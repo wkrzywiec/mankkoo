@@ -1,1 +1,2 @@
-# personal-finance
+# Personal finance application
+
