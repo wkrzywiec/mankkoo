@@ -44,4 +44,4 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Run Snyk to check for vulnerabilities
-      run: snyk test --org=${{ secrets.SNYK_USER }}
+      run: snyk test --org=wkrzywiec
