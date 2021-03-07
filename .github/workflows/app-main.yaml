@@ -11,12 +11,12 @@ defaults:
     working-directory: 'app'
 
 jobs:
-  codecov:
-    name: Codecov Workflow
-    runs-on: ubuntu-18.04
+  qa:
+    name: Quality Check
+    runs-on: ubuntu-20.04
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: Set up Python
         uses: actions/setup-python@master
         with:
@@ -32,5 +32,5 @@ jobs:
         uses: codecov/codecov-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./coverage.xml
+          file: ./app/coverage.xml
           flags: unittests
