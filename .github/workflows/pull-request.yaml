@@ -6,25 +6,18 @@ on:
 
 jobs:
 
-  qa:
-    name: Quality check
-    runs-on: ubuntu-18.04
+  linter:
+    name: Python Linter
+    runs-on: ubuntu-20.04
     defaults:
       run:
         working-directory: 'app'
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: Set up Python
         uses: actions/setup-python@master
         with:
           python-version: 3.8
-      - name: Install dependencies
-        run: |
-          python -m pip install pipenv
-          pipenv install --dev
-      - name: Run unit tests
-        run: |
-          pipenv run pytest --cov=./scripts -s -v
       - name: Wemake Python Stylguide
         uses: wemake-services/wemake-python-styleguide@0.15.2
         continue-on-error: true

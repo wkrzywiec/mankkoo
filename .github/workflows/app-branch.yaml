@@ -14,9 +14,9 @@ jobs:
 
   qa:
     name: Quality check
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: Set up Python
         uses: actions/setup-python@master
         with:
@@ -28,10 +28,3 @@ jobs:
       - name: Run unit tests
         run: |
           pipenv run pytest --cov=./scripts -s -v
-      - name: Wemake Python Stylguide
-        uses: wemake-services/wemake-python-styleguide@0.15.2
-        continue-on-error: true
-        with:
-          reporter: 'github-pr-review'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
