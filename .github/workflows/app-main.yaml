@@ -1,4 +1,4 @@
-name: App main
+name: Build
 on:
   push:
     branches:
@@ -34,3 +34,14 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: ./app/coverage.xml
           flags: unittests
+
+  security:
+    name: Security scan
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run Snyk to check for vulnerabilities
+      uses: snyk/actions/python@master
+      continue-on-error: true
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
