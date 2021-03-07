@@ -8,7 +8,7 @@ on:
 
 defaults:
   run:
-    working-directory: 'app'
+    working-directory: app
 
 jobs:
 
@@ -30,7 +30,11 @@ jobs:
           pipenv run pytest --cov=./scripts -s -v
 
   security:
+    name: Security scan
     runs-on: ubuntu-20.04
+    defaults:
+      run:
+        working-directory: app
     steps:
     - uses: actions/checkout@v2
     - name: Run Snyk to check for vulnerabilities
@@ -38,3 +42,5 @@ jobs:
       continue-on-error: true
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        args: --file=./app/Pipfile
