@@ -1,0 +1,3 @@
+
+def placeholder():
+    return 'placeholder'

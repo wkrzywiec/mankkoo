@@ -21,11 +21,13 @@ jobs:
         uses: actions/setup-python@master
         with:
           python-version: 3.8
+      - name: Install dependencies
+        run: |
+          python -m pip install pipenv
+          pipenv install --dev
       - name: Generate coverage report
         run: |
-          pip install pytest
-          pip install pytest-cov
-          pytest --cov=./app/scripts --cov-report=xml -s -v
+          pipenv run pytest --cov=./scripts --cov-report=xml -s -v
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
         with:
