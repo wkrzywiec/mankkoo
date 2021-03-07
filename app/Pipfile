@@ -5,6 +5,7 @@ verify_ssl = true
 
 [dev-packages]
 pytest = "~=6.2"
+pytest-cov = "~=2.11"
 
 [packages]
 pandas = "~=1.2"
