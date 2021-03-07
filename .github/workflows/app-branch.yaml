@@ -6,11 +6,12 @@ on:
     paths:
       - 'app/**'
 
-jobs:
 
-  defaults:
-    run:
-      working-directory: 'app'
+defaults:
+  run:
+    working-directory: 'app'
+
+jobs:
 
   qa:
     name: Quality check
