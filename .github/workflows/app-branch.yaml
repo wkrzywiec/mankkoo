@@ -13,7 +13,7 @@ defaults:
 jobs:
 
   qa:
-    name: Quality check
+    name: Unit tests
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
@@ -43,5 +43,7 @@ jobs:
         - /app:/project
     steps:
     - uses: actions/checkout@v2
+    - name: Debug
+      run: ls
     - name: Run Snyk to check for vulnerabilities
       run: test --org=wkrzywiec
