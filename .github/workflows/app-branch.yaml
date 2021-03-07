@@ -1,10 +1,16 @@
-name: Python Pull Request Workflow
+name: App branch
 on:
   push:
     branches-ignore:
       - 'main'
+    paths:
+      - 'app/**'
 
 jobs:
+
+  defaults:
+    run:
+      working-directory: 'app'
 
   qa:
     name: Quality check
@@ -14,13 +20,13 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@master
         with:
-          python-version: 3.7
+          python-version: 3.8
       - name: Run unit tests
         run: |
           pip install pytest
           pytest
       - name: Wemake Python Stylguide
-        uses: wemake-services/wemake-python-styleguide@0.13.4
+        uses: wemake-services/wemake-python-styleguide@0.15.2
         continue-on-error: true
         with:
           reporter: 'github-pr-review'
