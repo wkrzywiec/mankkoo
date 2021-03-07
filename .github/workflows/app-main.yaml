@@ -17,14 +17,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
-      - name: Set up Python
-        uses: actions/setup-python@master
+      - name: Install dependecies
+        uses: VaultVulp/action-pipenv@v2.0.1
         with:
-          python-version: 3.8
-      - name: Generate coverage report
-        run: |
-          pipenv install --dev
-          pipenv run pytest --cov=./scripts --cov-report=xml -s -v
+          command: install --dev
+      - name: Run unit tests
+        uses: VaultVulp/action-pipenv@v2.0.1
+        with:
+          command: run pytest --cov=./scripts --cov-report=xml -s -v
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
         with:
