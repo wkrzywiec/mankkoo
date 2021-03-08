@@ -27,4 +27,4 @@ jobs:
           pipenv install --dev
       - name: Run unit tests
         run: |
-          pipenv run pytest --cov=./scripts -s -v
+          pipenv run test
