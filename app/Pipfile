@@ -18,3 +18,4 @@ python_version = "3.8"
 [scripts]
 test = "pytest --cov=./scripts -s -v"
 test-coverage = "pytest --cov=./scripts --cov-report=xml -s -v"
+dev = "python app.py"
