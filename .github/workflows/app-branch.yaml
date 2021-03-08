@@ -43,9 +43,5 @@ jobs:
         - /app:/project
     steps:
     - uses: actions/checkout@v2
-    - name: Install dependencies
-      run: |
-        python -m pip install pipenv
-        pipenv install --dev
     - name: Run Snyk to check for vulnerabilities
-      run: test --org=wkrzywiec
+      run: monitor --org=wkrzywiec
