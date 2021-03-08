@@ -34,20 +34,3 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: ./app/coverage.xml
           flags: unittests
-
-  security:
-    name: Security scan
-    runs-on: ubuntu-20.04
-    container:
-      image: snyk/snyk-cli:python-3
-      env:
-        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        USER_ID: ${{ secrets.SNYK_USER }}
-        MONITOR: true
-        TARGET_FILE: Pipfile
-      volumes:
-        - /app:/project
-    steps:
-    - uses: actions/checkout@v2
-    - name: Run Snyk to check for vulnerabilities
-      run: test --org=wkrzywiec
