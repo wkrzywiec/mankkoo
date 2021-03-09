@@ -8,6 +8,8 @@ import dash_core_components as dcc
 import dash_html_components as html
 import plotly.express as px
 import pandas as pd
+import scripts.data as dt
+
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -21,6 +23,17 @@ df = pd.DataFrame({
     "City": ["SF", "SF", "SF", "Montreal", "Montreal", "Montreal"]
 })
 
+dane = [
+    dict(
+        x = [dt.date('01-01-2021'), dt.date('24-01-2021'), dt.date('30-01-2021'), dt.date('01-02-2021'), dt.date('27-02-2021')],
+        y = [30230.21, 35830.88, 27850.21, 17640.21, 29106.86],
+        name = "Bilans",
+        marker=dict(
+            color='rgb(55, 83, 109)'
+        )
+    )
+]
+
 fig = px.bar(df, x="Fruit", y="Amount", color="City", barmode="group")
 
 app.layout = html.Div(children=[
@@ -33,8 +46,20 @@ app.layout = html.Div(children=[
     dcc.Graph(
         id='example-graph',
         figure=fig
+    ),
+
+    dcc.Graph(
+        figure=dict(
+            data=dane,
+            layout=dict(
+                title='Total money',
+                showlegend=False,
+            margin=dict(l=40, r=0, t=40, b=30)
+            )
+        )
     )
 ])
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
