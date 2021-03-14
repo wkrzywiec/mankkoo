@@ -14,17 +14,24 @@ jobs:
 
   qa:
     name: Unit tests
-    runs-on: ubuntu-20.04
+    runs-on: ${{ matrix.os }}
+    strategy:
+            matrix:
+                os: [ubuntu-20.04, windows-2019]
+    
     steps:
       - uses: actions/checkout@v2
+      
       - name: Set up Python
         uses: actions/setup-python@master
         with:
           python-version: 3.8
+      
       - name: Install dependencies
         run: |
           python -m pip install pipenv
           pipenv install --dev
+      
       - name: Run unit tests
         run: |
           pipenv run test
