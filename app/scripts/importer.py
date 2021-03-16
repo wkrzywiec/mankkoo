@@ -39,8 +39,7 @@ def load_pl_mbank(file_name: str):
 def load_pl_millenium(file_name: str):
     df = load_data(file_name)
     df = df[['Data transakcji', 'Opis', 'Obciążenia', 'Uznania', 'Waluta']]
-    df['Operation'] = np.where(
-        df['Obciążenia'] < 0, df['Obciążenia'], df['Uznania'])
+    df['Operation'] = np.where(df['Obciążenia'] < 0, df['Obciążenia'], df['Uznania'])
     df = df.drop(columns=['Obciążenia', 'Uznania'])
     df = df.rename(columns={'Data transakcji': 'Date', 'Opis': 'Title', 'Waluta': 'Currency'})
     df['Bank'] = 'Millenium'
