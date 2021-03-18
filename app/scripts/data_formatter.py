@@ -13,7 +13,6 @@ def map_date(date: str):
     Returns:
         (date): date object
     """
-
     pattern = ''
 
     if __match(date, "\d{1,2}-\d{1,2}-\d{4}"):

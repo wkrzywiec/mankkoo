@@ -26,7 +26,7 @@ def load_data(file_name: str):
     """Load data from a CSV file
 
     Args:
-        file_location (str): full path 
+        file_name (str): name of a file located in /data directory
 
     Returns:
         [pd.Dataframe]: holds history of operations for an account
@@ -34,15 +34,35 @@ def load_data(file_name: str):
     return pd.read_csv(data_path() + file_name)
 
 def load_pl_mbank(file_name: str):
+    """Load data from CSV file for Mbank bank (PL) - https://www.mbank.pl
+
+    Args:
+        file_name (str): name of a file located in /data directory
+
+    Returns:
+        [pd.Dataframe]: all operations transformed to common format 
+    """
     pass
 
 def load_pl_millenium(file_name: str):
+    """Load data from CSV file for Millenium bank (PL) - https://www.bankmillennium.pl
+
+    Args:
+        file_name (str): name of a file located in /data directory
+
+    Returns:
+        [pd.Dataframe]: all operations transformed to common format 
+    """
     df = load_data(file_name)
     df = df[['Data transakcji', 'Opis', 'Obciążenia', 'Uznania', 'Waluta']]
+    
     df['Operation'] = np.where(df['Obciążenia'] < 0, df['Obciążenia'], df['Uznania'])
     df = df.drop(columns=['Obciążenia', 'Uznania'])
+    
     df = df.rename(columns={'Data transakcji': 'Date', 'Opis': 'Title', 'Waluta': 'Currency'})
+    
     df['Bank'] = 'Millenium'
+    df['Bank'] = df['Bank'].astype('string')
     return __add_missing_columns(df, ['Category', 'Comment'])
 
 

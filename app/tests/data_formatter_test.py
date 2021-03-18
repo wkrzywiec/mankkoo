@@ -5,7 +5,7 @@ import datetime
 @pytest.mark.parametrize(
     "date_string",
     ['02-01-2021', '2021-01-02'])
-def format_date_test(date_string):
+def test_format_date(date_string):
 
     # WHEN
     mapped_date = formatter.map_date(date_string)
