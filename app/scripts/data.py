@@ -1,6 +1,7 @@
 from enum import Enum
 import app.scripts.importer as importer
 import pandas as pd
+import numpy as np
 
 class Bank(Enum):
     PL_MBANK = 'pl_mbank'
@@ -16,10 +17,15 @@ def add_new_operations(bank: Bank, file_name: str):
         raise KeyError("Failed to load data from file. Not known bank. Was provided {} bank".format(bank))
     
     df = importer.load_data(account_file)
-    df = pd.concat([df, df_new])
-    df = df.sort_values(by=['Date'])
-    
+    df = pd.concat([df, df_new]).reset_index(drop=True)
+
     return calculate_balance(df)
     
-def calculate_balance(data: pd.DataFrame):
-    return data
+def calculate_balance(df: pd.DataFrame):
+
+    nan_index = df['Balance'].index[df['Balance'].apply(np.isnan)]
+
+    for i in range(nan_index[0], len(df)):
+        df.loc[i, 'Balance'] = df.loc[i-1, 'Balance'] + df.loc[i, 'Operation']
+    
+    return df

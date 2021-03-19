@@ -20,6 +20,4 @@ def test_add_new_operations():
     df = data.add_new_operations(bank, 'test_pl_millenium.csv')
 
     # THEN
-    print('\n')
-    print(df)
     assert len(df) == 12
