@@ -33,6 +33,17 @@ def load_data(file_name: str):
     """
     return pd.read_csv(data_path() + file_name)
 
+def load_pl_idea(file_name: str):
+    """Load data from CSV file for Idea bank (PL) - https://www.ideabank.pl
+
+    Args:
+        file_name (str): name of a file located in /data directory
+
+    Returns:
+        [pd.Dataframe]: all operations transformed to common format 
+    """
+    pass
+
 def load_pl_mbank(file_name: str):
     """Load data from CSV file for Mbank bank (PL) - https://www.mbank.pl
 
