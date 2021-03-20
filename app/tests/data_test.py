@@ -9,7 +9,7 @@ start_data = pd.DataFrame(
     ['Millenium', '2021-01-31', 'Armchair', 'Detail 2', np.NaN, np.NaN, -222.22, 'PLN', 777.78],
     ['Millenium', '2021-01-31', 'Candies', 'Detail 3', np.NaN, np.NaN, -3.3, 'PLN', 774.48]
     ]),
-    columns=["Bank", "Date", "Title", "Details", "Category", "Comment", "Operation", "Currency","Balance"]
+    columns=data.columns
 ).astype({'Balance': 'float', 'Operation': 'float'})
 
 millenium_data = pd.DataFrame(
@@ -30,7 +30,7 @@ end_data = pd.DataFrame(
     ['Millenium', '2021-03-16', 'Bus ticket', np.NaN, np.NaN, np.NaN, -200.00, 'PLN', 474.48],
     ['Millenium', '2021-03-17', 'Salary', np.NaN, np.NaN, np.NaN, 3000.33, 'PLN', 3474.81]
     ]),
-    columns=["Bank", "Date", "Title", "Details", "Category", "Comment", "Operation", "Currency","Balance"]
+    columns=data.columns
 ).astype({'Balance': 'float', 'Operation': 'float'})
 
 def test_incorrect_bank():
@@ -50,6 +50,7 @@ def test_add_new_operations(mocker):
 
     mocker.patch('app.scripts.importer.load_pl_millenium', return_value=millenium_data)
     mocker.patch('app.scripts.importer.load_data', return_value=start_data)
+    mocker.patch('pandas.DataFrame.to_csv')
 
     # WHEN
     df = data.add_new_operations(bank, 'test_pl_millenium.csv')
