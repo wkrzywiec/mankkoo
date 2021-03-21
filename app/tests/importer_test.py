@@ -1,11 +1,15 @@
 import pytest
 import app.scripts.importer as importer
-from app.scripts.data import account_file 
+import app.scripts.config as config
 import pandas as pd
 
-def test_load_data():
+def test_load_data(mocker):
+    # GIVEN
+    test_account = config.data_path() + config.account_file
+    mocker.patch('app.scripts.config.mankoo_account_path', return_value=test_account)
+
     # WHEN
-    data = importer.load_data(account_file)
+    data = importer.load_data(type='account')
 
     # THEN
     assert len(data) == 6

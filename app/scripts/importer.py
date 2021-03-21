@@ -1,37 +1,38 @@
 import pandas as pd
 import numpy as np
-import pathlib
 from sys import platform
+import app.scripts.config as config
+from enum import Enum
 
+class Bank(Enum):
+    """Representations of supported bank reports exports.
 
-def data_path() -> str:
-    """Get full path of data directory. Currently supporrted only for Linux and Windows
-
-    Raises:
-        ValueError: raised for MacOS, as it's not supported
-
-    Returns:
-        [str]: full path to data directory
+    Args:
+        Enum (str): country and name of a bank
     """
-    scripts_path = str(pathlib.Path(__file__).parent.absolute())
+    PL_MBANK = 'pl_mbank'
+    PL_MILLENIUM = 'pl_millenium'
+    PL_IDEA = 'pl_idea'
 
-    if platform == "linux":
-        return scripts_path.rsplit("/", 1)[0] + "/data/"
-    elif platform == "win32":
-        return scripts_path.rsplit("\\", 1)[0] + "\\data\\"
-    elif platform == "darwin":
-        raise ValueError("MacOS is currently not supported")
-
-def load_data(file_name: str):
+def load_data(type: str, file_name=None):
     """Load data from a CSV file
 
     Args:
+        type (str): type of a file that needs to be loaded. If 'account' is provided it will load account.csv file from home directory. If 'bank' is provided than a bank file located in data dir will be loaded
         file_name (str): name of a file located in /data directory
 
     Returns:
         [pd.Dataframe]: holds history of operations for an account
     """
-    return pd.read_csv(data_path() + file_name)
+    if type == 'account':
+        return pd.read_csv(config.mankoo_account_path())
+
+    if type == 'bank':
+        if not file_name:
+            raise ValueError('file_name was not provided. In order to load data you need to provide a file name located in data directory.')
+        return pd.read_csv(config.data_path() + file_name)
+
+    raise ValueError('A type of a file to be loaded was not provided.')
 
 def load_pl_idea(file_name: str):
     """Load data from CSV file for Idea bank (PL) - https://www.ideabank.pl
@@ -64,7 +65,7 @@ def load_pl_millenium(file_name: str):
     Returns:
         [pd.Dataframe]: all operations transformed to common format 
     """
-    df = load_data(file_name)
+    df = load_data(type='bank', file_name=file_name)
     df = df[['Data transakcji', 'Opis', 'Obciążenia', 'Uznania', 'Waluta']]
     
     df['Operation'] = np.where(df['Obciążenia'] < 0, df['Obciążenia'], df['Uznania'])

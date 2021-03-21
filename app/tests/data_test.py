@@ -1,5 +1,6 @@
 import pytest
 import app.scripts.data as data
+import app.scripts.importer as importer
 import numpy as np
 import pandas as pd
 
@@ -46,7 +47,7 @@ def test_incorrect_bank():
 
 def test_add_new_operations(mocker):
     # GIVEN
-    bank = data.Bank.PL_MILLENIUM
+    bank = importer.Bank.PL_MILLENIUM
 
     mocker.patch('app.scripts.importer.load_pl_millenium', return_value=millenium_data)
     mocker.patch('app.scripts.importer.load_data', return_value=start_data)
