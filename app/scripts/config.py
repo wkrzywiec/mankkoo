@@ -44,10 +44,11 @@ def mankoo_path():
 def __slash():
     if platform == "linux":
         return "/"
-    elif platform == "win32":
+    if platform == "win32":
         return "\\"
-    elif platform == "darwin":
+    if platform == "darwin":
         raise ValueError("MacOS is currently not supported")
+    raise ValueError("{} OS is not supported".format(platform))
 
 def data_path() -> str:
     """Get full path of data directory. Currently supporrted only for Linux and Windows
