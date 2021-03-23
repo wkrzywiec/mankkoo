@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import os
 
-columns = ["Bank", "Date", "Title", "Details", "Category", "Comment", "Operation", "Currency","Balance"]
+columns = ['Bank', 'Date', 'Title', 'Details', 'Category', 'Comment', 'Operation', 'Currency', 'Balance']
 
 def add_new_operations(bank: importer.Bank, file_name: str):
     """Append bank accounts history with new operations. 

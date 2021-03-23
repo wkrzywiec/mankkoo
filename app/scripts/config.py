@@ -62,7 +62,8 @@ def data_path() -> str:
 
     if platform == "linux":
         return scripts_path.rsplit("/", 1)[0] + "/data/"
-    elif platform == "win32":
+    if platform == "win32":
         return scripts_path.rsplit("\\", 1)[0] + "\\data\\"
-    elif platform == "darwin":
+    if platform == "darwin":
         raise ValueError("MacOS is currently not supported")
+    raise ValueError("{} OS is not supported".format(platform))

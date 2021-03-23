@@ -9,7 +9,7 @@ def test_load_data(mocker):
     mocker.patch('app.scripts.config.mankoo_account_path', return_value=test_account)
 
     # WHEN
-    data = importer.load_data(type='account')
+    data = importer.load_data(kind='account')
 
     # THEN
     assert len(data) == 6

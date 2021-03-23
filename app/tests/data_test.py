@@ -4,6 +4,7 @@ import app.scripts.importer as importer
 import numpy as np
 import pandas as pd
 
+
 start_data = pd.DataFrame(
     data=np.array([
     ['Millenium', '2021-01-31', 'Init money', 'Detail 1', np.NaN, 'init', 1000, 'PLN', 1000],
@@ -19,7 +20,7 @@ millenium_data = pd.DataFrame(
         ['2021-03-16', 'Bus ticket', 'PLN', -200, 'Millenium', np.NaN, np.NaN],
         ['2021-03-17', 'Salary', 'PLN', 3000.33, 'Millenium', np.NaN, np.NaN]
     ]),
-    columns=["Date", "Title", "Currency", "Operation", "Bank", "Category", "Comment"]
+    columns=['Date', 'Title', 'Currency', 'Operation', 'Bank', 'Category', 'Comment']
     )
 
 end_data = pd.DataFrame(
@@ -33,6 +34,7 @@ end_data = pd.DataFrame(
     ]),
     columns=data.columns
 ).astype({'Balance': 'float', 'Operation': 'float'})
+
 
 def test_incorrect_bank():
     # GIVEN

@@ -14,7 +14,7 @@ class Bank(Enum):
     PL_MILLENIUM = 'pl_millenium'
     PL_IDEA = 'pl_idea'
 
-def load_data(type: str, file_name=None):
+def load_data(kind: str, file_name=None):
     """Load data from a CSV file
 
     Args:
@@ -24,15 +24,15 @@ def load_data(type: str, file_name=None):
     Returns:
         [pd.Dataframe]: holds history of operations for an account
     """
-    if type == 'account':
+    if kind == 'account':
         return pd.read_csv(config.mankoo_account_path())
 
-    if type == 'bank':
+    if kind == 'bank':
         if not file_name:
             raise ValueError('file_name was not provided. In order to load data you need to provide a file name located in data directory.')
         return pd.read_csv(config.data_path() + file_name)
 
-    raise ValueError('A type of a file to be loaded was not provided.')
+    raise ValueError('A kind of a file to be loaded was not provided.')
 
 def load_pl_idea(file_name: str):
     """Load data from CSV file for Idea bank (PL) - https://www.ideabank.pl
@@ -43,7 +43,7 @@ def load_pl_idea(file_name: str):
     Returns:
         [pd.Dataframe]: all operations transformed to common format 
     """
-    pass
+    raise NotImplementedError()
 
 def load_pl_mbank(file_name: str):
     """Load data from CSV file for Mbank bank (PL) - https://www.mbank.pl
@@ -54,7 +54,7 @@ def load_pl_mbank(file_name: str):
     Returns:
         [pd.Dataframe]: all operations transformed to common format 
     """
-    pass
+    raise NotImplementedError()
 
 def load_pl_millenium(file_name: str):
     """Load data from CSV file for Millenium bank (PL) - https://www.bankmillennium.pl
@@ -65,7 +65,7 @@ def load_pl_millenium(file_name: str):
     Returns:
         [pd.Dataframe]: all operations transformed to common format 
     """
-    df = load_data(type='bank', file_name=file_name)
+    df = load_data(kind='bank', file_name=file_name)
     df = df[['Data transakcji', 'Opis', 'Obciążenia', 'Uznania', 'Waluta']]
     
     df['Operation'] = np.where(df['Obciążenia'] < 0, df['Obciążenia'], df['Uznania'])

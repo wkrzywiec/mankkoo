@@ -2,6 +2,7 @@ import pytest
 import app.scripts.data_formatter as formatter
 import datetime
 
+
 @pytest.mark.parametrize(
     "date_string",
     ['02-01-2021', '2021-01-02'])
