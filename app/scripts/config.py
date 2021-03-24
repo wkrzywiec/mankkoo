@@ -2,7 +2,7 @@ import os
 import pathlib
 from sys import platform
 import logging as log
-import app.scripts.data as data
+import scripts.data as data
 import pandas as pd
 
 mankkoo_dir = '.mankkoo'

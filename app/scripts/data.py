@@ -1,10 +1,18 @@
-import app.scripts.importer as importer
-import app.scripts.config as config
+import scripts.importer as importer
+import scripts.config as config
 import pandas as pd
 import numpy as np
 import os
 
 columns = ['Bank', 'Date', 'Title', 'Details', 'Category', 'Comment', 'Operation', 'Currency', 'Balance']
+
+def load_data():
+    """Load account.csv file into a Pandas DataFrame
+
+    Returns:
+        pandas.DataFrame: DataFrame that holds all historical data
+    """
+    return importer.load_data('account')
 
 def add_new_operations(bank: importer.Bank, file_name: str):
     """Append bank accounts history with new operations. 
