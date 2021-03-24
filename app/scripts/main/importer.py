@@ -56,7 +56,7 @@ def load_pl_mbank(file_name: str):
     """
     raise NotImplementedError()
 
-def load_pl_millenium(file_name: str):
+def load_pl_millenium(file_name: str, account_name=None):
     """Load data from CSV file for Millenium bank (PL) - https://www.bankmillennium.pl
 
     Args:
@@ -74,6 +74,7 @@ def load_pl_millenium(file_name: str):
     df = df.rename(columns={'Data transakcji': 'Date', 'Opis': 'Title', 'Waluta': 'Currency'})
     
     df['Bank'] = 'Millenium'
+    df['Account'] = account_name if account_name is not None else 'Millenium Account'
     df['Bank'] = df['Bank'].astype('string')
     return __add_missing_columns(df, ['Category', 'Comment'])
 

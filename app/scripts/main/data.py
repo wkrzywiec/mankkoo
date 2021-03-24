@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import os
 
-columns = ['Bank', 'Date', 'Title', 'Details', 'Category', 'Comment', 'Operation', 'Currency', 'Balance']
+columns = ['Bank', 'Account', 'Active', 'Date', 'Title', 'Details', 'Category', 'Comment', 'Operation', 'Currency', 'Balance']
 
 def load_data():
     """Load account.csv file into a Pandas DataFrame

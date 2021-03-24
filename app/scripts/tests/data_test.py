@@ -7,9 +7,9 @@ import pandas as pd
 
 start_data = pd.DataFrame(
     data=np.array([
-    ['Millenium', '2021-01-31', 'Init money', 'Detail 1', np.NaN, 'init', 1000, 'PLN', 1000],
-    ['Millenium', '2021-01-31', 'Armchair', 'Detail 2', np.NaN, np.NaN, -222.22, 'PLN', 777.78],
-    ['Millenium', '2021-01-31', 'Candies', 'Detail 3', np.NaN, np.NaN, -3.3, 'PLN', 774.48]
+    ['Millenium', '360 Account', True, '2021-01-31', 'Init money', 'Detail 1', np.NaN, 'init', 1000, 'PLN', 1000],
+    ['Millenium', '360 Account', True, '2021-01-31', 'Armchair', 'Detail 2', np.NaN, np.NaN, -222.22, 'PLN', 777.78],
+    ['Millenium', '360 Account', True, '2021-01-31', 'Candies', 'Detail 3', np.NaN, np.NaN, -3.3, 'PLN', 774.48]
     ]),
     columns=data.columns
 ).astype({'Balance': 'float', 'Operation': 'float'})
@@ -25,12 +25,12 @@ millenium_data = pd.DataFrame(
 
 end_data = pd.DataFrame(
     data=np.array([
-    ['Millenium', '2021-01-31', 'Init money', 'Detail 1', np.NaN, 'init', 1000.00, 'PLN', 1000.00],
-    ['Millenium', '2021-01-31', 'Armchair', 'Detail 2', np.NaN, np.NaN, -222.22, 'PLN', 777.78],
-    ['Millenium', '2021-01-31', 'Candies', 'Detail 3', np.NaN, np.NaN, -3.30, 'PLN', 774.48],
-    ['Millenium', '2021-03-15', 'Train ticket', np.NaN, np.NaN, np.NaN, -100.00, 'PLN', 674.48],
-    ['Millenium', '2021-03-16', 'Bus ticket', np.NaN, np.NaN, np.NaN, -200.00, 'PLN', 474.48],
-    ['Millenium', '2021-03-17', 'Salary', np.NaN, np.NaN, np.NaN, 3000.33, 'PLN', 3474.81]
+    ['Millenium', '360 Account', True, '2021-01-31', 'Init money', 'Detail 1', np.NaN, 'init', 1000.00, 'PLN', 1000.00],
+    ['Millenium', '360 Account', True, '2021-01-31', 'Armchair', 'Detail 2', np.NaN, np.NaN, -222.22, 'PLN', 777.78],
+    ['Millenium', '360 Account', True, '2021-01-31', 'Candies', 'Detail 3', np.NaN, np.NaN, -3.30, 'PLN', 774.48],
+    ['Millenium', '360 Account', True, '2021-03-15', 'Train ticket', np.NaN, np.NaN, np.NaN, -100.00, 'PLN', 674.48],
+    ['Millenium', '360 Account', True, '2021-03-16', 'Bus ticket', np.NaN, np.NaN, np.NaN, -200.00, 'PLN', 474.48],
+    ['Millenium', '360 Account', True, '2021-03-17', 'Salary', np.NaN, np.NaN, np.NaN, 3000.33, 'PLN', 3474.81]
     ]),
     columns=data.columns
 ).astype({'Balance': 'float', 'Operation': 'float'})
