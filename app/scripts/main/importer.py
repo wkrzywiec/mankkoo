@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from sys import platform
-import scripts.config as config
+import scripts.main.config as config
 from enum import Enum
 
 class Bank(Enum):

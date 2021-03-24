@@ -1,5 +1,5 @@
-import scripts.importer as importer
-import scripts.config as config
+import scripts.main.importer as importer
+import scripts.main.config as config
 import pandas as pd
 import numpy as np
 import os

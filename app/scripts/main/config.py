@@ -2,7 +2,7 @@ import os
 import pathlib
 from sys import platform
 import logging as log
-import scripts.data as data
+import scripts.main.data as data
 import pandas as pd
 
 mankkoo_dir = '.mankkoo'
@@ -62,9 +62,9 @@ def data_path() -> str:
     scripts_path = str(pathlib.Path(__file__).parent.absolute())
 
     if platform == "linux":
-        return scripts_path.rsplit("/", 1)[0] + "/data/"
+        return scripts_path.rsplit("/", 2)[0] + "/data/"
     if platform == "win32":
-        return scripts_path.rsplit("\\", 1)[0] + "\\data\\"
+        return scripts_path.rsplit("\\", 2)[0] + "\\data\\"
     if platform == "darwin":
         raise ValueError("MacOS is currently not supported")
     raise ValueError("{} OS is not supported".format(platform))

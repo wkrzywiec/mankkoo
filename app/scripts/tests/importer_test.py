@@ -1,12 +1,12 @@
 import pytest
-import app.scripts.importer as importer
-import app.scripts.config as config
+import scripts.main.importer as importer
+import scripts.main.config as config
 import pandas as pd
 
 def test_load_data(mocker):
     # GIVEN
     test_account = config.data_path() + config.account_file
-    mocker.patch('app.scripts.config.mankoo_account_path', return_value=test_account)
+    mocker.patch('scripts.main.config.mankoo_account_path', return_value=test_account)
 
     # WHEN
     data = importer.load_data(kind='account')
