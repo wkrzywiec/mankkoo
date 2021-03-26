@@ -22,7 +22,7 @@ def init_data_folder():
 
     if not os.path.exists(mankoo_account_file):
         log.info("Creating mankkoo's account file")
-        df = pd.DataFrame(columns=data.columns)
+        df = pd.DataFrame(columns=data.account_columns)
         df.to_csv(mankoo_account_file)
 
 def mankoo_account_path():
