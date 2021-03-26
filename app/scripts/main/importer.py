@@ -5,11 +5,12 @@ import scripts.main.config as config
 from enum import Enum
 
 class Bank(Enum):
-    """Representations of supported bank reports exports.
+    """Representations of supported bank reports exports. Special value is MANKKOO, which is used to load a file in mankkoo format
 
     Args:
         Enum (str): country and name of a bank
     """
+    MANKKOO = 'mankkoo'
     PL_MBANK = 'pl_mbank'
     PL_MILLENIUM = 'pl_millenium'
     PL_IDEA = 'pl_idea'
@@ -73,6 +74,7 @@ def load_pl_millenium(file_name: str, account_name=None):
     
     df = df.rename(columns={'Data transakcji': 'Date', 'Opis': 'Title', 'Waluta': 'Currency'})
     
+    df['Date'] = pd.to_datetime(df.Date)
     df['Bank'] = 'Millenium'
     df['Account'] = account_name if account_name is not None else 'Millenium Account'
     df['Bank'] = df['Bank'].astype('string')

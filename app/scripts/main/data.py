@@ -29,7 +29,9 @@ def add_new_operations(bank: importer.Bank, file_name: str):
         pandas.DataFrame: DataFrame that holds transactions history with newly added operations
     """
     
-    if bank == importer.Bank.PL_MILLENIUM:
+    if bank == importer.Bank.MANKKOO:
+        df_new = importer.load_data('bank', file_name)
+    elif bank == importer.Bank.PL_MILLENIUM:
         df_new = importer.load_pl_millenium(file_name)
     else:
         raise KeyError("Failed to load data from file. Not known bank. Was provided {} bank".format(bank))
@@ -38,7 +40,7 @@ def add_new_operations(bank: importer.Bank, file_name: str):
     df = pd.concat([df, df_new]).reset_index(drop=True)
 
     df = calculate_balance(df)
-    df.to_csv(config.mankoo_account_path())
+    df.to_csv(config.mankoo_account_path(), index=False)
     return df
     
 def calculate_balance(df: pd.DataFrame):
