@@ -14,7 +14,7 @@ def load_data():
     Returns:
         pandas.DataFrame: DataFrame that holds all historical data
     """
-    return importer.load_data('account')
+    return importer.load_data(importer.FileType.ACCOUNT)
 
 def add_new_operations(bank: importer.Bank, file_name: str):
     """Append bank accounts history with new operations. 
@@ -30,15 +30,8 @@ def add_new_operations(bank: importer.Bank, file_name: str):
     Returns:
         pandas.DataFrame: DataFrame that holds transactions history with newly added operations
     """
-    
-    if bank == importer.Bank.MANKKOO:
-        df_new = importer.load_data('bank', file_name)
-    elif bank == importer.Bank.PL_MILLENIUM:
-        df_new = importer.load_pl_millenium(file_name)
-    else:
-        raise KeyError("Failed to load data from file. Not known bank. Was provided {} bank".format(bank))
-    
-    df = importer.load_data('account')
+    df_new = importer.load_data(importer.FileType.BANK, bank, file_name)
+    df = importer.load_data(importer.FileType.ACCOUNT)
     df = pd.concat([df, df_new]).reset_index(drop=True)
 
     df = calculate_balance(df)

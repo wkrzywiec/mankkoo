@@ -9,7 +9,7 @@ def test_load_data(mocker):
     mocker.patch('scripts.main.config.mankoo_account_path', return_value=test_account)
 
     # WHEN
-    data = importer.load_data(kind='account')
+    data = importer.load_data(importer.FileType.ACCOUNT)
 
     # THEN
     assert len(data) == 6
@@ -19,7 +19,7 @@ def test_load_pl_millenium():
     millenium_file = 'test_pl_millenium.csv'
 
     # WHEN
-    data = importer.load_pl_millenium(millenium_file)
+    data = importer.load_data(importer.FileType.BANK, kind=importer.Bank.PL_MILLENIUM, file_name=millenium_file)
 
     # THEN
     assert len(data) == 6

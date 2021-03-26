@@ -51,8 +51,7 @@ def test_add_new_operations(mocker):
     # GIVEN
     bank = importer.Bank.PL_MILLENIUM
 
-    mocker.patch('scripts.main.importer.load_pl_millenium', return_value=millenium_data)
-    mocker.patch('scripts.main.importer.load_data', return_value=start_data)
+    mocker.patch('scripts.main.importer.load_data', side_effect=[millenium_data, start_data])
     mocker.patch('pandas.DataFrame.to_csv')
 
     # WHEN

@@ -4,6 +4,11 @@ from sys import platform
 import scripts.main.config as config
 from enum import Enum
 
+class FileType(Enum):
+    ACCOUNT = 'account'
+    INVESTMENT = 'investment'
+    STOCK = 'stock'
+    BANK = 'bank'
 class Bank(Enum):
     """Representations of supported bank reports exports. Special value is MANKKOO, which is used to load a file in mankkoo format
 
@@ -15,7 +20,7 @@ class Bank(Enum):
     PL_MILLENIUM = 'pl_millenium'
     PL_IDEA = 'pl_idea'
 
-def load_data(kind: str, file_name=None):
+def load_data(file_type: FileType, kind=None, file_name=None):
     """Load data from a CSV file
 
     Args:
@@ -25,15 +30,23 @@ def load_data(kind: str, file_name=None):
     Returns:
         [pd.Dataframe]: holds history of operations for an account
     """
-    if kind == 'account':
+    if file_type is FileType.ACCOUNT:
         return pd.read_csv(config.mankoo_account_path())
 
-    if kind == 'bank':
-        if not file_name:
-            raise ValueError('file_name was not provided. In order to load data you need to provide a file name located in data directory.')
-        return pd.read_csv(config.data_path() + file_name)
+    if kind is None:
+        raise ValueError('Could not load data file. "kind" (bank, investment, stock) argument was not provided')
+    if file_name is None:
+        raise ValueError('Could not load data file. file_name was not provided. In order to load data you need to provide a file name located in data directory.')
 
-    raise ValueError('A kind of a file to be loaded was not provided.')
+    if file_type is FileType.BANK:
+        if kind is Bank.MANKKOO:
+            return __read_from_data_path(file_name)
+        elif kind is Bank.PL_MILLENIUM:
+            return load_pl_millenium(file_name)
+        else:
+            raise KeyError("Failed to load data from file. Not known bank. Was provided {} bank".format(str(kind)))
+
+    raise ValueError('A file_type: {} is not supported'.format(file_type))
 
 def load_pl_idea(file_name: str):
     """Load data from CSV file for Idea bank (PL) - https://www.ideabank.pl
@@ -66,7 +79,7 @@ def load_pl_millenium(file_name: str, account_name=None):
     Returns:
         [pd.Dataframe]: all operations transformed to common format 
     """
-    df = load_data(kind='bank', file_name=file_name)
+    df = __read_from_data_path(file_name)
     df = df[['Data transakcji', 'Opis', 'Obciążenia', 'Uznania', 'Waluta']]
     
     df['Operation'] = np.where(df['Obciążenia'] < 0, df['Obciążenia'], df['Uznania'])
@@ -80,6 +93,8 @@ def load_pl_millenium(file_name: str, account_name=None):
     df['Bank'] = df['Bank'].astype('string')
     return __add_missing_columns(df, ['Category', 'Comment'])
 
+def __read_from_data_path(file_name: str):
+    return pd.read_csv(config.data_path() + file_name)
 
 def __add_missing_columns(df: pd.DataFrame, columns):
     existing_columns = list(df.columns)
