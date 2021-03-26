@@ -24,7 +24,12 @@ def load_data(file_type: FileType, kind=None, file_name=None):
     """Load data from a CSV file
 
     Args:
-        type (str): type of a file that needs to be loaded. If 'account' is provided it will load account.csv file from home directory. If 'bank' is provided than a bank file located in data dir will be loaded
+        file_type (importer.FileType)*: define which kind of a file needs to be loaded. Currently supported:
+            - ACCOUNT - account.csv (from .mankkkoo dir) with operations history from multiple bank accounts
+            - INVESTMENT - investment.csv (from .mankkoo dir) with investments history
+            - STOCK - stock.csv (from .mankkoo dir) with history of bought and sold shares
+            - BANK - load an exported file from a bank with transaction history. It requires to provide two addition params kind and file_name
+        kind (importer.Bank): used only to load a data from bank exported file
         file_name (str): name of a file located in /data directory
 
     Returns:
