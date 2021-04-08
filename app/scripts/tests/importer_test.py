@@ -6,7 +6,7 @@ import pandas as pd
 def test_load_data(mocker):
     # GIVEN
     test_account = config.data_path() + config.account_file
-    mocker.patch('scripts.main.config.mankoo_account_path', return_value=test_account)
+    mocker.patch('scripts.main.config.mankoo_file_path', return_value=test_account)
 
     # WHEN
     data = importer.load_data(importer.FileType.ACCOUNT)

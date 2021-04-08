@@ -36,7 +36,13 @@ def load_data(file_type: FileType, kind=None, file_name=None):
         [pd.Dataframe]: holds history of operations for an account
     """
     if file_type is FileType.ACCOUNT:
-        return pd.read_csv(config.mankoo_account_path())
+        return pd.read_csv(config.mankoo_file_path('account'))
+
+    if file_type is FileType.INVESTMENT:
+        return pd.read_csv(config.mankoo_file_path('investment'))
+
+    if file_type is FileType.STOCK:
+        return pd.read_csv(config.mankoo_file_path('stock'))
 
     if kind is None:
         raise ValueError('Could not load data file. "kind" (bank, investment, stock) argument was not provided')

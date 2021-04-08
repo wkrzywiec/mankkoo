@@ -7,12 +7,14 @@ import pandas as pd
 
 mankkoo_dir = '.mankkoo'
 account_file = 'account.csv'
+investment_file = 'investment.csv'
+stock_file = 'stock.csv'
 
 def init_data_folder():
     """Initilize .mankkoo directory in home folder and account.csv file inside of it
     """
     mankkoo_path = mankoo_path()
-    mankoo_account_file = mankoo_account_path()
+    mankoo_account_file = mankoo_file_path('account')
 
     log.info('Initializing mankkoo directory and files')
 
@@ -25,13 +27,30 @@ def init_data_folder():
         df = pd.DataFrame(columns=data.account_columns)
         df.to_csv(mankoo_account_file)
 
-def mankoo_account_path():
-    """Get a full path to the account.csv file
+def mankoo_file_path(file: str):
+    """Get full path of one of mankkoo's files. 
+
+    Args:
+        file (str): Which file needs to be loaded. Supported values: 'account', 'investment' and 'stock'
+
+    Raises:
+        ValueError: raised when invalid file type has been provided
 
     Returns:
-        str: full path to account.csv file
+        str: full path to the mankkoo's data file
     """
-    return mankoo_path() + __slash() + account_file
+    path = mankoo_path() + __slash()
+
+    if file == 'account':
+        return path + account_file
+    
+    if file == 'investment':
+        return path + investment_file
+
+    if file == 'stock':
+        return path + stock_file
+
+    raise ValueError("Can't get mankkoo file. Unsupported file type: {}".format(file))
 
 def mankoo_path():
     """Get full path to the .mankkoo directory

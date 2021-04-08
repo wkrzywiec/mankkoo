@@ -35,8 +35,25 @@ end_data = pd.DataFrame(
     columns=data.account_columns
 ).astype({'Balance': 'float', 'Operation': 'float'})
 
+investment = pd.DataFrame(
+    data=np.array([
+        [0, 'Bank Deposit', 'Bank A', 'Super Bank Deposit', '2016-11-28', '2017-04-09', 1000.00, 1079.89, 'PLN', np.NaN, np.NaN],
+        [1, 'Bank Deposit', 'Bank B', 'Ultra Bank Deposit', '2020-01-01', np.NaN, 1000.00, np.NaN, 'PLN', np.NaN, np.NaN],
+        [1, 'Bank Deposit', 'Bank A', 'Hiper Bank Deposit', '2020-11-28', np.NaN, 1000.00, np.NaN, 'PLN', np.NaN, np.NaN]
+    ]),
+    columns=data.invest_columns
+).astype({'Active': 'int', 'Start Amount': 'float', 'End amount': 'float'})
 
-def test_incorrect_bank():
+stock = pd.DataFrame(
+    data=np.array([
+        ['Bank A', '2021-01-01', 'ETFSP500', 'Buy', 1000.00, 10, 'PLN', np.NaN, np.NaN, np.NaN],
+        ['Bank A', '2021-01-01', 'ETFDAX', 'Buy', 1000.00, 10, 'PLN', np.NaN, np.NaN, np.NaN]
+    ]),
+    columns=data.stock_columns
+).astype({'Total Value': 'float'})
+
+
+def test_add_new_operation_for_incorrect_bank():
     # GIVEN
     bank = 'NOT KNOWN BANK'
 
@@ -61,3 +78,25 @@ def test_add_new_operations(mocker):
     assert df['Operation'].equals(end_data['Operation'])
     assert df['Balance'].equals(end_data['Balance'])
     assert df['Date'].equals(end_data['Date'])
+
+def test_total_money_data():
+    # GIVEN
+    investment.Active = investment.Active.astype('bool')
+    all_data = dict(
+        account = start_data,
+        investment = investment,
+        stock = stock
+    )
+
+    # WHEN
+    total_money = data.total_money_data(all_data)
+
+    # THEN 
+    assert total_money == [
+        {'Type': 'Checking Account', 'Total ammount': 774.48},
+        {'Type': 'Savings Account', 'Total ammount':0.00},
+        {'Type': 'Cash', 'Total ammount': 0.00},
+        {'Type': 'PPK', 'Total ammount': 0.00},
+        {'Type': 'Investments', 'Total ammount': 2000.00},
+        {'Type': 'Stocks', 'Total ammount': 2000.00}
+    ]

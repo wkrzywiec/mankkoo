@@ -15,10 +15,10 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
-df2 = dt.load_data()
-df2 = df2[['Date', 'Balance']]
+data = dt.load_data()
+total_chart_data = data['account'][['Date', 'Balance']]
 
-fig = px.line(df2, x='Date', y='Balance', title='Balance')
+fig = px.line(total_chart_data, x='Date', y='Balance', title='Balance')
 
 app.layout = html.Div(children=[
     html.H1(children='Hello Dash'),
@@ -27,7 +27,20 @@ app.layout = html.Div(children=[
         Dash: A web application framework for Python.
     '''),
 
-    dcc.Graph(figure=fig)
+    dcc.Graph(figure=fig),
+
+    # dash_table.DataTable(
+    #     data=df.to_dict('records'),
+    #     columns=[{'id': c, 'name': c} for c in df.columns],
+    #     style_cell_conditional=[
+    #         {
+    #             'if': {'column_id': c},
+    #             'textAlign': 'left'
+    #         } for c in ['Date', 'Region']
+    # ],
+
+    # style_as_list_view=True,
+# )
 ])
 
 

@@ -5,8 +5,8 @@ import numpy as np
 import os
 
 account_columns = ['Bank', 'Account', 'Date', 'Title', 'Details', 'Category', 'Comment', 'Operation', 'Currency', 'Balance']
-invest_columns = ['Active', 'Category', 'Bank', 'Investment', 'Start Date', 'End Date', 'Start Amount', 'End amount', 'Details', 'Comment']
-stock_columns = ['Broker', 'Date', 'Title', 'Operation', 'Amount', 'Units', 'Details', 'Commnent']
+invest_columns = ['Active', 'Category', 'Bank', 'Investment', 'Start Date', 'End Date', 'Start Amount', 'End amount', 'Currency', 'Details', 'Comment']
+stock_columns = ['Broker', 'Date', 'Title', 'Operation', 'Total Value', 'Units', 'Currency', 'Details', 'Url', 'Comment']
 
 def load_data():
     """Load account.csv file into a Pandas DataFrame
@@ -14,7 +14,46 @@ def load_data():
     Returns:
         pandas.DataFrame: DataFrame that holds all historical data
     """
-    return importer.load_data(importer.FileType.ACCOUNT)
+    return dict(
+        account = importer.load_data(importer.FileType.ACCOUNT),
+        investment = importer.load_data(importer.FileType.INVESTMENT),
+        stock = importer.load_data(importer.FileType.STOCK)
+    )
+
+def total_money_data(data: dict):
+
+    print('Account')
+    checking_account = data['account'].loc[data['account']['Account'] == '360 Account']
+    checking_account = checking_account['Balance'].iloc[-1]
+
+    # print('Oszczedno')
+    # savings_account = data['account'].loc[data['account']['Account'] == 'Konto Oszczędnościowe Profit']
+    # savings_account = savings_account['Balance'].iloc[-1]
+
+    # print('Gotówka')
+    # cash = data['account'].loc[data['account']['Account'] == 'Gotówka']
+    # cash = cash['Balance'].iloc[-1]
+
+    # print('PPK')
+    # ppk = data['account'].loc[data['account']['Account'] == 'PKO PPK']
+    # ppk = ppk['Balance'].iloc[-1]
+
+    inv = data['investment'].loc[data['investment']['Active'] == True]
+    print(inv)
+    inv = inv['Start Amount'].sum()
+
+    stock_buy = data['stock'].loc[data['stock']['Operation'] == 'Buy']
+    stock_buy = stock_buy['Total Value'].sum()
+    # TODO check how much stock units I have Broker-Title pair buy-sell
+
+    return [
+        {'Type': 'Checking Account', 'Total ammount': checking_account},
+        {'Type': 'Savings Account', 'Total ammount': 0.00},
+        {'Type': 'Cash', 'Total ammount': 0.00},
+        {'Type': 'PPK', 'Total ammount': 0.00},
+        {'Type': 'Investments', 'Total ammount': inv},
+        {'Type': 'Stocks', 'Total ammount': stock_buy}
+    ]
 
 def add_new_operations(bank: importer.Bank, file_name: str):
     """Append bank accounts history with new operations. 
@@ -35,7 +74,7 @@ def add_new_operations(bank: importer.Bank, file_name: str):
     df = pd.concat([df, df_new]).reset_index(drop=True)
 
     df = calculate_balance(df)
-    df.to_csv(config.mankoo_account_path(), index=False)
+    df.to_csv(config.mankoo_file_path('account'), index=False)
     return df
     
 def calculate_balance(df: pd.DataFrame):
