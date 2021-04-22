@@ -22,24 +22,13 @@ def load_data():
 
 def total_money_data(data: dict):
 
-    print('Account')
-    checking_account = data['account'].loc[data['account']['Account'] == '360 Account']
-    checking_account = checking_account['Balance'].iloc[-1]
 
-    # print('Oszczedno')
-    # savings_account = data['account'].loc[data['account']['Account'] == 'Konto Oszczędnościowe Profit']
-    # savings_account = savings_account['Balance'].iloc[-1]
-
-    # print('Gotówka')
-    # cash = data['account'].loc[data['account']['Account'] == 'Gotówka']
-    # cash = cash['Balance'].iloc[-1]
-
-    # print('PPK')
-    # ppk = data['account'].loc[data['account']['Account'] == 'PKO PPK']
-    # ppk = ppk['Balance'].iloc[-1]
+    checking_account = __latest_account_balance(data, '360 Account')
+    savings_account = __latest_account_balance(data, 'Konto Oszczędnościowe Profit')
+    cash = __latest_account_balance(data, 'Gotówka')
+    ppk = __latest_account_balance(data, 'PKO PPK')
 
     inv = data['investment'].loc[data['investment']['Active'] == True]
-    print(inv)
     inv = inv['Start Amount'].sum()
 
     stock_buy = data['stock'].loc[data['stock']['Operation'] == 'Buy']
@@ -47,13 +36,21 @@ def total_money_data(data: dict):
     # TODO check how much stock units I have Broker-Title pair buy-sell
 
     return [
-        {'Type': 'Checking Account', 'Total ammount': checking_account},
-        {'Type': 'Savings Account', 'Total ammount': 0.00},
-        {'Type': 'Cash', 'Total ammount': 0.00},
-        {'Type': 'PPK', 'Total ammount': 0.00},
-        {'Type': 'Investments', 'Total ammount': inv},
-        {'Type': 'Stocks', 'Total ammount': stock_buy}
+        {'Type': 'Checking Account', 'Total': checking_account},
+        {'Type': 'Savings Account', 'Total': savings_account},
+        {'Type': 'Cash', 'Total': cash},
+        {'Type': 'PPK', 'Total': ppk},
+        {'Type': 'Investments', 'Total': inv},
+        {'Type': 'Stocks', 'Total': stock_buy}
     ]
+
+def __latest_account_balance(data: dict, type: str) -> float:
+    
+    #TODO filter by account type, not name, and if more than one sum it
+    df = data['account'].loc[data['account']['Account'] == type]
+    if not df.empty:
+        return df['Balance'].iloc[-1]
+    return 0.00
 
 def add_new_operations(bank: importer.Bank, file_name: str):
     """Append bank accounts history with new operations. 

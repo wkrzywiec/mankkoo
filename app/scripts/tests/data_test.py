@@ -93,10 +93,10 @@ def test_total_money_data():
 
     # THEN 
     assert total_money == [
-        {'Type': 'Checking Account', 'Total ammount': 774.48},
-        {'Type': 'Savings Account', 'Total ammount':0.00},
-        {'Type': 'Cash', 'Total ammount': 0.00},
-        {'Type': 'PPK', 'Total ammount': 0.00},
-        {'Type': 'Investments', 'Total ammount': 2000.00},
-        {'Type': 'Stocks', 'Total ammount': 2000.00}
+        {'Type': 'Checking Account', 'Total': 774.48},
+        {'Type': 'Savings Account', 'Total':0.00},
+        {'Type': 'Cash', 'Total': 0.00},
+        {'Type': 'PPK', 'Total': 0.00},
+        {'Type': 'Investments', 'Total': 2000.00},
+        {'Type': 'Stocks', 'Total': 2000.00}
     ]
