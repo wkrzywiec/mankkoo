@@ -4,11 +4,13 @@ from sys import platform
 import scripts.main.config as config
 from enum import Enum
 
+# TODO move all enums to models.py
 class FileType(Enum):
     ACCOUNT = 'account'
     INVESTMENT = 'investment'
     STOCK = 'stock'
     BANK = 'bank'
+
 class Bank(Enum):
     """Representations of supported bank reports exports. Special value is MANKKOO, which is used to load a file in mankkoo format
 
@@ -19,6 +21,17 @@ class Bank(Enum):
     PL_MBANK = 'pl_mbank'
     PL_MILLENIUM = 'pl_millenium'
     PL_IDEA = 'pl_idea'
+
+class Account(Enum):
+    """Representations of different kinds of account, like checking, savings, cash or for retirement
+
+    Args:
+        Enum (str): string name of a type
+    """
+    CHECKING = 'checking'
+    SAVINGS = 'savings'
+    RETIREMENT = 'retirement'
+    CASH = 'cash'
 
 def load_data(file_type: FileType, kind=None, file_name=None):
     """Load data from a CSV file
@@ -70,6 +83,17 @@ def load_pl_idea(file_name: str):
     """
     raise NotImplementedError()
 
+def load_pl_ing(file_name: str):
+    """Load data from CSV file for ING bank (PL) - https://www.ing.pl
+
+    Args:
+        file_name (str): name of a file located in /data directory
+
+    Returns:
+        [pd.Dataframe]: all operations transformed to common format 
+    """
+    raise NotImplementedError()
+
 def load_pl_mbank(file_name: str):
     """Load data from CSV file for Mbank bank (PL) - https://www.mbank.pl
 
@@ -100,6 +124,7 @@ def load_pl_millenium(file_name: str, account_name=None):
     
     df['Date'] = pd.to_datetime(df.Date)
     df['Bank'] = 'Millenium'
+    df['Type'] = Account.CHECKING.value
     df['Account'] = account_name if account_name is not None else 'Millenium Account'
     df['Bank'] = df['Bank'].astype('string')
     return __add_missing_columns(df, ['Category', 'Comment'])

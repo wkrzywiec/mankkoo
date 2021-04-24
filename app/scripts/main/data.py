@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import os
 
-account_columns = ['Bank', 'Account', 'Date', 'Title', 'Details', 'Category', 'Comment', 'Operation', 'Currency', 'Balance']
+account_columns = ['Bank', 'Type', 'Account', 'Date', 'Title', 'Details', 'Category', 'Comment', 'Operation', 'Currency', 'Balance']
 invest_columns = ['Active', 'Category', 'Bank', 'Investment', 'Start Date', 'End Date', 'Start Amount', 'End amount', 'Currency', 'Details', 'Comment']
 stock_columns = ['Broker', 'Date', 'Title', 'Operation', 'Total Value', 'Units', 'Currency', 'Details', 'Url', 'Comment']
 
@@ -21,7 +21,6 @@ def load_data():
     )
 
 def total_money_data(data: dict):
-
 
     checking_account = __latest_account_balance(data, '360 Account')
     savings_account = __latest_account_balance(data, 'Konto Oszczędnościowe Profit')
@@ -66,7 +65,7 @@ def add_new_operations(bank: importer.Bank, file_name: str):
     Returns:
         pandas.DataFrame: DataFrame that holds transactions history with newly added operations
     """
-    df_new = importer.load_data(importer.FileType.BANK, bank, file_name)
+    df_new = importer.load_data(file_type=importer.FileType.BANK, kind=bank, file_name=file_name)
     df = importer.load_data(importer.FileType.ACCOUNT)
     df = pd.concat([df, df_new]).reset_index(drop=True)
 
