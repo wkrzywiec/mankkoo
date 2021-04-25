@@ -22,7 +22,7 @@ def load_data():
 
 def total_money_data(data: dict):
 
-    checking_account = __latest_account_balance(data, '360 Account')
+    checking_account = __latest_account_balance(data, '360')
     savings_account = __latest_account_balance(data, 'Konto Oszczędnościowe Profit')
     cash = __latest_account_balance(data, 'Gotówka')
     ppk = __latest_account_balance(data, 'PKO PPK')
@@ -33,14 +33,16 @@ def total_money_data(data: dict):
     stock_buy = data['stock'].loc[data['stock']['Operation'] == 'Buy']
     stock_buy = stock_buy['Total Value'].sum()
     # TODO check how much stock units I have Broker-Title pair buy-sell
+    total = checking_account + savings_account + cash + ppk + inv + stock_buy
 
     return [
-        {'Type': 'Checking Account', 'Total': checking_account},
-        {'Type': 'Savings Account', 'Total': savings_account},
-        {'Type': 'Cash', 'Total': cash},
-        {'Type': 'PPK', 'Total': ppk},
-        {'Type': 'Investments', 'Total': inv},
-        {'Type': 'Stocks', 'Total': stock_buy}
+        {'Type': 'Checking Account', 'Total': checking_account, 'Percentage': checking_account/total},
+        {'Type': 'Savings Account', 'Total': savings_account, 'Percentage': savings_account/total},
+        {'Type': 'Cash', 'Total': cash, 'Percentage': cash/total},
+        {'Type': 'PPK', 'Total': ppk, 'Percentage': ppk/total},
+        {'Type': 'Investments', 'Total': inv, 'Percentage': inv/total},
+        {'Type': 'Stocks', 'Total': stock_buy, 'Percentage': stock_buy/total},
+        {'Type': 'Total', 'Total': total, 'Percentage': 1}
     ]
 
 def __latest_account_balance(data: dict, type: str) -> float:

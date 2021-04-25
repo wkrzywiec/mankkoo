@@ -7,9 +7,9 @@ import pandas as pd
 
 start_data = pd.DataFrame(
     data=np.array([
-    ['Millenium', 'checking', '360 Account', '2021-01-31', 'Init money', 'Detail 1', np.NaN, 'init', 1000, 'PLN', 1000],
-    ['Millenium', 'checking', '360 Account', '2021-01-31', 'Armchair', 'Detail 2', np.NaN, np.NaN, -222.22, 'PLN', 777.78],
-    ['Millenium', 'checking', '360 Account', '2021-01-31', 'Candies', 'Detail 3', np.NaN, np.NaN, -3.3, 'PLN', 774.48]
+    ['Millenium', 'checking', '360', '2021-01-31', 'Init money', 'Detail 1', np.NaN, 'init', 1000, 'PLN', 1000],
+    ['Millenium', 'checking', '360', '2021-01-31', 'Armchair', 'Detail 2', np.NaN, np.NaN, -222.22, 'PLN', 777.78],
+    ['Millenium', 'checking', '360', '2021-01-31', 'Candies', 'Detail 3', np.NaN, np.NaN, -3.3, 'PLN', 774.48]
     ]),
     columns=data.account_columns
 ).astype({'Balance': 'float', 'Operation': 'float'})
@@ -25,12 +25,12 @@ millenium_data = pd.DataFrame(
 
 end_data = pd.DataFrame(
     data=np.array([
-    ['Millenium', 'checking', '360 Account', '2021-01-31', 'Init money', 'Detail 1', np.NaN, 'init', 1000.00, 'PLN', 1000.00],
-    ['Millenium', 'checking', '360 Account', '2021-01-31', 'Armchair', 'Detail 2', np.NaN, np.NaN, -222.22, 'PLN', 777.78],
-    ['Millenium', 'checking', '360 Account', '2021-01-31', 'Candies', 'Detail 3', np.NaN, np.NaN, -3.30, 'PLN', 774.48],
-    ['Millenium', 'checking', '360 Account', '2021-03-15', 'Train ticket', np.NaN, np.NaN, np.NaN, -100.00, 'PLN', 674.48],
-    ['Millenium', 'checking', '360 Account', '2021-03-16', 'Bus ticket', np.NaN, np.NaN, np.NaN, -200.00, 'PLN', 474.48],
-    ['Millenium', 'checking', '360 Account', '2021-03-17', 'Salary', np.NaN, np.NaN, np.NaN, 3000.33, 'PLN', 3474.81]
+    ['Millenium', 'checking', '360', '2021-01-31', 'Init money', 'Detail 1', np.NaN, 'init', 1000.00, 'PLN', 1000.00],
+    ['Millenium', 'checking', '360', '2021-01-31', 'Armchair', 'Detail 2', np.NaN, np.NaN, -222.22, 'PLN', 777.78],
+    ['Millenium', 'checking', '360', '2021-01-31', 'Candies', 'Detail 3', np.NaN, np.NaN, -3.30, 'PLN', 774.48],
+    ['Millenium', 'checking', '360', '2021-03-15', 'Train ticket', np.NaN, np.NaN, np.NaN, -100.00, 'PLN', 674.48],
+    ['Millenium', 'checking', '360', '2021-03-16', 'Bus ticket', np.NaN, np.NaN, np.NaN, -200.00, 'PLN', 474.48],
+    ['Millenium', 'checking', '360', '2021-03-17', 'Salary', np.NaN, np.NaN, np.NaN, 3000.33, 'PLN', 3474.81]
     ]),
     columns=data.account_columns
 ).astype({'Balance': 'float', 'Operation': 'float'})
@@ -93,10 +93,11 @@ def test_total_money_data():
 
     # THEN 
     assert total_money == [
-        {'Type': 'Checking Account', 'Total': 774.48},
-        {'Type': 'Savings Account', 'Total':0.00},
-        {'Type': 'Cash', 'Total': 0.00},
-        {'Type': 'PPK', 'Total': 0.00},
-        {'Type': 'Investments', 'Total': 2000.00},
-        {'Type': 'Stocks', 'Total': 2000.00}
+        {'Type': 'Checking Account', 'Total': 774.48, 'Percentage': 0.16221242941639719},
+        {'Type': 'Savings Account', 'Total': 0.00, 'Percentage': 0.0},
+        {'Type': 'Cash', 'Total': 0.00, 'Percentage': 0.0},
+        {'Type': 'PPK', 'Total': 0.00, 'Percentage': 0.0},
+        {'Type': 'Investments', 'Total': 2000.00, 'Percentage': 0.41889378529180143},
+        {'Type': 'Stocks', 'Total': 2000.00, 'Percentage': 0.41889378529180143},
+        {'Type': 'Total', 'Total': 4774.48, 'Percentage': 1}
     ]
