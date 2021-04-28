@@ -35,15 +35,14 @@ def total_money_data(data: dict):
     # TODO check how much stock units I have Broker-Title pair buy-sell
     total = checking_account + savings_account + cash + ppk + inv + stock_buy
 
-    return [
+    return pd.DataFrame([
         {'Type': 'Checking Account', 'Total': checking_account, 'Percentage': checking_account/total},
         {'Type': 'Savings Account', 'Total': savings_account, 'Percentage': savings_account/total},
         {'Type': 'Cash', 'Total': cash, 'Percentage': cash/total},
         {'Type': 'PPK', 'Total': ppk, 'Percentage': ppk/total},
         {'Type': 'Investments', 'Total': inv, 'Percentage': inv/total},
-        {'Type': 'Stocks', 'Total': stock_buy, 'Percentage': stock_buy/total},
-        {'Type': 'Total', 'Total': total, 'Percentage': 1}
-    ]
+        {'Type': 'Stocks', 'Total': stock_buy, 'Percentage': stock_buy/total}
+    ])
 
 def __latest_account_balance(data: dict, type: str) -> float:
     

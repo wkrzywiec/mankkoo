@@ -92,12 +92,11 @@ def test_total_money_data():
     total_money = data.total_money_data(all_data)
 
     # THEN 
-    assert total_money == [
+    assert total_money.to_dict('records') == [
         {'Type': 'Checking Account', 'Total': 774.48, 'Percentage': 0.16221242941639719},
         {'Type': 'Savings Account', 'Total': 0.00, 'Percentage': 0.0},
         {'Type': 'Cash', 'Total': 0.00, 'Percentage': 0.0},
         {'Type': 'PPK', 'Total': 0.00, 'Percentage': 0.0},
         {'Type': 'Investments', 'Total': 2000.00, 'Percentage': 0.41889378529180143},
-        {'Type': 'Stocks', 'Total': 2000.00, 'Percentage': 0.41889378529180143},
-        {'Type': 'Total', 'Total': 4774.48, 'Percentage': 1}
+        {'Type': 'Stocks', 'Total': 2000.00, 'Percentage': 0.41889378529180143}
     ]
