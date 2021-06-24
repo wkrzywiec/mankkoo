@@ -26,6 +26,8 @@ def init_data_folder():
         log.info("Creating mankkoo's account file")
         df = pd.DataFrame(columns=data.account_columns)
         df.to_csv(mankoo_account_file)
+        
+    # TODO init pozostałe pliki
 
 def mankoo_file_path(file: str):
     """Get full path of one of mankkoo's files. 
@@ -41,14 +43,8 @@ def mankoo_file_path(file: str):
     """
     path = mankoo_path() + __slash()
 
-    if file == 'account':
-        return path + account_file
-    
-    if file == 'investment':
-        return path + investment_file
-
-    if file == 'stock':
-        return path + stock_file
+    if file in {'account', 'investment', 'stock'}:
+        return path + file + '.csv'
 
     raise ValueError("Can't get mankkoo file. Unsupported file type: {}".format(file))
 

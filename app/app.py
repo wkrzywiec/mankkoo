@@ -9,8 +9,8 @@ import dash_html_components as html
 import widget
 import pandas as pd
 import scripts.main.data as dt
-
-
+import scripts.main.total as total
+import plotly.express as px
 
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
@@ -18,11 +18,12 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 data = dt.load_data()
 
-total_money = dt.total_money_data(data)
+total_money = total.total_money_data(data)
 total_table = widget.total_money_table(total_money)
 total_pie = widget.total_money_pie(total_money)
 
 # print(px.data.gapminder().query("year == 2007").query("continent == 'Americas'"))
+# print(px.data.gapminder().query("country=='Canada'"))
 # TODO add total money cell
 
 # total_chart_data = data['account'][['Date', 'Balance']]

@@ -9,6 +9,7 @@ class FileType(Enum):
     ACCOUNT = 'account'
     INVESTMENT = 'investment'
     STOCK = 'stock'
+    TOTAL = 'total'
     BANK = 'bank'
 
 class Bank(Enum):
@@ -41,7 +42,8 @@ def load_data(file_type: FileType, kind=None, file_name=None):
             - ACCOUNT - account.csv (from .mankkkoo dir) with operations history from multiple bank accounts
             - INVESTMENT - investment.csv (from .mankkoo dir) with investments history
             - STOCK - stock.csv (from .mankkoo dir) with history of bought and sold shares
-            - BANK - load an exported file from a bank with transaction history. It requires to provide two addition params kind and file_name
+            - TOTAL - total.csv (from .mankkoo dir) with total money history
+            - BANK - loads an exported file from a bank with transaction history. It requires to provide two addition params kind and file_name
         kind (importer.Bank): used only to load a data from bank exported file
         file_name (str): name of a file located in /data directory
 
@@ -56,6 +58,9 @@ def load_data(file_type: FileType, kind=None, file_name=None):
 
     if file_type is FileType.STOCK:
         return pd.read_csv(config.mankoo_file_path('stock'))
+
+    if file_type is FileType.TOTAL:
+        return pd.read_csv(config.mankoo_file_path('total'))
 
     if kind is None:
         raise ValueError('Could not load data file. "kind" (bank, investment, stock) argument was not provided')

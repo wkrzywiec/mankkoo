@@ -1,10 +1,10 @@
 import pytest
-import scripts.main.data as data
-import scripts.main.importer as importer
 import numpy as np
 import pandas as pd
+import scripts.main.data as data
+import scripts.main.total as total
 
-
+# TODO extract to separate class
 start_data = pd.DataFrame(
     data=np.array([
     ['Millenium', 'checking', '360', '2021-01-31', 'Init money', 'Detail 1', np.NaN, 'init', 1000, 'PLN', 1000],
@@ -52,29 +52,24 @@ stock = pd.DataFrame(
     columns=data.stock_columns
 ).astype({'Total Value': 'float'})
 
-
-def test_add_new_operation_for_incorrect_bank():
+def test_total_money_data():
     # GIVEN
-    bank = 'NOT KNOWN BANK'
+    investment.Active = investment.Active.astype('bool')
+    all_data = dict(
+        account = start_data,
+        investment = investment,
+        stock = stock
+    )
 
     # WHEN
-    with pytest.raises(KeyError) as ex:
-        data.add_new_operations(bank, 'not_known_bank.csv')
+    total_money = total.total_money_data(all_data)
 
-    # THEN
-    assert 'Failed to load data from file. Not known bank. Was provided {} bank'.format(bank) in str(ex.value)
-
-def test_add_new_operations(mocker):
-    # GIVEN
-    bank = importer.Bank.PL_MILLENIUM
-
-    mocker.patch('scripts.main.importer.load_data', side_effect=[millenium_data, start_data])
-    mocker.patch('pandas.DataFrame.to_csv')
-
-    # WHEN
-    df = data.add_new_operations(bank, 'test_pl_millenium.csv')
-
-    # THEN
-    assert df['Operation'].equals(end_data['Operation'])
-    assert df['Balance'].equals(end_data['Balance'])
-    assert df['Date'].equals(end_data['Date'])
+    # THEN 
+    assert total_money.to_dict('records') == [
+        {'Type': 'Checking Account', 'Total': 774.48, 'Percentage': 0.16221242941639719},
+        {'Type': 'Savings Account', 'Total': 0.00, 'Percentage': 0.0},
+        {'Type': 'Cash', 'Total': 0.00, 'Percentage': 0.0},
+        {'Type': 'PPK', 'Total': 0.00, 'Percentage': 0.0},
+        {'Type': 'Investments', 'Total': 2000.00, 'Percentage': 0.41889378529180143},
+        {'Type': 'Stocks', 'Total': 2000.00, 'Percentage': 0.41889378529180143}
+    ]

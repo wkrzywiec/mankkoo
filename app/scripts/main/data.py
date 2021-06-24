@@ -1,8 +1,9 @@
-import scripts.main.importer as importer
-import scripts.main.config as config
 import pandas as pd
 import numpy as np
 import os
+import scripts.main.importer as importer
+import scripts.main.config as config
+import scripts.main.total as total
 
 account_columns = ['Bank', 'Type', 'Account', 'Date', 'Title', 'Details', 'Category', 'Comment', 'Operation', 'Currency', 'Balance']
 invest_columns = ['Active', 'Category', 'Bank', 'Investment', 'Start Date', 'End Date', 'Start Amount', 'End amount', 'Currency', 'Details', 'Comment']
@@ -19,38 +20,6 @@ def load_data():
         investment = importer.load_data(importer.FileType.INVESTMENT),
         stock = importer.load_data(importer.FileType.STOCK)
     )
-
-def total_money_data(data: dict):
-
-    checking_account = __latest_account_balance(data, '360')
-    savings_account = __latest_account_balance(data, 'Konto Oszczędnościowe Profit')
-    cash = __latest_account_balance(data, 'Gotówka')
-    ppk = __latest_account_balance(data, 'PKO PPK')
-
-    inv = data['investment'].loc[data['investment']['Active'] == True]
-    inv = inv['Start Amount'].sum()
-
-    stock_buy = data['stock'].loc[data['stock']['Operation'] == 'Buy']
-    stock_buy = stock_buy['Total Value'].sum()
-    # TODO check how much stock units I have Broker-Title pair buy-sell
-    total = checking_account + savings_account + cash + ppk + inv + stock_buy
-
-    return pd.DataFrame([
-        {'Type': 'Checking Account', 'Total': checking_account, 'Percentage': checking_account/total},
-        {'Type': 'Savings Account', 'Total': savings_account, 'Percentage': savings_account/total},
-        {'Type': 'Cash', 'Total': cash, 'Percentage': cash/total},
-        {'Type': 'PPK', 'Total': ppk, 'Percentage': ppk/total},
-        {'Type': 'Investments', 'Total': inv, 'Percentage': inv/total},
-        {'Type': 'Stocks', 'Total': stock_buy, 'Percentage': stock_buy/total}
-    ])
-
-def __latest_account_balance(data: dict, type: str) -> float:
-    
-    #TODO filter by account type, not name, and if more than one sum it
-    df = data['account'].loc[data['account']['Account'] == type]
-    if not df.empty:
-        return df['Balance'].iloc[-1]
-    return 0.00
 
 def add_new_operations(bank: importer.Bank, file_name: str):
     """Append bank accounts history with new operations. 
@@ -71,6 +40,7 @@ def add_new_operations(bank: importer.Bank, file_name: str):
     df = pd.concat([df, df_new]).reset_index(drop=True)
 
     df = calculate_balance(df)
+    total.update_total_money(df, df_new['Date'])
     df.to_csv(config.mankoo_file_path('account'), index=False)
     return df
     
