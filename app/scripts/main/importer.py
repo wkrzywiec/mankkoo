@@ -60,7 +60,7 @@ def load_data(file_type: FileType, kind=None, file_name=None):
         return pd.read_csv(config.mankoo_file_path('stock'))
 
     if file_type is FileType.TOTAL:
-        return pd.read_csv(config.mankoo_file_path('total'))
+        return __set_columns_formats(pd.read_csv(config.mankoo_file_path('total')))
 
     if kind is None:
         raise ValueError('Could not load data file. "kind" (bank, investment, stock) argument was not provided')
@@ -140,3 +140,6 @@ def __read_from_data_path(file_name: str):
 def __add_missing_columns(df: pd.DataFrame, columns):
     existing_columns = list(df.columns)
     return df.reindex(columns= existing_columns + columns)
+
+def __set_columns_formats(df: pd.DataFrame):
+    return df.astype({'Date': 'datetime64[ns]'})

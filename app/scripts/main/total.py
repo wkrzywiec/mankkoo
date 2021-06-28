@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
+from datetime import datetime
 import scripts.main.importer as importer
+import scripts.main.config as config
 
 def total_money_data(data: dict):
 
@@ -34,7 +36,7 @@ def __latest_account_balance(data: dict, type: str) -> float:
         return df['Balance'].iloc[-1]
     return 0.00
 
-def update_total_money(df: pd.DataFrame, updated_dates: df.Series):
+def update_total_money(accounts: pd.DataFrame, updated_dates: pd.Series, file_type = 'account'):
     total = importer.load_data(importer.FileType.TOTAL)
 
     investment = importer.load_data(importer.FileType.INVESTMENT)
@@ -42,24 +44,42 @@ def update_total_money(df: pd.DataFrame, updated_dates: df.Series):
     # TODO two categories - retire and all total money
     
 
-    # wykasuj wszystkie operacje do najpóźniejszego dnia z df
-    # dla każdego dnia z serii wykalkuluj total (usuń duplikaty, )
-    # dodaj do totala posortowane wyniki
-    # zapisz totala
-    pass
+    total = __clean_overlapping_days(total, updated_dates.min())
+    total_new_lines = __calc_totals(accounts, updated_dates)
+    total = pd.concat([total, total_new_lines]).reset_index(drop=True)
+    total.to_csv(config.mankoo_file_path('total'), index=False)
+    return total
 
-def total_money_in_time(data: dict):
-    # znajdź wszystkie pnkty w czasie, wszystkie unikalne daty
-    # iteracja po każdym dniu po 3 dataframeach - account, invest oraz stock i dodanie
+def __clean_overlapping_days(total: pd.DataFrame, min_date: datetime):
+    return total.drop(total[total['Date'] >= min_date].index)
 
-    df = data['account']['Date'].drop_duplicates().reset_index(drop=True).to_frame()
-    df['Total'] = np.nan
+def __calc_totals(accounts: pd.DataFrame, updated_dates: pd.Series):
+    accounts_dates = accounts[accounts['Date'] > updated_dates.min()]['Dates']
+    updated_dates = updated_dates.append(accounts_dates, ignore_index=True)
+    updated_dates = updated_dates.drop_duplicates().sort_values()
 
-    # TODO replace with better approach, e.g.
+    result_list = []
+    
+#    TODO replace with better approach, e.g.
     # https://stackoverflow.com/questions/16476924/how-to-iterate-over-rows-in-a-dataframe-in-pandas
-    for index, row in df.iterrows():
-        row['Total'] = _calculate_total(data, row['Date'])
+    for date in updated_dates.iterrows():
+        row_dict = {'Date': date, 'Total': balance_for_day(accounts, date) + 'gotówka' + 'investment' + 'stock'}
+        result_list.append(row_dict)
+        
+    return pd.DataFrame(result_list)
+    
 
-def _calculate_total(data: dict, date):
-    # pobrać z każdego dnia wartość na koncie, jeśli tylko jedno konto danego dnia - ostatnia wartość i dodać do innych kont z poprzednich dni
-    print(date)
+def balance_for_day(accounts: pd.DataFrame, date: datetime):
+    account_names = accounts['Account'].unique()
+
+    result = 0
+    for account_name in account_names:
+        result = result + __get_balance_for_day_or_earlier(accounts, account_name, date)
+    return result
+
+def __get_balance_for_day_or_earlier(accounts: pd.DataFrame, account_name: str, date: datetime):
+
+    only_single_account = accounts[accounts['Account'] == account_name]
+    only_specific_dates_accounts = only_single_account[only_single_account['Date'] >= date]
+    
+    return only_specific_dates_accounts['Balance'].iloc[-1]

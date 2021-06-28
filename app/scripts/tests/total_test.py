@@ -73,3 +73,38 @@ def test_total_money_data():
         {'Type': 'Investments', 'Total': 2000.00, 'Percentage': 0.41889378529180143},
         {'Type': 'Stocks', 'Total': 2000.00, 'Percentage': 0.41889378529180143}
     ]
+
+def test_balance_from_date_multiple_accounts():
+    # GIVEN
+    account = pd.DataFrame(
+        data=np.array([
+            ['Millenium', 'checking', '360', '2021-01-31', 'Init money', 'Detail 1', np.NaN, 'init', 1000, 'PLN', 1000],
+            ['ING', 'checking', 'Direct', '2021-01-31', 'Armchair', 'Detail 2', np.NaN, np.NaN, -222.22, 'PLN', 1000],
+            ['mBank', 'checking', 'eKonto', '2021-01-31', 'Candies', 'Detail 3', np.NaN, np.NaN, -3.3, 'PLN', 2000]
+        ]),
+        columns=data.account_columns
+    ).astype({'Balance': 'float', 'Operation': 'float', 'Date': 'datetime64[ns]'})
+
+    # WHEN
+    total_balance = total.balance_from_date(account, pd.to_datetime('2021-01-31'))
+
+    # THEN
+    assert total_balance == 4000
+
+def test_balance_from_date_multiple_accounts_in_different_days():
+    # GIVEN
+    account = pd.DataFrame(
+        data=np.array([
+            ['Millenium', 'checking', '360', '2021-01-31', 'a', 'a', np.NaN, '', 1000, 'PLN', 1000],
+            ['ING', 'checking', 'Direct', '2021-02-01', 'a', 'a', np.NaN, np.NaN, -222.22, 'PLN', 1000],
+            ['mBank', 'checking', 'eKonto', '2021-01-02', 'a', 'a', np.NaN, np.NaN, -3.3, 'PLN', 2000],
+            ['mBank', 'checking', 'eKonto', '2021-01-02', 'a', 'a', np.NaN, np.NaN, 1000, 'PLN', 3000]
+        ]),
+        columns=data.account_columns
+    ).astype({'Balance': 'float', 'Operation': 'float', 'Date': 'datetime64[ns]'})
+
+    # WHEN
+    total_balance = total.balance_from_date(account, pd.to_datetime('2021-01-02'))
+
+    # THEN
+    assert total_balance == 5000
