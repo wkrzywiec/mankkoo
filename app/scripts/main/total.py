@@ -43,7 +43,6 @@ def update_total_money(accounts: pd.DataFrame, updated_dates: pd.Series, file_ty
     stock = importer.load_data(importer.FileType.STOCK)
     # TODO two categories - retire and all total money
     
-
     total = __clean_overlapping_days(total, updated_dates.min())
     total_new_lines = __calc_totals(accounts, updated_dates)
     total = pd.concat([total, total_new_lines]).reset_index(drop=True)
@@ -63,7 +62,7 @@ def __calc_totals(accounts: pd.DataFrame, updated_dates: pd.Series):
 #    TODO replace with better approach, e.g.
     # https://stackoverflow.com/questions/16476924/how-to-iterate-over-rows-in-a-dataframe-in-pandas
     for date in updated_dates.iterrows():
-        row_dict = {'Date': date, 'Total': balance_for_day(accounts, date) + 'gotówka' + 'investment' + 'stock'}
+        row_dict = {'Date': date, 'Total': balance_for_day(accounts, date) + cash_for_day(accounts, date) + 'investment' + 'stock'}
         result_list.append(row_dict)
         
     return pd.DataFrame(result_list)
@@ -83,3 +82,9 @@ def __get_balance_for_day_or_earlier(accounts: pd.DataFrame, account_name: str, 
     only_specific_dates_accounts = only_single_account[only_single_account['Date'] >= date]
     
     return only_specific_dates_accounts['Balance'].iloc[-1]
+
+def cash_for_day(accounts: pd.DataFrame, date: datetime):
+    cash_lines = accounts[accounts['Type'] == 'cash']
+    cash_specific_day = cash_lines[cash_lines['Date'] >= date]
+
+    return cash_specific_day['Balance'].iloc[-1]

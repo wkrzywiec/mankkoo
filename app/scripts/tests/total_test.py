@@ -74,7 +74,7 @@ def test_total_money_data():
         {'Type': 'Stocks', 'Total': 2000.00, 'Percentage': 0.41889378529180143}
     ]
 
-def test_balance_from_date_multiple_accounts():
+def test_balance_for_day_multiple_accounts():
     # GIVEN
     account = pd.DataFrame(
         data=np.array([
@@ -86,12 +86,12 @@ def test_balance_from_date_multiple_accounts():
     ).astype({'Balance': 'float', 'Operation': 'float', 'Date': 'datetime64[ns]'})
 
     # WHEN
-    total_balance = total.balance_from_date(account, pd.to_datetime('2021-01-31'))
+    total_balance = total.balance_for_day(account, pd.to_datetime('2021-01-31'))
 
     # THEN
     assert total_balance == 4000
 
-def test_balance_from_date_multiple_accounts_in_different_days():
+def test_balance_for_day_multiple_accounts_in_different_days():
     # GIVEN
     account = pd.DataFrame(
         data=np.array([
@@ -104,7 +104,25 @@ def test_balance_from_date_multiple_accounts_in_different_days():
     ).astype({'Balance': 'float', 'Operation': 'float', 'Date': 'datetime64[ns]'})
 
     # WHEN
-    total_balance = total.balance_from_date(account, pd.to_datetime('2021-01-02'))
+    total_balance = total.balance_for_day(account, pd.to_datetime('2021-01-02'))
 
     # THEN
     assert total_balance == 5000
+
+def test_cash_for_day():
+    # GIVEN
+    account = pd.DataFrame(
+        data=np.array([
+            ['Skarpeta', 'cash', 'Gotówka', '2021-01-31', 'a', 'a', np.NaN, '', 1000, 'PLN', 1000],
+            ['Skarpeta', 'cash', 'Gotówka', '2021-02-01', 'a', 'a', np.NaN, np.NaN, 1000, 'PLN', 2000],
+            ['Skarpeta', 'cash', 'Gotówka', '2021-01-02', 'a', 'a', np.NaN, np.NaN, 1000, 'PLN', 3000],
+            ['Skarpeta', 'cash', 'Gotówka', '2021-01-02', 'a', 'a', np.NaN, np.NaN, 1000, 'PLN', 4000]
+        ]),
+        columns=data.account_columns
+    ).astype({'Balance': 'float', 'Operation': 'float', 'Date': 'datetime64[ns]'})
+
+    # WHEN
+    total_cash = total.cash_for_day(account, pd.to_datetime('2021-01-02'))
+
+    # THEN
+    assert total_cash == 4000
