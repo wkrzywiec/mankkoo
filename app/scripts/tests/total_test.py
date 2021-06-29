@@ -74,24 +74,27 @@ def test_total_money_data():
         {'Type': 'Stocks', 'Total': 2000.00, 'Percentage': 0.41889378529180143}
     ]
 
-def test_balance_for_day_multiple_accounts():
+def test_accounts_balance_for_day_multiple_accounts():
     # GIVEN
     account = pd.DataFrame(
         data=np.array([
             ['Millenium', 'checking', '360', '2021-01-31', 'Init money', 'Detail 1', np.NaN, 'init', 1000, 'PLN', 1000],
             ['ING', 'checking', 'Direct', '2021-01-31', 'Armchair', 'Detail 2', np.NaN, np.NaN, -222.22, 'PLN', 1000],
-            ['mBank', 'checking', 'eKonto', '2021-01-31', 'Candies', 'Detail 3', np.NaN, np.NaN, -3.3, 'PLN', 2000]
+            ['mBank', 'checking', 'eKonto', '2021-01-31', 'Candies', 'Detail 3', np.NaN, np.NaN, -3.3, 'PLN', 1000],
+            ['Skarpeta', 'cash', 'Gotówka', '2021-01-31', 'a', 'a', np.NaN, np.NaN, 1000, 'PLN', 1000],
+            ['Millenium', 'savings', 'Konto Oszczędnościowe Profit', '2021-01-31', 'a', 'a', np.NaN, np.NaN, 1000, 'PLN', 1000],
+            ['PKO', 'retirement', 'PKO PPK', '2021-01-31', 'a', 'a', np.NaN, np.NaN, 1000, 'PLN', 1000]
         ]),
         columns=data.account_columns
     ).astype({'Balance': 'float', 'Operation': 'float', 'Date': 'datetime64[ns]'})
 
     # WHEN
-    total_balance = total.balance_for_day(account, pd.to_datetime('2021-01-31'))
+    total_balance = total.accounts_balance_for_day(account, pd.to_datetime('2021-01-31'))
 
     # THEN
-    assert total_balance == 4000
+    assert total_balance == 6000
 
-def test_balance_for_day_multiple_accounts_in_different_days():
+def test_accounts_balance_for_day_multiple_accounts_in_different_days():
     # GIVEN
     account = pd.DataFrame(
         data=np.array([
@@ -104,25 +107,25 @@ def test_balance_for_day_multiple_accounts_in_different_days():
     ).astype({'Balance': 'float', 'Operation': 'float', 'Date': 'datetime64[ns]'})
 
     # WHEN
-    total_balance = total.balance_for_day(account, pd.to_datetime('2021-01-02'))
+    total_balance = total.accounts_balance_for_day(account, pd.to_datetime('2021-01-02'))
 
     # THEN
     assert total_balance == 5000
 
-def test_cash_for_day():
+def test_investments_for_day():
     # GIVEN
-    account = pd.DataFrame(
-        data=np.array([
-            ['Skarpeta', 'cash', 'Gotówka', '2021-01-31', 'a', 'a', np.NaN, '', 1000, 'PLN', 1000],
-            ['Skarpeta', 'cash', 'Gotówka', '2021-02-01', 'a', 'a', np.NaN, np.NaN, 1000, 'PLN', 2000],
-            ['Skarpeta', 'cash', 'Gotówka', '2021-01-02', 'a', 'a', np.NaN, np.NaN, 1000, 'PLN', 3000],
-            ['Skarpeta', 'cash', 'Gotówka', '2021-01-02', 'a', 'a', np.NaN, np.NaN, 1000, 'PLN', 4000]
-        ]),
-        columns=data.account_columns
-    ).astype({'Balance': 'float', 'Operation': 'float', 'Date': 'datetime64[ns]'})
+    investment = pd.DataFrame(
+    data=np.array([
+        [0, 'Bank Deposit', 'Bank A', 'Super Bank Deposit', '2016-11-28', '2017-04-09', 1000.00, 1079.89, 'PLN', np.NaN, np.NaN],
+        [1, 'Bank Deposit', 'Bank B', 'Ultra Bank Deposit', '2020-01-01', '2021-01-01', 1000.00, np.NaN, 'PLN', np.NaN, np.NaN],
+        [1, 'Bank Deposit', 'Bank A', 'Hiper Bank Deposit', '2020-11-28', '2021-11-28', 1000.00, np.NaN, 'PLN', np.NaN, np.NaN],
+        [1, 'Bank Deposit', 'Bank A', 'Hiper Bank Deposit', '2020-11-28', np.NaN, 1000.00, np.NaN, 'PLN', np.NaN, np.NaN]
+    ]),
+    columns=data.invest_columns
+    ).astype({'Active': 'int', 'Start Amount': 'float', 'End amount': 'float', 'Start Date': 'datetime64[ns]', 'End Date': 'datetime64[ns]'})
 
     # WHEN
-    total_cash = total.cash_for_day(account, pd.to_datetime('2021-01-02'))
+    total_inv = total.investments_for_day(investment, pd.to_datetime('2021-01-01'))
 
     # THEN
-    assert total_cash == 4000
+    assert total_inv == 3000
