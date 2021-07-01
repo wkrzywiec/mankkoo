@@ -57,6 +57,6 @@ def calculate_balance(df: pd.DataFrame):
     nan_index = df['Balance'].index[df['Balance'].apply(pd.isna)]
 
     for i in range(nan_index[0], len(df)):
-        df.loc[i, 'Balance'] = df.loc[i-1, 'Balance'] + df.loc[i, 'Operation']
-    
+        df.loc[i, 'Balance'] = df.loc[i - 1, 'Balance'] + df.loc[i, 'Operation']
+
     return df

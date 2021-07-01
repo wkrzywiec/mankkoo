@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from datetime import datetime
+import datetime
 import scripts.main.importer as importer
 import scripts.main.config as config
 
@@ -29,7 +29,7 @@ def total_money_data(data: dict):
     ])
 
 def __latest_account_balance(data: dict, type: str) -> float:
-    
+
     #TODO filter by account type, not name, and if more than one sum it
     df = data['account'].loc[data['account']['Account'] == type]
     if not df.empty:
@@ -38,7 +38,7 @@ def __latest_account_balance(data: dict, type: str) -> float:
 
 def update_total_money(accounts: pd.DataFrame, updated_dates: pd.Series, file_type = 'account'):
     total = importer.load_data(importer.FileType.TOTAL)
-    
+
     total = __clean_overlapping_days(total, updated_dates.min())
     total_new_lines = __calc_totals(accounts, updated_dates)
     total = pd.concat([total, total_new_lines]).reset_index(drop=True)
@@ -57,17 +57,17 @@ def __calc_totals(accounts: pd.DataFrame, updated_dates: pd.Series):
     stock = importer.load_data(importer.FileType.STOCK)
 
     result_list = []
-    
+
     # TODO replace with better approach, e.g.
     # https://stackoverflow.com/questions/16476924/how-to-iterate-over-rows-in-a-dataframe-in-pandas
     for date in updated_dates.iterrows():
         total = accounts_balance_for_day(accounts, date) + investments_for_day(investments, date) + stock_for_day(stock, date)
         row_dict = {'Date': date, 'Total': total}
         result_list.append(row_dict)
-        
+
     return pd.DataFrame(result_list)
-    
-def accounts_balance_for_day(accounts: pd.DataFrame, date: datetime):
+
+def accounts_balance_for_day(accounts: pd.DataFrame, date: datetime.date):
     account_names = accounts['Account'].unique()
 
     result = 0
@@ -75,20 +75,22 @@ def accounts_balance_for_day(accounts: pd.DataFrame, date: datetime):
         result = result + __get_balance_for_day_or_earlier(accounts, account_name, date)
     return result
 
-def __get_balance_for_day_or_earlier(accounts: pd.DataFrame, account_name: str, date: datetime):
+def __get_balance_for_day_or_earlier(accounts: pd.DataFrame, account_name: str, date: datetime.date):
 
     only_single_account = accounts[accounts['Account'] == account_name]
-    only_specific_dates_accounts = only_single_account[only_single_account['Date'] >= date]
-    
+    only_specific_dates_accounts = only_single_account.loc[only_single_account['Date'] <= date]
+
+    if only_specific_dates_accounts.empty:
+        return 0
     return only_specific_dates_accounts['Balance'].iloc[-1]
 
-def investments_for_day(investments: pd.DataFrame, date: datetime):
+def investments_for_day(investments: pd.DataFrame, date: datetime.date):
     after_start = investments['Start Date'] <= date
-    before_end = investments['End Date'] >=  date
+    before_end = investments['End Date'] >= date
     is_na = pd.isna(investments['End Date'])
 
     active_inv = investments.loc[after_start & (before_end | is_na)]
     return active_inv['Start Amount'].to_numpy().sum()
 
-def stock_for_day(stock: pd.DataFrame, date: datetime):
-    pass
+def stock_for_day(stock: pd.DataFrame, date: datetime.date):
+    return 0

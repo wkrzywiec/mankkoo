@@ -1,6 +1,7 @@
 import pytest
 import numpy as np
 import pandas as pd
+import datetime
 import scripts.main.data as data
 import scripts.main.total as total
 
@@ -83,13 +84,15 @@ def test_accounts_balance_for_day_multiple_accounts():
             ['mBank', 'checking', 'eKonto', '2021-01-31', 'Candies', 'Detail 3', np.NaN, np.NaN, -3.3, 'PLN', 1000],
             ['Skarpeta', 'cash', 'Gotówka', '2021-01-31', 'a', 'a', np.NaN, np.NaN, 1000, 'PLN', 1000],
             ['Millenium', 'savings', 'Konto Oszczędnościowe Profit', '2021-01-31', 'a', 'a', np.NaN, np.NaN, 1000, 'PLN', 1000],
-            ['PKO', 'retirement', 'PKO PPK', '2021-01-31', 'a', 'a', np.NaN, np.NaN, 1000, 'PLN', 1000]
+            ['PKO', 'retirement', 'PKO PPK', '2021-01-31', 'a', 'a', np.NaN, np.NaN, 1000, 'PLN', 1000],
+            ['mBank', 'checking', 'eKonto', '2035-08-08', 'a', 'a', np.NaN, np.NaN, 10000, 'PLN', 10000]
         ]),
         columns=data.account_columns
     ).astype({'Balance': 'float', 'Operation': 'float', 'Date': 'datetime64[ns]'})
+    account['Date'] = account['Date'].dt.date
 
     # WHEN
-    total_balance = total.accounts_balance_for_day(account, pd.to_datetime('2021-01-31'))
+    total_balance = total.accounts_balance_for_day(account, datetime.date(2021, 1, 31))
 
     # THEN
     assert total_balance == 6000
@@ -98,16 +101,18 @@ def test_accounts_balance_for_day_multiple_accounts_in_different_days():
     # GIVEN
     account = pd.DataFrame(
         data=np.array([
-            ['Millenium', 'checking', '360', '2021-01-31', 'a', 'a', np.NaN, '', 1000, 'PLN', 1000],
-            ['ING', 'checking', 'Direct', '2021-02-01', 'a', 'a', np.NaN, np.NaN, -222.22, 'PLN', 1000],
-            ['mBank', 'checking', 'eKonto', '2021-01-02', 'a', 'a', np.NaN, np.NaN, -3.3, 'PLN', 2000],
-            ['mBank', 'checking', 'eKonto', '2021-01-02', 'a', 'a', np.NaN, np.NaN, 1000, 'PLN', 3000]
+            ['Millenium', 'checking', '360', '2021-01-01', 'a', 'a', np.NaN, '', 1000, 'PLN', 1000],
+            ['ING', 'checking', 'Direct', '2021-01-31', 'a', 'a', np.NaN, np.NaN, -222.22, 'PLN', 1000],
+            ['mBank', 'checking', 'eKonto', '2021-02-01', 'a', 'a', np.NaN, np.NaN, -3.3, 'PLN', 2000],
+            ['mBank', 'checking', 'eKonto', '2021-02-01', 'a', 'a', np.NaN, np.NaN, 1000, 'PLN', 3000],
+            ['mBank', 'checking', 'eKonto', '2035-08-08', 'a', 'a', np.NaN, np.NaN, 10000, 'PLN', 10000]
         ]),
         columns=data.account_columns
     ).astype({'Balance': 'float', 'Operation': 'float', 'Date': 'datetime64[ns]'})
+    account['Date'] = account['Date'].dt.date
 
     # WHEN
-    total_balance = total.accounts_balance_for_day(account, pd.to_datetime('2021-01-02'))
+    total_balance = total.accounts_balance_for_day(account, datetime.date(2021, 2, 1))
 
     # THEN
     assert total_balance == 5000
@@ -119,13 +124,16 @@ def test_investments_for_day():
         [0, 'Bank Deposit', 'Bank A', 'Super Bank Deposit', '2016-11-28', '2017-04-09', 1000.00, 1079.89, 'PLN', np.NaN, np.NaN],
         [1, 'Bank Deposit', 'Bank B', 'Ultra Bank Deposit', '2020-01-01', '2021-01-01', 1000.00, np.NaN, 'PLN', np.NaN, np.NaN],
         [1, 'Bank Deposit', 'Bank A', 'Hiper Bank Deposit', '2020-11-28', '2021-11-28', 1000.00, np.NaN, 'PLN', np.NaN, np.NaN],
-        [1, 'Bank Deposit', 'Bank A', 'Hiper Bank Deposit', '2020-11-28', np.NaN, 1000.00, np.NaN, 'PLN', np.NaN, np.NaN]
+        [1, 'Bank Deposit', 'Bank A', 'Hiper Bank Deposit', '2020-11-28', np.NaN, 1000.00, np.NaN, 'PLN', np.NaN, np.NaN],
+        [1, 'Bank Deposit', 'Bank A', 'Hiper Bank Deposit', '2035-08-08', np.NaN, 10000.00, np.NaN, 'PLN', np.NaN, np.NaN]
     ]),
     columns=data.invest_columns
     ).astype({'Active': 'int', 'Start Amount': 'float', 'End amount': 'float', 'Start Date': 'datetime64[ns]', 'End Date': 'datetime64[ns]'})
+    investment['Start Date'] = investment['Start Date'].dt.date
+    investment['End Date'] = investment['End Date'].dt.date
 
     # WHEN
-    total_inv = total.investments_for_day(investment, pd.to_datetime('2021-01-01'))
+    total_inv = total.investments_for_day(investment, datetime.date(2021, 1, 1))
 
     # THEN
     assert total_inv == 3000
