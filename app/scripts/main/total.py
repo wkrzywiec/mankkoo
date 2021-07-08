@@ -93,4 +93,8 @@ def investments_for_day(investments: pd.DataFrame, date: datetime.date):
     return active_inv['Start Amount'].to_numpy().sum()
 
 def stock_for_day(stock: pd.DataFrame, date: datetime.date):
-    return 0
+
+    df = stock.loc[stock['Date'] <= date]
+    df['Change'] = [1 if x == 'Buy' else -1 for x in df['Operation']]
+    df['Val'] = df['Total Value'] * df['Change']
+    return df['Val'].sum()

@@ -137,3 +137,22 @@ def test_investments_for_day():
 
     # THEN
     assert total_inv == 3000
+
+def test_stock_for_day():
+    # GIVEN
+    stock = pd.DataFrame(
+    data=np.array([
+        ['Bank A', '2021-01-01', 'ETFSP500', 'Buy', 1000.00, 10, 'PLN', np.NaN, np.NaN, np.NaN],
+        ['Bank A', '2021-01-01', 'ETFDAX', 'Buy', 1000.00, 10, 'PLN', np.NaN, np.NaN, np.NaN],
+        ['Bank A', '2021-01-02', 'ETFDAX', 'Sell', 100.00, 1, 'PLN', np.NaN, np.NaN, np.NaN],
+        ['Bank A', '2032-11-27', 'ETFSP500', 'Buy', 10000.00, 10, 'PLN', np.NaN, np.NaN, np.NaN]
+    ]),
+    columns=data.stock_columns
+    ).astype({'Total Value': 'float', 'Units': 'int64', 'Date': 'datetime64[ns]'})
+    stock['Date'] = stock['Date'].dt.date
+
+    # WHEN
+    total_stock = total.stock_for_day(stock, datetime.date(2021, 1, 2))
+
+    # THEN
+    assert total_stock == 1900
