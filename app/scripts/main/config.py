@@ -9,6 +9,9 @@ mankkoo_dir = '.mankkoo'
 account_file = 'account.csv'
 investment_file = 'investment.csv'
 stock_file = 'stock.csv'
+total_file = 'total.csv'
+
+mankkoo_files = {account_file, investment_file, stock_file, total_file}
 
 def init_data_folder():
     """Initilize .mankkoo directory in home folder and account.csv file inside of it
@@ -22,12 +25,22 @@ def init_data_folder():
         log.info('Creating mankkoo directory')
         os.makedirs(mankkoo_path)
 
-    if not os.path.exists(mankoo_account_file):
-        log.info("Creating mankkoo's account file")
-        df = pd.DataFrame(columns=data.account_columns)
-        df.to_csv(mankoo_account_file)
-        
-    # TODO init pozostałe pliki
+    for file in mankkoo_files:
+        file_path = mankoo_file_path(file)
+        if not os.path.exists(file_path):
+            log.info("Creating mankkoo's " + file + " file")
+            df = pd.DataFrame(columns=__select_columns(file))
+            df.to_csv(file_path, index=False)
+
+def __select_columns(file: str):
+    if file == account_file:
+        return data.account_columns
+    if file == investment_file:
+        return data.invest_columns
+    if file == stock_file:
+        return data.stock_columns
+    if file == total_file:
+        return data.total_columns
 
 def mankoo_file_path(file: str):
     """Get full path of one of mankkoo's files. 
@@ -43,8 +56,11 @@ def mankoo_file_path(file: str):
     """
     path = mankoo_path() + __slash()
 
-    if file in {'account', 'investment', 'stock'}:
+    if file in {'account', 'investment', 'stock', 'total'}:
         return path + file + '.csv'
+
+    if file in mankkoo_files:
+        return path + file
 
     raise ValueError("Can't get mankkoo file. Unsupported file type: {}".format(file))
 

@@ -10,6 +10,7 @@ import widget
 import pandas as pd
 import scripts.main.data as dt
 import scripts.main.total as total
+import scripts.main.config as config
 import plotly.express as px
 
 
@@ -21,6 +22,8 @@ data = dt.load_data()
 total_money = total.total_money_data(data)
 total_table = widget.total_money_table(total_money)
 total_pie = widget.total_money_pie(total_money)
+
+config.init_data_folder()
 
 # print(px.data.gapminder().query("year == 2007").query("continent == 'Americas'"))
 # print(px.data.gapminder().query("country=='Canada'"))
