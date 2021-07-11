@@ -6,58 +6,48 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-import plotly.express as px
+import widget
 import pandas as pd
-import scripts.data as dt
+import scripts.main.data as dt
+import scripts.main.total as total
+import scripts.main.config as config
+import plotly.express as px
 
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
-# assume you have a "long-form" data frame
-# see https://plotly.com/python/px-arguments/ for more options
-df = pd.DataFrame({
-    "Fruit": ["Apples", "Oranges", "Bananas", "Apples", "Oranges", "Bananas"],
-    "Amount": [4, 1, 2, 2, 4, 5],
-    "City": ["SF", "SF", "SF", "Montreal", "Montreal", "Montreal"]
-})
+data = dt.load_data()
 
-dane = [
-    dict(
-        x = [dt.date('01-01-2021'), dt.date('24-01-2021'), dt.date('30-01-2021'), dt.date('01-02-2021'), dt.date('27-02-2021')],
-        y = [30230.21, 35830.88, 27850.21, 17640.21, 29106.86],
-        name = "Bilans",
-        marker=dict(
-            color='rgb(55, 83, 109)'
-        )
-    )
-]
+total_money = total.total_money_data(data)
+total_table = widget.total_money_table(total_money)
+total_pie = widget.total_money_pie(total_money)
 
-fig = px.bar(df, x="Fruit", y="Amount", color="City", barmode="group")
+config.init_data_folder()
+
+# print(px.data.gapminder().query("year == 2007").query("continent == 'Americas'"))
+# print(px.data.gapminder().query("country=='Canada'"))
+# TODO add total money cell
+
+# total_chart_data = data['account'][['Date', 'Balance']]
+# fig = px.line(total_chart_data, x='Date', y='Balance', title='Balance')
 
 app.layout = html.Div(children=[
-    html.H1(children='Hello Dash'),
+    html.H1(children='mankkoo'),
 
     html.Div(children='''
-        Dash: A web application framework for Python.
+        your personal finance dashboard
     '''),
+    html.Div(children='''
+        total money: {:,.2f} PLN
+    '''.format(total_money['Total'].sum()).replace(',', ' ')),
+    html.Div([
+        html.Div([total_table], className="six columns"),
+        html.Div([dcc.Graph(figure=total_pie)], className="six columns")
+        ], className="row")
 
-    dcc.Graph(
-        id='example-graph',
-        figure=fig
-    ),
-
-    dcc.Graph(
-        figure=dict(
-            data=dane,
-            layout=dict(
-                title='Total money',
-                showlegend=False,
-            margin=dict(l=40, r=0, t=40, b=30)
-            )
-        )
-    )
+    # dcc.Graph(figure=fig) 
+# )
 ])
 
 

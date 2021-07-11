@@ -1,5 +1,5 @@
 import pytest
-import app.scripts.data_formatter as formatter
+import scripts.main.data_formatter as formatter
 import datetime
 
 

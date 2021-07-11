@@ -1,0 +1,16 @@
+site_name: Mankkoo Docs
+
+theme:
+  name: material
+  palette:
+    scheme: default
+    primary: teal
+
+plugins:
+  - search
+  - mkdocstrings
+
+nav:
+  - Home: 'index.md'
+  - 'Scripts API': 'scripts.md'
+

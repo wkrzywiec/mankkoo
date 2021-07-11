@@ -8,6 +8,7 @@ pytest = "~=6.2"
 pytest-cov = "~=2.11"
 pytest-sugar = "~=0.9.4"
 pytest-mock = "~=3.5.1"
+flake8 = "*"
 
 [packages]
 pandas = "~=1.2"
@@ -19,6 +20,6 @@ numpy = "~=1.20"
 python_version = "3.8"
 
 [scripts]
-test = "py.test --cov=./scripts -s -v"
-test-coverage = "pytest --cov=./scripts --cov-report=xml -s -v"
+test = "py.test --cov=./scripts -s -vv"
+test-coverage = "pytest --cov=./scripts --cov-report=xml -s -vv"
 dev = "python app.py"
