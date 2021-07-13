@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-import pandas as pd
+from pandas._testing import assert_frame_equal
 import datetime
 import scripts.main.data as data
 import scripts.main.total as total
@@ -129,4 +129,4 @@ def test_update_total_money(mocker):
         ['2021-02-01', 9000],
         ['2035-08-08', 16000]
     ])
-    pd._testing.assert_frame_equal(expected, result)
+    assert_frame_equal(expected, result)
