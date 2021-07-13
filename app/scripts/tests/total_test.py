@@ -103,6 +103,7 @@ def test_update_total_money(mocker):
     ])
     updated_dates = account.tail(3)['Date']
 
+    # set other data
     old_total = td.total_data([
         ['2021-01-01', 10],
         ['2021-01-01', 20]
@@ -116,8 +117,8 @@ def test_update_total_money(mocker):
         ['Bank A', '2021-01-01', 'ETFSP500', 'Buy', 1000.00, 10, 'PLN', np.NaN, np.NaN, np.NaN],
         ['Bank A', '2021-01-01', 'ETFDAX', 'Buy', 1000.00, 10, 'PLN', np.NaN, np.NaN, np.NaN]
     ])
-
     mocker.patch('scripts.main.importer.load_data', side_effect=[old_total, inv_data, stocks])
+    mocker.patch('pandas.DataFrame.to_csv')
 
     # WHEN
     result = total.update_total_money(account, updated_dates)
