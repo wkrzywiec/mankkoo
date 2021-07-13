@@ -4,6 +4,7 @@ import pandas as pd
 import datetime
 import scripts.main.data as data
 import scripts.main.total as total
+import scripts.main.test_data as td
 
 # TODO extract to separate class
 start_data = pd.DataFrame(
@@ -12,8 +13,7 @@ start_data = pd.DataFrame(
     ['Millenium', 'checking', '360', '2021-01-31', 'Armchair', 'Detail 2', np.NaN, np.NaN, -222.22, 'PLN', 777.78],
     ['Millenium', 'checking', '360', '2021-01-31', 'Candies', 'Detail 3', np.NaN, np.NaN, -3.3, 'PLN', 774.48]
     ]),
-    columns=data.account_columns
-).astype({'Balance': 'float', 'Operation': 'float'})
+    columns=data.account_columns).astype({'Balance': 'float', 'Operation': 'float'})
 
 millenium_data = pd.DataFrame(
     data=np.array([
@@ -21,17 +21,16 @@ millenium_data = pd.DataFrame(
         ['2021-03-16', 'Bus ticket', 'PLN', -200, 'Millenium', np.NaN, np.NaN],
         ['2021-03-17', 'Salary', 'PLN', 3000.33, 'Millenium', np.NaN, np.NaN]
     ]),
-    columns=['Date', 'Title', 'Currency', 'Operation', 'Bank', 'Category', 'Comment']
-    )
+    columns=['Date', 'Title', 'Currency', 'Operation', 'Bank', 'Category', 'Comment'])
 
 end_data = pd.DataFrame(
     data=np.array([
-    ['Millenium', 'checking', '360', '2021-01-31', 'Init money', 'Detail 1', np.NaN, 'init', 1000.00, 'PLN', 1000.00],
-    ['Millenium', 'checking', '360', '2021-01-31', 'Armchair', 'Detail 2', np.NaN, np.NaN, -222.22, 'PLN', 777.78],
-    ['Millenium', 'checking', '360', '2021-01-31', 'Candies', 'Detail 3', np.NaN, np.NaN, -3.30, 'PLN', 774.48],
-    ['Millenium', 'checking', '360', '2021-03-15', 'Train ticket', np.NaN, np.NaN, np.NaN, -100.00, 'PLN', 674.48],
-    ['Millenium', 'checking', '360', '2021-03-16', 'Bus ticket', np.NaN, np.NaN, np.NaN, -200.00, 'PLN', 474.48],
-    ['Millenium', 'checking', '360', '2021-03-17', 'Salary', np.NaN, np.NaN, np.NaN, 3000.33, 'PLN', 3474.81]
+        ['Millenium', 'checking', '360', '2021-01-31', 'Init money', 'Detail 1', np.NaN, 'init', 1000.00, 'PLN', 1000.00],
+        ['Millenium', 'checking', '360', '2021-01-31', 'Armchair', 'Detail 2', np.NaN, np.NaN, -222.22, 'PLN', 777.78],
+        ['Millenium', 'checking', '360', '2021-01-31', 'Candies', 'Detail 3', np.NaN, np.NaN, -3.30, 'PLN', 774.48],
+        ['Millenium', 'checking', '360', '2021-03-15', 'Train ticket', np.NaN, np.NaN, np.NaN, -100.00, 'PLN', 674.48],
+        ['Millenium', 'checking', '360', '2021-03-16', 'Bus ticket', np.NaN, np.NaN, np.NaN, -200.00, 'PLN', 474.48],
+        ['Millenium', 'checking', '360', '2021-03-17', 'Salary', np.NaN, np.NaN, np.NaN, 3000.33, 'PLN', 3474.81]
     ]),
     columns=data.account_columns
 ).astype({'Balance': 'float', 'Operation': 'float'})
@@ -43,7 +42,7 @@ investment = pd.DataFrame(
         [1, 'Bank Deposit', 'Bank A', 'Hiper Bank Deposit', '2020-11-28', np.NaN, 1000.00, np.NaN, 'PLN', np.NaN, np.NaN]
     ]),
     columns=data.invest_columns
-).astype({'Active': 'int', 'Start Amount': 'float', 'End amount': 'float'})
+).astype({'Active': 'int', 'Start Amount': 'float', 'End amount': 'float', 'Start Date': 'datetime64[ns]', 'End Date': 'datetime64[ns]'})
 
 stock = pd.DataFrame(
     data=np.array([
@@ -57,9 +56,9 @@ def test_total_money_data():
     # GIVEN
     investment.Active = investment.Active.astype('bool')
     all_data = dict(
-        account = start_data,
-        investment = investment,
-        stock = stock
+        account=start_data,
+        investment=investment,
+        stock=stock
     )
 
     # WHEN
@@ -77,19 +76,15 @@ def test_total_money_data():
 
 def test_accounts_balance_for_day_multiple_accounts():
     # GIVEN
-    account = pd.DataFrame(
-        data=np.array([
-            ['Millenium', 'checking', '360', '2021-01-31', 'Init money', 'Detail 1', np.NaN, 'init', 1000, 'PLN', 1000],
-            ['ING', 'checking', 'Direct', '2021-01-31', 'Armchair', 'Detail 2', np.NaN, np.NaN, -222.22, 'PLN', 1000],
-            ['mBank', 'checking', 'eKonto', '2021-01-31', 'Candies', 'Detail 3', np.NaN, np.NaN, -3.3, 'PLN', 1000],
-            ['Skarpeta', 'cash', 'Gotówka', '2021-01-31', 'a', 'a', np.NaN, np.NaN, 1000, 'PLN', 1000],
-            ['Millenium', 'savings', 'Konto Oszczędnościowe Profit', '2021-01-31', 'a', 'a', np.NaN, np.NaN, 1000, 'PLN', 1000],
-            ['PKO', 'retirement', 'PKO PPK', '2021-01-31', 'a', 'a', np.NaN, np.NaN, 1000, 'PLN', 1000],
-            ['mBank', 'checking', 'eKonto', '2035-08-08', 'a', 'a', np.NaN, np.NaN, 10000, 'PLN', 10000]
-        ]),
-        columns=data.account_columns
-    ).astype({'Balance': 'float', 'Operation': 'float', 'Date': 'datetime64[ns]'})
-    account['Date'] = account['Date'].dt.date
+    account = td.account_data([
+        ['Millenium', 'checking', '360', '2021-01-31', 'Init money', 'Detail 1', np.NaN, 'init', 1000, 'PLN', 1000],
+        ['ING', 'checking', 'Direct', '2021-01-31', 'Armchair', 'Detail 2', np.NaN, np.NaN, -222.22, 'PLN', 1000],
+        ['mBank', 'checking', 'eKonto', '2021-01-31', 'Candies', 'Detail 3', np.NaN, np.NaN, -3.3, 'PLN', 1000],
+        ['Skarpeta', 'cash', 'Gotówka', '2021-01-31', 'a', 'a', np.NaN, np.NaN, 1000, 'PLN', 1000],
+        ['Millenium', 'savings', 'Konto Oszczędnościowe Profit', '2021-01-31', 'a', 'a', np.NaN, np.NaN, 1000, 'PLN', 1000],
+        ['PKO', 'retirement', 'PKO PPK', '2021-01-31', 'a', 'a', np.NaN, np.NaN, 1000, 'PLN', 1000],
+        ['mBank', 'checking', 'eKonto', '2035-08-08', 'a', 'a', np.NaN, np.NaN, 10000, 'PLN', 10000]
+    ])
 
     # WHEN
     total_balance = total.accounts_balance_for_day(account, datetime.date(2021, 1, 31))
@@ -99,17 +94,13 @@ def test_accounts_balance_for_day_multiple_accounts():
 
 def test_accounts_balance_for_day_multiple_accounts_in_different_days():
     # GIVEN
-    account = pd.DataFrame(
-        data=np.array([
-            ['Millenium', 'checking', '360', '2021-01-01', 'a', 'a', np.NaN, '', 1000, 'PLN', 1000],
-            ['ING', 'checking', 'Direct', '2021-01-31', 'a', 'a', np.NaN, np.NaN, -222.22, 'PLN', 1000],
-            ['mBank', 'checking', 'eKonto', '2021-02-01', 'a', 'a', np.NaN, np.NaN, -3.3, 'PLN', 2000],
-            ['mBank', 'checking', 'eKonto', '2021-02-01', 'a', 'a', np.NaN, np.NaN, 1000, 'PLN', 3000],
-            ['mBank', 'checking', 'eKonto', '2035-08-08', 'a', 'a', np.NaN, np.NaN, 10000, 'PLN', 10000]
-        ]),
-        columns=data.account_columns
-    ).astype({'Balance': 'float', 'Operation': 'float', 'Date': 'datetime64[ns]'})
-    account['Date'] = account['Date'].dt.date
+    account = td.account_data([
+        ['Millenium', 'checking', '360', '2021-01-01', 'a', 'a', np.NaN, '', 1000, 'PLN', 1000],
+        ['ING', 'checking', 'Direct', '2021-01-31', 'a', 'a', np.NaN, np.NaN, -222.22, 'PLN', 1000],
+        ['mBank', 'checking', 'eKonto', '2021-02-01', 'a', 'a', np.NaN, np.NaN, -3.3, 'PLN', 2000],
+        ['mBank', 'checking', 'eKonto', '2021-02-01', 'a', 'a', np.NaN, np.NaN, 1000, 'PLN', 3000],
+        ['mBank', 'checking', 'eKonto', '2035-08-08', 'a', 'a', np.NaN, np.NaN, 10000, 'PLN', 10000]
+    ])
 
     # WHEN
     total_balance = total.accounts_balance_for_day(account, datetime.date(2021, 2, 1))
@@ -120,14 +111,14 @@ def test_accounts_balance_for_day_multiple_accounts_in_different_days():
 def test_investments_for_day():
     # GIVEN
     investment = pd.DataFrame(
-    data=np.array([
+        data=np.array([
         [0, 'Bank Deposit', 'Bank A', 'Super Bank Deposit', '2016-11-28', '2017-04-09', 1000.00, 1079.89, 'PLN', np.NaN, np.NaN],
         [1, 'Bank Deposit', 'Bank B', 'Ultra Bank Deposit', '2020-01-01', '2021-01-01', 1000.00, np.NaN, 'PLN', np.NaN, np.NaN],
         [1, 'Bank Deposit', 'Bank A', 'Hiper Bank Deposit', '2020-11-28', '2021-11-28', 1000.00, np.NaN, 'PLN', np.NaN, np.NaN],
         [1, 'Bank Deposit', 'Bank A', 'Hiper Bank Deposit', '2020-11-28', np.NaN, 1000.00, np.NaN, 'PLN', np.NaN, np.NaN],
         [1, 'Bank Deposit', 'Bank A', 'Hiper Bank Deposit', '2035-08-08', np.NaN, 10000.00, np.NaN, 'PLN', np.NaN, np.NaN]
     ]),
-    columns=data.invest_columns
+        columns=data.invest_columns
     ).astype({'Active': 'int', 'Start Amount': 'float', 'End amount': 'float', 'Start Date': 'datetime64[ns]', 'End Date': 'datetime64[ns]'})
     investment['Start Date'] = investment['Start Date'].dt.date
     investment['End Date'] = investment['End Date'].dt.date
@@ -156,3 +147,43 @@ def test_stock_for_day():
 
     # THEN
     assert total_stock == 1900
+
+def test_update_total_money(mocker):
+    # GIVEN
+    account = td.account_data([
+        ['Millenium', 'checking', '360', '2021-01-01', 'a', 'a', np.NaN, '', 1000, 'PLN', 1000],
+        ['ING', 'checking', 'Direct', '2021-01-31', 'a', 'a', np.NaN, np.NaN, -222.22, 'PLN', 1000],
+        ['mBank', 'checking', 'eKonto', '2021-02-01', 'a', 'a', np.NaN, np.NaN, -3.3, 'PLN', 2000],
+        ['mBank', 'checking', 'eKonto', '2021-02-01', 'a', 'a', np.NaN, np.NaN, 1000, 'PLN', 3000],
+        ['mBank', 'checking', 'eKonto', '2035-08-08', 'a', 'a', np.NaN, np.NaN, 10000, 'PLN', 10000]
+    ])
+    updated_dates = account.tail(3)['Date']
+
+    old_total = td.total_data([
+        ['2021-01-01', 10],
+        ['2021-01-01', 20]
+    ])
+
+    inv_data = td.investment_data([
+        [0, 'Bank Deposit', 'Bank A', 'Super Bank Deposit', '2016-11-28', '2017-04-09', 1000.00, 1079.89, 'PLN', np.NaN, np.NaN],
+        [1, 'Bank Deposit', 'Bank B', 'Ultra Bank Deposit', '2020-01-01', np.NaN, 1000.00, np.NaN, 'PLN', np.NaN, np.NaN],
+        [1, 'Bank Deposit', 'Bank A', 'Hiper Bank Deposit', '2020-11-28', np.NaN, 1000.00, np.NaN, 'PLN', np.NaN, np.NaN]
+    ])
+    stocks = td.stock_data([
+        ['Bank A', '2021-01-01', 'ETFSP500', 'Buy', 1000.00, 10, 'PLN', np.NaN, np.NaN, np.NaN],
+        ['Bank A', '2021-01-01', 'ETFDAX', 'Buy', 1000.00, 10, 'PLN', np.NaN, np.NaN, np.NaN]
+    ])
+
+    mocker.patch('scripts.main.importer.load_data', side_effect=[old_total, inv_data, stocks])
+
+    # WHEN
+    result = total.update_total_money(account, updated_dates)
+
+    # THEN
+    expected = td.total_data([
+        ['2021-01-01', 10],
+        ['2021-01-01', 20],
+        ['2021-02-01', 9000],
+        ['2035-08-08', 16000]
+    ])
+    pd._testing.assert_frame_equal(expected, result)

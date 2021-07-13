@@ -36,7 +36,16 @@ def __latest_account_balance(data: dict, type: str) -> float:
         return df['Balance'].iloc[-1]
     return 0.00
 
-def update_total_money(accounts: pd.DataFrame, updated_dates: pd.Series, file_type = 'account'):
+def update_total_money(accounts: pd.DataFrame, updated_dates: pd.Series):
+    """Calculate and add rows of totals for each day from pd.Series
+
+    Args:
+        accounts (pd.DataFrame): updated accounts file
+        updated_dates (pd.Series): Series of updated dates for which calculation needs to be done
+
+    Returns:
+        [type]: [description]
+    """
     total = importer.load_data(importer.FileType.TOTAL)
 
     total = __clean_overlapping_days(total, updated_dates.min())
@@ -45,11 +54,11 @@ def update_total_money(accounts: pd.DataFrame, updated_dates: pd.Series, file_ty
     total.to_csv(config.mankoo_file_path('total'), index=False)
     return total
 
-def __clean_overlapping_days(total: pd.DataFrame, min_date: datetime):
+def __clean_overlapping_days(total: pd.DataFrame, min_date: datetime.date):
     return total.drop(total[total['Date'] >= min_date].index)
 
 def __calc_totals(accounts: pd.DataFrame, updated_dates: pd.Series):
-    accounts_dates = accounts[accounts['Date'] > updated_dates.min()]['Dates']
+    accounts_dates = accounts[accounts['Date'] > updated_dates.min()]['Date']
     updated_dates = updated_dates.append(accounts_dates, ignore_index=True)
     updated_dates = updated_dates.drop_duplicates().sort_values()
 
@@ -60,7 +69,8 @@ def __calc_totals(accounts: pd.DataFrame, updated_dates: pd.Series):
 
     # TODO replace with better approach, e.g.
     # https://stackoverflow.com/questions/16476924/how-to-iterate-over-rows-in-a-dataframe-in-pandas
-    for date in updated_dates.iterrows():
+    for date_tuple in updated_dates.iteritems():
+        date = date_tuple[1]
         total = accounts_balance_for_day(accounts, date) + investments_for_day(investments, date) + stock_for_day(stock, date)
         row_dict = {'Date': date, 'Total': total}
         result_list.append(row_dict)
