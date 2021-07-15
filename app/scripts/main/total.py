@@ -20,17 +20,17 @@ def total_money_data(data: dict):
     total = checking_account + savings_account + cash + ppk + inv + stock_buy
 
     return pd.DataFrame([
-        {'Type': 'Checking Account', 'Total': checking_account, 'Percentage': checking_account/total},
-        {'Type': 'Savings Account', 'Total': savings_account, 'Percentage': savings_account/total},
-        {'Type': 'Cash', 'Total': cash, 'Percentage': cash/total},
-        {'Type': 'PPK', 'Total': ppk, 'Percentage': ppk/total},
-        {'Type': 'Investments', 'Total': inv, 'Percentage': inv/total},
-        {'Type': 'Stocks', 'Total': stock_buy, 'Percentage': stock_buy/total}
+        {'Type': 'Checking Account', 'Total': checking_account, 'Percentage': checking_account / total},
+        {'Type': 'Savings Account', 'Total': savings_account, 'Percentage': savings_account / total},
+        {'Type': 'Cash', 'Total': cash, 'Percentage': cash / total},
+        {'Type': 'PPK', 'Total': ppk, 'Percentage': ppk / total},
+        {'Type': 'Investments', 'Total': inv, 'Percentage': inv / total},
+        {'Type': 'Stocks', 'Total': stock_buy, 'Percentage': stock_buy / total}
     ])
 
 def __latest_account_balance(data: dict, type: str) -> float:
 
-    #TODO filter by account type, not name, and if more than one sum it
+    # TODO filter by account type, not name, and if more than one sum it
     df = data['account'].loc[data['account']['Account'] == type]
     if not df.empty:
         return df['Balance'].iloc[-1]
@@ -72,7 +72,7 @@ def __calc_totals(accounts: pd.DataFrame, updated_dates: pd.Series):
     for date_tuple in updated_dates.iteritems():
         date = date_tuple[1]
         total = accounts_balance_for_day(accounts, date) + investments_for_day(investments, date) + stock_for_day(stock, date)
-        row_dict = {'Date': date, 'Total': total}
+        row_dict = {'Date': date, 'Total': round(total, 2)}
         result_list.append(row_dict)
 
     return pd.DataFrame(result_list)
@@ -103,7 +103,6 @@ def investments_for_day(investments: pd.DataFrame, date: datetime.date):
     return active_inv['Start Amount'].to_numpy().sum()
 
 def stock_for_day(stock: pd.DataFrame, date: datetime.date):
-
     df = stock.loc[stock['Date'] <= date]
     df['Change'] = [1 if x == 'Buy' else -1 for x in df['Operation']]
     df['Val'] = df['Total Value'] * df['Change']
