@@ -34,7 +34,7 @@ class Account(Enum):
     RETIREMENT = 'retirement'
     CASH = 'cash'
 
-def load_data(file_type: FileType, kind=None, file_name=None):
+def load_data(file_type: FileType, kind=None, file_name=None, account_name=None):
     """Load data from a CSV file
 
     Args:
@@ -85,7 +85,7 @@ def load_data(file_type: FileType, kind=None, file_name=None):
         if kind is Bank.MANKKOO:
             return __read_from_data_path(file_name)
         elif kind is Bank.PL_MILLENIUM:
-            return load_pl_millenium(file_name)
+            return load_pl_millenium(file_name, account_name)
         else:
             raise KeyError("Failed to load data from file. Not known bank. Was provided {} bank".format(str(kind)))
 

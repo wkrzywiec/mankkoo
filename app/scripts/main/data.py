@@ -22,7 +22,7 @@ def load_data():
         stock = importer.load_data(importer.FileType.STOCK)
     )
 
-def add_new_operations(bank: importer.Bank, file_name: str):
+def add_new_operations(bank: importer.Bank, file_name: str, account_name: str):
     """Append bank accounts history with new operations. 
     This method return a pandas DataFrame with calculated balance.
 
@@ -36,16 +36,16 @@ def add_new_operations(bank: importer.Bank, file_name: str):
     Returns:
         pandas.DataFrame: DataFrame that holds transactions history with newly added operations
     """
-    df_new = importer.load_data(file_type=importer.FileType.BANK, kind=bank, file_name=file_name)
+    df_new = importer.load_data(file_type=importer.FileType.BANK, kind=bank, file_name=file_name, account_name=account_name)
     df = importer.load_data(importer.FileType.ACCOUNT)
     df = pd.concat([df, df_new]).reset_index(drop=True)
 
-    df = calculate_balance(df)
+    df = calculate_balance(df, account_name)
     total.update_total_money(df, df_new['Date'])
     df.to_csv(config.mankoo_file_path('account'), index=False)
     return df
     
-def calculate_balance(df: pd.DataFrame):
+def calculate_balance(df: pd.DataFrame, account_name: str):
     """Calculates balance for new operations
 
     Args:
@@ -54,10 +54,19 @@ def calculate_balance(df: pd.DataFrame):
     Returns:
         pandas.DataFrame: DataFrame with calucated 'Balance' after each operation
     """
+    # TODO move to importer.py
     df = df.astype({'Balance': 'float', 'Operation': 'float'})
-    nan_index = df['Balance'].index[df['Balance'].apply(pd.isna)]
+    non_balanced_rows = df['Balance'].index[df['Balance'].apply(pd.isna)]
 
-    for i in range(nan_index[0], len(df)):
-        df.loc[i, 'Balance'] = df.loc[i - 1, 'Balance'] + df.loc[i, 'Operation']
+    latest_balance = __latest_balance_for_account(df, account_name)
+
+    for i in range(non_balanced_rows[0], len(df)):
+        latest_balance = latest_balance + df.loc[i, 'Operation']
+        df.loc[i, 'Balance'] = latest_balance
 
     return df
+
+def __latest_balance_for_account(df: pd.DataFrame, account_name: str):
+    result = df.loc[(df['Account'] == account_name)]
+    result = result.dropna()
+    return result.iloc[-1]['Balance']

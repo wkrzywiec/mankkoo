@@ -4,7 +4,7 @@ from pandas._testing import assert_frame_equal
 import datetime
 import scripts.main.data as data
 import scripts.main.total as total
-import scripts.main.test_data as td
+import scripts.main.data_for_test as td
 
 def test_total_money_data():
     # GIVEN
