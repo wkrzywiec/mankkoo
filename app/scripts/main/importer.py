@@ -52,7 +52,7 @@ def load_data(file_type: FileType, kind=None, file_name=None, account_name=None)
     """
     if file_type is FileType.ACCOUNT:
         result = pd.read_csv(config.mankoo_file_path('account'), parse_dates=['Date'])
-        result = result.astype({'Balance': 'float', 'Operation': 'float', 'Date': 'datetime64[ns]'})
+        result = result.astype({'Account': 'string', 'Balance': 'float', 'Operation': 'float', 'Date': 'datetime64[ns]'})
         result['Date'] = result['Date'].dt.date
         return result
 
