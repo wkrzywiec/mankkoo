@@ -34,7 +34,7 @@ class Account(Enum):
     RETIREMENT = 'retirement'
     CASH = 'cash'
 
-def load_data(file_type: FileType, kind=None, file_name=None):
+def load_data(file_type: FileType, kind=None, file_name=None, account_name=None):
     """Load data from a CSV file
 
     Args:
@@ -51,16 +51,30 @@ def load_data(file_type: FileType, kind=None, file_name=None):
         [pd.Dataframe]: holds history of operations for an account
     """
     if file_type is FileType.ACCOUNT:
-        return pd.read_csv(config.mankoo_file_path('account'), parse_dates=['Date'])
+        result = pd.read_csv(config.mankoo_file_path('account'), parse_dates=['Date'])
+        result = result.astype({'Account': 'string', 'Balance': 'float', 'Operation': 'float', 'Date': 'datetime64[ns]'})
+        result['Date'] = result['Date'].dt.date
+        return result
 
     if file_type is FileType.INVESTMENT:
-        return pd.read_csv(config.mankoo_file_path('investment'), parse_dates=['Start Date', 'End Date'])
+        result = pd.read_csv(config.mankoo_file_path('investment'), parse_dates=['Start Date', 'End Date'])
+        result = result.astype({'Active': 'int', 'Start Amount': 'float', 'End amount': 'float', 'Start Date': 'datetime64[ns]', 'End Date': 'datetime64[ns]'})
+        result.Active = result.Active.astype('bool')
+        result['Start Date'] = result['Start Date'].dt.date
+        result['End Date'] = result['End Date'].dt.date
+        return result
 
     if file_type is FileType.STOCK:
-        return pd.read_csv(config.mankoo_file_path('stock'), parse_dates=['Date'])
+        result = pd.read_csv(config.mankoo_file_path('stock'), parse_dates=['Date'])
+        result = result.astype({'Total Value': 'float', 'Date': 'datetime64[ns]'})
+        result['Date'] = result['Date'].dt.date
+        return result
 
     if file_type is FileType.TOTAL:
-        return __set_columns_formats(pd.read_csv(config.mankoo_file_path('total'), parse_dates=['Date']))
+        result = pd.read_csv(config.mankoo_file_path('total'), parse_dates=['Date'])
+        result = result.astype({'Date': 'datetime64[ns]', 'Total': 'float'})
+        result['Date'] = result['Date'].dt.date
+        return result
 
     if kind is None:
         raise ValueError('Could not load data file. "kind" (bank, investment, stock) argument was not provided')
@@ -71,7 +85,7 @@ def load_data(file_type: FileType, kind=None, file_name=None):
         if kind is Bank.MANKKOO:
             return __read_from_data_path(file_name)
         elif kind is Bank.PL_MILLENIUM:
-            return load_pl_millenium(file_name)
+            return load_pl_millenium(file_name, account_name)
         else:
             raise KeyError("Failed to load data from file. Not known bank. Was provided {} bank".format(str(kind)))
 
@@ -121,18 +135,20 @@ def load_pl_millenium(file_name: str, account_name=None):
     """
     df = __read_from_data_path(file_name)
     df = df[['Data transakcji', 'Opis', 'Obciążenia', 'Uznania', 'Waluta']]
-    
+
     df['Operation'] = np.where(df['Obciążenia'] < 0, df['Obciążenia'], df['Uznania'])
     df = df.drop(columns=['Obciążenia', 'Uznania'])
-    
+
     df = df.rename(columns={'Data transakcji': 'Date', 'Opis': 'Title', 'Waluta': 'Currency'})
-    
+
     df['Date'] = pd.to_datetime(df.Date)
     df['Bank'] = 'Millenium'
     df['Type'] = Account.CHECKING.value
     df['Account'] = account_name if account_name is not None else 'Millenium Account'
     df['Bank'] = df['Bank'].astype('string')
-    return __add_missing_columns(df, ['Category', 'Comment'])
+    result = __add_missing_columns(df, ['Category', 'Comment'])
+    result = result.sort_values(by="Date")
+    return result
 
 def __read_from_data_path(file_name: str):
     return pd.read_csv(config.data_path() + file_name)
@@ -140,6 +156,3 @@ def __read_from_data_path(file_name: str):
 def __add_missing_columns(df: pd.DataFrame, columns):
     existing_columns = list(df.columns)
     return df.reindex(columns= existing_columns + columns)
-
-def __set_columns_formats(df: pd.DataFrame):
-    return df.astype({'Date': 'datetime64[ns]'})
