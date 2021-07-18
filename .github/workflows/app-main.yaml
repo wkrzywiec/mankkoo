@@ -90,11 +90,12 @@ jobs:
           python -m pip install pipenv
           pipenv install --dev
 
-      - name: Build docs 🏗️
-        run: pipenv run docs-build
+# TODO enable docs generation
+      # - name: Build docs 🏗️
+      #   run: pipenv run docs-build
 
-      - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@4.1.0
-        with:
-          branch: gh-pages
-          folder: ./site
+      # - name: Deploy 🚀
+      #   uses: JamesIves/github-pages-deploy-action@4.1.0
+      #   with:
+      #     branch: gh-pages
+      #     folder: ./site
