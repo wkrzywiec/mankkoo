@@ -23,6 +23,8 @@ total_money = total.total_money_data(data)
 total_table = widget.total_money_table(total_money)
 total_pie = widget.total_money_pie(total_money)
 
+total_chart = widget.total_money_chart(data['total'])
+
 config.init_data_folder()
 
 # print(px.data.gapminder().query("year == 2007").query("continent == 'Americas'"))
@@ -38,13 +40,17 @@ app.layout = html.Div(children=[
     html.Div(children='''
         your personal finance dashboard
     '''),
+
     html.Div(children='''
         total money: {:,.2f} PLN
     '''.format(total_money['Total'].sum()).replace(',', ' ')),
+
     html.Div([
         html.Div([total_table], className="six columns"),
         html.Div([dcc.Graph(figure=total_pie)], className="six columns")
-        ], className="row")
+        ], className="row"),
+
+    html.Div(dcc.Graph(figure=total_chart))
 
     # dcc.Graph(figure=fig) 
 # )
