@@ -23,7 +23,8 @@ def load_data():
     return dict(
         account = importer.load_data(importer.FileType.ACCOUNT),
         investment = importer.load_data(importer.FileType.INVESTMENT),
-        stock = importer.load_data(importer.FileType.STOCK)
+        stock = importer.load_data(importer.FileType.STOCK),
+        total = importer.load_data(importer.FileType.TOTAL)
     )
 
 def add_new_operations(bank: importer.Bank, file_name: str, account_name: str):
@@ -48,7 +49,7 @@ def add_new_operations(bank: importer.Bank, file_name: str, account_name: str):
     df = calculate_balance(df, account_name)
     total.update_total_money(df, df_new['Date'])
     df.to_csv(config.mankoo_file_path('account'), index=False)
-    log.info('%d new operations for %s account was added.', df_new.size, account_name)
+    log.info('%d new operations for %s account were added.', df_new.size, account_name)
     return df
 
 def calculate_balance(df: pd.DataFrame, account_name: str):

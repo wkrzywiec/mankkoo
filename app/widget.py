@@ -9,7 +9,7 @@ def total_money_table(data):
         columns=[
             dict(id='Type', name='Type'),
             dict(id='Total', name='Total', type='numeric', format=Format(
-                    scheme=Scheme.fixed, 
+                    scheme=Scheme.fixed,
                     precision=2,
                     group=Group.yes,
                     groups=3,
@@ -51,7 +51,10 @@ def total_money_table(data):
 
 def total_money_pie(data):
     data = data.drop(columns=['Percentage'])
-    pie = px.pie(data, values='Total', names='Type',
-             title='Total Money distribution')
+    pie = px.pie(data, values='Total', names='Type', title='Total Money distribution')
     pie.update_traces(textposition='inside', textinfo='percent+label')
     return pie
+
+def total_money_chart(data):
+    chart = px.line(data, x='Date', y='Total', title='Total money')
+    return chart
