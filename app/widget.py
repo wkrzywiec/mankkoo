@@ -1,5 +1,6 @@
 from dash_table.Format import Format, Group, Scheme, Symbol
 from dash_table import DataTable, FormatTemplate
+import dash_html_components as html
 import plotly.express as px
 
 
@@ -58,3 +59,45 @@ def total_money_pie(data):
 def total_money_chart(data):
     chart = px.line(data, x='Date', y='Total', title='Total money')
     return chart
+
+def navbar():
+    return html.Div(className='l-navbar', id='nav-bar', children=[
+            html.Nav(className='nav', children=[
+                html.Div(children=[
+                    html.A(href='#', className='nav_logo', children=[
+                        html.I(className='bx bx-layer nav_logo-icon'),
+                        html.Span('mankkoo', className='nav_logo-name')
+                    ]),
+                    html.Div(className='nav_list', children=[
+                        html.A(href='#', className='nav_link active', children=[
+                            html.I(className='bx bx-grid-alt nav_icon'),
+                            html.Span('Overview', className='nav_name')
+                        ])
+                    ]),
+                    html.Div(className='nav_list', children=[
+                        html.A(href='#', className='nav_link', children=[
+                            html.I(className='bx bx-euro nav_icon'),
+                            html.Span('Accounts', className='nav_name')
+                        ])
+                    ]),
+                    html.Div(className='nav_list', children=[
+                        html.A(href='#', className='nav_link', children=[
+                            html.I(className='bx bx-briefcase nav_icon'),
+                            html.Span('Investments', className='nav_name')
+                        ])
+                    ]),
+                    html.Div(className='nav_list', children=[
+                        html.A(href='#', className='nav_link', children=[
+                            html.I(className='bx bx-bar-chart nav_icon'),
+                            html.Span('Stock', className='nav_name')
+                        ])
+                    ]),
+                    html.Div(className='nav_list', children=[
+                        html.A(href='#', className='nav_link', children=[
+                            html.I(className='bx bx-medal nav_icon'),
+                            html.Span('Retirement', className='nav_name')
+                        ])
+                    ])
+                ])
+            ])
+    ])

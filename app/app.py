@@ -14,8 +14,18 @@ import scripts.main.config as config
 import plotly.express as px
 
 
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+external_stylesheets = [
+    'https://codepen.io/chriddyp/pen/bWLwgP.css',
+    'https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css',
+    'https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css'
+]
+
+external_scripts = [
+    'https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js'
+]
+app = dash.Dash(__name__,
+    external_stylesheets=external_stylesheets,
+    external_scripts=external_scripts)
 
 data = dt.load_data()
 
@@ -35,25 +45,28 @@ config.init_data_folder()
 # fig = px.line(total_chart_data, x='Date', y='Balance', title='Balance')
 
 app.layout = html.Div(children=[
-    html.H1(children='mankkoo'),
 
-    html.Div(children='''
-        your personal finance dashboard
-    '''),
+    widget.navbar(),
 
-    html.Div(children='''
-        total money: {:,.2f} PLN
-    '''.format(total_money['Total'].sum()).replace(',', ' ')),
+    html.Div(className='height-100 bg-light', children=[
+        html.H1(children='mankkoo'),
 
-    html.Div([
-        html.Div([total_table], className="six columns"),
-        html.Div([dcc.Graph(figure=total_pie)], className="six columns")
-        ], className="row"),
+        html.Div(children='''
+            your personal finance dashboard
+        '''),
 
-    html.Div(dcc.Graph(figure=total_chart))
+        html.Div(children='''
+            total money: {:,.2f} PLN
+        '''.format(total_money['Total'].sum()).replace(',', ' ')),
 
-    # dcc.Graph(figure=fig) 
-# )
+        html.Div([
+            html.Div([total_table], className="six columns"),
+            html.Div([dcc.Graph(figure=total_pie)], className="six columns")
+            ], className="row"),
+
+        html.Div(dcc.Graph(figure=total_chart))
+    ])
+
 ])
 
 
