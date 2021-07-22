@@ -37,34 +37,54 @@ total_chart = widget.total_money_chart(data['total'])
 
 config.init_data_folder()
 
-# print(px.data.gapminder().query("year == 2007").query("continent == 'Americas'"))
-# print(px.data.gapminder().query("country=='Canada'"))
-# TODO add total money cell
-
-# total_chart_data = data['account'][['Date', 'Balance']]
-# fig = px.line(total_chart_data, x='Date', y='Balance', title='Balance')
-
 app.layout = html.Div(children=[
 
     widget.navbar(),
 
-    html.Div(className='height-100 bg-light', children=[
-        html.H1(children='mankkoo'),
+    html.Div(className='height-100 container main-body', children=[
 
-        html.Div(children='''
-            your personal finance dashboard
-        '''),
+        html.Div(className='row', children=[
+            html.Div(className='col-3', children=[
+                html.Div(className='card card-indicator', children=[
+                     html.Div(className='card-body card-body-indicator', children=[
+                        html.Span('Total Money', className='card-body-title'),
+                        html.Span('{:,.2f} PLN'.format(total_money['Total'].sum()).replace(',', ' '))
+                     ])
+                ])
+            ])
+        ]),
 
-        html.Div(children='''
-            total money: {:,.2f} PLN
-        '''.format(total_money['Total'].sum()).replace(',', ' ')),
+        html.Div(className='row', children=[
+            html.Div(className='col-4', children=[
+                html.Div(className='card card-indicator', style={'height': '300px', 'width': '400px'}, children=[
+                    html.Div(className='card-body card-body-plotly', children=[
+                        html.Span('Total Money Distribution', className='card-body-title'),
+                        total_table
+                    ])     
+                ])
+            ]),
+            html.Div(className="col-8", children=[
+                html.Div(className='card card-indicator', children=[
+                    html.Div(className='card-body card-body-plotly', children=[
+                        html.Span('Total Money Distribution', className='card-body-title'),
+                        html.Div(dcc.Graph(figure=total_pie), style={'width': '800px'})
+                    ])
+                ])
+            ])
+        
+        ]),
 
-        html.Div([
-            html.Div([total_table], className="six columns"),
-            html.Div([dcc.Graph(figure=total_pie)], className="six columns")
-            ], className="row"),
-
-        html.Div(dcc.Graph(figure=total_chart))
+        html.Div(className='row', style={'padding-bottom': '50px'}, children=[
+             html.Div(className='col-12', children=[
+                html.Div(className='card card-indicator', children=[
+                    html.Div(className='card-body card-body-plotly', children=[
+                        html.Span('Total Money Distribution', className='card-body-title'),
+                        html.Div(dcc.Graph(figure=total_chart), style={'width': '1200px'})
+                    ])
+                    
+                ])
+            ]),
+        ])
     ])
 
 ])

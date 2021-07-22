@@ -2,6 +2,8 @@ from dash_table.Format import Format, Group, Scheme, Symbol
 from dash_table import DataTable, FormatTemplate
 import dash_html_components as html
 import plotly.express as px
+import plotly.graph_objects as go
+import logging as log
 
 
 def total_money_table(data):
@@ -52,12 +54,14 @@ def total_money_table(data):
 
 def total_money_pie(data):
     data = data.drop(columns=['Percentage'])
-    pie = px.pie(data, values='Total', names='Type', title='Total Money distribution')
-    pie.update_traces(textposition='inside', textinfo='percent+label')
-    return pie
+    # pie = px.pie(data, values='Total', names='Type')  
+    fig = go.Figure(data=[go.Pie(labels=data['Type'].tolist(), values=data['Total'].tolist(), hole=.4)])
+    fig.update_traces(textposition='inside', textinfo='percent+label')
+    # pie.update_traces(textposition='inside', textinfo='percent+label', showlegend=False)
+    return fig
 
 def total_money_chart(data):
-    chart = px.line(data, x='Date', y='Total', title='Total money')
+    chart = px.line(data, x='Date', y='Total')
     return chart
 
 def navbar():

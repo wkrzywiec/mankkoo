@@ -4,9 +4,10 @@
 :root {
     --header-height: 3rem;
     --nav-width: 100px;
-    --first-color: #4723D9;
-    --first-color-light: #AFA5D9;
-    --white-color: #F7F6FB;
+    --background-color: #25283D;
+    --text-color: #cfd2ddee;
+    --logo-color: #8cd37b;
+    --hover-color: #F49D6E;
     --body-font: 'Nunito', sans-serif;
     --normal-font-size: 1.1rem;
     --z-fixed: 100
@@ -37,7 +38,7 @@ a {
     left: -30%;
     width: var(--nav-width);
     height: 100vh;
-    background-color: var(--first-color);
+    background-color: var(--background-color);
     padding: .5rem 1rem 0 0;
     transition: .5s;
     z-index: var(--z-fixed);
@@ -69,17 +70,17 @@ a {
 
 .nav_logo-icon {
     font-size: 3rem;
-    color: var(--white-color)
+    color: var(--logo-color)
 }
 
 .nav_logo-name {
-    color: var(--white-color);
+    color: var(--logo-color);
     font-weight: 700
 }
 
 .nav_link {
     position: relative;
-    color: var(--first-color-light);
+    color: var(--text-color);
     margin-bottom: 1.5rem;
     transition: .3s;
     display: flex;
@@ -87,7 +88,7 @@ a {
 }
 
 .nav_link:hover {
-    color: var(--white-color);
+    color: var(--hover-color);
 }
 
 .nav_icon {
@@ -103,7 +104,7 @@ a {
 }
 
 .active {
-    color: var(--white-color)
+    color: var(--hover-color)
 }
 
 .active::before {
@@ -112,7 +113,7 @@ a {
     left: 0;
     width: 2px;
     height: 32px;
-    background-color: var(--white-color)
+    background-color: var(--hover-color)
 }
 
 .height-100 {
@@ -152,3 +153,11 @@ a {
         padding-left: calc(var(--nav-width) + 188px)
     }
 }
+
+
+/* CSS HEX
+--space-cadet: #25283dff;
+--plum: #8f3985ff;
+--blizzard-blue: #98dfeaff;
+--tiffany-blue: #07beb8ff;
+--champagne-pink: #efd9ceff; */
