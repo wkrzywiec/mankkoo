@@ -5,6 +5,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import logging as log
 
+mankkoo_colors = ['#A40E4C', '#ACC3A6', '#F5D6BA', '#F49D6E', '#27474E', '#BEB8EB', '#6BBF59', '#C2E812', '#5299D3']
 
 def total_money_table(data):
     table = DataTable(
@@ -18,12 +19,12 @@ def total_money_table(data):
                     groups=3,
                     group_delimiter=' ',
                     decimal_delimiter=',',
-                    symbol=Symbol.no)
-                    ),
+                    symbol=Symbol.no)),
             dict(id='Percentage', name='Percentage', type='numeric', format=FormatTemplate.percentage(2))
         ],
         data=data.to_dict('records'),
         style_cell={
+            'fontFamily': 'Rubik',
             'textAlign': 'right',
             'height': 'auto',
             # all three widths are needed
@@ -37,16 +38,6 @@ def total_money_table(data):
             },
             
         ],
-        style_data_conditional=[
-            {
-                'if': {
-                    'filter_query': '{{Total}} = {}'.format(data['Total'].sum())
-                },
-                'color': 'tomato',
-                'textDecoration': 'underline',
-                'fontWeight': 'bold'
-            }
-        ],
         style_as_list_view=True,
         fill_width=False
     )
@@ -56,12 +47,25 @@ def total_money_pie(data):
     data = data.drop(columns=['Percentage'])
     # pie = px.pie(data, values='Total', names='Type')  
     fig = go.Figure(data=[go.Pie(labels=data['Type'].tolist(), values=data['Total'].tolist(), hole=.4)])
-    fig.update_traces(textposition='inside', textinfo='percent+label')
+    fig.update_traces(
+        textposition='inside',
+        textinfo='percent+label',
+        marker=dict(colors=mankkoo_colors))
+    fig.update_layout(
+        autosize=False,
+        width=400,
+        height=300,
+        margin=dict(l=50, r=50, b=0, t=0, pad=20),
+        font_family='Rubik'
+    )
     # pie.update_traces(textposition='inside', textinfo='percent+label', showlegend=False)
     return fig
 
 def total_money_chart(data):
-    chart = px.line(data, x='Date', y='Total')
+    chart = px.line(data, x='Date', y='Total', color_discrete_sequence=mankkoo_colors)
+    chart.update_layout(
+        font_family='Rubik'
+    )
     return chart
 
 def navbar():

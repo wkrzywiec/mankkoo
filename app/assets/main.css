@@ -1,5 +1,11 @@
+@font-face {
+    font-family: "Rubik";
+    src: url("Rubik.ttf");
+}
+
 body {
     background-color: rgba(219, 215, 215, 0.667);
+    font-family: "Rubik";
 }
 
 .row {
@@ -16,7 +22,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
 }
 
 .card-body-indicator {

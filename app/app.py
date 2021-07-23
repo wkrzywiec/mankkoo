@@ -47,7 +47,7 @@ app.layout = html.Div(children=[
             html.Div(className='col-3', children=[
                 html.Div(className='card card-indicator', children=[
                      html.Div(className='card-body card-body-indicator', children=[
-                        html.Span('Total Money', className='card-body-title'),
+                        html.Span('My Wealth', className='card-body-title'),
                         html.Span('{:,.2f} PLN'.format(total_money['Total'].sum()).replace(',', ' '))
                      ])
                 ])
@@ -56,18 +56,18 @@ app.layout = html.Div(children=[
 
         html.Div(className='row', children=[
             html.Div(className='col-4', children=[
-                html.Div(className='card card-indicator', style={'height': '300px', 'width': '400px'}, children=[
+                html.Div(className='card card-indicator', style={'height': '366px', 'width': '400px'}, children=[
                     html.Div(className='card-body card-body-plotly', children=[
-                        html.Span('Total Money Distribution', className='card-body-title'),
+                        html.Span('Wealth Distribution', className='card-body-title', style={'margin-bottom': '40px'}),
                         total_table
                     ])     
                 ])
             ]),
-            html.Div(className="col-8", children=[
+            html.Div(className="col-5", children=[
                 html.Div(className='card card-indicator', children=[
                     html.Div(className='card-body card-body-plotly', children=[
-                        html.Span('Total Money Distribution', className='card-body-title'),
-                        html.Div(dcc.Graph(figure=total_pie), style={'width': '800px'})
+                        html.Span('Wealth Distribution', className='card-body-title', style={'margin-bottom': '20px'}),
+                        html.Div(dcc.Graph(figure=total_pie), style={'width': '400px'})
                     ])
                 ])
             ])
@@ -78,7 +78,7 @@ app.layout = html.Div(children=[
              html.Div(className='col-12', children=[
                 html.Div(className='card card-indicator', children=[
                     html.Div(className='card-body card-body-plotly', children=[
-                        html.Span('Total Money Distribution', className='card-body-title'),
+                        html.Span('Wealth History', className='card-body-title'),
                         html.Div(dcc.Graph(figure=total_chart), style={'width': '1200px'})
                     ])
                     
