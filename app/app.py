@@ -1,61 +1,59 @@
-# -*- coding: utf-8 -*-
-
-# Run this app with `python app.py` and
-# visit http://127.0.0.1:8050/ in your web browser.
-
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-import widget
-import pandas as pd
-import scripts.main.data as dt
-import scripts.main.total as total
+from dash.dependencies import Input, Output
+
 import scripts.main.config as config
-import plotly.express as px
 
+import navbar
+import pages.main as main
+import pages.accounts as pa
+import pages.investments as pi
+import pages.stocks as ps
+import pages.retirement as pr
 
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+external_stylesheets = [
+    'https://codepen.io/chriddyp/pen/bWLwgP.css',
+    'https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css',
+    'https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css'
+]
 
-data = dt.load_data()
+external_scripts = [
+    'https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js'
+]
 
-total_money = total.total_money_data(data)
-total_table = widget.total_money_table(total_money)
-total_pie = widget.total_money_pie(total_money)
+mankkoo_colors = ['#A40E4C', '#ACC3A6', '#F5D6BA', '#F49D6E', '#27474E', '#BEB8EB', '#6BBF59', '#C2E812', '#5299D3']
 
-total_chart = widget.total_money_chart(data['total'])
+app = dash.Dash(__name__,
+    external_stylesheets=external_stylesheets,
+    external_scripts=external_scripts)
 
 config.init_data_folder()
 
-# print(px.data.gapminder().query("year == 2007").query("continent == 'Americas'"))
-# print(px.data.gapminder().query("country=='Canada'"))
-# TODO add total money cell
-
-# total_chart_data = data['account'][['Date', 'Balance']]
-# fig = px.line(total_chart_data, x='Date', y='Balance', title='Balance')
-
 app.layout = html.Div(children=[
-    html.H1(children='mankkoo'),
+    # represents the URL bar, doesn't render anything
+    dcc.Location(id='url', refresh=False),
 
-    html.Div(children='''
-        your personal finance dashboard
-    '''),
-
-    html.Div(children='''
-        total money: {:,.2f} PLN
-    '''.format(total_money['Total'].sum()).replace(',', ' ')),
-
-    html.Div([
-        html.Div([total_table], className="six columns"),
-        html.Div([dcc.Graph(figure=total_pie)], className="six columns")
-        ], className="row"),
-
-    html.Div(dcc.Graph(figure=total_chart))
-
-    # dcc.Graph(figure=fig) 
-# )
+    # content will be rendered in this element
+    html.Div(id='page-content')
 ])
 
+@app.callback(Output('page-content', 'children'),
+              Input('url', 'pathname'))
+def display_page(pathname):
+
+    if pathname == '/accounts':
+        page = pa.account_page()
+    elif pathname == '/investments':
+        page = pi.inv_page()
+    elif pathname == '/stocks':
+        page = ps.stock_page()
+    elif pathname == '/retirement':
+        page = pr.retirement_page()
+    else:
+        page = main.main_page()
+
+    return html.Div(children=[navbar.navbar(pathname), page])
 
 if __name__ == '__main__':
     app.run_server(debug=True)
