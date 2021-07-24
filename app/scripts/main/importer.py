@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from sys import platform
 import scripts.main.config as config
+from scripts.main.base_logger import log
 from enum import Enum
 
 # TODO move all enums to models.py
@@ -50,6 +51,7 @@ def load_data(file_type: FileType, kind=None, file_name=None, account_name=None)
     Returns:
         [pd.Dataframe]: holds history of operations for an account
     """
+    log.info('Loading %s file', file_type)
     if file_type is FileType.ACCOUNT:
         result = pd.read_csv(config.mankoo_file_path('account'), parse_dates=['Date'])
         result = result.astype({'Account': 'string', 'Balance': 'float', 'Operation': 'float', 'Date': 'datetime64[ns]'})

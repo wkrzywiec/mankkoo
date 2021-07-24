@@ -4,7 +4,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 
 import scripts.main.config as config
-
+from scripts.main.base_logger import log
 import navbar
 import pages.main as main
 import pages.accounts as pa
@@ -23,6 +23,8 @@ external_scripts = [
 ]
 
 mankkoo_colors = ['#A40E4C', '#ACC3A6', '#F5D6BA', '#F49D6E', '#27474E', '#BEB8EB', '#6BBF59', '#C2E812', '#5299D3']
+
+log.info("Starting mankkoo's server")
 
 app = dash.Dash(__name__,
     external_stylesheets=external_stylesheets,

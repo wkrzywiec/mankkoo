@@ -4,7 +4,7 @@ import os
 import scripts.main.importer as importer
 import scripts.main.config as config
 import scripts.main.total as total
-import logging as log
+from scripts.main.base_logger import log
 
 log.basicConfig(level=log.DEBUG)
 
@@ -20,6 +20,7 @@ def load_data():
     Returns:
         pandas.DataFrame: DataFrame that holds all historical data
     """
+    log.info("Loading mankkoo's files")
     return dict(
         account = importer.load_data(importer.FileType.ACCOUNT),
         investment = importer.load_data(importer.FileType.INVESTMENT),

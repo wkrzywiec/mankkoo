@@ -3,9 +3,7 @@ import numpy as np
 import datetime
 import scripts.main.importer as importer
 import scripts.main.config as config
-import logging as log
-
-log.basicConfig(level=log.DEBUG)
+from scripts.main.base_logger import log
 
 def total_money_data(data: dict):
 
