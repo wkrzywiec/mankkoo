@@ -1,7 +1,7 @@
 import os
 import pathlib
 from sys import platform
-import logging as log
+from scripts.main.base_logger import log
 import scripts.main.data as data
 import pandas as pd
 
@@ -19,7 +19,7 @@ def init_data_folder():
     mankkoo_path = mankoo_path()
     mankoo_account_file = mankoo_file_path('account')
 
-    log.info('Initializing mankkoo directory and files')
+    log.info("Checking if mankkoo's files are existing")
 
     if not os.path.exists(mankkoo_path):
         log.info('Creating mankkoo directory')

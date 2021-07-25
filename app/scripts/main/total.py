@@ -1,11 +1,10 @@
 import pandas as pd
 import numpy as np
 import datetime
-import scripts.main.importer as importer
+import scripts.main.importer.importer as importer
 import scripts.main.config as config
-import logging as log
-
-log.basicConfig(level=log.DEBUG)
+import scripts.main.models as models
+from scripts.main.base_logger import log
 
 def total_money_data(data: dict):
 
@@ -54,7 +53,7 @@ def update_total_money(accounts: pd.DataFrame, updated_dates: pd.Series):
         [type]: [description]
     """
     log.info('Updating and calculating total money history from %s', str(updated_dates.min()))
-    total = importer.load_data(importer.FileType.TOTAL)
+    total = importer.load_data(models.FileType.TOTAL)
 
     total = __clean_overlapping_days(total, updated_dates.min())
     total_new_lines = __calc_totals(accounts, updated_dates)
@@ -71,8 +70,8 @@ def __calc_totals(accounts: pd.DataFrame, updated_dates: pd.Series):
     updated_dates = updated_dates.append(accounts_dates, ignore_index=True)
     updated_dates = updated_dates.drop_duplicates().sort_values()
 
-    investments = importer.load_data(importer.FileType.INVESTMENT)
-    stock = importer.load_data(importer.FileType.STOCK)
+    investments = importer.load_data(models.FileType.INVESTMENT)
+    stock = importer.load_data(models.FileType.STOCK)
 
     result_list = []
 

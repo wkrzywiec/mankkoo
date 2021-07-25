@@ -1,6 +1,7 @@
 import pytest
 import scripts.main.data as data
-import scripts.main.importer as importer
+import scripts.main.importer.importer as importer
+import scripts.main.models as models
 import numpy as np
 import pandas as pd
 from pandas._testing import assert_frame_equal
@@ -68,9 +69,9 @@ def test_add_new_operation_for_incorrect_bank():
 
 def test_add_new_operations(mocker):
     # GIVEN
-    bank = importer.Bank.PL_MILLENIUM
+    bank = models.Bank.PL_MILLENIUM
 
-    mocker.patch('scripts.main.importer.load_data', side_effect=[millenium_data, start_data])
+    mocker.patch('scripts.main.importer.importer.load_data', side_effect=[millenium_data, start_data])
     mocker.patch('scripts.main.total.update_total_money')
     mocker.patch('pandas.DataFrame.to_csv')
 
@@ -82,7 +83,7 @@ def test_add_new_operations(mocker):
 
 def test_add_new_operations_multiple_banks(mocker):
     # GIVEN
-    bank = importer.Bank.PL_MILLENIUM
+    bank = models.Bank.PL_MILLENIUM
 
     account = td.account_data([
         ['Millenium', 'checking', '360', '2020-12-01', 'a', 'a', np.NaN, '', -1000, 'PLN', 2000],
@@ -97,7 +98,7 @@ def test_add_new_operations_multiple_banks(mocker):
         columns=['Date', 'Title', 'Currency', 'Operation', 'Bank', 'Type', 'Account', 'Details', 'Category', 'Comment']
     )
 
-    mocker.patch('scripts.main.importer.load_data', side_effect=[millenium, account])
+    mocker.patch('scripts.main.importer.importer.load_data', side_effect=[millenium, account])
     mocker.patch('scripts.main.total.update_total_money')
     mocker.patch('pandas.DataFrame.to_csv')
 
