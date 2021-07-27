@@ -1,9 +1,11 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 
 import scripts.main.config as config
+import scripts.main.models as models
+import scripts.main.data as dt
 from scripts.main.base_logger import log
 import navbar
 import pages.main as main
@@ -29,6 +31,7 @@ log.info("Starting mankkoo's server")
 app = dash.Dash(__name__,
     external_stylesheets=external_stylesheets,
     external_scripts=external_scripts)
+app.config.suppress_callback_exceptions = True
 
 config.init_data_folder()
 
@@ -55,7 +58,15 @@ def display_page(pathname):
     else:
         page = main.main_page()
 
-    return html.Div(children=[navbar.navbar(pathname), page])
+    return html.Div(children=[navbar.navbar(app, pathname), page])
+
+@app.callback(Output('output-data-upload', 'children'),
+              Input('upload-data', 'contents'),
+              State('upload-data', 'filename'),
+              State('upload-data', 'last_modified'))
+def update_output(list_of_contents, list_of_names, list_of_dates):
+    if list_of_contents is not None:
+        dt.add_new_operations(models.Bank.PL_MILLENIUM, list_of_names, '360')
 
 if __name__ == '__main__':
     app.run_server(debug=True)
