@@ -6,7 +6,7 @@ def navbar(app, pathname: str):
             html.Nav(className='nav', children=[
                 html.Div(children=[
                     html.A(href='/', className='nav_logo', children=[
-                        html.Img(src=app.get_asset_url('logo.png'), style={"width": "50px"}),
+                        html.Img(src=app.get_asset_url('logo.png'), style={"width": "30px"}),
                         html.Span('mankkoo', className='nav_logo-name')
                     ]),
                     html.Div(className='nav_list', children=[
