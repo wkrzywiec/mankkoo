@@ -1,12 +1,12 @@
 import dash_html_components as html
 
-def navbar(pathname: str):
+def navbar(app, pathname: str):
 
     navbar = html.Div(className='l-navbar', id='nav-bar', children=[
             html.Nav(className='nav', children=[
                 html.Div(children=[
                     html.A(href='/', className='nav_logo', children=[
-                        html.I(className='bx bx-layer nav_logo-icon'),
+                        html.Img(src=app.get_asset_url('logo.png'), style={"width": "30px"}),
                         html.Span('mankkoo', className='nav_logo-name')
                     ]),
                     html.Div(className='nav_list', children=[
