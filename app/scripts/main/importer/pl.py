@@ -1,7 +1,8 @@
 import numpy as np
 import pandas as pd
-import scripts.main.config as config
+import os
 import scripts.main.models as models
+import scripts.main.config as config
 
 class Millenium(models.Importer):
     # Millenium bank (PL) - https://www.bankmillennium.pl
@@ -30,3 +31,48 @@ class Millenium(models.Importer):
     def __add_missing_columns(self, df: pd.DataFrame, columns):
         existing_columns = list(df.columns)
         return df.reindex(columns=existing_columns + columns)
+
+class Ing(models.Importer):
+    # ING bank (PL) - https://www.ing.pl
+
+    def load_file(self, file_name: str, account_name=None):
+        temp_file_path = self.__prepare_temp_file(file_name)
+        df = self.__read_from_data_path(temp_file_path)
+
+        os.remove(temp_file_path)
+        return df
+
+    def __prepare_temp_file(self, file_name: str):
+        temp_content = self.__clean_data(file_name)
+        return self.__save_file(file_name, temp_content)
+
+    def __clean_data(self, file_name: str):
+        with open(config.data_path() + file_name, 'r+') as file:
+            lines = file.readlines()
+            file.close()
+
+            start_index = 0
+            stop_index = 0
+
+            for i, elem in enumerate(lines):
+                if 'Data transakcji' in elem and start_index == 0:
+                    start_index = i
+
+                if start_index != 0 and elem.strip() == '':
+                    stop_index = i
+                    break
+
+        return lines[start_index:stop_index]
+
+    def __save_file(self, file_name: str, temp_content):
+        temp_file_path = config.data_path() + file_name + '_temp'
+        temp_file = open(temp_file_path, 'w')
+
+        for line in temp_content:
+            temp_file.write(line)
+
+        temp_file.close()
+        return temp_file_path
+
+    def __read_from_data_path(self, file_name: str):
+        return pd.read_csv(file_name, sep=';')

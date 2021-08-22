@@ -23,7 +23,7 @@ class Bank(Enum):
     MANKKOO = 'mankkoo'
     PL_MBANK = 'pl_mbank'
     PL_MILLENIUM = 'pl_millenium'
-    PL_IDEA = 'pl_idea'
+    PL_ING = 'pl_ing'
 
 class Account(Enum):
     """Representations of different kinds of account, like checking, savings, cash or for retirement
