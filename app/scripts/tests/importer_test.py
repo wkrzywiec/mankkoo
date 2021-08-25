@@ -26,3 +26,15 @@ def test_load_pl_millenium():
     assert len(data) == 6
     data['Bank'].dtypes == pd.StringDtype
     data['Date'].iloc[0] == '31/01/2021'
+
+def test_load_pl_ing():
+    # GIVEN
+    ing_file = 'test_pl_ing.csv'
+
+    # WHEN
+    data = importer.load_data(models.FileType.BANK, kind=models.Bank.PL_ING, file_name=ing_file)
+
+    # THEN
+    assert len(data) == 6
+    data['Bank'].dtypes == pd.StringDtype
+    data['Date'].iloc[0] == '31/01/2021'
