@@ -18,7 +18,7 @@
 ;;;;;"Suma obci��e� (1):";1,70;PLN;;;;;;;;;;;;;
 
 "Data transakcji";"Data ksi�gowania";"Dane kontrahenta";"Tytu�";"Nr rachunku";"Nazwa banku";"Szczeg�y";"Nr transakcji";"Kwota transakcji (waluta rachunku)";"Waluta";"Kwota blokady/zwolnienie blokady";"Waluta";"Kwota p�atno�ci w walucie";"Waluta";"Konto";"Saldo po transakcji";"Waluta";;;;
-2021-03-15;2021-03-15;" PKP PL ";"Train ticket PKP";'1111';"";"";;;;-21.78;PLN;;;"KONTO Z LWEM Direct";2178,36;PLN;;;;
+2021-03-15;2021-03-15;" PKP PL ";"Train ticket PKP";'1111';"";"";;-21,78;PLN;;;;;"KONTO Z LWEM Direct";2178,36;PLN;;;;
 2021-03-08;2021-03-08;" Spotify PL ";" Spotify";'1111';"";"ZAKUP - BEZ FIZ. UŻYCIA KARTY";'1';-19,9;PLN;;;;;"KONTO Z LWEM Direct";2200,14;PLN;;;;
 2021-02-26;2021-02-26;" Jane Doe ";" Przelew";'1111';"";"";'1';50,00;PLN;;;;;"KONTO Z LWEM Direct";2220,13;PLN;;;;
 2021-02-26;2021-02-26;" John Doe ";" Penska";'1111';"bank pl";"Przelew ";'1';1234,78;PLN;;;;;"KONTO Z LWEM Direct";2170,13;PLN;;;;

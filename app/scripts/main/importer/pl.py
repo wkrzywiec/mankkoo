@@ -39,10 +39,11 @@ class Ing(models.Importer):
         temp_file_path = self.__prepare_temp_file(file_name)
         df = self.__read_from_data_path(temp_file_path)
 
-        df = df[['Data transakcji', 'Tytu�', 'Kwota transakcji (waluta rachunku)', 'Waluta']]
+        df = df[['Data transakcji', 'Dane kontrahenta', 'Kwota transakcji (waluta rachunku)', 'Waluta']]
+
         df = df.rename(columns={
             'Data transakcji': 'Date',
-            'Tytu�': 'Title',
+            'Dane kontrahenta': 'Title',
             'Kwota transakcji (waluta rachunku)': 'Operation',
             'Waluta': 'Currency'})
 
@@ -51,6 +52,10 @@ class Ing(models.Importer):
         df['Type'] = models.Account.CHECKING.value
         df['Account'] = account_name if account_name is not None else 'ING Account'
         df['Bank'] = df['Bank'].astype('string')
+
+        df['Operation'] = df['Operation'].str.replace(',', '.')
+        df['Operation'] = pd.to_numeric(df['Operation'])
+
         result = self.__add_missing_columns(df, ['Category', 'Comment'])
         result = result.sort_values(by="Date")
         result.reset_index(drop=True, inplace=True)
@@ -58,6 +63,7 @@ class Ing(models.Importer):
         return result
 
     def __prepare_temp_file(self, file_name: str):
+        # TODO remove this approach with pure pandas
         temp_content = self.__clean_data(file_name)
         return self.__save_file(file_name, temp_content)
 
