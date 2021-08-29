@@ -106,6 +106,5 @@ def test_add_new_operations_multiple_banks(mocker):
     df = data.add_new_operations(bank, 'test_pl_millenium.csv', '360')
 
     # THEN
-    # print(df)
     millenium_balance = df.iloc[-1]['Balance']
     assert millenium_balance == 500

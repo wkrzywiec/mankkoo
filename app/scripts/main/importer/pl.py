@@ -3,6 +3,7 @@ import pandas as pd
 import os
 import scripts.main.models as models
 import scripts.main.config as config
+import scripts.main.data as data
 
 class Millenium(models.Importer):
     # Millenium bank (PL) - https://www.bankmillennium.pl
@@ -18,11 +19,17 @@ class Millenium(models.Importer):
 
         df['Date'] = pd.to_datetime(df.Date)
         df['Bank'] = 'Millenium'
+        df['Bank'] = df['Bank'].astype('string')
+
         df['Type'] = models.Account.CHECKING.value
         df['Account'] = account_name if account_name is not None else 'Millenium Account'
-        df['Bank'] = df['Bank'].astype('string')
+        df['Account'] = df['Account'].astype('string')
+        df['Details'] = np.NaN
+        df['Balance'] = np.NaN
+
         result = self.__add_missing_columns(df, ['Category', 'Comment'])
         result = result.sort_values(by="Date")
+        result = result[data.account_columns]
         return result
 
     def __read_from_data_path(self, file_name: str):
@@ -49,9 +56,12 @@ class Ing(models.Importer):
 
         df['Date'] = pd.to_datetime(df.Date)
         df['Bank'] = 'ING'
+        df['Bank'] = df['Bank'].astype('string')
         df['Type'] = models.Account.CHECKING.value
         df['Account'] = account_name if account_name is not None else 'ING Account'
-        df['Bank'] = df['Bank'].astype('string')
+        df['Account'] = df['Account'].astype('string')
+        df['Details'] = np.NaN
+        df['Balance'] = np.NaN
 
         df['Operation'] = df['Operation'].str.replace(',', '.')
         df['Operation'] = pd.to_numeric(df['Operation'])
@@ -59,6 +69,7 @@ class Ing(models.Importer):
         result = self.__add_missing_columns(df, ['Category', 'Comment'])
         result = result.sort_values(by="Date")
         result.reset_index(drop=True, inplace=True)
+        result = result[data.account_columns]
         os.remove(temp_file_path)
         return result
 
