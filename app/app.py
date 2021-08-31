@@ -32,6 +32,7 @@ app = dash.Dash(__name__,
     external_stylesheets=external_stylesheets,
     external_scripts=external_scripts)
 app.config.suppress_callback_exceptions = True
+app.title = 'Mankkoo - Personal finance dashboard'
 
 config.init_data_folder()
 
