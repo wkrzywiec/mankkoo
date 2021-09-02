@@ -37,3 +37,7 @@ body {
     font-size: medium;
     margin-bottom: 10px;
 }
+
+.custom-tab-selected {
+    border-top: 3px solid #a40e4c !important;
+}

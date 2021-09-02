@@ -42,41 +42,45 @@ def account_page():
                 id="tabs-styled-with-inline",
                 children=[
                 dcc.Tab(label='Millenium - 360',
-                children=[
-                    table.DataTable(
-                        id='account-table',
-                        columns=[{"name": i, "id": i} for i in millenium],
-                        data=millenium.to_dict('records'),
-                        page_size=20,
-                        style_cell={
-                            'textAlign': 'left',
-                            'font-family': 'Rubik'
-                        },
-                        style_header={
-                            'backgroundColor': 'rgba(245, 214, 186, 0.7)',
-                            'font-family': 'Rubik',
-                            'fontWeight': 'bold'
-                        },
-                        style_data_conditional=[
-                            {
-                                'if': {
-                                    'filter_query': '{Operation} > 0',
-                                    'column_id': 'Operation'
-                                },
-                                'backgroundColor': '#acc3a6'
+                    selected_className='custom-tab-selected',
+                    children=[
+                        table.DataTable(
+                            id='account-table',
+                            columns=[{"name": i, "id": i} for i in millenium],
+                            data=millenium.to_dict('records'),
+                            page_size=20,
+                            style_cell={
+                                'textAlign': 'left',
+                                'font-family': 'Rubik'
                             },
-                            {
-                                'if': {
-                                    'filter_query': '{Operation} < 0',
-                                    'column_id': 'Operation'
+                            style_header={
+                                'backgroundColor': 'rgba(245, 214, 186, 0.7)',
+                                'font-family': 'Rubik',
+                                'fontWeight': 'bold'
+                            },
+                            style_data_conditional=[
+                                {
+                                    'if': {
+                                        'filter_query': '{Operation} > 0',
+                                        'column_id': 'Operation'
+                                    },
+                                    'backgroundColor': '#acc3a6'
                                 },
-                                'backgroundColor': '#cc5a71',
-                                'color': 'white'
-                            }
-                        ])
+                                {
+                                    'if': {
+                                        'filter_query': '{Operation} < 0',
+                                        'column_id': 'Operation'
+                                    },
+                                    'backgroundColor': '#cc5a71',
+                                    'color': 'white'
+                                }
+                            ])
                 ]),
-                dcc.Tab(label='ING - Konto z Lwem Direct', children=[
-                    html.Span('ING - Konto z Lwem Direct')
+                dcc.Tab(
+                    label='ING - Konto z Lwem Direct',
+                    selected_className='custom-tab-selected',
+                    children=[
+                        html.Span('ING - Konto z Lwem Direct')
                 ])
             ])
         ])
