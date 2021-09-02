@@ -38,7 +38,9 @@ def account_page():
             html.Div(id='output-data-upload', style={'display': 'none'})
         ]),
         html.Div(className='row', children=[
-            dcc.Tabs([
+            dcc.Tabs(
+                id="tabs-styled-with-inline",
+                children=[
                 dcc.Tab(label='Millenium - 360',
                 children=[
                     table.DataTable(
@@ -46,6 +48,15 @@ def account_page():
                         columns=[{"name": i, "id": i} for i in millenium],
                         data=millenium.to_dict('records'),
                         page_size=20,
+                        style_cell={
+                            'textAlign': 'left',
+                            'font-family': 'Rubik'
+                        },
+                        style_header={
+                            'backgroundColor': 'rgba(245, 214, 186, 0.7)',
+                            'font-family': 'Rubik',
+                            'fontWeight': 'bold'
+                        },
                         style_data_conditional=[
                             {
                                 'if': {
@@ -68,13 +79,5 @@ def account_page():
                     html.Span('ING - Konto z Lwem Direct')
                 ])
             ])
-
-
-            # html.Ul(className='nav nav-tabs', id='accounts-tab', role='tablist', children=[
-            #     html.Li(className='nav-item', role='presentation', children=[
-            #         html.Button(className='nav-link active', id='home-tab', )
-                    
-            #     ])
-            # ])
         ])
     ])
