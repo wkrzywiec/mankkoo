@@ -2,6 +2,8 @@ from dash.dependencies import Input, Output, State
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_table as table
+import app
+import plotly.express as px
 
 import scripts.main.importer.importer as importer
 import scripts.main.models as models
@@ -25,6 +27,8 @@ def account_page():
         account_tabs.append(account_tab)
 
     return html.Div(className='height-100 container main-body', children=[
+
+        
 
         html.Div(className='row', children=[
             dcc.Upload(
@@ -59,6 +63,11 @@ def __account_tab(account_data, account_name):
     full_account_name = account_name[0] + ' - ' + account_name[1]
 
     return dcc.Tab(label=full_account_name, selected_className='custom-tab-selected', children=[
+
+        html.Div(className='row', children=[
+            dcc.Graph(figure=__account_chart(account_data))
+        ]),
+
         table.DataTable(
             id=full_account_name + '-table',
             columns=[{"name": i, "id": i} for i in account_data],
@@ -88,3 +97,11 @@ def __account_tab(account_data, account_name):
                     'color': 'white'
                 }])
     ])
+
+def __account_chart(account_data):
+    account_data = account_data[['Date', 'Balance']]
+    chart = px.line(account_data, x='Date', y='Balance', color_discrete_sequence=app.mankkoo_colors)
+    chart.update_layout(
+        font_family='Rubik'
+    )
+    return chart
