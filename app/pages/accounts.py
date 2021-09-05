@@ -6,13 +6,23 @@ import dash_table as table
 import scripts.main.importer.importer as importer
 import scripts.main.models as models
 
-def account_page():
+from scripts.main.base_logger import log
 
-    accounts = importer.load_data(models.FileType.ACCOUNT)
-    millenium = accounts[accounts['Bank'] == 'Millenium']
-    # millenium = millenium.drop(columns=['Bank', 'Type', 'Account', 'Category'])
-    millenium = millenium[['Date', 'Title', 'Details', 'Operation', 'Balance', 'Currency', 'Comment']]
-    millenium = millenium.iloc[::-1]
+def account_page():
+    log.info("Loading accounts page")
+
+    accounts_data = importer.load_data(models.FileType.ACCOUNT)
+    accounts_data = accounts_data.iloc[::-1]
+    accounts_names = list(accounts_data.groupby(['Bank', 'Account']).groups)
+
+    account_tabs = []
+
+    for account_name in accounts_names:
+        single_account = accounts_data[(accounts_data['Bank'] == account_name[0]) & (accounts_data['Account'] == account_name[1])]
+        single_account = single_account[['Date', 'Title', 'Details', 'Operation', 'Balance', 'Currency', 'Comment']]
+
+        account_tab = __account_tab(single_account, account_name)
+        account_tabs.append(account_tab)
 
     return html.Div(className='height-100 container main-body', children=[
 
@@ -40,48 +50,41 @@ def account_page():
         html.Div(className='row', children=[
             dcc.Tabs(
                 id="tabs-styled-with-inline",
-                children=[
-                dcc.Tab(label='Millenium - 360',
-                    selected_className='custom-tab-selected',
-                    children=[
-                        table.DataTable(
-                            id='account-table',
-                            columns=[{"name": i, "id": i} for i in millenium],
-                            data=millenium.to_dict('records'),
-                            page_size=20,
-                            style_cell={
-                                'textAlign': 'left',
-                                'font-family': 'Rubik'
-                            },
-                            style_header={
-                                'backgroundColor': 'rgba(245, 214, 186, 0.7)',
-                                'font-family': 'Rubik',
-                                'fontWeight': 'bold'
-                            },
-                            style_data_conditional=[
-                                {
-                                    'if': {
-                                        'filter_query': '{Operation} > 0',
-                                        'column_id': 'Operation'
-                                    },
-                                    'backgroundColor': '#acc3a6'
-                                },
-                                {
-                                    'if': {
-                                        'filter_query': '{Operation} < 0',
-                                        'column_id': 'Operation'
-                                    },
-                                    'backgroundColor': '#cc5a71',
-                                    'color': 'white'
-                                }
-                            ])
-                ]),
-                dcc.Tab(
-                    label='ING - Konto z Lwem Direct',
-                    selected_className='custom-tab-selected',
-                    children=[
-                        html.Span('ING - Konto z Lwem Direct')
-                ])
-            ])
+                children=account_tabs)
         ])
+    ])
+
+
+def __account_tab(account_data, account_name):
+    full_account_name = account_name[0] + ' - ' + account_name[1]
+
+    return dcc.Tab(label=full_account_name, selected_className='custom-tab-selected', children=[
+        table.DataTable(
+            id=full_account_name + '-table',
+            columns=[{"name": i, "id": i} for i in account_data],
+            data=account_data.to_dict('records'),
+            page_size=20,
+            style_cell={
+                'textAlign': 'left',
+                'font-family': 'Rubik'},
+            style_header={
+                'backgroundColor': 'rgba(245, 214, 186, 0.7)',
+                'font-family': 'Rubik',
+                'fontWeight': 'bold'},
+            style_data_conditional=[
+                {
+                    'if': {
+                        'filter_query': '{Operation} > 0',
+                        'column_id': 'Operation'
+                    },
+                    'backgroundColor': '#acc3a6'
+                },
+                {
+                    'if': {
+                        'filter_query': '{Operation} < 0',
+                        'column_id': 'Operation'
+                    },
+                    'backgroundColor': '#cc5a71',
+                    'color': 'white'
+                }])
     ])

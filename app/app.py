@@ -26,8 +26,6 @@ external_scripts = [
 
 mankkoo_colors = ['#A40E4C', '#ACC3A6', '#F5D6BA', '#F49D6E', '#27474E', '#BEB8EB', '#6BBF59', '#C2E812', '#5299D3']
 
-log.info("Starting mankkoo's server")
-
 app = dash.Dash(__name__,
     external_stylesheets=external_stylesheets,
     external_scripts=external_scripts)
@@ -70,4 +68,5 @@ def update_output(list_of_contents, list_of_names, list_of_dates):
         dt.add_new_operations(models.Bank.PL_MILLENIUM, list_of_names, '360')
 
 if __name__ == '__main__':
+    log.info("Starting mankkoo's server")
     app.run_server(debug=True)
