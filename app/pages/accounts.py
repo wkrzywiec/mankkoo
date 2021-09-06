@@ -26,9 +26,7 @@ def account_page():
         account_tab = __account_tab(single_account, account_name)
         account_tabs.append(account_tab)
 
-    return html.Div(className='height-100 container main-body', children=[
-
-        
+    return html.Div(className='height-100 container main-body', children=[  
 
         html.Div(className='row', children=[
             dcc.Upload(
@@ -36,24 +34,25 @@ def account_page():
                 children=html.Div([
                     'Drag and Drop or ',
                     html.A('Select Files')
-            ]),
-            style={
-                'width': '100%',
-                'height': '60px',
-                'lineHeight': '60px',
-                'borderWidth': '1px',
-                'borderStyle': 'dashed',
-                'borderRadius': '5px',
-                'textAlign': 'center',
-                'margin': '10px'
-            },
-            # Allow multiple files to be uploaded
-            multiple=False),
+                ]),
+                style={
+                    'width': '100%',
+                    'height': '60px',
+                    'lineHeight': '60px',
+                    'borderWidth': '1px',
+                    'borderStyle': 'dashed',
+                    'borderRadius': '5px',
+                    'textAlign': 'center',
+                    'margin': '10px'
+                },
+                # Allow multiple files to be uploaded
+                multiple=False),
             html.Div(id='output-data-upload', style={'display': 'none'})
         ]),
         html.Div(className='row', children=[
             dcc.Tabs(
                 id="tabs-styled-with-inline",
+                parent_className='accounts-tabs-container',
                 children=account_tabs)
         ])
     ])
@@ -62,7 +61,7 @@ def account_page():
 def __account_tab(account_data, account_name):
     full_account_name = account_name[0] + ' - ' + account_name[1]
 
-    return dcc.Tab(label=full_account_name, selected_className='custom-tab-selected', children=[
+    return dcc.Tab(label=full_account_name, selected_className='accounts-tab-selected', children=[
 
         html.Div(className='row', children=[
             dcc.Graph(figure=__account_chart(account_data))
