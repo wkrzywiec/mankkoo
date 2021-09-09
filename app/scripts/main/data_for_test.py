@@ -9,9 +9,9 @@ start_data = [
 ]
 
 millenium_data = [
-    ['2021-03-15', 'Train ticket', 'PLN', -100, 'Millenium', np.NaN, np.NaN],
-    ['2021-03-16', 'Bus ticket', 'PLN', -200, 'Millenium', np.NaN, np.NaN],
-    ['2021-03-17', 'Salary', 'PLN', 3000.33, 'Millenium', np.NaN, np.NaN]
+    ['Millenium', 'checking', '360', '2021-03-15', 'Train ticket', 'Detail new', np.NaN, np.NaN, -100, 'PLN', np.NaN],
+    ['Millenium', 'checking', '360', '2021-03-16', 'Bus ticket', 'Detail new', np.NaN, np.NaN, -200, 'PLN', np.NaN],
+    ['Millenium', 'checking', '360', '2021-03-17', 'Salary', 'Detail new', np.NaN, np.NaN, 3000.33, 'PLN', np.NaN]
 ]
 
 end_data = [
@@ -43,7 +43,8 @@ def account_data(rows=start_data):
     result = pd.DataFrame(
         data=np.array(rows),
         columns=data.account_columns
-    ).astype({'Balance': 'float', 'Operation': 'float', 'Date': 'datetime64[ns]'})
+    ).astype({'Balance': 'float', 'Operation': 'float'})
+    result['Date'] = pd.to_datetime(result['Date'], format='%Y-%m-%d', errors='coerce')
     result['Date'] = result['Date'].dt.date
     return result
 

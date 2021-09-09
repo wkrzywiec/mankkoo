@@ -18,6 +18,7 @@ class Millenium(models.Importer):
         df = df.rename(columns={'Data transakcji': 'Date', 'Opis': 'Title', 'Waluta': 'Currency'})
 
         df['Date'] = pd.to_datetime(df.Date)
+        df['Date'] = df['Date'].dt.date
         df['Bank'] = 'Millenium'
         df['Bank'] = df['Bank'].astype('string')
 
@@ -55,6 +56,7 @@ class Ing(models.Importer):
             'Waluta': 'Currency'})
 
         df['Date'] = pd.to_datetime(df.Date)
+        df['Date'] = df['Date'].dt.date
         df['Bank'] = 'ING'
         df['Bank'] = df['Bank'].astype('string')
         df['Type'] = models.Account.CHECKING.value

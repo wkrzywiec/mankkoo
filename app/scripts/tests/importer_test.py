@@ -3,21 +3,19 @@ import scripts.main.importer.importer as importer
 import scripts.main.config as config
 import scripts.main.models as models
 import scripts.main.data as data
+import scripts.main.data_for_test as td
 import numpy as np
 import pandas as pd
 from pandas._testing import assert_frame_equal
 
-exp_result = pd.DataFrame(
-    data=np.array([
-    ['Bank', 'checking', 'Bank Account', '2021-01-01T00:00:00.000Z', 'Init money', np.NaN, np.NaN, np.NaN, 1000.00, 'PLN', np.NaN],
-    ['Bank', 'checking', 'Bank Account', '2021-02-02T00:00:00.000Z', 'Out 1', np.NaN, np.NaN, np.NaN, -200.00, 'PLN', np.NaN],
-    ['Bank', 'checking', 'Bank Account', '2021-03-03T00:00:00.000Z', 'Out 2', np.NaN, np.NaN, np.NaN, -3.33, 'PLN', np.NaN],
-    ['Bank', 'checking', 'Bankm Account', '2021-04-04T00:00:00.000Z', 'In 1', np.NaN, np.NaN, np.NaN, 3.33, 'PLN', np.NaN],
-    ['Bank', 'checking', 'Bank Account', '2021-05-05T00:00:00.000Z', 'Out 3', np.NaN, np.NaN, np.NaN, -400.00, 'PLN', np.NaN],
-    ['Bank', 'checking', 'Bank Account', '2021-06-06T00:00:00.000Z', 'In 2', np.NaN, np.NaN, np.NaN, 50.00, 'PLN', np.NaN]
-    ]),
-    columns=data.account_columns
-).astype({'Bank': 'string', 'Date': 'datetime64', 'Operation': 'float'})
+exp_result = td.account_data([
+    ['Bank', 'checking', 'Bank Account', '2021-01-01', 'Init money', np.NaN, np.NaN, np.NaN, 1000.00, 'PLN', np.NaN],
+    ['Bank', 'checking', 'Bank Account', '2021-02-02', 'Out 1', np.NaN, np.NaN, np.NaN, -200.00, 'PLN', np.NaN],
+    ['Bank', 'checking', 'Bank Account', '2021-03-03', 'Out 2', np.NaN, np.NaN, np.NaN, -3.33, 'PLN', np.NaN],
+    ['Bank', 'checking', 'Bankm Account', '2021-04-04', 'In 1', np.NaN, np.NaN, np.NaN, 3.33, 'PLN', np.NaN],
+    ['Bank', 'checking', 'Bank Account', '2021-05-05', 'Out 3', np.NaN, np.NaN, np.NaN, -400.00, 'PLN', np.NaN],
+    ['Bank', 'checking', 'Bank Account', '2021-06-06', 'In 2', np.NaN, np.NaN, np.NaN, 50.00, 'PLN', np.NaN]
+])
 
 def test_load_data(mocker):
     # GIVEN
