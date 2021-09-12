@@ -37,3 +37,12 @@ body {
     font-size: medium;
     margin-bottom: 10px;
 }
+
+.accounts-tabs-container {
+    background-color: #f9f9f9;
+    padding-top: 10px;
+}
+
+.accounts-tab-selected {
+    border-top: 3px solid #a40e4c !important;
+}

@@ -9,11 +9,15 @@ import scripts.main.total as total
 import scripts.main.data as dt
 import app
 
+from scripts.main.base_logger import log
+
 data = dt.load_data()
 
 total_money = total.total_money_data(data)
 
 def main_page():
+    log.info("Loading main page")
+
     return html.Div(className='height-100 container main-body', children=[
 
         html.Div(className='row', children=[

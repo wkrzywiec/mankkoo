@@ -46,10 +46,13 @@ def add_new_operations(bank: models.Bank, file_name: str, account_name: str):
     log.info('Adding new operations for %s account from a file %s', account_name, file_name)
     df_new = importer.load_data(file_type=models.FileType.BANK, kind=bank, file_name=file_name, account_name=account_name)
     df = importer.load_data(models.FileType.ACCOUNT)
+    __make_account_backup(df)
+
     df = pd.concat([df, df_new]).reset_index(drop=True)
 
     df = calculate_balance(df, account_name)
     total.update_total_money(df, df_new['Date'])
+    df = df.sort_values(by='Date')
     df.to_csv(config.mankoo_file_path('account'), index=False)
     log.info('%d new operations for %s account were added.', df_new['Bank'].size, account_name)
     return df
@@ -82,3 +85,6 @@ def __latest_balance_for_account(df: pd.DataFrame, account_name: str):
     result = df.loc[(df['Account'] == account_name)]
     result = result.dropna(subset=['Balance'])
     return result.iloc[-1]['Balance']
+
+def __make_account_backup(df: pd.DataFrame):
+    df.to_csv(config.mankoo_file_path('account-backup'), index=False)
