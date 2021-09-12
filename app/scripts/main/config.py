@@ -56,7 +56,7 @@ def mankoo_file_path(file: str):
     """
     path = mankoo_path() + __slash()
 
-    if file in {'account', 'investment', 'stock', 'total'}:
+    if file in {'account', 'account-backup', 'investment', 'stock', 'total'}:
         return path + file + '.csv'
 
     if file in mankkoo_files:
