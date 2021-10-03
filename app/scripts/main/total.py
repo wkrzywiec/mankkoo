@@ -36,10 +36,9 @@ def total_money_data(data: dict):
 
 def __latest_account_balance(data: dict, type: str) -> float:
 
-    # TODO filter by account type, not name, and if more than one sum it
     df = data['account'].loc[data['account']['Type'] == type]
     if not df.empty:
-        return df['Balance'].sum()
+        return accounts_balance_for_day(df, df['Date'].max())
     return 0.00
 
 def update_total_money(accounts: pd.DataFrame, updated_dates: pd.Series):
