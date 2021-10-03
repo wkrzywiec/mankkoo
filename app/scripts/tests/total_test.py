@@ -19,13 +19,30 @@ def test_total_money_data():
 
     # THEN
     assert total_money.to_dict('records') == [
-        {'Type': 'Checking Account', 'Total': 774.48, 'Percentage': 0.16221242941639719},
+        {'Type': 'Checking Account', 'Total': 2552.26, 'Percentage': 0.38952361475277236},
         {'Type': 'Savings Account', 'Total': 0.00, 'Percentage': 0.0},
         {'Type': 'Cash', 'Total': 0.00, 'Percentage': 0.0},
         {'Type': 'PPK', 'Total': 0.00, 'Percentage': 0.0},
-        {'Type': 'Investments', 'Total': 2000.00, 'Percentage': 0.41889378529180143},
-        {'Type': 'Stocks', 'Total': 2000.00, 'Percentage': 0.41889378529180143}
+        {'Type': 'Investments', 'Total': 2000.00, 'Percentage': 0.30523819262361385},
+        {'Type': 'Stocks', 'Total': 2000.00, 'Percentage': 0.30523819262361385}
     ]
+
+def test_total_money_data_for_checking_accounts():
+    # GIVEN
+    all_data = dict(
+        account=td.account_data([
+            ['Millenium', 'checking', '360', '2021-01-31', 'Init money', 'Detail 1', np.NaN, 'init', 1000, 'PLN', 1000],
+            ['Bank B', 'checking', 'Account name', '2021-01-31', 'Armchair', 'Detail 2', np.NaN, np.NaN, -222.22, 'PLN', 1000]
+        ]),
+        investment=td.investment_data(),
+        stock=td.stock_data()
+    )
+
+    # WHEN
+    total_money = total.total_money_data(all_data)
+
+    # THEN
+    assert total_money[total_money['Type'] == 'Checking Account'].iloc[0]['Total'] == 2000.0
 
 def test_accounts_balance_for_day_multiple_accounts():
     # GIVEN

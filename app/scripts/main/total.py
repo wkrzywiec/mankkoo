@@ -9,10 +9,10 @@ from scripts.main.base_logger import log
 def total_money_data(data: dict):
 
     log.info('Fetching latest total money data')
-    checking_account = __latest_account_balance(data, '360')
-    savings_account = __latest_account_balance(data, 'Konto Oszczędnościowe Profit')
-    cash = __latest_account_balance(data, 'Gotówka')
-    ppk = __latest_account_balance(data, 'PKO PPK')
+    checking_account = __latest_account_balance(data, 'checking')
+    savings_account = __latest_account_balance(data, 'savings')
+    cash = __latest_account_balance(data, 'cash')
+    ppk = __latest_account_balance(data, 'retirement')
 
     inv = data['investment'].loc[data['investment']['Active'] == True]
     inv = inv['Start Amount'].sum()
@@ -37,9 +37,9 @@ def total_money_data(data: dict):
 def __latest_account_balance(data: dict, type: str) -> float:
 
     # TODO filter by account type, not name, and if more than one sum it
-    df = data['account'].loc[data['account']['Account'] == type]
+    df = data['account'].loc[data['account']['Type'] == type]
     if not df.empty:
-        return df['Balance'].iloc[-1]
+        return df['Balance'].sum()
     return 0.00
 
 def update_total_money(accounts: pd.DataFrame, updated_dates: pd.Series):
