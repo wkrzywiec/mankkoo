@@ -84,7 +84,11 @@ def __latest_balance_for_account(df: pd.DataFrame, account_name: str):
 
     result = df.loc[(df['Account'] == account_name)]
     result = result.dropna(subset=['Balance'])
-    return result.iloc[-1]['Balance']
+    try:
+        return result.iloc[-1]['Balance']
+    except IndexError:
+        log.info('There are no latest balance for %s account. Therefore assuming 0.', account_name)
+        return 0
 
 def __make_account_backup(df: pd.DataFrame):
     df.to_csv(config.mankoo_file_path('account-backup'), index=False)
