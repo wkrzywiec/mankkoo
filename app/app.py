@@ -59,13 +59,17 @@ def display_page(pathname):
 
     return html.Div(children=[navbar.navbar(app, pathname), page])
 
-@app.callback(Output('output-data-upload', 'children'),
+@app.callback(Output('import-modal-wrapper', 'children'),
               Input('upload-data', 'contents'),
               State('upload-data', 'filename'),
-              State('upload-data', 'last_modified'))
-def update_output(list_of_contents, list_of_names, list_of_dates):
+              State('upload-data', 'last_modified'),
+              State('bank-id', 'value'),
+              State('account-name', 'value'),
+              State('account-type', 'value'))
+def update_output(list_of_contents, list_of_names, list_of_dates, bank_id, account_name, account_type):
     if list_of_contents is not None:
-        dt.add_new_operations(models.Bank.PL_MILLENIUM, list_of_names, '360')
+        # dt.add_new_operations(models.Bank.PL_MILLENIUM, list_of_names, '360')
+        log.info("bank-id: {}, account_name: {}, account_type: {}".format(bank_id, account_name, account_type))
 
 if __name__ == '__main__':
     log.info("Starting mankkoo's server")

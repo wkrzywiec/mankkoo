@@ -26,14 +26,41 @@ def account_page():
         account_tab = __account_tab(single_account, account_name)
         account_tabs.append(account_tab)
 
-    return html.Div(className='height-100 container main-body', children=[  
-
+    return html.Div(className='height-100 container main-body', children=[
+        html.Div(className='row', children=[
+            html.Div(className='col-4', children=[
+                html.Label(htmlFor='bank-id', children=['Bank']),
+                dcc.Dropdown(
+                    id='bank-id',
+                    options=[
+                        {'label': 'New York City', 'value': 'NYC'},
+                        {'label': 'Montreal', 'value': 'MTL'},
+                        {'label': 'San Francisco', 'value': 'SF'}
+                    ],
+                    value='NYC')
+            ]),
+            html.Div(className='col-2', children=[
+                html.Label(htmlFor='account-type', children=['Account type']),
+                dcc.Dropdown(
+                    id='account-type',
+                    options=[
+                        {'label': 'Checking', 'value': 'checking'},
+                        {'label': 'Savings', 'value': 'savings'}
+                    ],
+                    value='checking')
+            ]),
+            html.Div(className='col-4', children=[
+                html.Label(htmlFor='account-name', children=['Account name']),
+                dcc.Input(id='account-name', placeholder='Accunt name', type='text', style={'width': '100%'})
+            ])
+        ]),
         html.Div(className='row', children=[
             dcc.Upload(
                 id='upload-data',
                 children=html.Div([
                     'Drag and Drop or ',
-                    html.A('Select Files')
+                    html.A('Select Files'),
+                    " to upload account's files"
                 ]),
                 style={
                     'width': '100%',
@@ -45,9 +72,8 @@ def account_page():
                     'textAlign': 'center',
                     'margin': '10px'
                 },
-                # Allow multiple files to be uploaded
                 multiple=False),
-            html.Div(id='output-data-upload', style={'display': 'none'})
+            html.Div(id='import-modal-wrapper', style={'display': 'none'})
         ]),
         html.Div(className='row', children=[
             dcc.Tabs(
