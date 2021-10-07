@@ -2,7 +2,6 @@ import pytest
 import scripts.main.data as data
 import scripts.main.models as models
 import numpy as np
-import pandas as pd
 from pandas._testing import assert_frame_equal
 import scripts.main.data_for_test as td
 
@@ -31,7 +30,7 @@ def test_add_new_operation_for_incorrect_bank():
 
     # WHEN
     with pytest.raises(KeyError) as ex:
-        data.add_new_operations(bank, 'not_known_bank.csv', 'not known account')
+        data.add_new_operations_by_filename(bank, 'not_known_bank.csv', 'not known account')
 
     # THEN
     assert 'Failed to load data from file. Not known bank. Was provided {} bank'.format(bank) in str(ex.value)
@@ -45,7 +44,7 @@ def test_add_new_operations(mocker):
     mocker.patch('pandas.DataFrame.to_csv')
 
     # WHEN
-    df = data.add_new_operations(bank, 'test_pl_millenium.csv', '360')
+    df = data.add_new_operations_by_filename(bank, 'test_pl_millenium.csv', '360')
 
     # THEN
     assert_frame_equal(end_data, df)
@@ -69,7 +68,7 @@ def test_add_new_operations_multiple_banks(mocker):
     mocker.patch('pandas.DataFrame.to_csv')
 
     # WHEN
-    df = data.add_new_operations(bank, 'test_pl_millenium.csv', '360')
+    df = data.add_new_operations_by_filename(bank, 'test_pl_millenium.csv', '360')
 
     # THEN
     millenium_balance = df.iloc[-1]['Balance']
