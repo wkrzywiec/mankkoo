@@ -1,9 +1,11 @@
 import pytest
+import base64
 import scripts.main.data as data
 import scripts.main.models as models
 import numpy as np
 from pandas._testing import assert_frame_equal
 import scripts.main.data_for_test as td
+import scripts.main.config as config
 
 
 start_data = td.account_data([
@@ -35,7 +37,7 @@ def test_add_new_operation_for_incorrect_bank():
     # THEN
     assert 'Failed to load data from file. Not known bank. Was provided {} bank'.format(bank) in str(ex.value)
 
-def test_add_new_operations(mocker):
+def test_add_new_operations_by_filename(mocker):
     # GIVEN
     bank = models.Bank.PL_MILLENIUM
 
@@ -46,6 +48,24 @@ def test_add_new_operations(mocker):
 
     # WHEN
     df = data.add_new_operations(bank, '360', file_name='test_pl_millenium.csv')
+
+    # THEN
+    assert_frame_equal(end_data, df)
+
+def test_add_new_operations_by_contents(mocker):
+    # GIVEN
+    bank = models.Bank.PL_MILLENIUM
+
+    account_raw_data = open(config.data_path() + 'test_pl_millenium.csv', "r", encoding="utf8").read().encode('utf8')
+    encoded_account = base64.b64encode(account_raw_data)
+
+    mocker.patch('scripts.main.importer.importer.load_bank_data', side_effect=[millenium_data])
+    mocker.patch('scripts.main.importer.importer.load_data_from_file', side_effect=[start_data])
+    mocker.patch('scripts.main.total.update_total_money')
+    mocker.patch('pandas.DataFrame.to_csv')
+
+    # WHEN
+    df = data.add_new_operations(bank, '360', contents='data:application/vnd.ms-excel;' + str(encoded_account))
 
     # THEN
     assert_frame_equal(end_data, df)
