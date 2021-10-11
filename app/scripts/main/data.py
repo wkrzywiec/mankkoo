@@ -29,7 +29,7 @@ def load_data():
         total=importer.load_data_from_file(models.FileType.TOTAL)
     )
 
-def add_new_operations_by_filename(bank: models.Bank, file_name: str, account_name: str):
+def add_new_operations(bank: models.Bank, account_name: str, file_name=None, contents=None):
     """Append bank accounts history with new operations. 
     This method return a pandas DataFrame with calculated balance.
 
@@ -43,8 +43,8 @@ def add_new_operations_by_filename(bank: models.Bank, file_name: str, account_na
     Returns:
         pandas.DataFrame: DataFrame that holds transactions history with newly added operations
     """
-    log.info('Adding new operations for %s account from a file %s', account_name, file_name)
-    df_new = importer.load_data_from_file(file_type=models.FileType.BANK, kind=bank, file_name=file_name, account_name=account_name)
+    log.info('Adding new operations for %s account in %s bank', account_name, bank)
+    df_new = importer.load_bank_data(file_name, contents, bank, account_name)
     df = importer.load_data_from_file(models.FileType.ACCOUNT)
     __make_account_backup(df)
 

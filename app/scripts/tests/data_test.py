@@ -30,7 +30,7 @@ def test_add_new_operation_for_incorrect_bank():
 
     # WHEN
     with pytest.raises(KeyError) as ex:
-        data.add_new_operations_by_filename(bank, 'not_known_bank.csv', 'not known account')
+        data.add_new_operations(bank, 'not known account', file_name='not_known_bank.csv')
 
     # THEN
     assert 'Failed to load data from file. Not known bank. Was provided {} bank'.format(bank) in str(ex.value)
@@ -39,12 +39,13 @@ def test_add_new_operations(mocker):
     # GIVEN
     bank = models.Bank.PL_MILLENIUM
 
-    mocker.patch('scripts.main.importer.importer.load_data_from_file', side_effect=[millenium_data, start_data])
+    mocker.patch('scripts.main.importer.importer.load_bank_data', side_effect=[millenium_data])
+    mocker.patch('scripts.main.importer.importer.load_data_from_file', side_effect=[start_data])
     mocker.patch('scripts.main.total.update_total_money')
     mocker.patch('pandas.DataFrame.to_csv')
 
     # WHEN
-    df = data.add_new_operations_by_filename(bank, 'test_pl_millenium.csv', '360')
+    df = data.add_new_operations(bank, '360', file_name='test_pl_millenium.csv')
 
     # THEN
     assert_frame_equal(end_data, df)
@@ -63,12 +64,13 @@ def test_add_new_operations_multiple_banks(mocker):
         ['Millenium', 'checking', '360', '2021-02-15', 'Train ticket', 'Detail new', np.NaN, np.NaN, -500, 'PLN', np.NaN]
     ])
 
-    mocker.patch('scripts.main.importer.importer.load_data_from_file', side_effect=[millenium, account])
+    mocker.patch('scripts.main.importer.importer.load_bank_data', side_effect=[millenium])
+    mocker.patch('scripts.main.importer.importer.load_data_from_file', side_effect=[account])
     mocker.patch('scripts.main.total.update_total_money')
     mocker.patch('pandas.DataFrame.to_csv')
 
     # WHEN
-    df = data.add_new_operations_by_filename(bank, 'test_pl_millenium.csv', '360')
+    df = data.add_new_operations(bank, '360', file_name='test_pl_millenium.csv')
 
     # THEN
     millenium_balance = df.iloc[-1]['Balance']

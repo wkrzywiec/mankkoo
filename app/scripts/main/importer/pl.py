@@ -12,7 +12,7 @@ class Millenium(models.Importer):
     def load_file_by_filename(self, file_name: str):
         return pd.read_csv(config.data_path() + file_name)
 
-    def load_file_by_contents(self, contents):
+    def load_file_by_contents(self, contents: str):
         content_type, content_string = contents.split(',')
         decoded = base64.b64decode(content_string)
         return pd.read_csv(io.StringIO(decoded.decode('utf-8')))
@@ -52,9 +52,9 @@ class Ing(models.Importer):
         return pd.read_csv(config.data_path() + file_name, sep=";")
 
     def load_file_by_contents(self, contents):
-        content_type, content_string = contents.split(';')
+        content_type, content_string = contents.split(',')
         decoded = base64.b64decode(content_string)
-        return pd.read_csv(io.StringIO(decoded.decode('utf-8')))
+        return pd.read_csv(io.StringIO(decoded.decode('utf-8')), sep=";")
 
     def format_file(self, df: pd.DataFrame, account_name=None):
         df = self.__clean_data(df)

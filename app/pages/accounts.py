@@ -13,7 +13,7 @@ from scripts.main.base_logger import log
 def account_page():
     log.info("Loading accounts page")
 
-    accounts_data = importer.load_data(models.FileType.ACCOUNT)
+    accounts_data = importer.load_data_from_file(models.FileType.ACCOUNT)
     accounts_data = accounts_data.iloc[::-1]
     accounts_names = list(accounts_data.groupby(['Bank', 'Account']).groups)
 

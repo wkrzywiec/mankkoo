@@ -9,7 +9,7 @@ class Importer(ABC):
         pass
 
     @abstractmethod
-    def load_file_by_contents(self, contents):
+    def load_file_by_contents(self, contents: str):
         pass
 
     @abstractmethod
