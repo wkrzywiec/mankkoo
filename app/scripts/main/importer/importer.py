@@ -8,7 +8,7 @@ from scripts.main.base_logger import log
 
 class Mankkoo(models.Importer):
 
-    def load_file(self, file_name: str, account_name=None):
+    def import_file(self, file_name: str, account_name=None):
         return pd.read_csv(config.data_path() + file_name)
 
 def load_data(file_type: models.FileType, kind=None, file_name=None, account_name=None):
@@ -69,6 +69,6 @@ def load_data(file_type: models.FileType, kind=None, file_name=None, account_nam
         else:
             raise KeyError("Failed to load data from file. Not known bank. Was provided {} bank".format(str(kind)))
 
-        return bank.load_file(file_name, account_name)
+        return bank.import_file(file_name, account_name)
 
     raise ValueError('A file_type: {} is not supported'.format(file_type))

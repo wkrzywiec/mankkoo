@@ -8,7 +8,7 @@ import scripts.main.data as data
 class Millenium(models.Importer):
     # Millenium bank (PL) - https://www.bankmillennium.pl
 
-    def load_file(self, file_name: str, account_name=None):
+    def import_file(self, file_name: str, account_name=None):
         df = self.__read_from_data_path(file_name)
         df = df[['Data transakcji', 'Opis', 'Obciążenia', 'Uznania', 'Waluta']]
 
@@ -43,7 +43,7 @@ class Millenium(models.Importer):
 class Ing(models.Importer):
     # ING bank (PL) - https://www.ing.pl
 
-    def load_file(self, file_name: str, account_name=None):
+    def import_file(self, file_name: str, account_name=None):
         df = self.__read_from_data_path(file_name)
         df = self.__clean_data(df)
 

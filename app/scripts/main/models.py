@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 class Importer(ABC):
 
     @abstractmethod
-    def load_file(self, file_name: str, account_name=None):
+    def import_file(self, file_name: str, account_name=None):
         pass
 
 class FileType(Enum):
