@@ -23,10 +23,10 @@ def load_data():
     """
     log.info("Loading mankkoo's files")
     return dict(
-        account=importer.load_data(models.FileType.ACCOUNT),
-        investment=importer.load_data(models.FileType.INVESTMENT),
-        stock=importer.load_data(models.FileType.STOCK),
-        total=importer.load_data(models.FileType.TOTAL)
+        account=importer.load_data_from_file(models.FileType.ACCOUNT),
+        investment=importer.load_data_from_file(models.FileType.INVESTMENT),
+        stock=importer.load_data_from_file(models.FileType.STOCK),
+        total=importer.load_data_from_file(models.FileType.TOTAL)
     )
 
 def add_new_operations_by_filename(bank: models.Bank, file_name: str, account_name: str):
@@ -44,8 +44,8 @@ def add_new_operations_by_filename(bank: models.Bank, file_name: str, account_na
         pandas.DataFrame: DataFrame that holds transactions history with newly added operations
     """
     log.info('Adding new operations for %s account from a file %s', account_name, file_name)
-    df_new = importer.load_data(file_type=models.FileType.BANK, kind=bank, file_name=file_name, account_name=account_name)
-    df = importer.load_data(models.FileType.ACCOUNT)
+    df_new = importer.load_data_from_file(file_type=models.FileType.BANK, kind=bank, file_name=file_name, account_name=account_name)
+    df = importer.load_data_from_file(models.FileType.ACCOUNT)
     __make_account_backup(df)
 
     df = pd.concat([df, df_new]).reset_index(drop=True)

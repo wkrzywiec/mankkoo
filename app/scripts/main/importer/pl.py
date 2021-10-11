@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
-import os
+import base64
+import io
 import scripts.main.models as models
 import scripts.main.config as config
 import scripts.main.data as data
@@ -8,8 +9,15 @@ import scripts.main.data as data
 class Millenium(models.Importer):
     # Millenium bank (PL) - https://www.bankmillennium.pl
 
-    def import_file(self, file_name: str, account_name=None):
-        df = self.__read_from_data_path(file_name)
+    def load_file_by_filename(self, file_name: str):
+        return pd.read_csv(config.data_path() + file_name)
+
+    def load_file_by_contents(self, contents):
+        content_type, content_string = contents.split(',')
+        decoded = base64.b64decode(content_string)
+        return pd.read_csv(io.StringIO(decoded.decode('utf-8')))
+
+    def format_file(self, df: pd.DataFrame, account_name=None):
         df = df[['Data transakcji', 'Opis', 'Obciążenia', 'Uznania', 'Waluta']]
 
         df['Operation'] = np.where(df['Obciążenia'] < 0, df['Obciążenia'], df['Uznania'])
@@ -33,9 +41,6 @@ class Millenium(models.Importer):
         result = result[data.account_columns]
         return result
 
-    def __read_from_data_path(self, file_name: str):
-        return pd.read_csv(config.data_path() + file_name)
-
     def __add_missing_columns(self, df: pd.DataFrame, columns):
         existing_columns = list(df.columns)
         return df.reindex(columns=existing_columns + columns)
@@ -43,8 +48,15 @@ class Millenium(models.Importer):
 class Ing(models.Importer):
     # ING bank (PL) - https://www.ing.pl
 
-    def import_file(self, file_name: str, account_name=None):
-        df = self.__read_from_data_path(file_name)
+    def load_file_by_filename(self, file_name: str):
+        return pd.read_csv(config.data_path() + file_name, sep=";")
+
+    def load_file_by_contents(self, contents):
+        content_type, content_string = contents.split(';')
+        decoded = base64.b64decode(content_string)
+        return pd.read_csv(io.StringIO(decoded.decode('utf-8')))
+
+    def format_file(self, df: pd.DataFrame, account_name=None):
         df = self.__clean_data(df)
 
         df = df[['Data transakcji', 'Dane kontrahenta', 'Kwota transakcji (waluta rachunku)', 'Waluta']]
@@ -75,9 +87,6 @@ class Ing(models.Importer):
         result.reset_index(drop=True, inplace=True)
         result = result[data.account_columns]
         return result
-
-    def __read_from_data_path(self, file_name: str):
-        return pd.read_csv(config.data_path() + file_name, sep=';')
 
     def __clean_data(self, df: pd.DataFrame):
         # remove first rows without data

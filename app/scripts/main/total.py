@@ -52,7 +52,7 @@ def update_total_money(accounts: pd.DataFrame, updated_dates: pd.Series):
         [type]: [description]
     """
     log.info('Updating and calculating total money history from %s', str(updated_dates.min()))
-    total = importer.load_data(models.FileType.TOTAL)
+    total = importer.load_data_from_file(models.FileType.TOTAL)
 
     total = __clean_overlapping_days(total, updated_dates.min())
     total_new_lines = __calc_totals(accounts, updated_dates)
@@ -69,8 +69,8 @@ def __calc_totals(accounts: pd.DataFrame, updated_dates: pd.Series):
     updated_dates = updated_dates.append(accounts_dates, ignore_index=True)
     updated_dates = updated_dates.drop_duplicates().sort_values()
 
-    investments = importer.load_data(models.FileType.INVESTMENT)
-    stock = importer.load_data(models.FileType.STOCK)
+    investments = importer.load_data_from_file(models.FileType.INVESTMENT)
+    stock = importer.load_data_from_file(models.FileType.STOCK)
 
     result_list = []
 

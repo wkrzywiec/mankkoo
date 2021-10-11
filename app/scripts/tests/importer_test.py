@@ -23,7 +23,7 @@ def test_load_data(mocker):
     mocker.patch('scripts.main.config.mankoo_file_path', return_value=test_account)
 
     # WHEN
-    result = importer.load_data(models.FileType.ACCOUNT)
+    result = importer.load_data_from_file(models.FileType.ACCOUNT)
 
     # THEN
     assert len(result) == 6
@@ -33,7 +33,7 @@ def test_load_pl_millenium():
     millenium_file = 'test_pl_millenium.csv'
 
     # WHEN
-    result = importer.load_data(models.FileType.BANK, kind=models.Bank.PL_MILLENIUM, file_name=millenium_file)
+    result = importer.load_data_from_file(models.FileType.BANK, kind=models.Bank.PL_MILLENIUM, file_name=millenium_file)
 
     # THEN
     expected = __prepare_expected(exp_result, 'Millenium', 'Millenium Account')
@@ -45,7 +45,7 @@ def test_load_pl_ing():
     ing_file = 'test_pl_ing.csv'
 
     # WHEN
-    result = importer.load_data(models.FileType.BANK, kind=models.Bank.PL_ING, file_name=ing_file)
+    result = importer.load_data_from_file(models.FileType.BANK, kind=models.Bank.PL_ING, file_name=ing_file)
 
     # THEN
     expected = __prepare_expected(exp_result, 'ING', 'ING Account')

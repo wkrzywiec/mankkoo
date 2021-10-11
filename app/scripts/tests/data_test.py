@@ -39,7 +39,7 @@ def test_add_new_operations(mocker):
     # GIVEN
     bank = models.Bank.PL_MILLENIUM
 
-    mocker.patch('scripts.main.importer.importer.load_data', side_effect=[millenium_data, start_data])
+    mocker.patch('scripts.main.importer.importer.load_data_from_file', side_effect=[millenium_data, start_data])
     mocker.patch('scripts.main.total.update_total_money')
     mocker.patch('pandas.DataFrame.to_csv')
 
@@ -63,7 +63,7 @@ def test_add_new_operations_multiple_banks(mocker):
         ['Millenium', 'checking', '360', '2021-02-15', 'Train ticket', 'Detail new', np.NaN, np.NaN, -500, 'PLN', np.NaN]
     ])
 
-    mocker.patch('scripts.main.importer.importer.load_data', side_effect=[millenium, account])
+    mocker.patch('scripts.main.importer.importer.load_data_from_file', side_effect=[millenium, account])
     mocker.patch('scripts.main.total.update_total_money')
     mocker.patch('pandas.DataFrame.to_csv')
 

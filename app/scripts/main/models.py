@@ -1,10 +1,19 @@
 from enum import Enum
 from abc import ABC, abstractmethod
+import pandas as pd
 
 class Importer(ABC):
 
     @abstractmethod
-    def import_file(self, file_name: str, account_name=None):
+    def load_file_by_filename(self, file_name: str):
+        pass
+
+    @abstractmethod
+    def load_file_by_contents(self, contents):
+        pass
+
+    @abstractmethod
+    def format_file(self, df: pd.DataFrame, account_name=None):
         pass
 
 class FileType(Enum):
