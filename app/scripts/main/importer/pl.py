@@ -44,10 +44,12 @@ class Ing(models.Importer):
     # ING bank (PL) - https://www.ing.pl
 
     def load_file(self, file_name: str, account_name=None):
-        temp_file_path = self.__prepare_temp_file(file_name)
-        df = self.__read_from_data_path(temp_file_path)
+        df = self.__read_from_data_path(file_name)
+        df = self.__clean_data(df)
 
         df = df[['Data transakcji', 'Dane kontrahenta', 'Kwota transakcji (waluta rachunku)', 'Waluta']]
+
+        df = df.loc[:, ~df.columns.duplicated()]
 
         df = df.rename(columns={
             'Data transakcji': 'Date',
@@ -72,44 +74,27 @@ class Ing(models.Importer):
         result = result.sort_values(by="Date")
         result.reset_index(drop=True, inplace=True)
         result = result[data.account_columns]
-        os.remove(temp_file_path)
         return result
 
-    def __prepare_temp_file(self, file_name: str):
-        # TODO remove this approach with pure pandas
-        temp_content = self.__clean_data(file_name)
-        return self.__save_file(file_name, temp_content)
-
-    def __clean_data(self, file_name: str):
-        with open(config.data_path() + file_name, 'r+') as file:
-            lines = file.readlines()
-            file.close()
-
-            start_index = 0
-            stop_index = 0
-
-            for i, elem in enumerate(lines):
-                if 'Data transakcji' in elem and start_index == 0:
-                    start_index = i
-
-                if start_index != 0 and elem.strip() == '':
-                    stop_index = i
-                    break
-
-        return lines[start_index:stop_index]
-
-    def __save_file(self, file_name: str, temp_content):
-        temp_file_path = config.data_path() + file_name + '_temp'
-        temp_file = open(temp_file_path, 'w')
-
-        for line in temp_content:
-            temp_file.write(line)
-
-        temp_file.close()
-        return temp_file_path
-
     def __read_from_data_path(self, file_name: str):
-        return pd.read_csv(file_name, sep=';')
+        return pd.read_csv(config.data_path() + file_name, sep=';')
+
+    def __clean_data(self, df: pd.DataFrame):
+        # remove first rows without data
+        column = df.iloc[:, 0]
+        start_row_index = column.index[column == 'Data transakcji'].item()
+        df = df.iloc[start_row_index:, :]
+
+        #  remove last row
+        df = df[:-1]
+
+        # make first row a header
+        df.columns = df.iloc[0]
+        df = df[1:]
+
+        # drop columns with header with nan name
+        df = df.loc[:, df.columns.notnull()]
+        return df.reset_index(drop=True)
 
     def __add_missing_columns(self, df: pd.DataFrame, columns):
         existing_columns = list(df.columns)

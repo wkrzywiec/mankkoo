@@ -50,7 +50,7 @@ def test_load_pl_ing():
     # THEN
     expected = __prepare_expected(exp_result, 'ING', 'ING Account')
     result = __drop_empty_columns(result)
-    assert_frame_equal(expected.reset_index(drop=True), result.reset_index(drop=True))
+    assert_frame_equal(expected.reset_index(drop=True), result.reset_index(drop=True), check_names=False)
 
 def __prepare_expected(df, bank, account):
     result = __replace_placholders(df, bank, account)
