@@ -18,11 +18,13 @@ from scripts.main.base_logger import log
 external_stylesheets = [
     'https://codepen.io/chriddyp/pen/bWLwgP.css',
     'https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css',
-    'https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css'
+    'https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css',
+    'https://cdn.jsdelivr.net/npm/sweetalert2@11.1.7/dist/sweetalert2.min.css'
 ]
 
 external_scripts = [
-    'https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js'
+    'https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js',
+    'https://cdn.jsdelivr.net/npm/sweetalert2@11.1.7/dist/sweetalert2.min.js',
 ]
 
 mankkoo_colors = ['#A40E4C', '#ACC3A6', '#F5D6BA', '#F49D6E', '#27474E', '#BEB8EB', '#6BBF59', '#C2E812', '#5299D3']
@@ -60,7 +62,7 @@ def display_page(pathname):
 
     return html.Div(children=[navbar.navbar(app, pathname), page])
 
-@app.callback(Output('import-modal-wrapper', 'children'),
+@app.callback(Output('upload-status', 'value'),
               Input('upload-data', 'contents'),
               State('upload-data', 'filename'),
               State('upload-data', 'last_modified'),
@@ -69,7 +71,12 @@ def display_page(pathname):
               State('account-type', 'value'))
 def update_output(list_of_contents, list_of_names, list_of_dates, bank_id, account_name, account_type):
     if list_of_contents is not None:
-        dt.add_new_operations(models.Bank[bank_id], account_name, contents=list_of_contents)
+        try:
+            dt.add_new_operations(models.Bank[bank_id], account_name, contents=list_of_contents)
+            return "success"
+        except Exception as ex:
+            log.info(f"Error occured: {ex}")
+            return "failure"
 
 
 if __name__ == '__main__':

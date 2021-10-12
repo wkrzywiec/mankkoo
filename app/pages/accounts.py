@@ -80,6 +80,9 @@ def account_page():
                 id="tabs-styled-with-inline",
                 parent_className='accounts-tabs-container',
                 children=account_tabs)
+        ]),
+        html.Div(id='upload-status-container', hidden=True, children=[
+            dcc.Input(id='upload-status', type='hidden', value="no-info")
         ])
     ])
 
