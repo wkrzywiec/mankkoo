@@ -1,0 +1,9 @@
+accounts:
+  importers:
+    - PL_ING
+    - MANKKOO
+    - PL_MBANK
+    - PL_MILLENIUM
+  ui:
+    default_importer: PL_MILLENIUM
+

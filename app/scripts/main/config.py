@@ -1,5 +1,6 @@
 import os
 import pathlib
+import yaml
 from sys import platform
 from scripts.main.base_logger import log
 import scripts.main.data as data
@@ -99,3 +100,8 @@ def data_path() -> str:
     if platform == "darwin":
         raise ValueError("MacOS is currently not supported")
     raise ValueError("{} OS is not supported".format(platform))
+
+def load_config_file():
+    log.info('Loading config.yaml file')
+    with open(data_path() + 'config.yaml') as c:
+        return yaml.safe_load(c)

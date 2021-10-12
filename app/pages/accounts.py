@@ -1,4 +1,3 @@
-from dash.dependencies import Input, Output, State
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_table as table
@@ -7,11 +6,16 @@ import plotly.express as px
 
 import scripts.main.importer.importer as importer
 import scripts.main.models as models
+import scripts.main.config as config
+import scripts.main.ui as ui
 
 from scripts.main.base_logger import log
 
 def account_page():
     log.info("Loading accounts page")
+
+    config_file = config.load_config_file()
+    bank_ids = ui.decode_bank_ids(config_file['accounts']['importers'])
 
     accounts_data = importer.load_data_from_file(models.FileType.ACCOUNT)
     accounts_data = accounts_data.iloc[::-1]
@@ -32,12 +36,8 @@ def account_page():
                 html.Label(htmlFor='bank-id', children=['Bank']),
                 dcc.Dropdown(
                     id='bank-id',
-                    options=[
-                        {'label': 'Poland - ING', 'value': 'PL_ING'},
-                        {'label': 'Poland - Millenium', 'value': 'PL_MILLENIUM'},
-                        {'label': 'Mankkoo format', 'value': 'MANKKOO'}
-                    ],
-                    value='PL_MILLENIUM')
+                    options=bank_ids,
+                    value=config_file['accounts']['ui']['default_importer'])
             ]),
             html.Div(className='col-2', children=[
                 html.Label(htmlFor='account-type', children=['Account type']),
