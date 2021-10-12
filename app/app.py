@@ -3,16 +3,17 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
 
-import scripts.main.config as config
-import scripts.main.models as models
-import scripts.main.data as dt
-from scripts.main.base_logger import log
 import navbar
 import pages.main as main
 import pages.accounts as pa
 import pages.investments as pi
 import pages.stocks as ps
 import pages.retirement as pr
+
+import scripts.main.config as config
+import scripts.main.models as models
+import scripts.main.data as dt
+from scripts.main.base_logger import log
 
 external_stylesheets = [
     'https://codepen.io/chriddyp/pen/bWLwgP.css',
@@ -68,8 +69,8 @@ def display_page(pathname):
               State('account-type', 'value'))
 def update_output(list_of_contents, list_of_names, list_of_dates, bank_id, account_name, account_type):
     if list_of_contents is not None:
-        # dt.add_new_operations(models.Bank.PL_MILLENIUM, list_of_names, '360')
-        log.info("bank-id: {}, account_name: {}, account_type: {}".format(bank_id, account_name, account_type))
+        dt.add_new_operations(models.Bank[bank_id], account_name, contents=list_of_contents)
+
 
 if __name__ == '__main__':
     log.info("Starting mankkoo's server")

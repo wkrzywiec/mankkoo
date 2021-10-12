@@ -33,11 +33,11 @@ def account_page():
                 dcc.Dropdown(
                     id='bank-id',
                     options=[
-                        {'label': 'New York City', 'value': 'NYC'},
-                        {'label': 'Montreal', 'value': 'MTL'},
-                        {'label': 'San Francisco', 'value': 'SF'}
+                        {'label': 'Poland - ING', 'value': 'PL_ING'},
+                        {'label': 'Poland - Millenium', 'value': 'PL_MILLENIUM'},
+                        {'label': 'Mankkoo format', 'value': 'MANKKOO'}
                     ],
-                    value='NYC')
+                    value='PL_MILLENIUM')
             ]),
             html.Div(className='col-2', children=[
                 html.Label(htmlFor='account-type', children=['Account type']),

@@ -29,10 +29,10 @@ class Bank(Enum):
     Args:
         Enum (str): country and name of a bank
     """
-    MANKKOO = 'mankkoo'
-    PL_MBANK = 'pl_mbank'
-    PL_MILLENIUM = 'pl_millenium'
-    PL_ING = 'pl_ing'
+    MANKKOO = 'MANKKOO'
+    PL_MBANK = 'PL_MBANK'
+    PL_MILLENIUM = 'PL_MILLENIUM'
+    PL_ING = 'PL_ING'
 
 class Account(Enum):
     """Representations of different kinds of account, like checking, savings, cash or for retirement

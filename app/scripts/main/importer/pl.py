@@ -37,7 +37,7 @@ class Millenium(models.Importer):
         df['Balance'] = np.NaN
 
         result = self.__add_missing_columns(df, ['Category', 'Comment'])
-        result = result.sort_values(by="Date")
+        result = result.iloc[::-1]
         result = result[data.account_columns]
         return result
 
