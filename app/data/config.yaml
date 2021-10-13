@@ -4,6 +4,4 @@ accounts:
     - MANKKOO
     - PL_MBANK
     - PL_MILLENIUM
-  ui:
-    default_importer: PL_MILLENIUM
 

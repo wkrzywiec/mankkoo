@@ -11,6 +11,7 @@ account_file = 'account.csv'
 investment_file = 'investment.csv'
 stock_file = 'stock.csv'
 total_file = 'total.csv'
+config_file = 'config.yaml'
 
 mankkoo_files = {account_file, investment_file, stock_file, total_file}
 
@@ -20,18 +21,34 @@ def init_data_folder():
     mankkoo_path = mankoo_path()
     mankoo_account_file = mankoo_file_path('account')
 
-    log.info("Checking if mankkoo's files are existing")
+    log.info("Checking if mankkoo's files are existing...")
 
     if not os.path.exists(mankkoo_path):
-        log.info('Creating mankkoo directory')
+        log.info('Creating mankkoo directory...')
         os.makedirs(mankkoo_path)
 
     for file in mankkoo_files:
         file_path = mankoo_file_path(file)
         if not os.path.exists(file_path):
-            log.info("Creating mankkoo's " + file + " file")
+            log.info("Creating mankkoo's " + file + " file...")
             df = pd.DataFrame(columns=__select_columns(file))
             df.to_csv(file_path, index=False)
+            log.info(f"{file} was created in .mankkoo directory")
+
+    if not os.path.exists(mankkoo_path + __slash() + config_file):
+        log.info(f"Creating user {config_file} file...")
+        config_d = dict(
+            accounts=dict(
+                ui=dict(
+                    default_importer='',
+                    hide_accounts=[]
+                )
+            )
+        )
+
+        with open(mankkoo_path + __slash() + config_file, 'w') as outfile:
+            yaml.dump(config_d, outfile, allow_unicode=True, default_flow_style=False)
+        log.info(f"User {config_file} file was created in .mankkoo directory")
 
 def __select_columns(file: str):
     if file == account_file:
@@ -44,7 +61,7 @@ def __select_columns(file: str):
         return data.total_columns
 
 def mankoo_file_path(file: str):
-    """Get full path of one of mankkoo's files. 
+    """Get full path of one of mankkoo's files.
 
     Args:
         file (str): Which file needs to be loaded. Supported values: 'account', 'investment' and 'stock'
@@ -101,7 +118,12 @@ def data_path() -> str:
         raise ValueError("MacOS is currently not supported")
     raise ValueError("{} OS is not supported".format(platform))
 
-def load_config_file():
-    log.info('Loading config.yaml file')
-    with open(data_path() + 'config.yaml') as c:
+def load_global_config():
+    log.info(f"Loading global {config_file} file")
+    with open(data_path() + config_file) as c:
+        return yaml.safe_load(c)
+
+def load_user_config():
+    log.info(f"Loading user {config_file} file")
+    with open(mankoo_path() + __slash() + config_file, 'r', encoding='utf-8') as c:
         return yaml.safe_load(c)

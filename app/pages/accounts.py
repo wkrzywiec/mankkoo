@@ -14,8 +14,9 @@ from scripts.main.base_logger import log
 def account_page():
     log.info("Loading accounts page")
 
-    config_file = config.load_config_file()
-    bank_ids = ui.decode_bank_ids(config_file['accounts']['importers'])
+    global_config = config.load_global_config()
+    user_config = config.load_user_config()
+    bank_ids = ui.decode_bank_ids(global_config['accounts']['importers'])
 
     accounts_data = importer.load_data_from_file(models.FileType.ACCOUNT)
     accounts_data = accounts_data.iloc[::-1]
@@ -24,6 +25,9 @@ def account_page():
     account_tabs = []
 
     for account_name in accounts_names:
+        if account_name[0] + ' - ' + account_name[1] in user_config['accounts']['ui']['hide_accounts']:
+            continue
+
         single_account = accounts_data[(accounts_data['Bank'] == account_name[0]) & (accounts_data['Account'] == account_name[1])]
         single_account = single_account[['Date', 'Title', 'Details', 'Operation', 'Balance', 'Currency', 'Comment']]
 
@@ -37,7 +41,7 @@ def account_page():
                 dcc.Dropdown(
                     id='bank-id',
                     options=bank_ids,
-                    value=config_file['accounts']['ui']['default_importer'])
+                    value=user_config['accounts']['ui']['default_importer'])
             ]),
             html.Div(className='col-2', children=[
                 html.Label(htmlFor='account-type', children=['Account type']),
