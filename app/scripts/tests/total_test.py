@@ -2,7 +2,6 @@ import pytest
 import numpy as np
 from pandas._testing import assert_frame_equal
 import datetime
-import scripts.main.data as data
 import scripts.main.total as total
 import scripts.main.data_for_test as td
 
@@ -26,6 +25,24 @@ def test_total_money_data():
         {'Type': 'Investments', 'Total': 2000.00, 'Percentage': 0.41889378529180143},
         {'Type': 'Stocks', 'Total': 2000.00, 'Percentage': 0.41889378529180143}
     ]
+
+def test_total_money_data_for_checking_accounts():
+    # GIVEN
+    all_data = dict(
+        account=td.account_data([
+            ['Millenium', 'checking', '360', '2021-01-01', 'Init money', 'Detail 1', np.NaN, 'init', 1000, 'PLN', 2000],
+            ['Millenium', 'checking', '360', '2021-01-31', 'Init money', 'Detail 1', np.NaN, 'init', -1000, 'PLN', 1000],
+            ['Bank B', 'checking', 'Account name', '2021-01-31', 'Armchair', 'Detail 2', np.NaN, np.NaN, -222.22, 'PLN', 1000]
+        ]),
+        investment=td.investment_data(),
+        stock=td.stock_data()
+    )
+
+    # WHEN
+    total_money = total.total_money_data(all_data)
+
+    # THEN
+    assert total_money[total_money['Type'] == 'Checking Account'].iloc[0]['Total'] == 2000.0
 
 def test_accounts_balance_for_day_multiple_accounts():
     # GIVEN
@@ -117,7 +134,7 @@ def test_update_total_money(mocker):
         ['Bank A', '2021-01-01', 'ETFSP500', 'Buy', 1000.00, 10, 'PLN', np.NaN, np.NaN, np.NaN],
         ['Bank A', '2021-01-01', 'ETFDAX', 'Buy', 1000.00, 10, 'PLN', np.NaN, np.NaN, np.NaN]
     ])
-    mocker.patch('scripts.main.importer.importer.load_data', side_effect=[old_total, inv_data, stocks])
+    mocker.patch('scripts.main.importer.importer.load_data_from_file', side_effect=[old_total, inv_data, stocks])
     mocker.patch('pandas.DataFrame.to_csv')
 
     # WHEN

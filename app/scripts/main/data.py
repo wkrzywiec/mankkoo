@@ -1,6 +1,4 @@
 import pandas as pd
-import numpy as np
-import os
 import scripts.main.importer.importer as importer
 import scripts.main.models as models
 import scripts.main.config as config
@@ -15,21 +13,21 @@ stock_columns = ['Broker', 'Date', 'Title', 'Operation', 'Total Value', 'Units',
 total_columns = ['Date', 'Total']
 
 
-def load_data():
-    """Load account.csv file into a Pandas DataFrame
+def load_data() -> dict:
+    """Load aggregated data of all financial data (accounts, investments, etc.)
 
     Returns:
-        pandas.DataFrame: DataFrame that holds all historical data
+        dict(pandas.DataFrame): a dictonary with categorized financial data
     """
     log.info("Loading mankkoo's files")
     return dict(
-        account=importer.load_data(models.FileType.ACCOUNT),
-        investment=importer.load_data(models.FileType.INVESTMENT),
-        stock=importer.load_data(models.FileType.STOCK),
-        total=importer.load_data(models.FileType.TOTAL)
+        account=importer.load_data_from_file(models.FileType.ACCOUNT),
+        investment=importer.load_data_from_file(models.FileType.INVESTMENT),
+        stock=importer.load_data_from_file(models.FileType.STOCK),
+        total=importer.load_data_from_file(models.FileType.TOTAL)
     )
 
-def add_new_operations(bank: models.Bank, file_name: str, account_name: str):
+def add_new_operations(bank: models.Bank, account_name: str, file_name=None, contents=None):
     """Append bank accounts history with new operations. 
     This method return a pandas DataFrame with calculated balance.
 
@@ -43,9 +41,9 @@ def add_new_operations(bank: models.Bank, file_name: str, account_name: str):
     Returns:
         pandas.DataFrame: DataFrame that holds transactions history with newly added operations
     """
-    log.info('Adding new operations for %s account from a file %s', account_name, file_name)
-    df_new = importer.load_data(file_type=models.FileType.BANK, kind=bank, file_name=file_name, account_name=account_name)
-    df = importer.load_data(models.FileType.ACCOUNT)
+    log.info('Adding new operations for %s account in %s bank', account_name, bank)
+    df_new = importer.load_bank_data(file_name, contents, bank, account_name)
+    df = importer.load_data_from_file(models.FileType.ACCOUNT)
     __make_account_backup(df)
 
     df = pd.concat([df, df_new]).reset_index(drop=True)
@@ -53,7 +51,7 @@ def add_new_operations(bank: models.Bank, file_name: str, account_name: str):
     df = calculate_balance(df, account_name)
     total.update_total_money(df, df_new['Date'])
     df = df.sort_values(by='Date')
-    df.to_csv(config.mankoo_file_path('account'), index=False)
+    df.to_csv(config.mankkoo_file_path('account'), index=False)
     log.info('%d new operations for %s account were added.', df_new['Bank'].size, account_name)
     return df
 
@@ -84,7 +82,11 @@ def __latest_balance_for_account(df: pd.DataFrame, account_name: str):
 
     result = df.loc[(df['Account'] == account_name)]
     result = result.dropna(subset=['Balance'])
-    return result.iloc[-1]['Balance']
+    try:
+        return result.iloc[-1]['Balance']
+    except IndexError:
+        log.info('There are no latest balance for %s account. Therefore assuming 0.', account_name)
+        return 0
 
 def __make_account_backup(df: pd.DataFrame):
-    df.to_csv(config.mankoo_file_path('account-backup'), index=False)
+    df.to_csv(config.mankkoo_file_path('account-backup'), index=False)

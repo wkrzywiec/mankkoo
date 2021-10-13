@@ -1,4 +1,3 @@
-from dash.dependencies import Input, Output, State
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_table as table
@@ -7,33 +6,65 @@ import plotly.express as px
 
 import scripts.main.importer.importer as importer
 import scripts.main.models as models
+import scripts.main.config as config
+import scripts.main.ui as ui
 
 from scripts.main.base_logger import log
 
 def account_page():
     log.info("Loading accounts page")
 
-    accounts_data = importer.load_data(models.FileType.ACCOUNT)
+    global_config = config.load_global_config()
+    user_config = config.load_user_config()
+    bank_ids = ui.decode_bank_ids(global_config['accounts']['importers'])
+
+    accounts_data = importer.load_data_from_file(models.FileType.ACCOUNT)
     accounts_data = accounts_data.iloc[::-1]
     accounts_names = list(accounts_data.groupby(['Bank', 'Account']).groups)
 
     account_tabs = []
 
     for account_name in accounts_names:
+        if account_name[0] + ' - ' + account_name[1] in user_config['accounts']['ui']['hide_accounts']:
+            continue
+
         single_account = accounts_data[(accounts_data['Bank'] == account_name[0]) & (accounts_data['Account'] == account_name[1])]
         single_account = single_account[['Date', 'Title', 'Details', 'Operation', 'Balance', 'Currency', 'Comment']]
 
         account_tab = __account_tab(single_account, account_name)
         account_tabs.append(account_tab)
 
-    return html.Div(className='height-100 container main-body', children=[  
-
+    return html.Div(className='height-100 container main-body', children=[
+        html.Div(className='row', children=[
+            html.Div(className='col-4', children=[
+                html.Label(htmlFor='bank-id', children=['Bank']),
+                dcc.Dropdown(
+                    id='bank-id',
+                    options=bank_ids,
+                    value=user_config['accounts']['ui']['default_importer'])
+            ]),
+            html.Div(className='col-2', children=[
+                html.Label(htmlFor='account-type', children=['Account type']),
+                dcc.Dropdown(
+                    id='account-type',
+                    options=[
+                        {'label': 'Checking', 'value': 'checking'},
+                        {'label': 'Savings', 'value': 'savings'}
+                    ],
+                    value='checking')
+            ]),
+            html.Div(className='col-4', children=[
+                html.Label(htmlFor='account-name', children=['Account name']),
+                dcc.Input(id='account-name', placeholder='Accunt name', type='text', style={'width': '100%'})
+            ])
+        ]),
         html.Div(className='row', children=[
             dcc.Upload(
                 id='upload-data',
                 children=html.Div([
                     'Drag and Drop or ',
-                    html.A('Select Files')
+                    html.A('Select Files'),
+                    " to upload account's files"
                 ]),
                 style={
                     'width': '100%',
@@ -45,15 +76,17 @@ def account_page():
                     'textAlign': 'center',
                     'margin': '10px'
                 },
-                # Allow multiple files to be uploaded
                 multiple=False),
-            html.Div(id='output-data-upload', style={'display': 'none'})
+            html.Div(id='import-modal-wrapper', style={'display': 'none'})
         ]),
         html.Div(className='row', children=[
             dcc.Tabs(
                 id="tabs-styled-with-inline",
                 parent_className='accounts-tabs-container',
                 children=account_tabs)
+        ]),
+        html.Div(id='upload-status-container', hidden=True, children=[
+            dcc.Input(id='upload-status', type='hidden', value="no-info")
         ])
     ])
 
