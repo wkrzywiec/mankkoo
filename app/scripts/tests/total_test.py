@@ -2,7 +2,6 @@ import pytest
 import numpy as np
 from pandas._testing import assert_frame_equal
 import datetime
-import scripts.main.data as data
 import scripts.main.total as total
 import scripts.main.data_for_test as td
 

@@ -6,7 +6,15 @@ import scripts.main.config as config
 import scripts.main.models as models
 from scripts.main.base_logger import log
 
-def total_money_data(data: dict):
+def total_money_data(data: dict) -> pd.DataFrame:
+    """Get summary data of all assets sorted by categories
+
+    Args:
+        data (dict): dictionary with all financial data
+
+    Returns:
+        pd.DataFrame: grouped financial standings
+    """
 
     log.info('Fetching latest total money data')
     checking_account = __latest_account_balance(data, 'checking')
@@ -41,7 +49,7 @@ def __latest_account_balance(data: dict, type: str) -> float:
         return accounts_balance_for_day(df, df['Date'].max())
     return 0.00
 
-def update_total_money(accounts: pd.DataFrame, updated_dates: pd.Series):
+def update_total_money(accounts: pd.DataFrame, updated_dates: pd.Series) -> pd.DataFrame:
     """Calculate and add rows of totals for each day from pd.Series
 
     Args:
@@ -49,7 +57,7 @@ def update_total_money(accounts: pd.DataFrame, updated_dates: pd.Series):
         updated_dates (pd.Series): Series of updated dates for which calculation needs to be done
 
     Returns:
-        [type]: [description]
+        pd.DataFrame: new, updated total assets standing
     """
     log.info('Updating and calculating total money history from %s', str(updated_dates.min()))
     total = importer.load_data_from_file(models.FileType.TOTAL)
@@ -57,7 +65,7 @@ def update_total_money(accounts: pd.DataFrame, updated_dates: pd.Series):
     total = __clean_overlapping_days(total, updated_dates.min())
     total_new_lines = __calc_totals(accounts, updated_dates)
     total = pd.concat([total, total_new_lines]).reset_index(drop=True)
-    total.to_csv(config.mankoo_file_path('total'), index=False)
+    total.to_csv(config.mankkoo_file_path('total'), index=False)
     log.info('Total money data was updated successfully')
     return total
 
@@ -101,7 +109,16 @@ def __get_balance_for_day_or_earlier(accounts: pd.DataFrame, account_name: str, 
         return 0
     return only_specific_dates_accounts['Balance'].iloc[-1]
 
-def investments_for_day(investments: pd.DataFrame, date: datetime.date):
+def investments_for_day(investments: pd.DataFrame, date: datetime.date) -> float:
+    """Sums all investments in particular day
+
+    Args:
+        investments (pd.DataFrame): DataFrame with all operations for investments
+        date (datetime.date): a day for which sum of investments need to be calculated
+
+    Returns:
+        float: calculated total sum of all investments
+    """
     after_start = investments['Start Date'] <= date
     before_end = investments['End Date'] >= date
     is_na = pd.isna(investments['End Date'])
@@ -109,7 +126,16 @@ def investments_for_day(investments: pd.DataFrame, date: datetime.date):
     active_inv = investments.loc[after_start & (before_end | is_na)]
     return active_inv['Start Amount'].to_numpy().sum()
 
-def stock_for_day(stock: pd.DataFrame, date: datetime.date):
+def stock_for_day(stock: pd.DataFrame, date: datetime.date) -> float:
+    """Sums all stock data in particular day
+
+    Args:
+        stock (pd.DataFrame): DataFrame with all operations with stocks
+        date (datetime.date): a day for which sum of stocks need to be calculated
+
+    Returns:
+        float: calculated total sum of all stock value
+    """
     df = stock.loc[stock['Date'] <= date]
     df['Change'] = [1 if x == 'Buy' else -1 for x in df['Operation']]
     df['Val'] = df['Total Value'] * df['Change']

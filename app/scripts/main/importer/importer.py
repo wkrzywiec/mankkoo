@@ -27,13 +27,13 @@ def load_data_from_file(file_type: models.FileType, kind=None, file_name=None, a
     log.info('Loading %s file', file_type)
 
     if file_type is models.FileType.ACCOUNT:
-        result = pd.read_csv(config.mankoo_file_path('account'), parse_dates=['Date'])
+        result = pd.read_csv(config.mankkoo_file_path('account'), parse_dates=['Date'])
         result = result.astype({'Account': 'string', 'Balance': 'float', 'Operation': 'float', 'Date': 'datetime64[ns]'})
         result['Date'] = result['Date'].dt.date
         return result
 
     if file_type is models.FileType.INVESTMENT:
-        result = pd.read_csv(config.mankoo_file_path('investment'), parse_dates=['Start Date', 'End Date'])
+        result = pd.read_csv(config.mankkoo_file_path('investment'), parse_dates=['Start Date', 'End Date'])
         result = result.astype({'Active': 'int', 'Start Amount': 'float', 'End amount': 'float', 'Start Date': 'datetime64[ns]', 'End Date': 'datetime64[ns]'})
         result.Active = result.Active.astype('bool')
         result['Start Date'] = result['Start Date'].dt.date
@@ -41,13 +41,13 @@ def load_data_from_file(file_type: models.FileType, kind=None, file_name=None, a
         return result
 
     if file_type is models.FileType.STOCK:
-        result = pd.read_csv(config.mankoo_file_path('stock'), parse_dates=['Date'])
+        result = pd.read_csv(config.mankkoo_file_path('stock'), parse_dates=['Date'])
         result = result.astype({'Total Value': 'float', 'Date': 'datetime64[ns]'})
         result['Date'] = result['Date'].dt.date
         return result
 
     if file_type is models.FileType.TOTAL:
-        result = pd.read_csv(config.mankoo_file_path('total'), parse_dates=['Date'])
+        result = pd.read_csv(config.mankkoo_file_path('total'), parse_dates=['Date'])
         result = result.astype({'Date': 'datetime64[ns]', 'Total': 'float'})
         result['Date'] = result['Date'].dt.date
         return result

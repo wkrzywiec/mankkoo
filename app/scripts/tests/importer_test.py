@@ -2,7 +2,6 @@ import pytest
 import scripts.main.importer.importer as importer
 import scripts.main.config as config
 import scripts.main.models as models
-import scripts.main.data as data
 import scripts.main.data_for_test as td
 import numpy as np
 import pandas as pd
@@ -12,7 +11,7 @@ exp_result = td.account_data([
     ['Bank', 'checking', 'Bank Account', '2021-01-01', 'Init money', np.NaN, np.NaN, np.NaN, 1000.00, 'PLN', np.NaN],
     ['Bank', 'checking', 'Bank Account', '2021-02-02', 'Out 1', np.NaN, np.NaN, np.NaN, -200.00, 'PLN', np.NaN],
     ['Bank', 'checking', 'Bank Account', '2021-03-03', 'Out 2', np.NaN, np.NaN, np.NaN, -3.33, 'PLN', np.NaN],
-    ['Bank', 'checking', 'Bankm Account', '2021-04-04', 'In 1', np.NaN, np.NaN, np.NaN, 3.33, 'PLN', np.NaN],
+    ['Bank', 'checking', 'Bank Account', '2021-04-04', 'In 1', np.NaN, np.NaN, np.NaN, 3.33, 'PLN', np.NaN],
     ['Bank', 'checking', 'Bank Account', '2021-05-05', 'Out 3', np.NaN, np.NaN, np.NaN, -400.00, 'PLN', np.NaN],
     ['Bank', 'checking', 'Bank Account', '2021-06-06', 'In 2', np.NaN, np.NaN, np.NaN, 50.00, 'PLN', np.NaN]
 ])
@@ -20,7 +19,7 @@ exp_result = td.account_data([
 def test_load_data(mocker):
     # GIVEN
     test_account = config.data_path() + config.account_file
-    mocker.patch('scripts.main.config.mankoo_file_path', return_value=test_account)
+    mocker.patch('scripts.main.config.mankkoo_file_path', return_value=test_account)
 
     # WHEN
     result = importer.load_data_from_file(models.FileType.ACCOUNT)

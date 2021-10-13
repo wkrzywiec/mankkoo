@@ -1,7 +1,15 @@
 import pycountry
 from scripts.main.base_logger import log
 
-def decode_bank_ids(bank_ids):
+def decode_bank_ids(bank_ids) -> list:
+    """Transforms Bank account importer ids into user-friendly representation
+
+    Args:
+        bank_ids (list): list of strings that represents bank account importers
+
+    Returns:
+        list: list of user-friendly strings that represents each bank importer on UI
+    """
 
     result = []
     temp = []

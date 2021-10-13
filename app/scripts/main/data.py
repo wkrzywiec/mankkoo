@@ -1,6 +1,4 @@
 import pandas as pd
-import numpy as np
-import os
 import scripts.main.importer.importer as importer
 import scripts.main.models as models
 import scripts.main.config as config
@@ -15,11 +13,11 @@ stock_columns = ['Broker', 'Date', 'Title', 'Operation', 'Total Value', 'Units',
 total_columns = ['Date', 'Total']
 
 
-def load_data():
-    """Load account.csv file into a Pandas DataFrame
+def load_data() -> dict:
+    """Load aggregated data of all financial data (accounts, investments, etc.)
 
     Returns:
-        pandas.DataFrame: DataFrame that holds all historical data
+        dict(pandas.DataFrame): a dictonary with categorized financial data
     """
     log.info("Loading mankkoo's files")
     return dict(
@@ -53,7 +51,7 @@ def add_new_operations(bank: models.Bank, account_name: str, file_name=None, con
     df = calculate_balance(df, account_name)
     total.update_total_money(df, df_new['Date'])
     df = df.sort_values(by='Date')
-    df.to_csv(config.mankoo_file_path('account'), index=False)
+    df.to_csv(config.mankkoo_file_path('account'), index=False)
     log.info('%d new operations for %s account were added.', df_new['Bank'].size, account_name)
     return df
 
@@ -91,4 +89,4 @@ def __latest_balance_for_account(df: pd.DataFrame, account_name: str):
         return 0
 
 def __make_account_backup(df: pd.DataFrame):
-    df.to_csv(config.mankoo_file_path('account-backup'), index=False)
+    df.to_csv(config.mankkoo_file_path('account-backup'), index=False)

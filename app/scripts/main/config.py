@@ -16,26 +16,25 @@ config_file = 'config.yaml'
 mankkoo_files = {account_file, investment_file, stock_file, total_file}
 
 def init_data_folder():
-    """Initilize .mankkoo directory in home folder and account.csv file inside of it
+    """Initilize .mankkoo directory in home folder, config file and all storage files
     """
-    mankkoo_path = mankoo_path()
-    mankoo_account_file = mankoo_file_path('account')
+    m_path = mankkoo_path()
 
     log.info("Checking if mankkoo's files are existing...")
 
-    if not os.path.exists(mankkoo_path):
+    if not os.path.exists(m_path):
         log.info('Creating mankkoo directory...')
-        os.makedirs(mankkoo_path)
+        os.makedirs(m_path)
 
     for file in mankkoo_files:
-        file_path = mankoo_file_path(file)
+        file_path = mankkoo_file_path(file)
         if not os.path.exists(file_path):
             log.info("Creating mankkoo's " + file + " file...")
             df = pd.DataFrame(columns=__select_columns(file))
             df.to_csv(file_path, index=False)
             log.info(f"{file} was created in .mankkoo directory")
 
-    if not os.path.exists(mankkoo_path + __slash() + config_file):
+    if not os.path.exists(m_path + __slash() + config_file):
         log.info(f"Creating user {config_file} file...")
         config_d = dict(
             accounts=dict(
@@ -46,7 +45,7 @@ def init_data_folder():
             )
         )
 
-        with open(mankkoo_path + __slash() + config_file, 'w') as outfile:
+        with open(m_path + __slash() + config_file, 'w') as outfile:
             yaml.dump(config_d, outfile, allow_unicode=True, default_flow_style=False)
         log.info(f"User {config_file} file was created in .mankkoo directory")
 
@@ -60,7 +59,7 @@ def __select_columns(file: str):
     if file == total_file:
         return data.total_columns
 
-def mankoo_file_path(file: str):
+def mankkoo_file_path(file: str) -> str:
     """Get full path of one of mankkoo's files.
 
     Args:
@@ -72,7 +71,7 @@ def mankoo_file_path(file: str):
     Returns:
         str: full path to the mankkoo's data file
     """
-    path = mankoo_path() + __slash()
+    path = mankkoo_path() + __slash()
 
     if file in {'account', 'account-backup', 'investment', 'stock', 'total'}:
         return path + file + '.csv'
@@ -82,7 +81,7 @@ def mankoo_file_path(file: str):
 
     raise ValueError("Can't get mankkoo file. Unsupported file type: {}".format(file))
 
-def mankoo_path():
+def mankkoo_path() -> str:
     """Get full path to the .mankkoo directory
 
     Returns:
@@ -118,12 +117,22 @@ def data_path() -> str:
         raise ValueError("MacOS is currently not supported")
     raise ValueError("{} OS is not supported".format(platform))
 
-def load_global_config():
+def load_global_config() -> dict:
+    """Load global configuration from /data folder
+
+    Returns:
+        dict: global specific config from config.yaml file
+    """
     log.info(f"Loading global {config_file} file")
     with open(data_path() + config_file) as c:
         return yaml.safe_load(c)
 
-def load_user_config():
+def load_user_config() -> dict:
+    """Load user configuration from .mankkoo directory
+
+    Returns:
+        dict: user specific config from config.yaml file
+    """
     log.info(f"Loading user {config_file} file")
-    with open(mankoo_path() + __slash() + config_file, 'r', encoding='utf-8') as c:
+    with open(mankkoo_path() + __slash() + config_file, 'r', encoding='utf-8') as c:
         return yaml.safe_load(c)
