@@ -16,7 +16,7 @@ class Importer(ABC):
         Returns:
             pd.DataFrame: raw, unformatted Pandas Dataframe
         """
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def load_file_by_contents(self, contents: str) -> pd.DataFrame:
@@ -28,7 +28,7 @@ class Importer(ABC):
         Returns:
             pd.DataFrame: raw, unformatted Pandas Dataframe
         """
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def format_file(self, df: pd.DataFrame, account_name=None) -> pd.DataFrame:
@@ -41,7 +41,7 @@ class Importer(ABC):
         Returns:
             pd.DataFrame: formatted DataFrame
         """
-        pass
+        raise NotImplementedError
 
 class FileType(Enum):
     """Representation of file type supported in Mankkoo

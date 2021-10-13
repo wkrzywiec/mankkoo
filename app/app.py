@@ -46,7 +46,8 @@ app.layout = html.Div(children=[
 ])
 
 @app.callback(Output('page-content', 'children'),
-              Input('url', 'pathname'))
+              Input('url', 'pathname')
+)
 def display_page(pathname):
 
     if pathname == '/accounts':
@@ -68,15 +69,16 @@ def display_page(pathname):
               State('upload-data', 'last_modified'),
               State('bank-id', 'value'),
               State('account-name', 'value'),
-              State('account-type', 'value'))
+              State('account-type', 'value')
+)
 def update_output(list_of_contents, list_of_names, list_of_dates, bank_id, account_name, account_type):
     if list_of_contents is not None:
         try:
             dt.add_new_operations(models.Bank[bank_id], account_name, contents=list_of_contents)
-            return "success"
+            return 'success'
         except Exception as ex:
-            log.info(f"Error occured: {ex}")
-            return "failure"
+            log.info(f'Error occured: {ex}')
+            return 'failure'
 
 
 if __name__ == '__main__':

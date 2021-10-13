@@ -1,5 +1,5 @@
 import pycountry
-from scripts.main.base_logger import log
+
 
 def decode_bank_ids(bank_ids) -> list:
     """Transforms Bank account importer ids into user-friendly representation
@@ -16,7 +16,7 @@ def decode_bank_ids(bank_ids) -> list:
 
     for bank in bank_ids:
         if bank == 'MANKKOO':
-            temp.append(["", bank])
+            temp.append(['', bank])
             continue
         bl = bank.split('_')
         temp.append([bl[0], bl[1]])
