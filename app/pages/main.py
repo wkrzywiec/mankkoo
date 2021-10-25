@@ -1,3 +1,5 @@
+from datetime import date
+from dateutil.relativedelta import relativedelta
 import dash_html_components as html
 import dash_core_components as dcc
 from dash_table.Format import Format, Group, Scheme, Symbol
@@ -7,13 +9,29 @@ import plotly.graph_objects as go
 
 import scripts.main.total as total
 import scripts.main.data as dt
+import scripts.main.importer.importer as importer
+import scripts.main.models as models
 import app
 
 from scripts.main.base_logger import log
 
+def __calc_last_month_income_color(last_month_income: float) -> str:
+    if last_month_income > 0:
+        return '#ACC3A6'
+
+    if last_month_income < 0:
+        return '#A40E4C'
+
+    return '#212529'
+
 data = dt.load_data()
 
 total_money = total.total_money_data(data)
+last_month_income = total.last_month_income(importer.load_data_from_file(models.FileType.TOTAL), date.today())
+last_month_income_sign = '+' if last_month_income > 0 else ''
+last_month_income_color = __calc_last_month_income_color(last_month_income)
+last_month = date.today() - relativedelta(months=1)
+last_month_str = last_month.strftime('%B %Y')
 
 def main_page():
     log.info("Loading main page")
@@ -26,6 +44,15 @@ def main_page():
                      html.Div(className='card-body card-body-indicator', children=[
                         html.Span('My Wealth', className='card-body-title'),
                         html.Span('{:,.2f} PLN'.format(total_money['Total'].sum()).replace(',', ' '))
+                     ])
+                ])
+            ]),
+            html.Div(className='col-3', children=[
+                html.Div(className='card card-indicator', children=[
+                     html.Div(className='card-body card-body-indicator', children=[
+                        html.Span('Last month income', className='card-body-title'),
+                        html.Span(f'{last_month_income_sign} {last_month_income:,.2f} PLN', style={'color': last_month_income_color}),
+                        html.Span(last_month_str, style={'font-size': '0.4em'})
                      ])
                 ])
             ])
