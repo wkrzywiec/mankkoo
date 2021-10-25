@@ -1,6 +1,6 @@
 import pandas as pd
-import numpy as np
 import datetime
+from dateutil.relativedelta import relativedelta
 import scripts.main.importer.importer as importer
 import scripts.main.config as config
 import scripts.main.models as models
@@ -140,3 +140,31 @@ def stock_for_day(stock: pd.DataFrame, date: datetime.date) -> float:
     df['Change'] = [1 if x == 'Buy' else -1 for x in df['Operation']]
     df['Val'] = df['Total Value'] * df['Change']
     return df['Val'].sum()
+
+def last_month_income(total: pd.DataFrame, date: datetime.date) -> float:
+    """Calculate income from previous month. Compares latest total in previous month with lastest total in month before. 
+
+    Args:
+        total (pd.DataFrame): historical data of total money
+        date (datetime.date): date for which income will be calculated, usually today
+
+    Returns:
+        float: result of comparing two totals from previous months
+    """
+
+    temp = total
+    temp['Date'] = pd.to_datetime(temp['Date'])
+    temp = temp.set_index('Date')
+
+    month_1 = date - relativedelta(months=1)
+    month_1_str = month_1.strftime('%b-%Y')
+    month_2 = date - relativedelta(months=2)
+    month_2_str = month_2.strftime('%b-%Y')
+
+    month_1_data = temp[month_1_str]
+    month_2_data = temp[month_2_str]
+
+    month_1_data = month_1_data.sort_index()
+    month_2_data = month_2_data.sort_index()
+
+    return month_1_data['Total'].iloc[-1] - month_2_data['Total'].iloc[-1]
