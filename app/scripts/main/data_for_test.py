@@ -71,5 +71,6 @@ def total_data(rows=total):
         data=np.array(rows),
         columns=data.total_columns
     ).astype({'Date': 'datetime64[ns]', 'Total': 'float'})
+    result['Date'] = pd.to_datetime(result['Date'], format='%Y-%m-%d', errors='coerce')
     result['Date'] = result['Date'].dt.date
     return result

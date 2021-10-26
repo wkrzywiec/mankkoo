@@ -148,3 +148,20 @@ def test_update_total_money(mocker):
         ['2035-08-08', 16000]
     ])
     assert_frame_equal(expected, result)
+
+def test_last_month_income():
+    # GIVEN
+    total_data = td.total_data([
+        ['2020-12-25', 5],
+        ['2021-01-01', 10],
+        ['2021-01-15', 20],
+        ['2021-02-08', 30],
+        ['2021-02-28', 40],
+        ['2021-03-03', 50],
+    ])
+
+    # WHEN
+    result = total.last_month_income(total_data, datetime.date(2021, 3, 3))
+
+    # THEN
+    assert result == 20
