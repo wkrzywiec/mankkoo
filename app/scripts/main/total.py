@@ -141,8 +141,10 @@ def stock_for_day(stock: pd.DataFrame, date: datetime.date) -> float:
     df['Val'] = df['Total Value'] * df['Change']
     return df['Val'].sum()
 
+
 def last_month_income(total: pd.DataFrame, date: datetime.date) -> float:
-    """Calculate income from previous month. Compares latest total in previous month with lastest total in month before. 
+    """Calculate income from previous month.
+    Compares latest total in previous month with lastest total in month before.
 
     Args:
         total (pd.DataFrame): historical data of total money
