@@ -163,8 +163,8 @@ def last_month_income(total: pd.DataFrame, date: datetime.date) -> float:
     month_2 = date - relativedelta(months=2)
     month_2_str = month_2.strftime('%b-%Y')
 
-    month_1_data = temp[month_1_str]
-    month_2_data = temp[month_2_str]
+    month_1_data = temp.loc[month_1_str]
+    month_2_data = temp.loc[month_2_str]
 
     month_1_data = month_1_data.sort_index()
     month_2_data = month_2_data.sort_index()
