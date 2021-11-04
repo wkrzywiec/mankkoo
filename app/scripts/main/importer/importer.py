@@ -88,10 +88,12 @@ def load_bank_data(file_name: str, contents, kind: models.Bank, account_name: st
 
     if kind is models.Bank.MANKKOO:
         bank = Mankkoo()
-    elif kind is models.Bank.PL_MILLENIUM:
-        bank = pl_importer.Millenium()
     elif kind is models.Bank.PL_ING:
         bank = pl_importer.Ing()
+    elif kind is models.Bank.PL_MBANK:
+        bank = pl_importer.Mbank()
+    elif kind is models.Bank.PL_MILLENIUM:
+        bank = pl_importer.Millenium()
     else:
         raise KeyError("Failed to load data from file. Not known bank. Was provided {} bank".format(str(kind)))
 

@@ -27,18 +27,6 @@ def test_load_data(mocker):
     # THEN
     assert len(result) == 6
 
-def test_load_pl_millenium():
-    # GIVEN
-    millenium_file = 'test_pl_millenium.csv'
-
-    # WHEN
-    result = importer.load_data_from_file(models.FileType.BANK, kind=models.Bank.PL_MILLENIUM, file_name=millenium_file)
-
-    # THEN
-    expected = __prepare_expected(exp_result, 'Millenium', 'Millenium Account')
-    result = __drop_empty_columns(result)
-    assert_frame_equal(expected.reset_index(drop=True), result.reset_index(drop=True))
-
 def test_load_pl_ing():
     # GIVEN
     ing_file = 'test_pl_ing.csv'
@@ -50,6 +38,30 @@ def test_load_pl_ing():
     expected = __prepare_expected(exp_result, 'ING', 'ING Account')
     result = __drop_empty_columns(result)
     assert_frame_equal(expected.reset_index(drop=True), result.reset_index(drop=True), check_names=False)
+
+def test_load_pl_mbank():
+    # GIVEN
+    mbank_file = 'test_pl_mbank.csv'
+
+    # WHEN
+    result = importer.load_data_from_file(models.FileType.BANK, kind=models.Bank.PL_MBANK, file_name=mbank_file)
+
+    # THEN
+    expected = __prepare_expected(exp_result, 'Mbank', 'Mbank Account')
+    result = __drop_empty_columns(result)
+    assert_frame_equal(expected.reset_index(drop=True), result.reset_index(drop=True), check_names=False)
+
+def test_load_pl_millenium():
+    # GIVEN
+    millenium_file = 'test_pl_millenium.csv'
+
+    # WHEN
+    result = importer.load_data_from_file(models.FileType.BANK, kind=models.Bank.PL_MILLENIUM, file_name=millenium_file)
+
+    # THEN
+    expected = __prepare_expected(exp_result, 'Millenium', 'Millenium Account')
+    result = __drop_empty_columns(result)
+    assert_frame_equal(expected.reset_index(drop=True), result.reset_index(drop=True))
 
 def __prepare_expected(df, bank, account):
     result = __replace_placholders(df, bank, account)
