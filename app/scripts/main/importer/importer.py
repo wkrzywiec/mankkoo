@@ -22,12 +22,12 @@ class Mankkoo(models.Importer):
     def format_file(self, df: pd.DataFrame, account_name=None):
         return df
 
-def load_data_from_file(file_type: models.FileType, kind=None, file_name=None, account_name=None):
+def load_data_from_file(file_type: models.FileType, kind=None, file_name=None, account_name=None) -> pd.DataFrame:
     result = None
     log.info('Loading %s file', file_type)
 
     if file_type is models.FileType.ACCOUNT:
-        result = pd.read_csv(config.mankkoo_file_path('account'), parse_dates=['Date'])
+        result = pd.read_csv(config.mankkoo_file_path('account'), parse_dates=['Date'], index_col=0)
         result = result.astype({'Account': 'string', 'Balance': 'float', 'Operation': 'float', 'Date': 'datetime64[ns]'})
         result['Date'] = result['Date'].dt.date
         return result
@@ -61,7 +61,7 @@ def load_data_from_file(file_type: models.FileType, kind=None, file_name=None, a
 
     raise ValueError('A file_type: {} is not supported'.format(file_type))
 
-def load_bank_data(file_name: str, contents, kind: models.Bank, account_name: str):
+def load_bank_data(file_name: str, contents, kind: models.Bank, account_name: str)-> pd.DataFrame:
     """Load data from a CSV file
 
     Args:

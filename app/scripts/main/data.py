@@ -20,6 +20,7 @@ def load_data() -> dict:
         dict(pandas.DataFrame): a dictonary with categorized financial data
     """
     log.info("Loading mankkoo's files")
+
     return dict(
         account=importer.load_data_from_file(models.FileType.ACCOUNT),
         investment=importer.load_data_from_file(models.FileType.INVESTMENT),
@@ -51,7 +52,7 @@ def add_new_operations(bank: models.Bank, account_name: str, file_name=None, con
     df = calculate_balance(df, account_name)
     total.update_total_money(df, df_new['Date'])
     df = df.sort_values(by='Date')
-    df.to_csv(config.mankkoo_file_path('account'), index=False)
+    df.to_csv(config.mankkoo_file_path('account'), index=True, index_label='Row')
     log.info('%d new operations for %s account were added.', df_new['Bank'].size, account_name)
     return df
 
