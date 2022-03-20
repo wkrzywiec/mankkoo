@@ -28,7 +28,7 @@ def load_data() -> dict:
         total=importer.load_data_from_file(models.FileType.TOTAL)
     )
 
-def add_new_operations(bank: models.Bank, account_name: str, file_name=None, contents=None):
+def add_new_operations(bank: models.Bank, account_name: str, file_name=None, contents=None) -> pd.DataFrame:
     """Append bank accounts history with new operations. 
     This method return a pandas DataFrame with calculated balance.
 
@@ -48,15 +48,15 @@ def add_new_operations(bank: models.Bank, account_name: str, file_name=None, con
     __make_account_backup(df)
 
     df = pd.concat([df, df_new]).reset_index(drop=True)
-
+    df = df.sort_values(by=['Date', 'Bank', 'Account'])
     df = calculate_balance(df, account_name)
-    total.update_total_money(df, df_new['Date'])
-    df = df.sort_values(by='Date')
     df.to_csv(config.mankkoo_file_path('account'), index=True, index_label='Row')
+
+    total.update_total_money(df, df_new['Date'])
     log.info('%d new operations for %s account were added.', df_new['Bank'].size, account_name)
     return df
 
-def calculate_balance(df: pd.DataFrame, account_name: str):
+def calculate_balance(df: pd.DataFrame, account_name: str) -> pd.DataFrame:
     """Calculates balance for new operations
 
     Args:

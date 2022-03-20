@@ -4,6 +4,18 @@ from pandas._testing import assert_frame_equal
 import datetime
 import scripts.main.total as total
 import scripts.main.data_for_test as td
+import scripts.main.data as real_data
+
+# not actual test, used only to debug real data, uncomment to use
+# def test_real_total_money_data():
+#     # GIVEN
+#     all_data = real_data.load_data()
+
+#     # WHEN
+#     total_money = total.total_money_data(all_data)
+
+#     # THEN
+#     assert True
 
 def test_total_money_data():
     # GIVEN
