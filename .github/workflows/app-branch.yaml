@@ -26,7 +26,7 @@ jobs:
       - name: Set up Python 🐍
         uses: actions/setup-python@master
         with:
-          python-version: 3.10
+          python-version: 3.10.3
       
       - name: Set up Python 🐍
         run: |

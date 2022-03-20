@@ -46,6 +46,7 @@ def account_data(rows=start_data):
     ).astype({'Balance': 'float', 'Operation': 'float'})
     result['Date'] = pd.to_datetime(result['Date'], format='%Y-%m-%d', errors='coerce')
     result['Date'] = result['Date'].dt.date
+    # result = result.set_index('Row')
     return result
 
 def investment_data(rows=investment):
