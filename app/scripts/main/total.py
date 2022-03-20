@@ -168,5 +168,15 @@ def last_month_income(total: pd.DataFrame, date: datetime.date) -> float:
 
     month_1_data = month_1_data.sort_index()
     month_2_data = month_2_data.sort_index()
+    
+    if (month_1_data.empty):
+        month_1_total = 0
+    else:
+        month_1_total = month_1_data['Total'].iloc[-1]
 
-    return month_1_data['Total'].iloc[-1] - month_2_data['Total'].iloc[-1]
+    if (month_2_data.empty):
+        month_2_total = 0
+    else:
+        month_2_total = month_2_data['Total'].iloc[-1]
+
+    return month_1_total - month_2_total
