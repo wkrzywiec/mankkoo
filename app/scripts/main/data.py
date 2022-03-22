@@ -52,7 +52,7 @@ def add_new_operations(bank: models.Bank, account_name: str, file_name=None, con
     df = calculate_balance(df, account_name)
     df.to_csv(config.mankkoo_file_path('account'), index=True, index_label='Row')
 
-    total.update_total_money(df, df_new['Date'])
+    total.update_total_money(df, df_new['Date'].min())
     log.info('%d new operations for %s account were added.', df_new['Bank'].size, account_name)
     return df
 

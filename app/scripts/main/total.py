@@ -49,7 +49,7 @@ def __latest_account_balance(data: dict, type: str) -> float:
         return accounts_balance_for_day(df, df['Date'].max())
     return 0.00
 
-def update_total_money(accounts: pd.DataFrame, updated_dates: pd.Series) -> pd.DataFrame:
+def update_total_money(accounts: pd.DataFrame, from_date: datetime.date, till_date = datetime.date.today()) -> pd.DataFrame:
     """Calculate and add rows of totals for each day from pd.Series
 
     Args:
@@ -59,24 +59,20 @@ def update_total_money(accounts: pd.DataFrame, updated_dates: pd.Series) -> pd.D
     Returns:
         pd.DataFrame: new, updated total assets standing
     """
-    log.info('Updating and calculating total money history from %s', str(updated_dates.min()))
+    log.info('Updating and calculating total money history from %s to %s', str(from_date), str(till_date))
     total = importer.load_data_from_file(models.FileType.TOTAL)
 
-    total = __clean_overlapping_days(total, updated_dates.min())
-    total_new_lines = __calc_totals(accounts, updated_dates)
+    total = __drop_from_total_days(total, from_date)
+    total_new_lines = __calc_totals(accounts, from_date, till_date)
     total = pd.concat([total, total_new_lines]).reset_index(drop=True)
     total.to_csv(config.mankkoo_file_path('total'), index=False)
     log.info('Total money data was updated successfully')
     return total
 
-def __clean_overlapping_days(total: pd.DataFrame, min_date: datetime.date):
+def __drop_from_total_days(total: pd.DataFrame, min_date: datetime.date):
     return total.drop(total[total['Date'] >= min_date].index)
 
-def __calc_totals(accounts: pd.DataFrame, updated_dates: pd.Series):
-    accounts_dates = accounts[accounts['Date'] > updated_dates.min()]['Date']
-    updated_dates = updated_dates.append(accounts_dates, ignore_index=True)
-    updated_dates = updated_dates.drop_duplicates().sort_values()
-
+def __calc_totals(accounts: pd.DataFrame, from_date: datetime.date, till_date: datetime.date):
     investments = importer.load_data_from_file(models.FileType.INVESTMENT)
     stock = importer.load_data_from_file(models.FileType.STOCK)
 
@@ -84,11 +80,13 @@ def __calc_totals(accounts: pd.DataFrame, updated_dates: pd.Series):
 
     # TODO replace with better approach, e.g.
     # https://stackoverflow.com/questions/16476924/how-to-iterate-over-rows-in-a-dataframe-in-pandas
-    for date_tuple in updated_dates.iteritems():
-        date = date_tuple[1]
+    date = from_date
+    numdays = (till_date - from_date).days + 1
+    for i in range(0, numdays):
         total = accounts_balance_for_day(accounts, date) + investments_for_day(investments, date) + stock_for_day(stock, date)
         row_dict = {'Date': date, 'Total': round(total, 2)}
         result_list.append(row_dict)
+        date = date + datetime.timedelta(days=1)
 
     return pd.DataFrame(result_list)
 

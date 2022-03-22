@@ -1,7 +1,7 @@
 import datetime
 import re
 
-def map_date(date: str):
+def map_date(date: str) -> datetime.date:
     """Map date in string to date object
 
     Args:
