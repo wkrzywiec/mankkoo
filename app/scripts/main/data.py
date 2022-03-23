@@ -49,6 +49,7 @@ def add_new_operations(bank: models.Bank, account_name: str, file_name=None, con
 
     df = pd.concat([df, df_new]).reset_index(drop=True)
     df = df.sort_values(by=['Date', 'Bank', 'Account'])
+    df = df.reset_index(drop=True)
     df = calculate_balance(df, account_name)
     df.to_csv(config.mankkoo_file_path('account'), index=True, index_label='Row')
 

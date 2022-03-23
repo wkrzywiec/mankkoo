@@ -78,7 +78,8 @@ class Mbank(models.Importer):
     def load_file_by_filename(self, file_name: str):
 
         skip_lines = self.__skip_rows_footer(file_name)
-        return pd.read_csv(config.data_path() + file_name, sep=";", skiprows=skip_lines["skiprows"], skipfooter=skip_lines["skipfooter"])
+        # return pd.read_csv(config.data_path() + file_name, sep=";", skiprows=skip_lines["skiprows"], skipfooter=skip_lines["skipfooter"])
+        return pd.read_csv(config.data_path() + file_name, sep=";", skiprows=skip_lines["skiprows"])
 
     def load_file_by_contents(self, contents: str):
         content_type, content_string = contents.split(',')
@@ -111,16 +112,15 @@ class Mbank(models.Importer):
 
     def format_file(self, df: pd.DataFrame, account_name=None):
 
-        df = df[['#Data operacji', '#Tytu�', '#Kwota']]
+        df = df[['#Data operacji', '#Kategoria']]
 
         df = df.loc[:, ~df.columns.duplicated()]
 
         df = df.rename(columns={
-            '#Data operacji': 'Date',
-            '#Tytu�': 'Title',
-            '#Kwota': 'Operation'})
+            '#Data operacji': 'Title',
+            '#Kategoria': 'Operation'})
         df['Operation'] = df['Operation'].str.replace(r'PLN', '')
-        df.reset_index(drop=True, inplace=True)
+        df['Date'] = df.index
 
         df['Date'] = pd.to_datetime(df.Date)
         df['Date'] = df['Date'].dt.date
