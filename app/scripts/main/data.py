@@ -74,7 +74,7 @@ def calculate_balance(df: pd.DataFrame, account_name: str) -> pd.DataFrame:
     latest_balance = __latest_balance_for_account(df, account_name)
 
     log.info('Calculating balance for %s account from %s', account_name, df.iloc[non_balanced_rows[0]]['Date'])
-    for i in range(non_balanced_rows[0], len(df)):
+    for i in non_balanced_rows.values.tolist():
         latest_balance = latest_balance + df.loc[i, 'Operation']
         df.loc[i, 'Balance'] = round(latest_balance, 2)
 
@@ -91,4 +91,4 @@ def __latest_balance_for_account(df: pd.DataFrame, account_name: str):
         return 0
 
 def __make_account_backup(df: pd.DataFrame):
-    df.to_csv(config.mankkoo_file_path('account-backup'), index=False)
+    df.to_csv(config.mankkoo_file_path('account-backup'), index=True)
