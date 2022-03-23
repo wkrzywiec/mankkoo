@@ -74,7 +74,6 @@ class Ing(models.Importer):
 
 class Mbank(models.Importer):
     # Mbank bank (PL) - https://www.mbank.pl
-
     def load_file_by_filename(self, file_name: str) -> pd.DataFrame:
 
         skip_lines = self.__skip_rows_footer(file_name)
@@ -82,6 +81,7 @@ class Mbank(models.Importer):
         return pd.read_csv(config.data_path() + file_name, sep=";", skiprows=skip_lines["skiprows"])
 
     def load_file_by_contents(self, contents: str) -> pd.DataFrame:
+
         content_type, content_string = contents.split(',')
         decoded = base64.b64decode(content_string)
 
@@ -121,7 +121,6 @@ class Mbank(models.Importer):
     def format_file(self, df: pd.DataFrame, account_name=None):
 
         df = df[['#Data operacji', '#Kategoria']]
-
         df = df.loc[:, ~df.columns.duplicated()]
 
         df = df.rename(columns={
