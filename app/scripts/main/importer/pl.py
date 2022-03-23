@@ -74,19 +74,28 @@ class Ing(models.Importer):
 
 class Mbank(models.Importer):
     # Mbank bank (PL) - https://www.mbank.pl
-
-    def load_file_by_filename(self, file_name: str):
+    def load_file_by_filename(self, file_name: str) -> pd.DataFrame:
 
         skip_lines = self.__skip_rows_footer(file_name)
-        return pd.read_csv(config.data_path() + file_name, sep=";", skiprows=skip_lines["skiprows"], skipfooter=skip_lines["skipfooter"])
+        # return pd.read_csv(config.data_path() + file_name, sep=";", skiprows=skip_lines["skiprows"], skipfooter=skip_lines["skipfooter"])
+        return pd.read_csv(config.data_path() + file_name, sep=";", skiprows=skip_lines["skiprows"])
 
-    def load_file_by_contents(self, contents: str):
+    def load_file_by_contents(self, contents: str) -> pd.DataFrame:
+
         content_type, content_string = contents.split(',')
         decoded = base64.b64decode(content_string)
 
         temp_file_path = config.data_path() + 'temp_mbank.csv'
         temp_file = open(temp_file_path, 'w', encoding="utf-8")
-        temp_file.write(decoded.decode("utf-8"))
+        
+        decoded_str = decoded.decode("utf-8")
+        lines = decoded_str.split("\n")
+        non_empty_lines = [line for line in lines if line.strip() != ""]
+        cleaned_decoded_content = ""
+        for line in non_empty_lines:
+            cleaned_decoded_content += line + "\n"
+        
+        temp_file.write(cleaned_decoded_content)
         temp_file.close()
 
         result = self.load_file_by_filename('temp_mbank.csv')
@@ -111,16 +120,14 @@ class Mbank(models.Importer):
 
     def format_file(self, df: pd.DataFrame, account_name=None):
 
-        df = df[['#Data operacji', '#Tytu�', '#Kwota']]
-
+        df = df[['#Data operacji', '#Kategoria']]
         df = df.loc[:, ~df.columns.duplicated()]
 
         df = df.rename(columns={
-            '#Data operacji': 'Date',
-            '#Tytu�': 'Title',
-            '#Kwota': 'Operation'})
+            '#Data operacji': 'Title',
+            '#Kategoria': 'Operation'})
         df['Operation'] = df['Operation'].str.replace(r'PLN', '')
-        df.reset_index(drop=True, inplace=True)
+        df['Date'] = df.index
 
         df['Date'] = pd.to_datetime(df.Date)
         df['Date'] = df['Date'].dt.date

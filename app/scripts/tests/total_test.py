@@ -4,6 +4,19 @@ from pandas._testing import assert_frame_equal
 import datetime
 import scripts.main.total as total
 import scripts.main.data_for_test as td
+import scripts.main.data as real_data
+import scripts.main.data_formatter as formatter
+
+# not actual test, used only to debug real data, uncomment to use
+# def test_real_total_money_data():
+#     # GIVEN
+#     all_data = real_data.load_data()
+
+#     # WHEN
+#     total_money = total.total_money_data(all_data)
+
+#     # THEN
+#     assert True
 
 def test_total_money_data():
     # GIVEN
@@ -113,10 +126,11 @@ def test_update_total_money(mocker):
     # GIVEN
     account = td.account_data([
         ['Millenium', 'checking', '360', '2021-01-01', 'a', 'a', np.NaN, '', 1000, 'PLN', 1000],
-        ['ING', 'checking', 'Direct', '2021-01-31', 'a', 'a', np.NaN, np.NaN, -222.22, 'PLN', 1000],
-        ['mBank', 'checking', 'eKonto', '2021-02-01', 'a', 'a', np.NaN, np.NaN, -3.3, 'PLN', 2000],
-        ['mBank', 'checking', 'eKonto', '2021-02-01', 'a', 'a', np.NaN, np.NaN, 1000, 'PLN', 3000],
-        ['mBank', 'checking', 'eKonto', '2035-08-08', 'a', 'a', np.NaN, np.NaN, 10000, 'PLN', 10000]
+        ['ING', 'checking', 'Direct', '2021-01-01', 'a', 'a', np.NaN, np.NaN, -222.22, 'PLN', 1000],
+        ['mBank', 'checking', 'eKonto', '2021-01-03', 'a', 'a', np.NaN, np.NaN, -3.3, 'PLN', 2000],
+        ['mBank', 'checking', 'eKonto', '2021-01-03', 'a', 'a', np.NaN, np.NaN, 1000, 'PLN', 3000],
+        ['ING', 'checking', 'Direct', '2021-01-04', 'a', 'a', np.NaN, np.NaN, -222.22, 'PLN', 2000],
+        ['mBank', 'checking', 'eKonto', '2021-01-05', 'a', 'a', np.NaN, np.NaN, 10000, 'PLN', 10000]
     ])
     updated_dates = account.tail(3)['Date']
 
@@ -137,15 +151,19 @@ def test_update_total_money(mocker):
     mocker.patch('scripts.main.importer.importer.load_data_from_file', side_effect=[old_total, inv_data, stocks])
     mocker.patch('pandas.DataFrame.to_csv')
 
+    from_date = formatter.map_date('2021-01-01')
+    till_date = formatter.map_date('2021-01-05')
+
     # WHEN
-    result = total.update_total_money(account, updated_dates)
+    result = total.update_total_money(account,  from_date, till_date)
 
     # THEN
     expected = td.total_data([
-        ['2021-01-01', 10],
-        ['2021-01-01', 20],
-        ['2021-02-01', 9000],
-        ['2035-08-08', 16000]
+        ['2021-01-01', 6000],
+        ['2021-01-02', 6000],
+        ['2021-01-03', 9000],
+        ['2021-01-04', 10000],
+        ['2021-01-05', 17000],
     ])
     assert_frame_equal(expected, result)
 

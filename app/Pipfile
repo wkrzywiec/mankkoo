@@ -20,7 +20,7 @@ pyyaml = "*"
 python-dateutil = "*"
 
 [requires]
-python_version = "3.8"
+python_version = "3.10"
 
 [scripts]
 test = "py.test --cov=./scripts -s -vv"
