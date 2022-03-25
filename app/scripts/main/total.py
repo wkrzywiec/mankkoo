@@ -1,9 +1,8 @@
 import pandas as pd
 import datetime
 from dateutil.relativedelta import relativedelta
-import scripts.main.importer.importer as importer
 import scripts.main.config as config
-import scripts.main.models as models
+import scripts.main.database as db
 from scripts.main.base_logger import log
 
 def total_money_data(data: dict) -> pd.DataFrame:
@@ -60,7 +59,7 @@ def update_total_money(accounts: pd.DataFrame, from_date: datetime.date, till_da
         pd.DataFrame: new, updated total assets standing
     """
     log.info('Updating and calculating total money history from %s to %s', str(from_date), str(till_date))
-    total = importer.load_data_from_file(models.FileType.TOTAL)
+    total = db.load_total()
 
     total = __drop_from_total_days(total, from_date)
     total_new_lines = __calc_totals(accounts, from_date, till_date)
@@ -73,8 +72,8 @@ def __drop_from_total_days(total: pd.DataFrame, min_date: datetime.date):
     return total.drop(total[total['Date'] >= min_date].index)
 
 def __calc_totals(accounts: pd.DataFrame, from_date: datetime.date, till_date: datetime.date):
-    investments = importer.load_data_from_file(models.FileType.INVESTMENT)
-    stock = importer.load_data_from_file(models.FileType.STOCK)
+    investments = db.load_investments()
+    stock = db.load_stocks()
 
     result_list = []
 

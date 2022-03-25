@@ -1,5 +1,6 @@
 import pandas as pd
 import scripts.main.importer.importer as importer
+import scripts.main.database as db
 import scripts.main.models as models
 import scripts.main.config as config
 import scripts.main.total as total
@@ -22,10 +23,10 @@ def load_data() -> dict:
     log.info("Loading mankkoo's files")
 
     return dict(
-        account=importer.load_data_from_file(models.FileType.ACCOUNT),
-        investment=importer.load_data_from_file(models.FileType.INVESTMENT),
-        stock=importer.load_data_from_file(models.FileType.STOCK),
-        total=importer.load_data_from_file(models.FileType.TOTAL)
+        account=db.load_accounts(),
+        investment=db.load_investments(),
+        stock=db.load_stocks(),
+        total=db.load_total()
     )
 
 def add_new_operations(bank: models.Bank, account_name: str, file_name=None, contents=None) -> pd.DataFrame:
@@ -44,7 +45,7 @@ def add_new_operations(bank: models.Bank, account_name: str, file_name=None, con
     """
     log.info('Adding new operations for %s account in %s bank', account_name, bank)
     df_new = importer.load_bank_data(file_name, contents, bank, account_name)
-    df = importer.load_data_from_file(models.FileType.ACCOUNT)
+    df = db.load_accounts()
     __make_account_backup(df)
 
     df = pd.concat([df, df_new]).reset_index(drop=True)

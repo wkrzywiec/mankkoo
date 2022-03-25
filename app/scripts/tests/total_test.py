@@ -148,7 +148,9 @@ def test_update_total_money(mocker):
         ['Bank A', '2021-01-01', 'ETFSP500', 'Buy', 1000.00, 10, 'PLN', np.NaN, np.NaN, np.NaN],
         ['Bank A', '2021-01-01', 'ETFDAX', 'Buy', 1000.00, 10, 'PLN', np.NaN, np.NaN, np.NaN]
     ])
-    mocker.patch('scripts.main.importer.importer.load_data_from_file', side_effect=[old_total, inv_data, stocks])
+    mocker.patch('scripts.main.database.load_total', side_effect=[old_total])
+    mocker.patch('scripts.main.database.load_investments', side_effect=[inv_data])
+    mocker.patch('scripts.main.database.load_stocks', side_effect=[stocks])
     mocker.patch('pandas.DataFrame.to_csv')
 
     from_date = formatter.map_date('2021-01-01')

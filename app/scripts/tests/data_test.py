@@ -42,7 +42,7 @@ def test_add_new_operations_by_filename(mocker):
     bank = models.Bank.PL_MILLENIUM
 
     mocker.patch('scripts.main.importer.importer.load_bank_data', side_effect=[millenium_data])
-    mocker.patch('scripts.main.importer.importer.load_data_from_file', side_effect=[start_data])
+    mocker.patch('scripts.main.database.load_accounts', side_effect=[start_data])
     mocker.patch('scripts.main.total.update_total_money')
     mocker.patch('pandas.DataFrame.to_csv')
 
@@ -60,7 +60,7 @@ def test_add_new_operations_by_contents(mocker):
     encoded_account = base64.b64encode(account_raw_data)
 
     mocker.patch('scripts.main.importer.importer.load_bank_data', side_effect=[millenium_data])
-    mocker.patch('scripts.main.importer.importer.load_data_from_file', side_effect=[start_data])
+    mocker.patch('scripts.main.database.load_accounts', side_effect=[start_data])
     mocker.patch('scripts.main.total.update_total_money')
     mocker.patch('pandas.DataFrame.to_csv')
 
@@ -85,7 +85,7 @@ def test_add_new_operations_multiple_banks(mocker):
     ])
 
     mocker.patch('scripts.main.importer.importer.load_bank_data', side_effect=[millenium])
-    mocker.patch('scripts.main.importer.importer.load_data_from_file', side_effect=[account])
+    mocker.patch('scripts.main.database.load_accounts', side_effect=[account])
     mocker.patch('scripts.main.total.update_total_money')
     mocker.patch('pandas.DataFrame.to_csv')
 
