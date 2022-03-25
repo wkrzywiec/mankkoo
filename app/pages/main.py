@@ -7,10 +7,8 @@ from dash_table import DataTable, FormatTemplate
 import plotly.express as px
 import plotly.graph_objects as go
 
+import scripts.main.database as db
 import scripts.main.total as total
-import scripts.main.account as dt
-import scripts.main.importer.importer as importer
-import scripts.main.models as models
 import app
 
 from scripts.main.base_logger import log
@@ -24,10 +22,10 @@ def __calc_last_month_income_color(last_month_income: float) -> str:
 
     return '#212529'
 
-data = dt.load_data()
+data = db.load_all()
 
 total_money = total.total_money_data(data)
-last_month_income = total.last_month_income(importer.load_data_from_file(models.FileType.TOTAL), date.today())
+last_month_income = total.last_month_income(db.load_total(), date.today())
 last_month_income_sign = '+' if last_month_income > 0 else ''
 last_month_income_color = __calc_last_month_income_color(last_month_income)
 last_month = date.today() - relativedelta(months=1)
