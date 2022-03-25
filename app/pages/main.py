@@ -40,7 +40,7 @@ def main_page():
             html.Div(className='col-3', children=[
                 html.Div(className='card card-indicator', children=[
                      html.Div(className='card-body card-body-indicator', children=[
-                        html.Span('My Wealth', className='card-body-title'),
+                        html.Span('Total Wealth', className='card-body-title'),
                         html.Span('{:,.2f} PLN'.format(total_money['Total'].sum()).replace(',', ' '))
                      ])
                 ])
@@ -48,8 +48,26 @@ def main_page():
             html.Div(className='col-3', children=[
                 html.Div(className='card card-indicator', children=[
                      html.Div(className='card-body card-body-indicator', children=[
-                        html.Span('Last month income', className='card-body-title'),
+                        html.Span('Last Month Profit', className='card-body-title'),
                         html.Span(f'{last_month_income_sign} {last_month_income:,.2f} PLN', style={'color': last_month_income_color}),
+                        html.Span(last_month_str, style={'font-size': '0.4em'})
+                     ])
+                ])
+            ]),
+            html.Div(className='col-3', children=[
+                html.Div(className='card card-indicator', children=[
+                     html.Div(className='card-body card-body-indicator', children=[
+                        html.Span('Last Month Income', className='card-body-title'),
+                        html.Span(f'No Data', style={'color': '#ACC3A6'}),
+                        html.Span(last_month_str, style={'font-size': '0.4em'})
+                     ])
+                ])
+            ]),
+            html.Div(className='col-3', children=[
+                html.Div(className='card card-indicator', children=[
+                     html.Div(className='card-body card-body-indicator', children=[
+                        html.Span('Last Month Spending', className='card-body-title'),
+                        html.Span(f'No Data', style={'color': '#A40E4C'}),
                         html.Span(last_month_str, style={'font-size': '0.4em'})
                      ])
                 ])
