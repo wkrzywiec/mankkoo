@@ -5,7 +5,7 @@ import base64
 import io
 import scripts.main.models as models
 import scripts.main.config as config
-import scripts.main.data as data
+import scripts.main.database as db
 
 class Ing(models.Importer):
     # ING bank (PL) - https://www.ing.pl
@@ -47,7 +47,7 @@ class Ing(models.Importer):
         result = self.__add_missing_columns(df, ['Category', 'Comment'])
         result = result.sort_values(by="Date")
         result.reset_index(drop=True, inplace=True)
-        result = result[data.account_columns]
+        result = result[db.account_columns]
         return result
 
     def __clean_data(self, df: pd.DataFrame):
@@ -147,7 +147,7 @@ class Mbank(models.Importer):
         result = self.__add_missing_columns(df, ['Category', 'Comment'])
         result = result.sort_values(by="Date")
         result.reset_index(drop=True, inplace=True)
-        result = result[data.account_columns]
+        result = result[db.account_columns]
         return result
 
     def __add_missing_columns(self, df: pd.DataFrame, columns):
@@ -187,7 +187,7 @@ class Millenium(models.Importer):
 
         result = self.__add_missing_columns(df, ['Category', 'Comment'])
         result = result.iloc[::-1]
-        result = result[data.account_columns]
+        result = result[db.account_columns]
         return result
 
     def __add_missing_columns(self, df: pd.DataFrame, columns):

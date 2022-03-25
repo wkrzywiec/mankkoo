@@ -1,13 +1,29 @@
 import pandas as pd
-import numpy as np
 from sys import platform
-import base64
-import io
 import scripts.main.config as config
-import scripts.main.models as models
-import scripts.main.importer.pl as pl_importer
 from scripts.main.base_logger import log
 
+log.basicConfig(level=log.DEBUG)
+
+account_columns = ['Bank', 'Type', 'Account', 'Date', 'Title', 'Details', 'Category', 'Comment', 'Operation', 'Currency', 'Balance']
+invest_columns = ['Active', 'Category', 'Bank', 'Investment', 'Start Date', 'End Date', 'Start Amount', 'End amount', 'Currency', 'Details', 'Comment']
+stock_columns = ['Broker', 'Date', 'Title', 'Operation', 'Total Value', 'Units', 'Currency', 'Details', 'Url', 'Comment']
+total_columns = ['Date', 'Total']
+
+def load_all() -> dict:
+    """Load aggregated data of all financial data (accounts, investments, etc.)
+
+    Returns:
+        dict(pandas.DataFrame): a dictonary with categorized financial data
+    """
+    log.info("Loading mankkoo's files")
+
+    return dict(
+        account=load_accounts(),
+        investment=load_investments(),
+        stock=load_stocks(),
+        total=load_total()
+    )
 
 def load_total() -> pd.DataFrame:
     log.info('Loading TOTAL file')

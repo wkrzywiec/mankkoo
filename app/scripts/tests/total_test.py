@@ -4,7 +4,7 @@ from pandas._testing import assert_frame_equal
 import datetime
 import scripts.main.total as total
 import scripts.main.data_for_test as td
-import scripts.main.data as real_data
+import scripts.main.account as real_data
 import scripts.main.data_formatter as formatter
 
 # not actual test, used only to debug real data, uncomment to use

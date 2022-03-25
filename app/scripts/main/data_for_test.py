@@ -1,7 +1,7 @@
 from datetime import datetime
 import numpy as np
 import pandas as pd
-import scripts.main.data as data
+import scripts.main.database as db
 
 start_data = [
     ['Millenium', 'checking', '360', '2021-01-31', 'Init money', 'Detail 1', np.NaN, 'init', 1000, 'PLN', 1000],
@@ -43,7 +43,7 @@ total = [
 def account_data(rows=start_data):
     result = pd.DataFrame(
         data=np.array(rows),
-        columns=data.account_columns
+        columns=db.account_columns
     ).astype({'Balance': 'float', 'Operation': 'float'})
     result['Date'] = pd.to_datetime(result['Date'], format='%Y-%m-%d', errors='coerce')
     result['Date'] = result['Date'].dt.date
@@ -52,7 +52,7 @@ def account_data(rows=start_data):
 def investment_data(rows=investment):
     result = pd.DataFrame(
         data=np.array(rows),
-        columns=data.invest_columns
+        columns=db.invest_columns
     ).astype({'Active': 'int', 'Start Amount': 'float', 'End amount': 'float', 'Start Date': 'datetime64[ns]', 'End Date': 'datetime64[ns]'})
     result.Active = result.Active.astype('bool')
     result['Start Date'] = result['Start Date'].dt.date
@@ -62,7 +62,7 @@ def investment_data(rows=investment):
 def stock_data(rows=stock):
     result = pd.DataFrame(
         data=np.array(rows),
-        columns=data.stock_columns
+        columns=db.stock_columns
     ).astype({'Total Value': 'float', 'Date': 'datetime64[ns]'})
     result['Date'] = result['Date'].dt.date
     return result
@@ -70,7 +70,7 @@ def stock_data(rows=stock):
 def total_data(rows=total):
     result = pd.DataFrame(
         data=np.array(rows),
-        columns=data.total_columns
+        columns=db.total_columns
     ).astype({'Date': 'datetime64[ns]', 'Total': 'float'})
     result['Date'] = pd.to_datetime(result['Date'], format='%Y-%m-%d', errors='coerce')
     result['Date'] = result['Date'].dt.date

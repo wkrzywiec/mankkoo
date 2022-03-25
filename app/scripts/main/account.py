@@ -8,27 +8,6 @@ from scripts.main.base_logger import log
 
 log.basicConfig(level=log.DEBUG)
 
-account_columns = ['Bank', 'Type', 'Account', 'Date', 'Title', 'Details', 'Category', 'Comment', 'Operation', 'Currency', 'Balance']
-invest_columns = ['Active', 'Category', 'Bank', 'Investment', 'Start Date', 'End Date', 'Start Amount', 'End amount', 'Currency', 'Details', 'Comment']
-stock_columns = ['Broker', 'Date', 'Title', 'Operation', 'Total Value', 'Units', 'Currency', 'Details', 'Url', 'Comment']
-total_columns = ['Date', 'Total']
-
-
-def load_data() -> dict:
-    """Load aggregated data of all financial data (accounts, investments, etc.)
-
-    Returns:
-        dict(pandas.DataFrame): a dictonary with categorized financial data
-    """
-    log.info("Loading mankkoo's files")
-
-    return dict(
-        account=db.load_accounts(),
-        investment=db.load_investments(),
-        stock=db.load_stocks(),
-        total=db.load_total()
-    )
-
 def add_new_operations(bank: models.Bank, account_name: str, file_name=None, contents=None) -> pd.DataFrame:
     """Append bank accounts history with new operations. 
     This method return a pandas DataFrame with calculated balance.

@@ -8,7 +8,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 import scripts.main.total as total
-import scripts.main.data as dt
+import scripts.main.account as dt
 import scripts.main.importer.importer as importer
 import scripts.main.models as models
 import app

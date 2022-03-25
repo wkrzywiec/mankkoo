@@ -3,7 +3,7 @@ import pathlib
 import yaml
 from sys import platform
 from scripts.main.base_logger import log
-import scripts.main.data as data
+import scripts.main.account as account
 import pandas as pd
 
 mankkoo_dir = '.mankkoo'
@@ -51,13 +51,13 @@ def init_data_folder():
 
 def __select_columns(file: str):
     if file == account_file:
-        return data.account_columns
+        return account.account_columns
     if file == investment_file:
-        return data.invest_columns
+        return account.invest_columns
     if file == stock_file:
-        return data.stock_columns
+        return account.stock_columns
     if file == total_file:
-        return data.total_columns
+        return account.total_columns
 
 def mankkoo_file_path(file: str) -> str:
     """Get full path of one of mankkoo's files.

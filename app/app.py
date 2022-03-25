@@ -12,7 +12,7 @@ import pages.retirement as pr
 
 import scripts.main.config as config
 import scripts.main.models as models
-import scripts.main.data as dt
+import scripts.main.account as dt
 from scripts.main.base_logger import log
 
 external_stylesheets = [
