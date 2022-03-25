@@ -65,8 +65,8 @@ def main_page():
             html.Div(className='col-3', children=[
                 html.Div(className='card card-indicator', children=[
                      html.Div(className='card-body card-body-indicator', children=[
-                        html.Span('Last transactions', className='card-body-title'),
-                        html.Span(f'No Data', style={'color': '#A40E4C', 'height': '1000px'}),
+                        html.Span('Investments', className='card-body-title'),
+                        html.Span(f'No Data', style={'color': '#A40E4C'}),
                      ])
                 ])
             ]),
