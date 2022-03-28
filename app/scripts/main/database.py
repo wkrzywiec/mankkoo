@@ -9,6 +9,7 @@ account_columns = ['Bank', 'Type', 'Account', 'Date', 'Title', 'Details', 'Categ
 invest_columns = ['Active', 'Category', 'Bank', 'Investment', 'Start Date', 'End Date', 'Start Amount', 'End amount', 'Currency', 'Details', 'Comment']
 stock_columns = ['Broker', 'Date', 'Title', 'Operation', 'Total Value', 'Units', 'Currency', 'Details', 'Url', 'Comment']
 total_columns = ['Date', 'Total']
+total_monthly_columns = ['Date', 'Income', 'Spending', 'Profit']
 
 def load_all() -> dict:
     """Load aggregated data of all financial data (accounts, investments, etc.)

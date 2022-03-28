@@ -3,7 +3,7 @@ import pathlib
 import yaml
 from sys import platform
 from scripts.main.base_logger import log
-import scripts.main.account as account
+import scripts.main.database as db
 import pandas as pd
 
 mankkoo_dir = '.mankkoo'
@@ -11,9 +11,10 @@ account_file = 'account.csv'
 investment_file = 'investment.csv'
 stock_file = 'stock.csv'
 total_file = 'total.csv'
+total_monthly_file = 'total_monthly.csv'
 config_file = 'config.yaml'
 
-mankkoo_files = {account_file, investment_file, stock_file, total_file}
+mankkoo_files = {account_file, investment_file, stock_file, total_file, total_monthly_file}
 
 def init_data_folder():
     """Initilize .mankkoo directory in home folder, config file and all storage files
@@ -51,13 +52,15 @@ def init_data_folder():
 
 def __select_columns(file: str):
     if file == account_file:
-        return account.account_columns
+        return db.account_columns
     if file == investment_file:
-        return account.invest_columns
+        return db.invest_columns
     if file == stock_file:
-        return account.stock_columns
+        return db.stock_columns
     if file == total_file:
-        return account.total_columns
+        return db.total_columns
+    if file == total_monthly_file:
+        return db.total_monthly_columns
 
 def mankkoo_file_path(file: str) -> str:
     """Get full path of one of mankkoo's files.
