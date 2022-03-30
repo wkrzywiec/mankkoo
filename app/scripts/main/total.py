@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import datetime
 from dateutil.relativedelta import relativedelta
 import scripts.main.config as config
@@ -133,11 +134,68 @@ def stock_for_day(stock: pd.DataFrame, date: datetime.date) -> float:
     Returns:
         float: calculated total sum of all stock value
     """
+    # C:\work\mankkoo\app\scripts\main\total.py:138: SettingWithCopyWarning:
+    #
+    #
+    #A value is trying to be set on a copy of a slice from a DataFrame.
+    #Try using .loc[row_indexer,col_indexer] = value instead
+    #
+    #See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+
+
     df = stock.loc[stock['Date'] <= date]
     df['Change'] = [1 if x == 'Buy' else -1 for x in df['Operation']]
     df['Val'] = df['Total Value'] * df['Change']
     return df['Val'].sum()
 
+def update_monthly_profit(from_date: datetime.date, till_date = datetime.datetime.now(), force = False) -> pd.DataFrame:
+    log.info('Updating monthly profit info starting from %s', from_date.strftime("%m-%Y"))
+
+    from_month = datetime.date(from_date.year, from_date.month, 1)
+    total_monthly = db.load_total_monthly()
+
+    should_update = __should_monthly_total_be_updated(total_monthly, from_month, force)
+    if not should_update:
+        log.info("Monthly profit won't be updated.")
+        return
+
+    total = db.load_total()
+    months_list = pd.date_range(from_date - relativedelta(months=1), till_date, freq='MS')
+    result_list = []
+
+    for month in months_list:
+        profit = __calc_monthly_profit(month, total)
+        row_dict = {'Date': month, 'Income': round(0, 2), 'Spending': round(0, 2), 'Profit': round(profit, 2)}
+        result_list.append(row_dict)
+
+
+    df = pd.DataFrame(result_list)
+    total_monthly = total_monthly.drop(total_monthly[total_monthly['Date'] >= from_month ].index )
+    total_monthly = pd.concat([total_monthly, df], ignore_index=True) 
+
+    total_monthly.to_csv(config.mankkoo_file_path('total_monthly'), index=False)
+    log.info('Total monthly profit data was updated successfully')
+
+    return total_monthly
+
+def __should_monthly_total_be_updated(total_monthly: pd.DataFrame, from_month: datetime.date, force: bool) -> bool:
+    df = total_monthly.loc[total_monthly['Date'] >= from_month]
+    return df.empty or force
+
+def __calc_monthly_profit(month: datetime.datetime, total: pd.DataFrame) -> float:
+    this_month = total.loc[total['Date'] == month]
+
+    if this_month.empty:
+        return 0
+    
+    this_month_value = this_month.iloc[0]['Total']
+    previous_month = total.loc[total['Date'] == month - relativedelta(months=1)]
+
+    if previous_month.empty:
+        previous_month_value = 0 
+    else:
+        previous_month_value = previous_month.iloc[0]['Total']
+    return this_month_value - previous_month_value
 
 def last_month_income(total: pd.DataFrame, date: datetime.date) -> float:
     """Calculate income from previous month.

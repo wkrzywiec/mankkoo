@@ -44,6 +44,7 @@ def test_add_new_operations_by_filename(mocker):
     mocker.patch('scripts.main.importer.importer.load_bank_data', side_effect=[millenium_data])
     mocker.patch('scripts.main.database.load_accounts', side_effect=[start_data])
     mocker.patch('scripts.main.total.update_total_money')
+    mocker.patch('scripts.main.total.update_monthly_profit')
     mocker.patch('pandas.DataFrame.to_csv')
 
     # WHEN
@@ -62,6 +63,7 @@ def test_add_new_operations_by_contents(mocker):
     mocker.patch('scripts.main.importer.importer.load_bank_data', side_effect=[millenium_data])
     mocker.patch('scripts.main.database.load_accounts', side_effect=[start_data])
     mocker.patch('scripts.main.total.update_total_money')
+    mocker.patch('scripts.main.total.update_monthly_profit')
     mocker.patch('pandas.DataFrame.to_csv')
 
     # WHEN
@@ -87,6 +89,7 @@ def test_add_new_operations_multiple_banks(mocker):
     mocker.patch('scripts.main.importer.importer.load_bank_data', side_effect=[millenium])
     mocker.patch('scripts.main.database.load_accounts', side_effect=[start_data])
     mocker.patch('scripts.main.total.update_total_money')
+    mocker.patch('scripts.main.total.update_monthly_profit')
     mocker.patch('pandas.DataFrame.to_csv')
 
     # WHEN

@@ -34,6 +34,14 @@ def load_total() -> pd.DataFrame:
     result['Date'] = result['Date'].dt.date
     return result
 
+def load_total_monthly() -> pd.DataFrame:
+    log.info('Loading TOTAL MONTHLY file')
+
+    result = pd.read_csv(config.mankkoo_file_path('total_monthly'), parse_dates=['Date'])
+    result = result.astype({'Date': 'datetime64[ns]', 'Income': 'float', 'Spending': 'float', 'Profit': 'float'})
+    result['Date'] = result['Date'].dt.date
+    return result
+
 
 def load_accounts() -> pd.DataFrame:
     log.info('Loading ACCOUNT file')

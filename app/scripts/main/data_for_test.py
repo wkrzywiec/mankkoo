@@ -75,3 +75,12 @@ def total_data(rows=total):
     result['Date'] = pd.to_datetime(result['Date'], format='%Y-%m-%d', errors='coerce')
     result['Date'] = result['Date'].dt.date
     return result
+
+def total_monthly_data(rows=total):
+    result = pd.DataFrame(
+        data=np.array(rows),
+        columns=db.total_monthly_columns
+    ).astype({'Date': 'datetime64[ns]', 'Income': 'float', 'Spending': 'float', 'Profit': 'float'})
+    result['Date'] = pd.to_datetime(result['Date'], format='%Y-%m-%d', errors='coerce')
+    result['Date'] = result['Date'].dt.date
+    return result
