@@ -100,6 +100,17 @@ def main_page():
                     ])
                 ])
             ]),
+        ]),
+
+        html.Div(className='row', style={'padding-bottom': '50px'}, children=[
+             html.Div(className='col-12', children=[
+                html.Div(className='card card-indicator', children=[
+                    html.Div(className='card-body card-body-plotly', children=[
+                        html.Span('Monthly Profit History', className='card-body-title'),
+                        html.Div(dcc.Graph(figure=total_monthly_bar(data['total_monthly'])), style={'width': '1200px'})
+                    ])
+                ])
+            ]),
         ])
     ])
 
@@ -160,3 +171,7 @@ def total_money_chart(data):
         font_family='Rubik'
     )
     return chart
+
+def total_monthly_bar(data):
+    bar = px.bar(data, x='Date', y='Profit')
+    return bar

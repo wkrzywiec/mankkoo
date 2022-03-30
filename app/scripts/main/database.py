@@ -23,7 +23,8 @@ def load_all() -> dict:
         account=load_accounts(),
         investment=load_investments(),
         stock=load_stocks(),
-        total=load_total()
+        total=load_total(),
+        total_monthly=load_total_monthly()
     )
 
 def load_total() -> pd.DataFrame:
