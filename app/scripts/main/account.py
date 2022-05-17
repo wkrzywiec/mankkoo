@@ -8,7 +8,7 @@ from scripts.main.base_logger import log
 
 log.basicConfig(level=log.DEBUG)
 
-def add_new_operations(bank: models.Bank, account_name: str, file_name=None, contents=None) -> pd.DataFrame:
+def add_new_operations(bank: models.Bank, account_name: str, file_name=None, contents=None, account_tye=models.Account.CHECKING) -> pd.DataFrame:
     """Append bank accounts history with new operations. 
     This method return a pandas DataFrame with calculated balance.
 
@@ -24,6 +24,7 @@ def add_new_operations(bank: models.Bank, account_name: str, file_name=None, con
     """
     log.info('Adding new operations for %s account in %s bank', account_name, bank)
     df_new = importer.load_bank_data(file_name, contents, bank, account_name)
+    df_new['Type'] = account_tye.value
     df = db.load_accounts()
     __make_account_backup(df)
 

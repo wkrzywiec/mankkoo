@@ -133,7 +133,6 @@ class Mbank(models.Importer):
         df['Date'] = df['Date'].dt.date
         df['Bank'] = 'Mbank'
         df['Bank'] = df['Bank'].astype('string')
-        df['Type'] = models.Account.CHECKING.value
         df['Account'] = account_name if account_name is not None else 'Mbank Account'
         df['Account'] = df['Account'].astype('string')
         df['Currency'] = 'PLN'

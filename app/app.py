@@ -74,7 +74,7 @@ def display_page(pathname):
 def update_output(list_of_contents, list_of_names, list_of_dates, bank_id, account_name, account_type):
     if list_of_contents is not None:
         try:
-            account.add_new_operations(models.Bank[bank_id], account_name, contents=list_of_contents)
+            account.add_new_operations(models.Bank[bank_id], account_name, contents=list_of_contents, account_tye=models.Account(account_type))
             return 'success'
         except Exception as ex:
             log.info(f'Error occured: {ex}')
