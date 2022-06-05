@@ -164,7 +164,7 @@ def update_monthly_profit(from_date: datetime.date, till_date = datetime.datetim
     result_list = []
 
     for month in months_list:
-        profit = __calc_monthly_profit(month, total)
+        profit = last_month_income(total, month)
         row_dict = {'Date': month, 'Income': round(0, 2), 'Spending': round(0, 2), 'Profit': round(profit, 2)}
         result_list.append(row_dict)
 
@@ -181,21 +181,6 @@ def update_monthly_profit(from_date: datetime.date, till_date = datetime.datetim
 def __should_monthly_total_be_updated(total_monthly: pd.DataFrame, from_month: datetime.date, force: bool) -> bool:
     df = total_monthly.loc[total_monthly['Date'] >= from_month]
     return df.empty or force
-
-def __calc_monthly_profit(month: datetime.datetime, total: pd.DataFrame) -> float:
-    this_month = total.loc[total['Date'] == month]
-
-    if this_month.empty:
-        return 0
-    
-    this_month_value = this_month.iloc[0]['Total']
-    previous_month = total.loc[total['Date'] == month - relativedelta(months=1)]
-
-    if previous_month.empty:
-        previous_month_value = 0 
-    else:
-        previous_month_value = previous_month.iloc[0]['Total']
-    return this_month_value - previous_month_value
 
 def last_month_income(total: pd.DataFrame, date: datetime.date) -> float:
     """Calculate income from previous month.
