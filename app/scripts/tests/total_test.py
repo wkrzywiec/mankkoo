@@ -181,6 +181,7 @@ def test_update_monthly_profit(mocker):
     
     
     total_data = td.total_data([
+        ['2021-01-01', 100],
         ['2021-02-01', 200],
         ['2021-03-01', 300],
         ['2021-04-01', 400],
@@ -192,7 +193,7 @@ def test_update_monthly_profit(mocker):
     mocker.patch('pandas.DataFrame.to_csv')
 
     # WHEN
-    result = total.update_monthly_profit(from_date=datetime.datetime(2021, 3, 10), till_date=datetime.datetime(2021, 6, 12))
+    result = total.update_monthly_profit(from_date=datetime.date(2021, 3, 10), till_date=datetime.date(2021, 6, 12))
 
     # THEN
     expected = td.total_monthly_data([
