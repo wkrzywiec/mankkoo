@@ -1,10 +1,8 @@
 import pytest
 import scripts.main.importer.importer as importer
-import scripts.main.config as config
 import scripts.main.models as models
 import scripts.main.data_for_test as td
 import numpy as np
-import pandas as pd
 from pandas._testing import assert_frame_equal
 
 exp_result = td.account_data([
@@ -16,23 +14,12 @@ exp_result = td.account_data([
     ['Bank', 'checking', 'Bank Account', '2021-06-06', 'In 2', np.NaN, np.NaN, np.NaN, 50.00, 'PLN', np.NaN]
 ])
 
-def test_load_data(mocker):
-    # GIVEN
-    test_account = config.data_path() + config.account_file
-    mocker.patch('scripts.main.config.mankkoo_file_path', return_value=test_account)
-
-    # WHEN
-    result = importer.load_data_from_file(models.FileType.ACCOUNT)
-
-    # THEN
-    assert len(result) == 6
-
 def test_load_pl_ing():
     # GIVEN
     ing_file = 'test_pl_ing.csv'
 
     # WHEN
-    result = importer.load_data_from_file(models.FileType.BANK, kind=models.Bank.PL_ING, file_name=ing_file)
+    result = importer.load_bank_data(file_name=ing_file, contents=None, kind=models.Bank.PL_ING, account_name='ING Account')
 
     # THEN
     expected = __prepare_expected(exp_result, 'ING', 'ING Account')
@@ -44,7 +31,7 @@ def test_load_pl_mbank():
     mbank_file = 'test_pl_mbank.csv'
 
     # WHEN
-    result = importer.load_data_from_file(models.FileType.BANK, kind=models.Bank.PL_MBANK, file_name=mbank_file)
+    result = importer.load_bank_data(file_name=mbank_file, contents=None, kind=models.Bank.PL_MBANK, account_name='Mbank Account')
 
     # THEN
     expected = __prepare_expected(exp_result, 'Mbank', 'Mbank Account')
@@ -56,7 +43,7 @@ def test_load_pl_millenium():
     millenium_file = 'test_pl_millenium.csv'
 
     # WHEN
-    result = importer.load_data_from_file(models.FileType.BANK, kind=models.Bank.PL_MILLENIUM, file_name=millenium_file)
+    result = importer.load_bank_data(file_name=millenium_file, contents=None, kind=models.Bank.PL_MILLENIUM, account_name='Millenium Account')
 
     # THEN
     expected = __prepare_expected(exp_result, 'Millenium', 'Millenium Account')

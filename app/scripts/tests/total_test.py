@@ -2,9 +2,10 @@ import pytest
 import numpy as np
 from pandas._testing import assert_frame_equal
 import datetime
+from dateutil.relativedelta import relativedelta
 import scripts.main.total as total
 import scripts.main.data_for_test as td
-import scripts.main.data as real_data
+import scripts.main.database as real_data
 import scripts.main.data_formatter as formatter
 
 # not actual test, used only to debug real data, uncomment to use
@@ -148,14 +149,16 @@ def test_update_total_money(mocker):
         ['Bank A', '2021-01-01', 'ETFSP500', 'Buy', 1000.00, 10, 'PLN', np.NaN, np.NaN, np.NaN],
         ['Bank A', '2021-01-01', 'ETFDAX', 'Buy', 1000.00, 10, 'PLN', np.NaN, np.NaN, np.NaN]
     ])
-    mocker.patch('scripts.main.importer.importer.load_data_from_file', side_effect=[old_total, inv_data, stocks])
+    mocker.patch('scripts.main.database.load_total', side_effect=[old_total])
+    mocker.patch('scripts.main.database.load_investments', side_effect=[inv_data])
+    mocker.patch('scripts.main.database.load_stocks', side_effect=[stocks])
     mocker.patch('pandas.DataFrame.to_csv')
 
     from_date = formatter.map_date('2021-01-01')
     till_date = formatter.map_date('2021-01-05')
 
     # WHEN
-    result = total.update_total_money(account,  from_date, till_date)
+    result = total.update_total_money(account, from_date, till_date)
 
     # THEN
     expected = td.total_data([
@@ -166,6 +169,44 @@ def test_update_total_money(mocker):
         ['2021-01-05', 17000],
     ])
     assert_frame_equal(expected, result)
+
+def test_update_monthly_profit(mocker):
+    # GIVEN
+    old_total_monthly = td.total_monthly_data([
+        ['2021-01-01', 0, 0, 100],
+        ['2021-02-01', 0, 0, 200]
+    ])
+
+    mocker.patch('scripts.main.database.load_total_monthly', side_effect=[old_total_monthly])
+    
+    
+    total_data = td.total_data([
+        ['2021-01-01', 100],
+        ['2021-02-01', 200],
+        ['2021-03-01', 300],
+        ['2021-04-01', 400],
+        ['2021-05-01', 500],
+        ['2021-06-01', 600]
+    ])
+
+    mocker.patch('scripts.main.database.load_total', side_effect=[total_data])
+    mocker.patch('pandas.DataFrame.to_csv')
+
+    # WHEN
+    result = total.update_monthly_profit(from_date=datetime.date(2021, 3, 10), till_date=datetime.date(2021, 6, 12))
+
+    # THEN
+    expected = td.total_monthly_data([
+        ['2021-01-01', 0, 0, 100],
+        ['2021-02-01', 0, 0, 200],
+        ['2021-03-01', 0, 0, 100],
+        ['2021-04-01', 0, 0, 100],
+        ['2021-05-01', 0, 0, 100],
+        ['2021-06-01', 0, 0, 100]
+    ])
+    assert_frame_equal(expected, result)
+
+
 
 def test_last_month_income():
     # GIVEN

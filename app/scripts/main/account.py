@@ -1,5 +1,6 @@
 import pandas as pd
 import scripts.main.importer.importer as importer
+import scripts.main.database as db
 import scripts.main.models as models
 import scripts.main.config as config
 import scripts.main.total as total
@@ -7,28 +8,7 @@ from scripts.main.base_logger import log
 
 log.basicConfig(level=log.DEBUG)
 
-account_columns = ['Bank', 'Type', 'Account', 'Date', 'Title', 'Details', 'Category', 'Comment', 'Operation', 'Currency', 'Balance']
-invest_columns = ['Active', 'Category', 'Bank', 'Investment', 'Start Date', 'End Date', 'Start Amount', 'End amount', 'Currency', 'Details', 'Comment']
-stock_columns = ['Broker', 'Date', 'Title', 'Operation', 'Total Value', 'Units', 'Currency', 'Details', 'Url', 'Comment']
-total_columns = ['Date', 'Total']
-
-
-def load_data() -> dict:
-    """Load aggregated data of all financial data (accounts, investments, etc.)
-
-    Returns:
-        dict(pandas.DataFrame): a dictonary with categorized financial data
-    """
-    log.info("Loading mankkoo's files")
-
-    return dict(
-        account=importer.load_data_from_file(models.FileType.ACCOUNT),
-        investment=importer.load_data_from_file(models.FileType.INVESTMENT),
-        stock=importer.load_data_from_file(models.FileType.STOCK),
-        total=importer.load_data_from_file(models.FileType.TOTAL)
-    )
-
-def add_new_operations(bank: models.Bank, account_name: str, file_name=None, contents=None) -> pd.DataFrame:
+def add_new_operations(bank: models.Bank, account_name: str, file_name=None, contents=None, account_tye=models.Account.CHECKING) -> pd.DataFrame:
     """Append bank accounts history with new operations. 
     This method return a pandas DataFrame with calculated balance.
 
@@ -44,7 +24,8 @@ def add_new_operations(bank: models.Bank, account_name: str, file_name=None, con
     """
     log.info('Adding new operations for %s account in %s bank', account_name, bank)
     df_new = importer.load_bank_data(file_name, contents, bank, account_name)
-    df = importer.load_data_from_file(models.FileType.ACCOUNT)
+    df_new['Type'] = account_tye.value
+    df = db.load_accounts()
     __make_account_backup(df)
 
     df = pd.concat([df, df_new]).reset_index(drop=True)
@@ -54,6 +35,7 @@ def add_new_operations(bank: models.Bank, account_name: str, file_name=None, con
     df.to_csv(config.mankkoo_file_path('account'), index=True, index_label='Row')
 
     total.update_total_money(df, df_new['Date'].min())
+    total.update_monthly_profit(from_date=df_new['Date'].min(), force=True)
     log.info('%d new operations for %s account were added.', df_new['Bank'].size, account_name)
     return df
 

@@ -4,8 +4,7 @@ import dash_table as table
 import app
 import plotly.express as px
 
-import scripts.main.importer.importer as importer
-import scripts.main.models as models
+import scripts.main.database as db
 import scripts.main.config as config
 import scripts.main.ui as ui
 
@@ -18,7 +17,7 @@ def account_page():
     user_config = config.load_user_config()
     bank_ids = ui.decode_bank_ids(global_config['accounts']['importers'])
 
-    accounts_data = importer.load_data_from_file(models.FileType.ACCOUNT)
+    accounts_data = db.load_accounts()
     accounts_data = accounts_data.iloc[::-1]
     accounts_names = list(accounts_data.groupby(['Bank', 'Account']).groups)
 

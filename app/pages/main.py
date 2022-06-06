@@ -7,10 +7,8 @@ from dash_table import DataTable, FormatTemplate
 import plotly.express as px
 import plotly.graph_objects as go
 
+import scripts.main.database as db
 import scripts.main.total as total
-import scripts.main.data as dt
-import scripts.main.importer.importer as importer
-import scripts.main.models as models
 import app
 
 from scripts.main.base_logger import log
@@ -24,10 +22,10 @@ def __calc_last_month_income_color(last_month_income: float) -> str:
 
     return '#212529'
 
-data = dt.load_data()
+data = db.load_all()
 
 total_money = total.total_money_data(data)
-last_month_income = total.last_month_income(importer.load_data_from_file(models.FileType.TOTAL), date.today())
+last_month_income = total.last_month_income(db.load_total(), date.today())
 last_month_income_sign = '+' if last_month_income > 0 else ''
 last_month_income_color = __calc_last_month_income_color(last_month_income)
 last_month = date.today() - relativedelta(months=1)
@@ -42,7 +40,7 @@ def main_page():
             html.Div(className='col-3', children=[
                 html.Div(className='card card-indicator', children=[
                      html.Div(className='card-body card-body-indicator', children=[
-                        html.Span('My Wealth', className='card-body-title'),
+                        html.Span('Savings', className='card-body-title'),
                         html.Span('{:,.2f} PLN'.format(total_money['Total'].sum()).replace(',', ' '))
                      ])
                 ])
@@ -50,19 +48,35 @@ def main_page():
             html.Div(className='col-3', children=[
                 html.Div(className='card card-indicator', children=[
                      html.Div(className='card-body card-body-indicator', children=[
-                        html.Span('Last month income', className='card-body-title'),
+                        html.Span('Debt', className='card-body-title'),
+                        html.Span(f'No Data', style={'color': '#A40E4C'}),
+                     ])
+                ])
+            ]),
+            html.Div(className='col-3', children=[
+                html.Div(className='card card-indicator', children=[
+                     html.Div(className='card-body card-body-indicator', children=[
+                        html.Span('Last Month Profit', className='card-body-title'),
                         html.Span(f'{last_month_income_sign} {last_month_income:,.2f} PLN', style={'color': last_month_income_color}),
                         html.Span(last_month_str, style={'font-size': '0.4em'})
                      ])
                 ])
-            ])
+            ]),
+            html.Div(className='col-3', children=[
+                html.Div(className='card card-indicator', children=[
+                     html.Div(className='card-body card-body-indicator', children=[
+                        html.Span('Investments', className='card-body-title'),
+                        html.Span(f'No Data', style={'color': '#A40E4C'}),
+                     ])
+                ])
+            ]),
         ]),
 
         html.Div(className='row', children=[
             html.Div(className='col-4', children=[
                 html.Div(className='card card-indicator', style={'height': '366px', 'width': '400px'}, children=[
                     html.Div(className='card-body card-body-plotly', children=[
-                        html.Span('Wealth Distribution', className='card-body-title', style={'margin-bottom': '40px'}),
+                        html.Span('Savings Distribution', className='card-body-title', style={'margin-bottom': '40px'}),
                         total_money_table(total_money)
                     ])
                 ])
@@ -70,7 +84,7 @@ def main_page():
             html.Div(className="col-5", children=[
                 html.Div(className='card card-indicator', children=[
                     html.Div(className='card-body card-body-plotly', children=[
-                        html.Span('Wealth Distribution', className='card-body-title', style={'margin-bottom': '20px'}),
+                        html.Span('Savings Distribution', className='card-body-title', style={'margin-bottom': '20px'}),
                         html.Div(dcc.Graph(figure=total_money_pie(total_money)), style={'width': '400px'})
                     ])
                 ])
@@ -81,8 +95,19 @@ def main_page():
              html.Div(className='col-12', children=[
                 html.Div(className='card card-indicator', children=[
                     html.Div(className='card-body card-body-plotly', children=[
-                        html.Span('Wealth History', className='card-body-title'),
+                        html.Span('Savings History', className='card-body-title'),
                         html.Div(dcc.Graph(figure=total_money_chart(data['total'])), style={'width': '1200px'})
+                    ])
+                ])
+            ]),
+        ]),
+
+        html.Div(className='row', style={'padding-bottom': '50px'}, children=[
+             html.Div(className='col-12', children=[
+                html.Div(className='card card-indicator', children=[
+                    html.Div(className='card-body card-body-plotly', children=[
+                        html.Span('Monthly Profit History', className='card-body-title'),
+                        html.Div(dcc.Graph(figure=total_monthly_bar(data['total_monthly'])), style={'width': '1200px'})
                     ])
                 ])
             ]),
@@ -146,3 +171,7 @@ def total_money_chart(data):
         font_family='Rubik'
     )
     return chart
+
+def total_monthly_bar(data):
+    bar = px.bar(data, x='Date', y='Profit')
+    return bar
