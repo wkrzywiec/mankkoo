@@ -39,6 +39,7 @@ def init_data_folder():
         log.info(f"Creating user {config_file} file...")
         config_d = dict(
             accounts=dict(
+                definitions=[],
                 ui=dict(
                     default_importer='',
                     hide_accounts=[]
