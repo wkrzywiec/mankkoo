@@ -7,6 +7,7 @@ import navbar
 import pages.main as main
 import pages.accounts as pa
 import pages.investments as pi
+import pages.debt as pd
 import pages.stocks as ps
 import pages.retirement as pr
 import pages.settings as pset
@@ -55,6 +56,8 @@ def display_page(pathname):
         page = pa.account_page()
     elif pathname == '/investments':
         page = pi.inv_page()
+    elif pathname == '/debt':
+        page = pd.debt_page()
     elif pathname == '/stocks':
         page = ps.stock_page()
     elif pathname == '/retirement':
