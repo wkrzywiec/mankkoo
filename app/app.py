@@ -9,6 +9,7 @@ import pages.accounts as pa
 import pages.investments as pi
 import pages.stocks as ps
 import pages.retirement as pr
+import pages.settings as pset
 
 import scripts.main.config as config
 import scripts.main.models as models
@@ -58,6 +59,8 @@ def display_page(pathname):
         page = ps.stock_page()
     elif pathname == '/retirement':
         page = pr.retirement_page()
+    elif pathname == '/settings':
+        page = pset.settings_page()
     else:
         page = main.main_page()
 
