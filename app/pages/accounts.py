@@ -34,6 +34,7 @@ def account_page():
         account_tabs.append(account_tab)
 
     return html.Div(className='height-100 container main-body', children=[
+        html.H1('Accounts', className='title'),
         html.Div(className='row', children=[
             html.Div(className='col-4', children=[
                 html.Label(htmlFor='bank-id', children=['Bank']),
