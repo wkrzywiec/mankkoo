@@ -69,6 +69,7 @@ def display_page(pathname):
 
     return html.Div(children=[navbar.navbar(app, pathname), page])
 
+# account.py
 @app.callback(Output('upload-status', 'value'),
               Input('upload-data', 'contents'),
               State('upload-data', 'filename'),
@@ -85,6 +86,42 @@ def update_output(list_of_contents, list_of_names, list_of_dates, bank_id, accou
         except Exception as ex:
             log.info(f'Error occured: {ex}')
             return 'failure'
+
+# settings.py
+@app.callback(
+    Output('bank-accounts-table', 'data'),
+    Input('add-account-button', 'n_clicks'),
+    State('bank-accounts-table', 'data'),
+    State('bank-accounts-table', 'columns'))
+def account_settings_add_row(n_clicks, rows, columns):
+    if n_clicks > 0:
+        rows.append({c['id']: '' for c in columns})
+    return rows
+
+@app.callback(Output('account-settings-change', 'value'),
+              [Input('bank-accounts-table', 'data_previous')],
+              [State('bank-accounts-table', 'data')])
+def account_settings_remove_rows(previous, current):
+
+    if previous is None:
+        return 'success'
+    else:
+        
+        if (len(current) < len(previous)):
+            log.info('Account entry removed')
+            user_config = config.load_user_config()
+            user_config['accounts']['definitions'] = current
+            config.save_user_config(user_config)
+            return 'success'
+        
+        pairs = zip(current, previous)
+        if any(x != y for x, y in pairs):
+            log.info('sth has changed in config')
+            log.info(current)
+        else:
+            log.info('nothing has changed')
+            log.info(current)
+        return 'success'
 
 
 if __name__ == '__main__':

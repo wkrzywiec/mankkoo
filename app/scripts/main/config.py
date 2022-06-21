@@ -47,8 +47,7 @@ def init_data_folder():
             )
         )
 
-        with open(m_path + __slash() + config_file, 'w') as outfile:
-            yaml.dump(config_d, outfile, allow_unicode=True, default_flow_style=False)
+        save_user_config(config_d)
         log.info(f"User {config_file} file was created in .mankkoo directory")
 
 def __select_columns(file: str):
@@ -139,4 +138,27 @@ def load_user_config() -> dict:
     """
     log.info(f"Loading user {config_file} file")
     with open(mankkoo_path() + __slash() + config_file, 'r', encoding='utf-8') as c:
-        return yaml.safe_load(c)
+        result = yaml.safe_load(c)
+    
+    accounts = result['accounts']['definitions']
+    accounts_sorted = []
+    keyorder = ['id', 'bank', 'name', 'alias', 'type', 'active', 'bank_url']
+
+    for acc in accounts: 
+        acc_sorted = {k: acc[k] for k in keyorder if k in acc}
+        accounts_sorted.append(acc_sorted)
+    
+    result['accounts']['definitions'] = accounts_sorted
+
+    return result
+
+def save_user_config(user_config: dict):
+    log.info(f"Saving user config file. New file: {user_config}")
+    
+    try:
+        with open(mankkoo_path() + __slash() + config_file, 'w', encoding="utf-8") as outfile:
+            yaml.dump(user_config, outfile, allow_unicode=True, default_flow_style=False)
+    except Exception as err:
+        log.info(err)
+
+    log.info(f"User config file was updated in .mankkoo directory")
