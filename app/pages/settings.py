@@ -10,10 +10,10 @@ import scripts.main.config as config
 def settings_page():
     log.info('Loading settings page')
 
+    global_config = config.load_global_config()
     user_config = config.load_user_config()
 
     bank_accounts = pd.DataFrame(user_config['accounts']['definitions'])
-    default_importer = user_config['accounts']['ui']['default_importer']
 
     return html.Div(className='height-100 container main-body', children=[
         html.H1('Settings', className='title'),
@@ -36,10 +36,18 @@ def settings_page():
         html.Div(id='account-settings-change-container', hidden=True, children=[
             dcc.Input(id='account-settings-change', type='hidden', value="no-info")
         ]),
-
-
         html.Button('Add Bank Account', id='add-account-button', n_clicks=0),
+        
+        
         html.H3('Default bank account importer', className='title subtitle'),
-        html.P(default_importer),
-        html.H3('Hide bank accounts', className='title subtitle')
+        dcc.Dropdown(
+            id='default-importer-dropdown',
+            options=[{'label': i, 'value': i} for i in global_config['accounts']['importers']],
+            value=user_config['accounts']['ui']['default_importer'],
+            clearable=False
+        ),
+        
+        
+        html.H3('Hide bank accounts', className='title subtitle'),
+        html.Div(id='hidden-div', style={'display': 'none'})
     ])

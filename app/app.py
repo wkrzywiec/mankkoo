@@ -98,9 +98,10 @@ def account_settings_add_row(n_clicks, rows, columns):
         rows.append({c['id']: '' for c in columns})
     return rows
 
-@app.callback(Output('account-settings-change', 'value'),
-              [Input('bank-accounts-table', 'data_previous')],
-              [State('bank-accounts-table', 'data')])
+@app.callback(
+    Output('account-settings-change', 'value'),
+    [Input('bank-accounts-table', 'data_previous')],
+    [State('bank-accounts-table', 'data')])
 def account_settings_remove_rows(previous, current):
 
     if previous is None:
@@ -125,6 +126,17 @@ def __update_accounts_config(current):
     user_config = config.load_user_config()
     user_config['accounts']['definitions'] = current
     config.save_user_config(user_config)
+
+@app.callback(
+    Output('hidden-div', 'value'),
+    [Input('default-importer-dropdown', 'value')]
+    )
+def update_default_importer(default_importer):
+    log.info(f'Updating default account importer to: {default_importer}')
+    user_config = config.load_user_config()
+    user_config['accounts']['ui']['default_importer'] = default_importer
+    config.save_user_config(user_config)
+    return 'success'
 
 
 if __name__ == '__main__':
