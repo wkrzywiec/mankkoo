@@ -162,3 +162,4 @@ def save_user_config(user_config: dict):
         log.info(err)
 
     log.info(f"User config file was updated in .mankkoo directory")
+    # todo: if bank id changed -> update the account info 

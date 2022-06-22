@@ -108,20 +108,23 @@ def account_settings_remove_rows(previous, current):
     else:
         
         if (len(current) < len(previous)):
-            log.info('Account entry removed')
-            user_config = config.load_user_config()
-            user_config['accounts']['definitions'] = current
-            config.save_user_config(user_config)
+            log.info('Account config entry removed')
+            __update_accounts_config(current)
             return 'success'
         
         pairs = zip(current, previous)
         if any(x != y for x, y in pairs):
-            log.info('sth has changed in config')
-            log.info(current)
+            log.info('Account config entry was modified')
+            __update_accounts_config(current)
         else:
-            log.info('nothing has changed')
-            log.info(current)
+            log.info('None of account config entry was modified')
         return 'success'
+
+
+def __update_accounts_config(current):
+    user_config = config.load_user_config()
+    user_config['accounts']['definitions'] = current
+    config.save_user_config(user_config)
 
 
 if __name__ == '__main__':
