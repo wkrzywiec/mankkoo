@@ -78,10 +78,10 @@ def display_page(pathname):
               State('account-name', 'value'),
               State('account-type', 'value')
 )
-def update_output(list_of_contents, list_of_names, list_of_dates, bank_id, account_name, account_type):
+def update_output(list_of_contents, list_of_names, list_of_dates, bank_id, account_id, account_type):
     if list_of_contents is not None:
         try:
-            account.add_new_operations(models.Bank[bank_id], account_name, contents=list_of_contents, account_tye=models.Account(account_type))
+            account.add_new_operations(models.Bank[bank_id], account_id, contents=list_of_contents, account_tye=models.Account(account_type))
             return 'success'
         except Exception as ex:
             log.info(f'Error occured: {ex}')
@@ -129,7 +129,7 @@ def __update_accounts_config(current):
 
 @app.callback(
     Output('hidden-div', 'value'),
-    [Input('default-importer-dropdown', 'value')]
+    Input('default-importer-dropdown', 'value')
     )
 def update_default_importer(default_importer):
     log.info(f'Updating default account importer to: {default_importer}')

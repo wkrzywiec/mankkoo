@@ -9,20 +9,20 @@ import scripts.main.config as config
 
 
 start_data = td.account_data([
-    ['Millenium', 'checking', '360', '2021-01-31', 'Init money', 'Detail 1', np.NaN, 'init', 1000, 'PLN', 1000],
-    ['Millenium', 'checking', '360', '2021-01-31', 'Armchair', 'Detail 2', np.NaN, np.NaN, -222.22, 'PLN', 777.78],
-    ['Millenium', 'checking', '360', '2021-01-31', 'Candies', 'Detail 3', np.NaN, np.NaN, -3.3, 'PLN', 774.48]
+    ['iban-1', '2021-01-31', 'Init money', 'Detail 1', np.NaN, 'init', 1000, 'PLN', 1000],
+    ['iban-1', '2021-01-31', 'Armchair', 'Detail 2', np.NaN, np.NaN, -222.22, 'PLN', 777.78],
+    ['iban-1', '2021-01-31', 'Candies', 'Detail 3', np.NaN, np.NaN, -3.3, 'PLN', 774.48]
 ])
 
 millenium_data = td.account_data(td.millenium_data)
 
 end_data = td.account_data([
-    ['Millenium', 'checking', '360', '2021-01-31', 'Init money', 'Detail 1', np.NaN, 'init', 1000.00, 'PLN', 1000.00],
-    ['Millenium', 'checking', '360', '2021-01-31', 'Armchair', 'Detail 2', np.NaN, np.NaN, -222.22, 'PLN', 777.78],
-    ['Millenium', 'checking', '360', '2021-01-31', 'Candies', 'Detail 3', np.NaN, np.NaN, -3.30, 'PLN', 774.48],
-    ['Millenium', 'checking', '360', '2021-03-15', 'Train ticket', 'Detail new', np.NaN, np.NaN, -100.00, 'PLN', 674.48],
-    ['Millenium', 'checking', '360', '2021-03-16', 'Bus ticket', 'Detail new', np.NaN, np.NaN, -200.00, 'PLN', 474.48],
-    ['Millenium', 'checking', '360', '2021-03-17', 'Salary', 'Detail new', np.NaN, np.NaN, 3000.33, 'PLN', 3474.81]
+    ['iban-1', '2021-01-31', 'Init money', 'Detail 1', np.NaN, 'init', 1000.00, 'PLN', 1000.00],
+    ['iban-1', '2021-01-31', 'Armchair', 'Detail 2', np.NaN, np.NaN, -222.22, 'PLN', 777.78],
+    ['iban-1', '2021-01-31', 'Candies', 'Detail 3', np.NaN, np.NaN, -3.30, 'PLN', 774.48],
+    ['iban-1', '2021-03-15', 'Train ticket', 'Detail new', np.NaN, np.NaN, -100.00, 'PLN', 674.48],
+    ['iban-1', '2021-03-16', 'Bus ticket', 'Detail new', np.NaN, np.NaN, -200.00, 'PLN', 474.48],
+    ['iban-1', '2021-03-17', 'Salary', 'Detail new', np.NaN, np.NaN, 3000.33, 'PLN', 3474.81]
 ])
 
 
@@ -48,7 +48,7 @@ def test_add_new_operations_by_filename(mocker):
     mocker.patch('pandas.DataFrame.to_csv')
 
     # WHEN
-    df = account.add_new_operations(bank, '360', file_name='test_pl_millenium.csv')
+    df = account.add_new_operations(bank, 'iban-1', file_name='test_pl_millenium.csv')
 
     # THEN
     assert_frame_equal(end_data, df)
@@ -67,7 +67,7 @@ def test_add_new_operations_by_contents(mocker):
     mocker.patch('pandas.DataFrame.to_csv')
 
     # WHEN
-    df = account.add_new_operations(bank, '360', contents='data:application/vnd.ms-excel;' + str(encoded_account))
+    df = account.add_new_operations(bank, 'iban-1', contents='data:application/vnd.ms-excel;' + str(encoded_account))
 
     # THEN
     assert_frame_equal(end_data, df)
@@ -77,13 +77,13 @@ def test_add_new_operations_multiple_banks(mocker):
     bank = models.Bank.PL_MILLENIUM
 
     start_data = td.account_data([
-        ['Millenium', 'checking', '360', '2020-12-01', 'a', 'a', np.NaN, '', -1000, 'PLN', 2000],
-        ['Millenium', 'checking', '360', '2021-01-01', 'a', 'a', np.NaN, '', 1000, 'PLN', 1000],
-        ['ING', 'checking', 'Direct', '2021-01-31', 'a', 'a', np.NaN, np.NaN, -222.22, 'PLN', 10]
+        ['iban-1', '2020-12-01', 'a', 'a', np.NaN, '', -1000, 'PLN', 2000],
+        ['iban-1', '2021-01-01', 'a', 'a', np.NaN, '', 1000, 'PLN', 1000],
+        ['iban-2', '2021-01-31', 'a', 'a', np.NaN, np.NaN, -222.22, 'PLN', 10]
     ])
 
     millenium = td.account_data([
-        ['Millenium', 'checking', '360', '2021-02-15', 'Train ticket', 'Detail new', np.NaN, np.NaN, -500, 'PLN', np.NaN]
+        ['iban-1', '2021-02-15', 'Train ticket', 'Detail new', np.NaN, np.NaN, -500, 'PLN', np.NaN]
     ])
 
     mocker.patch('scripts.main.importer.importer.load_bank_data', side_effect=[millenium])
@@ -93,7 +93,7 @@ def test_add_new_operations_multiple_banks(mocker):
     mocker.patch('pandas.DataFrame.to_csv')
 
     # WHEN
-    df = account.add_new_operations(bank, '360', file_name='test_pl_millenium.csv')
+    df = account.add_new_operations(bank, 'iban-1', file_name='test_pl_millenium.csv')
 
     # THEN
     millenium_balance = df.iloc[-1]['Balance']

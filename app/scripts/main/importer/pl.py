@@ -18,7 +18,7 @@ class Ing(models.Importer):
         decoded = base64.b64decode(content_string)
         return pd.read_csv(io.StringIO(decoded.decode('utf-8')), sep=";")
 
-    def format_file(self, df: pd.DataFrame, account_name=None):
+    def format_file(self, df: pd.DataFrame, account_id: str):
         df = self.__clean_data(df)
 
         df = df[['Data transakcji', 'Dane kontrahenta', 'Kwota transakcji (waluta rachunku)', 'Waluta']]
@@ -33,10 +33,7 @@ class Ing(models.Importer):
 
         df['Date'] = pd.to_datetime(df.Date)
         df['Date'] = df['Date'].dt.date
-        df['Bank'] = 'ING'
-        df['Bank'] = df['Bank'].astype('string')
-        df['Type'] = models.Account.CHECKING.value
-        df['Account'] = account_name if account_name is not None else 'ING Account'
+        df['Account'] = account_id
         df['Account'] = df['Account'].astype('string')
         df['Details'] = np.NaN
         df['Balance'] = np.NaN
@@ -118,7 +115,7 @@ class Mbank(models.Importer):
             "skipfooter": lines - skipfooter
         }
 
-    def format_file(self, df: pd.DataFrame, account_name=None):
+    def format_file(self, df: pd.DataFrame, account_id: str):
 
         df = df[['#Data operacji', '#Kategoria']]
         df = df.loc[:, ~df.columns.duplicated()]
@@ -131,10 +128,7 @@ class Mbank(models.Importer):
 
         df['Date'] = pd.to_datetime(df.Date)
         df['Date'] = df['Date'].dt.date
-        df['Bank'] = 'Mbank'
-        df['Bank'] = df['Bank'].astype('string')
-        df['Type'] = models.Account.CHECKING.value
-        df['Account'] = account_name if account_name is not None else 'Mbank Account'
+        df['Account'] = account_id
         df['Account'] = df['Account'].astype('string')
         df['Currency'] = 'PLN'
         df['Details'] = np.NaN
@@ -166,7 +160,7 @@ class Millenium(models.Importer):
         decoded = base64.b64decode(content_string)
         return pd.read_csv(io.StringIO(decoded.decode('utf-8')))
 
-    def format_file(self, df: pd.DataFrame, account_name=None):
+    def format_file(self, df: pd.DataFrame, account_id: str):
         df = df[['Data transakcji', 'Opis', 'Obciążenia', 'Uznania', 'Waluta']]
 
         df['Operation'] = np.where(df['Obciążenia'] < 0, df['Obciążenia'], df['Uznania'])
@@ -176,11 +170,7 @@ class Millenium(models.Importer):
 
         df['Date'] = pd.to_datetime(df.Date)
         df['Date'] = df['Date'].dt.date
-        df['Bank'] = 'Millenium'
-        df['Bank'] = df['Bank'].astype('string')
-
-        df['Type'] = models.Account.CHECKING.value
-        df['Account'] = account_name if account_name is not None else 'Millenium Account'
+        df['Account'] = account_id
         df['Account'] = df['Account'].astype('string')
         df['Details'] = np.NaN
         df['Balance'] = np.NaN

@@ -46,8 +46,5 @@ def settings_page():
             value=user_config['accounts']['ui']['default_importer'],
             clearable=False
         ),
-        
-        
-        html.H3('Hide bank accounts', className='title subtitle'),
         html.Div(id='hidden-div', style={'display': 'none'})
     ])

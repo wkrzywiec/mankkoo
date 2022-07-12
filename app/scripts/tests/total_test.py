@@ -19,8 +19,10 @@ import scripts.main.data_formatter as formatter
 #     # THEN
 #     assert True
 
-def test_total_money_data():
+def test_total_money_data(mocker):
     # GIVEN
+    mocker.patch('scripts.main.config.load_user_config', side_effect=[td.user_config])
+
     all_data = dict(
         account=td.account_data(td.start_data),
         investment=td.investment_data(),
@@ -40,13 +42,15 @@ def test_total_money_data():
         {'Type': 'Stocks', 'Total': 2000.00, 'Percentage': 0.41889378529180143}
     ]
 
-def test_total_money_data_for_checking_accounts():
+def test_total_money_data_for_checking_accounts(mocker):
     # GIVEN
+    mocker.patch('scripts.main.config.load_user_config', side_effect=[td.user_config])
+
     all_data = dict(
         account=td.account_data([
-            ['Millenium', 'checking', '360', '2021-01-01', 'Init money', 'Detail 1', np.NaN, 'init', 1000, 'PLN', 2000],
-            ['Millenium', 'checking', '360', '2021-01-31', 'Init money', 'Detail 1', np.NaN, 'init', -1000, 'PLN', 1000],
-            ['Bank B', 'checking', 'Account name', '2021-01-31', 'Armchair', 'Detail 2', np.NaN, np.NaN, -222.22, 'PLN', 1000]
+            ['iban-1', '2021-01-01', 'Init money', 'Detail 1', np.NaN, 'init', 1000, 'PLN', 2000],
+            ['iban-1', '2021-01-31', 'Init money', 'Detail 1', np.NaN, 'init', -1000, 'PLN', 1000],
+            ['iban-4', '2021-01-31', 'Armchair', 'Detail 2', np.NaN, np.NaN, -222.22, 'PLN', 1000]
         ]),
         investment=td.investment_data(),
         stock=td.stock_data()
@@ -61,13 +65,13 @@ def test_total_money_data_for_checking_accounts():
 def test_accounts_balance_for_day_multiple_accounts():
     # GIVEN
     account = td.account_data([
-        ['Millenium', 'checking', '360', '2021-01-31', 'Init money', 'Detail 1', np.NaN, 'init', 1000, 'PLN', 1000],
-        ['ING', 'checking', 'Direct', '2021-01-31', 'Armchair', 'Detail 2', np.NaN, np.NaN, -222.22, 'PLN', 1000],
-        ['mBank', 'checking', 'eKonto', '2021-01-31', 'Candies', 'Detail 3', np.NaN, np.NaN, -3.3, 'PLN', 1000],
-        ['Skarpeta', 'cash', 'Gotówka', '2021-01-31', 'a', 'a', np.NaN, np.NaN, 1000, 'PLN', 1000],
-        ['Millenium', 'savings', 'Konto Oszczędnościowe Profit', '2021-01-31', 'a', 'a', np.NaN, np.NaN, 1000, 'PLN', 1000],
-        ['PKO', 'retirement', 'PKO PPK', '2021-01-31', 'a', 'a', np.NaN, np.NaN, 1000, 'PLN', 1000],
-        ['mBank', 'checking', 'eKonto', '2035-08-08', 'a', 'a', np.NaN, np.NaN, 10000, 'PLN', 10000]
+        ['iban-1', '2021-01-31', 'Init money', 'Detail 1', np.NaN, 'init', 1000, 'PLN', 1000],
+        ['iban-2', '2021-01-31', 'Armchair', 'Detail 2', np.NaN, np.NaN, -222.22, 'PLN', 1000],
+        ['iban-3', '2021-01-31', 'Candies', 'Detail 3', np.NaN, np.NaN, -3.3, 'PLN', 1000],
+        ['cash', '2021-01-31', 'a', 'a', np.NaN, np.NaN, 1000, 'PLN', 1000],
+        ['iban-11', '2021-01-31', 'a', 'a', np.NaN, np.NaN, 1000, 'PLN', 1000],
+        ['pko-ppk', '2021-01-31', 'a', 'a', np.NaN, np.NaN, 1000, 'PLN', 1000],
+        ['iban-3', '2035-08-08', 'a', 'a', np.NaN, np.NaN, 10000, 'PLN', 10000]
     ])
 
     # WHEN
@@ -79,11 +83,11 @@ def test_accounts_balance_for_day_multiple_accounts():
 def test_accounts_balance_for_day_multiple_accounts_in_different_days():
     # GIVEN
     account = td.account_data([
-        ['Millenium', 'checking', '360', '2021-01-01', 'a', 'a', np.NaN, '', 1000, 'PLN', 1000],
-        ['ING', 'checking', 'Direct', '2021-01-31', 'a', 'a', np.NaN, np.NaN, -222.22, 'PLN', 1000],
-        ['mBank', 'checking', 'eKonto', '2021-02-01', 'a', 'a', np.NaN, np.NaN, -3.3, 'PLN', 2000],
-        ['mBank', 'checking', 'eKonto', '2021-02-01', 'a', 'a', np.NaN, np.NaN, 1000, 'PLN', 3000],
-        ['mBank', 'checking', 'eKonto', '2035-08-08', 'a', 'a', np.NaN, np.NaN, 10000, 'PLN', 10000]
+        ['iban-1', '2021-01-01', 'a', 'a', np.NaN, '', 1000, 'PLN', 1000],
+        ['iban-2', '2021-01-31', 'a', 'a', np.NaN, np.NaN, -222.22, 'PLN', 1000],
+        ['iban-3', '2021-02-01', 'a', 'a', np.NaN, np.NaN, -3.3, 'PLN', 2000],
+        ['iban-3', '2021-02-01', 'a', 'a', np.NaN, np.NaN, 1000, 'PLN', 3000],
+        ['iban-3', '2035-08-08', 'a', 'a', np.NaN, np.NaN, 10000, 'PLN', 10000]
     ])
 
     # WHEN
@@ -126,12 +130,12 @@ def test_stock_for_day():
 def test_update_total_money(mocker):
     # GIVEN
     account = td.account_data([
-        ['Millenium', 'checking', '360', '2021-01-01', 'a', 'a', np.NaN, '', 1000, 'PLN', 1000],
-        ['ING', 'checking', 'Direct', '2021-01-01', 'a', 'a', np.NaN, np.NaN, -222.22, 'PLN', 1000],
-        ['mBank', 'checking', 'eKonto', '2021-01-03', 'a', 'a', np.NaN, np.NaN, -3.3, 'PLN', 2000],
-        ['mBank', 'checking', 'eKonto', '2021-01-03', 'a', 'a', np.NaN, np.NaN, 1000, 'PLN', 3000],
-        ['ING', 'checking', 'Direct', '2021-01-04', 'a', 'a', np.NaN, np.NaN, -222.22, 'PLN', 2000],
-        ['mBank', 'checking', 'eKonto', '2021-01-05', 'a', 'a', np.NaN, np.NaN, 10000, 'PLN', 10000]
+        ['iban-1', '2021-01-01', 'a', 'a', np.NaN, '', 1000, 'PLN', 1000],
+        ['iban-2', '2021-01-01', 'a', 'a', np.NaN, np.NaN, -222.22, 'PLN', 1000],
+        ['iban-3', '2021-01-03', 'a', 'a', np.NaN, np.NaN, -3.3, 'PLN', 2000],
+        ['iban-3', '2021-01-03', 'a', 'a', np.NaN, np.NaN, 1000, 'PLN', 3000],
+        ['iban-2', '2021-01-04', 'a', 'a', np.NaN, np.NaN, -222.22, 'PLN', 2000],
+        ['iban-3', '2021-01-05', 'a', 'a', np.NaN, np.NaN, 10000, 'PLN', 10000]
     ])
     updated_dates = account.tail(3)['Date']
 
