@@ -8,7 +8,7 @@ from scripts.main.base_logger import log
 
 log.basicConfig(level=log.DEBUG)
 
-def add_new_operations(bank: models.Bank, account_id: str, file_name=None, contents=None, account_tye=models.Account.CHECKING) -> pd.DataFrame:
+def add_new_operations(account_id: str, file_name=None, contents=None) -> pd.DataFrame:
     """Append bank accounts history with new operations. 
     This method return a pandas DataFrame with calculated balance.
 
@@ -22,7 +22,8 @@ def add_new_operations(bank: models.Bank, account_id: str, file_name=None, conte
     Returns:
         pandas.DataFrame: DataFrame that holds transactions history with newly added operations
     """
-    log.info('Adding new operations for %s account in %s bank', account_id, bank)
+    log.info('Adding new operations for %s account', account_id)
+    bank = __get_bank_type(account_id)
     df_new = importer.load_bank_data(file_name, contents, bank, account_id)
     df = db.load_accounts()
     __make_account_backup(df)
@@ -60,6 +61,22 @@ def calculate_balance(df: pd.DataFrame, account_id: str) -> pd.DataFrame:
         df.loc[i, 'Balance'] = round(latest_balance, 2)
 
     return df
+
+def __get_bank_type(account_id: str):
+    account_defs = config.load_user_config()['accounts']['definitions']
+    account_list = [acc for acc in account_defs if acc['id'] == account_id]
+    
+    if len(account_list) == 0:
+        raise ValueError(f"Failed to load bank definition. There is no bank account definition with an id '{account_id}'")
+
+    importer = account_list[0]['importer']
+    
+    try:
+        bank = models.Bank[importer]
+        log.info(f"Found bank by account_id ({account_id}): {bank}")
+        return bank
+    except Exception as ex:
+        raise ValueError(f"Failed to load importer for bank. Importer with a code: '{importer}' is not known")
 
 def __latest_balance_for_account(df: pd.DataFrame, account_id: str):
 

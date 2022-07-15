@@ -13,7 +13,8 @@ user_config = {
                 'bank_url': 'https://www.bank-a.com',
                 'id': 'iban-1',
                 'name': 'Super Personal account',
-                'type': 'checking'
+                'type': 'checking',
+                'importer': 'PL_MILLENIUM'
             },
             {
                 'active': True,
@@ -22,7 +23,8 @@ user_config = {
                 'bank_url': 'https://www.bank-a.com',
                 'id': 'iban-11',
                 'name': 'Super Savings account',
-                'type': 'savigs'
+                'type': 'savigs',
+                'importer': 'PL_MILLENIUM'
             },
             {
                 'active': True,
@@ -31,7 +33,8 @@ user_config = {
                 'bank_url': 'https://www.bank-b.com',
                 'id': 'iban-2',
                 'name': 'Super Personal account',
-                'type': 'checking'
+                'type': 'checking',
+                'importer': 'PL_MILLENIUM'
             },
             {
                 'active': True,
@@ -40,7 +43,8 @@ user_config = {
                 'bank_url': 'https://www.bank-c.com',
                 'id': 'iban-3',
                 'name': 'Super Personal account',
-                'type': 'checking'
+                'type': 'checking',
+                'importer': 'PL_MBANK'
             },
             {
                 'active': True,
@@ -49,7 +53,8 @@ user_config = {
                 'bank_url': 'https://www.bank-d.com',
                 'id': 'iban-4',
                 'name': 'Super Personal account',
-                'type': 'checking'
+                'type': 'checking',
+                'importer': 'PL_ING'
             },
             {
                 'active': True,
@@ -58,7 +63,8 @@ user_config = {
                 'bank_url': '',
                 'id': 'cash',
                 'name': 'Cash',
-                'type': 'checking'
+                'type': 'checking',
+                'importer': 'MANKKOO'
             },
             {
                 'active': True,
@@ -67,7 +73,8 @@ user_config = {
                 'bank_url': 'https://www.ppk.com',
                 'id': 'pko-ppk',
                 'name': 'PPK account',
-                'type': 'retirement'
+                'type': 'retirement',
+                'importer': 'MANKKOO'
             }
         ]
     }

@@ -142,7 +142,7 @@ def load_user_config() -> dict:
     
     accounts = result['accounts']['definitions']
     accounts_sorted = []
-    keyorder = ['id', 'bank', 'name', 'alias', 'type', 'active', 'bank_url']
+    keyorder = ['id', 'bank', 'name', 'alias', 'type', 'importer', 'active', 'bank_url']
 
     for acc in accounts: 
         acc_sorted = {k: acc[k] for k in keyorder if k in acc}

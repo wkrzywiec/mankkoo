@@ -19,21 +19,21 @@ def account_page():
 
     accounts_data = db.load_accounts()
     accounts_data = accounts_data.iloc[::-1]
-    accounts_names = list(accounts_data.groupby(['Bank', 'Account']).groups)
+    accounts = user_config['accounts']['definitions']
 
     accout_importers = []
     account_tabs = []
 
-    for account_name in accounts_names:
-        log.info(account_name)
-        if account_name[0] + ' - ' + account_name[1] in user_config['accounts']['ui']['hide_accounts']:
+    for acc in accounts:
+        acc_name = str(acc['bank']) + ' - ' + str(acc['name'])
+        if acc_name in user_config['accounts']['ui']['hide_accounts'] or acc['active'] == False:
             continue
 
-        accout_importers.append({'label': account_name[0] + ' - ' + account_name[1], 'value': account_name[0] + ' - ' + account_name[1]})
-        single_account = accounts_data[(accounts_data['Bank'] == account_name[0]) & (accounts_data['Account'] == account_name[1])]
+        accout_importers.append({'label': acc_name, 'value': acc['id']})
+        single_account = accounts_data[accounts_data['Account'] == acc['id']]
         single_account = single_account[['Date', 'Title', 'Details', 'Operation', 'Balance', 'Currency', 'Comment']]
 
-        account_tab = __account_tab(single_account, account_name)
+        account_tab = __account_tab(single_account, acc_name)
         account_tabs.append(account_tab)
 
     return html.Div(className='height-100 container main-body', children=[
@@ -86,16 +86,15 @@ def account_page():
 
 
 def __account_tab(account_data, account_name):
-    full_account_name = account_name[0] + ' - ' + account_name[1]
 
-    return dcc.Tab(label=full_account_name, selected_className='accounts-tab-selected', children=[
+    return dcc.Tab(label=account_name, selected_className='accounts-tab-selected', children=[
 
         html.Div(className='row', children=[
             dcc.Graph(figure=__account_chart(account_data))
         ]),
 
         table.DataTable(
-            id=full_account_name + '-table',
+            id=account_name + '-table',
             columns=[{"name": i, "id": i} for i in account_data],
             data=account_data.to_dict('records'),
             page_size=20,

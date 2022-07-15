@@ -15,6 +15,8 @@ def settings_page():
 
     bank_accounts = pd.DataFrame(user_config['accounts']['definitions'])
 
+    log.info(bank_accounts)
+
     return html.Div(className='height-100 container main-body', children=[
         html.H1('Settings', className='title'),
         
@@ -38,13 +40,5 @@ def settings_page():
         ]),
         html.Button('Add Bank Account', id='add-account-button', n_clicks=0),
         
-        
-        html.H3('Default bank account importer', className='title subtitle'),
-        dcc.Dropdown(
-            id='default-importer-dropdown',
-            options=[{'label': i, 'value': i} for i in global_config['accounts']['importers']],
-            value=user_config['accounts']['ui']['default_importer'],
-            clearable=False
-        ),
         html.Div(id='hidden-div', style={'display': 'none'})
     ])
