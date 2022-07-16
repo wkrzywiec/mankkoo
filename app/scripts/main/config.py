@@ -41,7 +41,6 @@ def init_data_folder():
             accounts=dict(
                 definitions=[],
                 ui=dict(
-                    default_importer='',
                     hide_accounts=[]
                 )
             )

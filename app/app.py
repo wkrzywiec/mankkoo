@@ -72,16 +72,13 @@ def display_page(pathname):
 # account.py
 @app.callback(Output('upload-status', 'value'),
               Input('upload-data', 'contents'),
-              State('upload-data', 'filename'),
-              State('upload-data', 'last_modified'),
-              State('account-id', 'value'),
-              State('account-type', 'value')
+              Input('account-importer-dropdown', 'value')
 )
-def update_output(list_of_contents, list_of_names, list_of_dates, account_id, account_type):
+def update_output(list_of_contents, account_id):
     if list_of_contents is not None:
         try:
 
-            account.add_new_operations(account_id, contents=list_of_contents, account_tye=models.Account(account_type))
+            account.add_new_operations(account_id, contents=list_of_contents)
             return 'success'
         except Exception as ex:
             log.info(f'Error occured: {ex}')
@@ -126,17 +123,6 @@ def __update_accounts_config(current):
     user_config = config.load_user_config()
     user_config['accounts']['definitions'] = current
     config.save_user_config(user_config)
-
-@app.callback(
-    Output('hidden-div', 'value'),
-    Input('default-importer-dropdown', 'value')
-    )
-def update_default_importer(default_importer):
-    log.info(f'Updating default account importer to: {default_importer}')
-    user_config = config.load_user_config()
-    user_config['accounts']['ui']['default_importer'] = default_importer
-    config.save_user_config(user_config)
-    return 'success'
 
 
 if __name__ == '__main__':

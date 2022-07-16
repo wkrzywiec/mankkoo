@@ -29,7 +29,9 @@ def account_page():
         if acc_name in user_config['accounts']['ui']['hide_accounts'] or acc['active'] == False:
             continue
 
-        accout_importers.append({'label': acc_name, 'value': acc['id']})
+        acc_id = acc['id']
+
+        accout_importers.append({'label': f'{acc_name} ({acc_id})', 'value': acc_id})
         single_account = accounts_data[accounts_data['Account'] == acc['id']]
         single_account = single_account[['Date', 'Title', 'Details', 'Operation', 'Balance', 'Currency', 'Comment']]
 
@@ -43,7 +45,7 @@ def account_page():
             html.Div(className='col-4', children=[
                 html.Label(htmlFor='bank-id', children=['Bank']),
                 dcc.Dropdown(
-                    id='default-importer-dropdown',
+                    id='account-importer-dropdown',
                     options=[{'label': i['label'], 'value': i['value']} for i in accout_importers],
                     # options=accout_importers,
                     # value=accout_importers,
