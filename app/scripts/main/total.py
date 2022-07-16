@@ -17,10 +17,11 @@ def total_money_data(data: dict) -> pd.DataFrame:
     """
 
     log.info('Fetching latest total money data')
-    checking_account = __latest_account_balance(data, 'checking')
-    savings_account = __latest_account_balance(data, 'savings')
-    cash = __latest_account_balance(data, 'cash')
-    ppk = __latest_account_balance(data, 'retirement')
+    accounts_definition = config.load_user_config()['accounts']['definitions']
+    checking_account = __latest_account_balance(data, 'checking', accounts_definition)
+    savings_account = __latest_account_balance(data, 'savings', accounts_definition)
+    cash = __latest_account_balance(data, 'cash', accounts_definition)
+    ppk = __latest_account_balance(data, 'retirement', accounts_definition)
 
     inv = data['investment'].loc[data['investment']['Active'] == True]
     inv = inv['Start Amount'].sum()
@@ -42,9 +43,10 @@ def total_money_data(data: dict) -> pd.DataFrame:
         {'Type': 'Stocks', 'Total': stock, 'Percentage': stock / total}
     ])
 
-def __latest_account_balance(data: dict, type: str) -> float:
-
-    df = data['account'].loc[data['account']['Type'] == type]
+def __latest_account_balance(data: dict, type: str, accounts: dict) -> float:
+    
+    accounts = [acc['id'] for acc in accounts if acc['type'] == type]
+    df = data['account'].loc[data['account']['Account'].isin(accounts)]
     if not df.empty:
         return accounts_balance_for_day(df, df['Date'].max())
     return 0.00
@@ -91,16 +93,16 @@ def __calc_totals(accounts: pd.DataFrame, from_date: datetime.date, till_date: d
     return pd.DataFrame(result_list)
 
 def accounts_balance_for_day(accounts: pd.DataFrame, date: datetime.date):
-    account_names = accounts['Account'].unique()
+    account_ids = accounts['Account'].unique()
 
     result = 0
-    for account_name in account_names:
-        result = result + __get_balance_for_day_or_earlier(accounts, account_name, date)
+    for acc_id in account_ids:
+        result = result + __get_balance_for_day_or_earlier(accounts, acc_id, date)
     return result
 
-def __get_balance_for_day_or_earlier(accounts: pd.DataFrame, account_name: str, date: datetime.date):
+def __get_balance_for_day_or_earlier(accounts: pd.DataFrame, account_id: str, date: datetime.date):
 
-    only_single_account = accounts[accounts['Account'] == account_name]
+    only_single_account = accounts[accounts['Account'] == account_id]
     only_specific_dates_accounts = only_single_account.loc[only_single_account['Date'] <= date]
 
     if only_specific_dates_accounts.empty:

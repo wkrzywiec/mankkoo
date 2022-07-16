@@ -31,12 +31,12 @@ class Importer(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def format_file(self, df: pd.DataFrame, account_name=None) -> pd.DataFrame:
+    def format_file(self, df: pd.DataFrame, account_id: str) -> pd.DataFrame:
         """Transforms raw bank specific account history data into Mankkoo's format
 
         Args:
             df (pd.DataFrame): raw, unformatted account history
-            account_name ([type], optional): Name of a bank account. Defaults to None.
+            account_id ([type], optional): Name of a bank account. Defaults to None.
 
         Returns:
             pd.DataFrame: formatted DataFrame

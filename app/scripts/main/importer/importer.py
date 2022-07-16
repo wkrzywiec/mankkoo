@@ -5,7 +5,7 @@ import scripts.main.importer.pl as pl_importer
 from scripts.main.base_logger import log
 
 
-def load_bank_data(file_name: str, contents, kind: models.Bank, account_name: str)-> pd.DataFrame:
+def load_bank_data(file_name: str, contents, kind: models.Bank, account_id: str)-> pd.DataFrame:
     """Load data from a CSV file
 
     Args:
@@ -21,6 +21,9 @@ def load_bank_data(file_name: str, contents, kind: models.Bank, account_name: st
     Returns:
         [pd.Dataframe]: holds history of operations for an account
     """
+    if account_id is None:
+        raise ValueError('Could not load data file. "account_id" needs to provided')
+
     if file_name is None and contents is None:
         raise ValueError('Could not load data file. Either "file_name" or "contents" needs to be provided')
 
@@ -43,4 +46,4 @@ def load_bank_data(file_name: str, contents, kind: models.Bank, account_name: st
         df = bank.load_file_by_filename(file_name)
     else:
         df = bank.load_file_by_contents(contents)
-    return bank.format_file(df, account_name)
+    return bank.format_file(df, account_id)

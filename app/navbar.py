@@ -28,6 +28,12 @@ def navbar(app, pathname: str):
                         ])
                     ]),
                     html.Div(className='nav_list', children=[
+                        html.A(href='/debt', className='nav_link', children=[
+                            html.I(className='bx bx-credit-card nav_icon'),
+                            html.Span('Debt', className='nav_name')
+                        ])
+                    ]),
+                    html.Div(className='nav_list', children=[
                         html.A(href='/stocks', className='nav_link', children=[
                             html.I(className='bx bx-bar-chart nav_icon'),
                             html.Span('Stock', className='nav_name')
@@ -37,6 +43,14 @@ def navbar(app, pathname: str):
                         html.A(href='/retirement', className='nav_link', children=[
                             html.I(className='bx bx-medal nav_icon'),
                             html.Span('Retirement', className='nav_name')
+                        ])
+                    ])
+                ]),
+                html.Div(children=[
+                    html.Div(className='nav_list', children=[
+                        html.A(href='/settings', className='nav_link', children=[
+                            html.I(className='bx bx-cog nav_icon'),
+                            html.Span('Settings', className='nav_name')
                         ])
                     ])
                 ])

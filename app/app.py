@@ -7,8 +7,10 @@ import navbar
 import pages.main as main
 import pages.accounts as pa
 import pages.investments as pi
+import pages.debt as pd
 import pages.stocks as ps
 import pages.retirement as pr
+import pages.settings as pset
 
 import scripts.main.config as config
 import scripts.main.models as models
@@ -54,31 +56,73 @@ def display_page(pathname):
         page = pa.account_page()
     elif pathname == '/investments':
         page = pi.inv_page()
+    elif pathname == '/debt':
+        page = pd.debt_page()
     elif pathname == '/stocks':
         page = ps.stock_page()
     elif pathname == '/retirement':
         page = pr.retirement_page()
+    elif pathname == '/settings':
+        page = pset.settings_page()
     else:
         page = main.main_page()
 
     return html.Div(children=[navbar.navbar(app, pathname), page])
 
+# account.py
 @app.callback(Output('upload-status', 'value'),
               Input('upload-data', 'contents'),
-              State('upload-data', 'filename'),
-              State('upload-data', 'last_modified'),
-              State('bank-id', 'value'),
-              State('account-name', 'value'),
-              State('account-type', 'value')
+              Input('account-importer-dropdown', 'value')
 )
-def update_output(list_of_contents, list_of_names, list_of_dates, bank_id, account_name, account_type):
+def update_output(list_of_contents, account_id):
     if list_of_contents is not None:
         try:
-            account.add_new_operations(models.Bank[bank_id], account_name, contents=list_of_contents, account_tye=models.Account(account_type))
+
+            account.add_new_operations(account_id, contents=list_of_contents)
             return 'success'
         except Exception as ex:
             log.info(f'Error occured: {ex}')
             return 'failure'
+
+# settings.py
+@app.callback(
+    Output('bank-accounts-table', 'data'),
+    Input('add-account-button', 'n_clicks'),
+    State('bank-accounts-table', 'data'),
+    State('bank-accounts-table', 'columns'))
+def account_settings_add_row(n_clicks, rows, columns):
+    if n_clicks > 0:
+        rows.append({c['id']: '' for c in columns})
+    return rows
+
+@app.callback(
+    Output('account-settings-change', 'value'),
+    [Input('bank-accounts-table', 'data_previous')],
+    [State('bank-accounts-table', 'data')])
+def account_settings_remove_rows(previous, current):
+
+    if previous is None:
+        return 'success'
+    else:
+        
+        if (len(current) < len(previous)):
+            log.info('Account config entry removed')
+            __update_accounts_config(current)
+            return 'success'
+        
+        pairs = zip(current, previous)
+        if any(x != y for x, y in pairs):
+            log.info('Account config entry was modified')
+            __update_accounts_config(current)
+        else:
+            log.info('None of account config entry was modified')
+        return 'success'
+
+
+def __update_accounts_config(current):
+    user_config = config.load_user_config()
+    user_config['accounts']['definitions'] = current
+    config.save_user_config(user_config)
 
 
 if __name__ == '__main__':
