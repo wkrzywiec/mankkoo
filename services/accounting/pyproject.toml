@@ -12,6 +12,7 @@ plotly = "~=4.14"
 numpy = "~=1.20"
 pyyaml = "*"
 python-dateutil = "*"
+pycountry = "^22.3.5"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "~=6.2"
