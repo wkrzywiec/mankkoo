@@ -11,7 +11,7 @@ jobs:
 
   accounting:
     name: accounting
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     defaults:
       run: 
         working-directory: services/accounting
