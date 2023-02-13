@@ -20,3 +20,4 @@ poetry install
 ```bash
 poetry run pytest -s -vv --cov=./accounting
 ```
+

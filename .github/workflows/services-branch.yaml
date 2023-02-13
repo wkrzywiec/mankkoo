@@ -28,6 +28,10 @@ jobs:
         uses: abatilo/actions-poetry@v2
         with:
           poetry-version: 1.3.2
+      
+      - name: Install Poetry deps 
+        run: |
+          poetry install
 
       - name: Unit tests 🧪
         run: |
