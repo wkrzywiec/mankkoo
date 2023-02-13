@@ -23,7 +23,7 @@ jobs:
           python-version: 3.10.3
       
       - name: Wemake Python Style Guide
-        uses: wemake-services/wemake-python-styleguide@0.15.2
+        uses: wemake-services/wemake-python-styleguide@latest
         continue-on-error: true
         with:
           reporter: 'github-pr-review'
