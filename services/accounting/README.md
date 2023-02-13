@@ -9,7 +9,7 @@ A heart of *mankkoo* responsible for data processing. Built with Python.
 
 ## Local work
 
-* Installing dependencies 
+* Install dependencies 
 
 ```bash
 poetry install
