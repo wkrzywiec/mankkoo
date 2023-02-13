@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-20.04
     defaults:
       run:
-        working-directory: 'app'
+        working-directory: services/accounting
     
     steps:
       - name: Checkout 🛎️

@@ -14,3 +14,9 @@ A heart of *mankkoo* responsible for data processing. Built with Python.
 ```bash
 poetry install
 ```
+
+* Run unit tests
+
+```bash
+poetry run pytest -s -vv --cov=./accounting
+```

@@ -5,13 +5,42 @@ on:
       - 'main'
     paths:
       - 'app/**'
-
-defaults:
-  run:
-    working-directory: 'app'
+      - 'services/**'
 
 jobs:
-  qa:
+
+  accounting:
+    name: accounting
+    runs-on: ubuntu-22.04
+    defaults:
+      run: 
+        working-directory: services/accounting
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v2
+      
+      - name: Set up Python 🐍
+        uses: actions/setup-python@master
+        with:
+          python-version: 3.10.3
+
+      - name: Set up Poetry 📜
+        uses: abatilo/actions-poetry@v2
+        with:
+          poetry-version: 1.3.2
+
+      - name: Unit tests 🧪
+        run: |
+          poetry run pytest -s -vv --cov=./accounting --cov-report=xml
+
+      - name: Upload coverage to Codecov 
+        uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./services/accounting/coverage.xml
+          flags: unittests
+
+  mankkoo-legacy:
     name: Quality Check
     runs-on: ${{ matrix.os }}
     strategy:
@@ -29,7 +58,7 @@ jobs:
         uses: actions/setup-python@master
         with:
           python-version: 3.10.3
-      
+    
       - name: Install dependencies 🧰
         run: |
           python -m pip install pipenv
@@ -39,13 +68,12 @@ jobs:
         run: |
           pipenv run test
   
-  coverage:
+  coverage-legacy:
     name: Code coverage
     runs-on: ubuntu-20.04
     defaults:
       run:
         working-directory: 'app'
-
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v2
@@ -73,7 +101,7 @@ jobs:
 
   docs:
     name: Generate Documentation
-    needs: qa
+    needs: mankkoo-legacy
     runs-on: ubuntu-20.04
 
     steps:
