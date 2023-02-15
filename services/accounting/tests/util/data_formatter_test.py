@@ -1,5 +1,5 @@
 import pytest
-import accounting.data_formatter as formatter
+import accounting.util.data_formatter as formatter
 import datetime
 
 

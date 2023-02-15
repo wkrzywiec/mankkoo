@@ -1,7 +1,7 @@
 import pytest
 import pathlib
-import accounting.importer.importer as importer
-import accounting.models as models
+import accounting.account.importer.importer as importer
+import accounting.account.models as models
 import accounting.data_for_test as td
 import numpy as np
 from pandas._testing import assert_frame_equal

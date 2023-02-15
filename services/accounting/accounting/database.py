@@ -1,6 +1,6 @@
 import pandas as pd
 from sys import platform
-import accounting.config as config
+import accounting.util.config as config
 from accounting.base_logger import log
 
 log.basicConfig(level=log.DEBUG)

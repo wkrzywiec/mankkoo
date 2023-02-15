@@ -3,10 +3,10 @@ import numpy as np
 from pandas._testing import assert_frame_equal
 import datetime
 from dateutil.relativedelta import relativedelta
-import accounting.total as total
+import accounting.total.total as total
 import accounting.data_for_test as td
 import accounting.database as real_data
-import accounting.data_formatter as formatter
+import accounting.util.data_formatter as formatter
 
 # not actual test, used only to debug real data, uncomment to use
 # def test_real_total_money_data():
@@ -21,7 +21,7 @@ import accounting.data_formatter as formatter
 
 def test_total_money_data(mocker):
     # GIVEN
-    mocker.patch('accounting.config.load_user_config', side_effect=[td.user_config])
+    mocker.patch('accounting.util.config.load_user_config', side_effect=[td.user_config])
 
     all_data = dict(
         account=td.account_data(td.start_data),
@@ -44,7 +44,7 @@ def test_total_money_data(mocker):
 
 def test_total_money_data_for_checking_accounts(mocker):
     # GIVEN
-    mocker.patch('accounting.config.load_user_config', side_effect=[td.user_config])
+    mocker.patch('accounting.util.config.load_user_config', side_effect=[td.user_config])
 
     all_data = dict(
         account=td.account_data([

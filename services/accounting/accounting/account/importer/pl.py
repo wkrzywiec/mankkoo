@@ -3,8 +3,8 @@ import numpy as np
 import pandas as pd
 import base64
 import io
-import accounting.models as models
-import accounting.config as config
+import accounting.account.models as models
+import accounting.util.config as config
 import accounting.database as db
 
 class Ing(models.Importer):

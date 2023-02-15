@@ -1,6 +1,6 @@
 import pytest
 
-import accounting.ui as ui
+import accounting.util.ui as ui
 
 def test_decode_bank_ids():
     # GIVEN

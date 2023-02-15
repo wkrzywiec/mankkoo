@@ -1,7 +1,7 @@
 import pandas as pd
 from sys import platform
-import accounting.models as models
-import accounting.importer.pl as pl_importer
+import accounting.account.models as models
+import accounting.account.importer.pl as pl_importer
 from accounting.base_logger import log
 
 

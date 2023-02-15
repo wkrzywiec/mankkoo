@@ -1,9 +1,9 @@
 import pandas as pd
-import accounting.importer.importer as importer
+import accounting.account.importer.importer as importer
 import accounting.database as db
-import accounting.models as models
-import accounting.config as config
-import accounting.total as total
+import accounting.account.models as models
+import accounting.util.config as config
+import accounting.total.total as total
 from accounting.base_logger import log
 
 log.basicConfig(level=log.DEBUG)

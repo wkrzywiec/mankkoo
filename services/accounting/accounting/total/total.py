@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import datetime
 from dateutil.relativedelta import relativedelta
-import accounting.config as config
+import accounting.util.config as config
 import accounting.database as db
 from accounting.base_logger import log
 
