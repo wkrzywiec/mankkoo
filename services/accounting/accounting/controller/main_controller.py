@@ -1,8 +1,8 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint
 
-main = Blueprint('main', __name__)
+main_endpoints = Blueprint('main_endpoints', __name__)
 
-@main.route("/indicators")
+@main_endpoints.route("/indicators")
 def indicators():
     return {
         'savings': 1000.12,
@@ -11,7 +11,7 @@ def indicators():
         'investments': 0.00
     }
 
-@main.route("/savings-distribution")
+@main_endpoints.route("/savings-distribution")
 def savings_distribution():
     return {
         'total': 1000.12,
@@ -19,14 +19,14 @@ def savings_distribution():
         'keys': ['Checking Account', 'Savings Account', 'Cash', 'PPK', 'Investments', 'Stock']
     }
 
-@main.route("/total-history")
+@main_endpoints.route("/total-history")
 def total_history():
     return {
         'date': ['2022-12-01'],
         'total': [0.00, 120.64]
     }
 
-@main.route("/monthly-profits")
+@main_endpoints.route("/monthly-profits")
 def monthly_profits():
     return {
         'date': ['2022-12'],

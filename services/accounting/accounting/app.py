@@ -1,5 +1,6 @@
 from flask import Flask
-from accounting.controller.main_controller import main
+from accounting.controller.main_controller import main_endpoints
+from accounting.controller.account_controller import account_endpoints
 
 app = Flask(__name__)
 
@@ -9,4 +10,5 @@ if app.config["ENV"] == 'prod':
 else:
     app.config.from_object('accounting.config.DevConfig')
 
-app.register_blueprint(main, url_prefix='/api/main')
+app.register_blueprint(main_endpoints, url_prefix='/api/main')
+app.register_blueprint(account_endpoints, url_prefix='/api/accounts')
