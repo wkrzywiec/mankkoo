@@ -1,6 +1,7 @@
-from flask import Blueprint, request
+from apiflask import APIBlueprint
+from flask import request
 
-account_endpoints = Blueprint('account_endpoints', __name__)
+account_endpoints = APIBlueprint('account_endpoints', __name__)
 
 @account_endpoints.route("", methods=['GET'])
 @account_endpoints.route("/", methods=['GET'])

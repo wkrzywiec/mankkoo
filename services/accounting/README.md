@@ -21,3 +21,18 @@ poetry install
 poetry run pytest -s -vv --cov=./accounting
 ```
 
+* Run the app
+
+From within the `accounting` folder
+
+```bash
+poetry run flask run --reload
+```
+
+## Documentation
+
+* Swagger UI - http://localhost:5000/docs
+* OpenAPI 3 spec - http://localhost:5000/openapi.yaml
+
+
+

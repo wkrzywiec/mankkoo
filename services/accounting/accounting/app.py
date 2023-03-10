@@ -1,8 +1,11 @@
-from flask import Flask
+from apiflask import APIFlask
 from accounting.controller.main_controller import main_endpoints
 from accounting.controller.account_controller import account_endpoints
 
-app = Flask(__name__)
+app = APIFlask(__name__, title='Mankkoo API', version='1.0', spec_path='/openapi.yaml')
+
+app.config['SPEC_FORMAT'] = 'yaml'
+app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 
 # to enable 'prod' config first run: export FLASK_ENV=prod
 if app.config["ENV"] == 'prod':
