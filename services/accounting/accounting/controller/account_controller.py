@@ -1,6 +1,7 @@
 from apiflask import APIBlueprint, Schema
 from apiflask.fields import String, Boolean, Float, List
 from flask import request
+from accounting.settings import account_settings
 
 account_endpoints = APIBlueprint('account_endpoints', __name__, tag='Account')
 
@@ -20,22 +21,16 @@ class AccountOperationResult(Schema):
     details = String()
 
 @account_endpoints.route("", methods=['GET'])
-@account_endpoints.output(Account, status_code = 200)
+@account_endpoints.output(Account(many=True), status_code = 200)
 @account_endpoints.doc(summary='Account info', description='Get info about an account')
 def accounts():
-    return [
-        {
-            'id': 'bank-id',
-            'name': 'bank a',
-            'number': '111-111',
-            'alias': '',
-            'type': 'checking',
-            'importer': 'PL_MILLENIUM',
-            'active': True,
-            'bankName': 'bank name',
-            'bankUrl': 'https://www.bankmillennium.pl'
-        }
-    ]
+    accounts = account_settings.load_all_accounts()
+    for acc in accounts:
+        acc['number'] = acc['id']
+        acc['bankName'] = acc.pop('bank')
+        acc['bankUrl'] = acc.pop('bank_url')
+        
+    return accounts
 
 @account_endpoints.route("", methods=['POST'])
 @account_endpoints.input(Account)
