@@ -1,6 +1,7 @@
 from apiflask import APIFlask
 from accounting.controller.main_controller import main_endpoints
 from accounting.controller.account_controller import account_endpoints
+from accounting.util import config
 
 app = APIFlask(__name__, title="Mankkoo - 'accounting' service API", version='1.0', spec_path='/openapi.yaml', docs_ui='elements')
 
@@ -23,3 +24,5 @@ else:
 
 app.register_blueprint(main_endpoints, url_prefix='/api/main')
 app.register_blueprint(account_endpoints, url_prefix='/api/accounts')
+
+config.init_data_folder()
