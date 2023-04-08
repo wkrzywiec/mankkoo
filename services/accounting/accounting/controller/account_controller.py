@@ -1,7 +1,9 @@
 from apiflask import APIBlueprint, Schema
-from apiflask.fields import String, Boolean, Float, Integer
+from apiflask.fields import String, Boolean, Float, File
 from flask import request
+from accounting.base_logger import log
 from accounting.account import account_db as database
+from accounting.account import account
 
 account_endpoints = APIBlueprint('account_endpoints', __name__, tag='Account')
 
@@ -24,6 +26,7 @@ class AccountOperationResult(Schema):
 @account_endpoints.output(Account(many=True), status_code = 200)
 @account_endpoints.doc(summary='Account info', description='Get info about an account')
 def accounts():
+    log.info('Fetching account info...')
     accounts = database.load_all_accounts()
     for acc in accounts:
         acc['number'] = acc['id']
@@ -103,6 +106,7 @@ class AccountOperations(Schema):
 @account_endpoints.output(AccountOperations(many=True), status_code = 200)
 @account_endpoints.doc(summary='All Accounts operations', description='Get a list of all operations for all account')
 def operations():
+    log.info('Fetching operations for all accounts...')
     return database.load_all_operations_as_dict()
 
 @account_endpoints.route("/<account_id>/operations")
@@ -122,12 +126,30 @@ def operations_by_account_id(account_id):
         }
     ]
 
+class OperationsImport(Schema):
+    operations = File()
+
 @account_endpoints.route("/<account_id>/operations/import", methods=['POST'])
+@account_endpoints.input(OperationsImport, location='files')
 @account_endpoints.output(AccountOperationResult, status_code = 200)
 @account_endpoints.doc(summary='Import account operations', description='Import new operations from a file to an account')
-def import_operations(account_id):
-    return {
-            'result': 'Failed to import data',
-            'details': 'account id not known'
-    }
+def import_operations(account_id, data):
+    log.info(f'Adding new operations to account with id {account_id}"...')
+
+    try:
+        df = account.add_new_operations(account_id, None, data['operations'].read())
+        log.info(f'New account operations have been added to account with id "{account_id}".')
+        return {
+            'result': 'Success',
+            'details': 'New account operations have been added!'
+        }
+    except Exception as ex:
+        log.info(f'Failed to add new operations. Err: {ex}')
+        return {
+            'result': 'Failure',
+            'details': str(ex)
+        }
+    
+    
+    
     

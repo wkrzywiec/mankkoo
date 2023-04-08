@@ -15,6 +15,7 @@ def add_new_operations(account_id: str, file_name=None, contents=None) -> pd.Dat
     Args:
         bank (importer.Bank): enum of a bank company
         file_name (str): name of a file from which data will be loaded
+        contents (bytes): content of a file
 
     Raises:
         KeyError: raised when unsupported bank enum is provided

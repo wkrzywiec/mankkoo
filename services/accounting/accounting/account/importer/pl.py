@@ -14,9 +14,7 @@ class Ing(models.Importer):
         return pd.read_csv(file_path, sep=";")
 
     def load_file_by_contents(self, contents):
-        content_type, content_string = contents.split(',')
-        decoded = base64.b64decode(content_string)
-        return pd.read_csv(io.StringIO(decoded.decode('utf-8')), sep=";")
+        return pd.read_csv(io.StringIO(contents.decode('utf-8')), sep=";")
 
     def format_file(self, df: pd.DataFrame, account_id: str):
         df = self.__clean_data(df)
@@ -78,7 +76,7 @@ class Mbank(models.Importer):
         return pd.read_csv(file_path, sep=";", skiprows=skip_lines["skiprows"])
 
     def load_file_by_contents(self, contents: str) -> pd.DataFrame:
-
+        raise Exception('Loading file by its content is not supported!')
         content_type, content_string = contents.split(',')
         decoded = base64.b64decode(content_string)
 
@@ -156,9 +154,7 @@ class Millenium(models.Importer):
         return pd.read_csv(file_path)
 
     def load_file_by_contents(self, contents: str):
-        content_type, content_string = contents.split(',')
-        decoded = base64.b64decode(content_string)
-        return pd.read_csv(io.StringIO(decoded.decode('utf-8')))
+        return pd.read_csv(io.StringIO(contents.decode('utf-8')))
 
     def format_file(self, df: pd.DataFrame, account_id: str):
         df = df[['Data transakcji', 'Opis', 'Obciążenia', 'Uznania', 'Waluta']]
