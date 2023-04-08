@@ -76,7 +76,10 @@ user_config = {
                 'type': 'retirement',
                 'importer': 'MANKKOO'
             }
-        ]
+        ],
+        "ui": {
+            "hide_accounts": []
+        }
     }
 }
 

@@ -20,7 +20,7 @@ def load_all() -> dict:
     log.info("Loading mankkoo's files")
 
     return dict(
-        account=load_accounts(),
+        account=[],
         investment=load_investments(),
         stock=load_stocks(),
         total=load_total(),
@@ -40,15 +40,6 @@ def load_total_monthly() -> pd.DataFrame:
 
     result = pd.read_csv(config.mankkoo_file_path('total_monthly'), parse_dates=['Date'])
     result = result.astype({'Date': 'datetime64[ns]', 'Income': 'float', 'Spending': 'float', 'Profit': 'float'})
-    result['Date'] = result['Date'].dt.date
-    return result
-
-
-def load_accounts() -> pd.DataFrame:
-    log.info('Loading ACCOUNT file')
-
-    result = pd.read_csv(config.mankkoo_file_path('account'), parse_dates=['Date'], index_col=0)
-    result = result.astype({'Account': 'string', 'Balance': 'float', 'Operation': 'float', 'Date': 'datetime64[ns]'})
     result['Date'] = result['Date'].dt.date
     return result
 

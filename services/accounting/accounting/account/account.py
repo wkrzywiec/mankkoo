@@ -1,6 +1,6 @@
 import pandas as pd
 import accounting.account.importer.importer as importer
-import accounting.database as db
+import accounting.account.account_db as db
 import accounting.account.models as models
 import accounting.util.config as config
 import accounting.total.total as total
@@ -25,7 +25,7 @@ def add_new_operations(account_id: str, file_name=None, contents=None) -> pd.Dat
     log.info('Adding new operations for %s account', account_id)
     bank = __get_bank_type(account_id)
     df_new = importer.load_bank_data(file_name, contents, bank, account_id)
-    df = db.load_accounts()
+    df = db.load_all_operations_as_df()
     __make_account_backup(df)
 
     df = pd.concat([df, df_new]).reset_index(drop=True)

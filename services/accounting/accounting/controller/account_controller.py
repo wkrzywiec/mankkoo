@@ -1,7 +1,7 @@
 from apiflask import APIBlueprint, Schema
-from apiflask.fields import String, Boolean, Float, List
+from apiflask.fields import String, Boolean, Float, Integer
 from flask import request
-from accounting.settings import account_settings
+from accounting.account import account_db as database
 
 account_endpoints = APIBlueprint('account_endpoints', __name__, tag='Account')
 
@@ -24,7 +24,7 @@ class AccountOperationResult(Schema):
 @account_endpoints.output(Account(many=True), status_code = 200)
 @account_endpoints.doc(summary='Account info', description='Get info about an account')
 def accounts():
-    accounts = account_settings.load_all_accounts()
+    accounts = database.load_all_accounts()
     for acc in accounts:
         acc['number'] = acc['id']
         acc['bankName'] = acc.pop('bank')
@@ -45,15 +45,15 @@ def create_account():
         return 'Content-Type not supported!'
 
     return {
-        'id': 'bank-id',
-        'name': 'bank a',
-        'number': '111-111',
-        'alias': '',
+        'id': 'Not implemented yet',
+        'name': 'Not implemented yet',
+        'number': 'Not implemented yet',
+        'alias': 'Not implemented yet',
         'type': 'checking',
-        'importer': 'PL_MILLENIUM',
+        'importer': 'Not implemented yet',
         'active': True,
-        'bankName': 'bank name',
-        'bankUrl': 'https://www.bankmillennium.pl'
+        'bankName': 'Not implemented yet',
+        'bankUrl': 'Not implemented yet'
     }
 
 @account_endpoints.route("/<account_id>", methods=['PUT'])
@@ -69,15 +69,15 @@ def update_account(account_id):
         return 'Content-Type not supported!'
 
     return {
-        'id': 'bank-id',
-        'name': 'bank a',
-        'number': '111-111',
-        'alias': '',
+        'id': 'Not implemented yet',
+        'name': 'Not implemented yet',
+        'number': 'Not implemented yet',
+        'alias': 'Not implemented yet',
         'type': 'checking',
-        'importer': 'PL_MILLENIUM',
+        'importer': 'Not implemented yet',
         'active': True,
-        'bankName': 'bank name',
-        'bankUrl': 'https://www.bankmillennium.pl'
+        'bankName': 'Not implemented yet',
+        'bankUrl': 'Not implemented yet'
     }
 
 @account_endpoints.route("/<account_id>", methods=['DELETE'])
@@ -85,8 +85,8 @@ def update_account(account_id):
 @account_endpoints.doc(summary='Delete an account', description='Delete an existing account')
 def delete_account(account_id):
     return {
-            'result': 'Failed to import data',
-            'details': 'account id not known'
+            'result': 'Failed to delete an account',
+            'details': 'Operation not yet implemented'
     }
 
 class AccountOperations(Schema):
@@ -99,10 +99,16 @@ class AccountOperations(Schema):
     currency = String()
     comment = String()
 
+@account_endpoints.route("/operations")
+@account_endpoints.output(AccountOperations(many=True), status_code = 200)
+@account_endpoints.doc(summary='All Accounts operations', description='Get a list of all operations for all account')
+def operations():
+    return database.load_all_operations_as_dict()
+
 @account_endpoints.route("/<account_id>/operations")
 @account_endpoints.output(AccountOperations(many=True), status_code = 200)
 @account_endpoints.doc(summary='Account operations', description='Get a list of operations for an account')
-def operations(account_id):
+def operations_by_account_id(account_id):
     return [
         {
             'id': 'uuid',
