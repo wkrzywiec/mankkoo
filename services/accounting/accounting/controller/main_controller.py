@@ -1,5 +1,8 @@
+from datetime import date
 from apiflask import APIBlueprint, Schema
 from apiflask.fields import String, Float, List
+import accounting.database as db
+import accounting.total as total
 
 main_endpoints = APIBlueprint('main_endpoints', __name__, tag='Main Page')
 
@@ -13,10 +16,13 @@ class MainIndicators(Schema):
 @main_endpoints.output(MainIndicators, status_code = 200)
 @main_endpoints.doc(summary='Main Indicators', description='Key indicators of a total wealth')
 def indicators():
+    data = db.load_all()
+    total_money = total.total_money_data(data)['Total'].sum()
+    last_month_income = total.last_month_income(db.load_total(), date.today())
     return {
-        'savings': 1000.12,
+        'savings': total_money,
         'debt': 0.00,
-        'lasyMonthProfit': -12.56,
+        'lasyMonthProfit': last_month_income,
         'investments': 0.00
     }
 

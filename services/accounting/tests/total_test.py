@@ -3,7 +3,7 @@ import numpy as np
 from pandas._testing import assert_frame_equal
 import datetime
 from dateutil.relativedelta import relativedelta
-import accounting.total.total as total
+import accounting.total as total
 import accounting.data_for_test as td
 import accounting.database as real_data
 import accounting.util.data_formatter as formatter

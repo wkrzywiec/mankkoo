@@ -3,7 +3,7 @@ import accounting.account.importer.importer as importer
 import accounting.account.account_db as db
 import accounting.account.models as models
 import accounting.util.config as config
-import accounting.total.total as total
+import accounting.total as total
 from accounting.base_logger import log
 
 log.basicConfig(level=log.DEBUG)

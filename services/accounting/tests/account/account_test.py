@@ -42,8 +42,8 @@ def test_add_new_operations_by_filename(mocker):
     mocker.patch('accounting.util.config.load_user_config', side_effect=[td.user_config])
     mocker.patch('accounting.account.importer.importer.load_bank_data', side_effect=[millenium_data])
     mocker.patch('accounting.account.account_db.load_all_operations_as_df', side_effect=[start_data])
-    mocker.patch('accounting.total.total.update_total_money')
-    mocker.patch('accounting.total.total.update_monthly_profit')
+    mocker.patch('accounting.total.update_total_money')
+    mocker.patch('accounting.total.update_monthly_profit')
     mocker.patch('pandas.DataFrame.to_csv')
 
     # WHEN
@@ -60,8 +60,8 @@ def test_add_new_operations_by_contents(mocker):
     mocker.patch('accounting.util.config.load_user_config', side_effect=[td.user_config])
     mocker.patch('accounting.account.importer.importer.load_bank_data', side_effect=[millenium_data])
     mocker.patch('accounting.account.account_db.load_all_operations_as_df', side_effect=[start_data])
-    mocker.patch('accounting.total.total.update_total_money')
-    mocker.patch('accounting.total.total.update_monthly_profit')
+    mocker.patch('accounting.total.update_total_money')
+    mocker.patch('accounting.total.update_monthly_profit')
     mocker.patch('pandas.DataFrame.to_csv')
 
     # WHEN
@@ -85,8 +85,8 @@ def test_add_new_operations_multiple_banks(mocker):
     mocker.patch('accounting.util.config.load_user_config', side_effect=[td.user_config])
     mocker.patch('accounting.account.importer.importer.load_bank_data', side_effect=[millenium])
     mocker.patch('accounting.account.account_db.load_all_operations_as_df', side_effect=[start_data])
-    mocker.patch('accounting.total.total.update_total_money')
-    mocker.patch('accounting.total.total.update_monthly_profit')
+    mocker.patch('accounting.total.update_total_money')
+    mocker.patch('accounting.total.update_monthly_profit')
     mocker.patch('pandas.DataFrame.to_csv')
 
     # WHEN

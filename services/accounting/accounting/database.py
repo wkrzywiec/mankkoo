@@ -2,6 +2,7 @@ import pandas as pd
 from sys import platform
 import accounting.util.config as config
 from accounting.base_logger import log
+from accounting.account import account_db
 
 log.basicConfig(level=log.DEBUG)
 
@@ -20,7 +21,7 @@ def load_all() -> dict:
     log.info("Loading mankkoo's files")
 
     return dict(
-        account=[],
+        account=account_db.load_all_operations_as_df(),
         investment=load_investments(),
         stock=load_stocks(),
         total=load_total(),
