@@ -35,11 +35,14 @@ class SavingsDistribution(Schema):
 @main_endpoints.output(SavingsDistribution, status_code = 200)
 @main_endpoints.doc(summary='Savings Distribution', description='Information about the distribution of wealth')
 def savings_distribution():
-    return {
-        'total': 1000.12,
-        'values': [0.00, 120.64],
-        'keys': ['Checking Account', 'Savings Account', 'Cash', 'PPK', 'Investments', 'Stock']
-    }
+    data = db.load_all()
+    total_money = total.total_money_data(data)
+    
+    result = total_money.to_dict('list')
+    result['keys'] = result.pop('Type')
+    result['values'] = result.pop('Total')
+    result['total'] = total_money['Total'].sum()
+    return result
 
 class TotalHistoryPerDay(Schema):
     date = List(String(), required=True)
