@@ -43,3 +43,16 @@ def test_total_history():
 
     assert 'date' in res_body.keys()
     assert 'total' in res_body.keys()
+
+def test_monthly_profits():
+    #GIVEN
+
+    #WHEN
+    response = app.test_client().get('/api/main/monthly-profits')
+
+    #THEN
+    assert response.status_code == 200
+    res_body = response.get_json()
+
+    assert 'date' in res_body.keys()
+    assert 'total' in res_body.keys()

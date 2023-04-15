@@ -66,7 +66,9 @@ class TotalMonthlyProfits(Schema):
 @main_endpoints.output(TotalMonthlyProfits, status_code = 200)
 @main_endpoints.doc(summary='Monthly Profits', description='A history of a monthly profit and loss statements')
 def monthly_profits():
-    return {
-        'date': ['2022-12'],
-        'total': [120.64]
-    }
+    data = db.load_all()
+    result = data['total_monthly']
+    print(result)
+    result['total'] = result.pop('Profit')
+    result['date'] = result.pop('Date')
+    return result.to_dict('list')
