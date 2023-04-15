@@ -30,3 +30,16 @@ def test_savings_distribution():
     assert 'keys' in res_body.keys()
     assert 'values' in res_body.keys()
     assert 'total' in res_body.keys()
+
+def test_total_history():
+    #GIVEN
+
+    #WHEN
+    response = app.test_client().get('/api/main/total-history')
+
+    #THEN
+    assert response.status_code == 200
+    res_body = response.get_json()
+
+    assert 'date' in res_body.keys()
+    assert 'total' in res_body.keys()
