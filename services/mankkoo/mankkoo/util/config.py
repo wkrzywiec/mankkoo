@@ -2,8 +2,8 @@ import os
 import pathlib
 import yaml
 from sys import platform
-from accounting.base_logger import log
-import accounting.database as db
+from mankkoo.base_logger import log
+import mankkoo.database as db
 import pandas as pd
 
 mankkoo_dir = '.mankkoo'

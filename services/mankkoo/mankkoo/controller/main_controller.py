@@ -1,8 +1,8 @@
 from datetime import date
 from apiflask import APIBlueprint, Schema
 from apiflask.fields import String, Float, List
-import accounting.database as db
-import accounting.total as total
+import mankkoo.database as db
+import mankkoo.total as total
 
 main_endpoints = APIBlueprint('main_endpoints', __name__, tag='Main Page')
 

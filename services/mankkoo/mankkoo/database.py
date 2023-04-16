@@ -1,8 +1,8 @@
 import pandas as pd
 from sys import platform
-import accounting.util.config as config
-from accounting.base_logger import log
-from accounting.account import account_db
+import mankkoo.util.config as config
+from mankkoo.base_logger import log
+from mankkoo.account import account_db
 
 log.basicConfig(level=log.DEBUG)
 

@@ -1,5 +1,5 @@
 import pytest
-import accounting.util.data_formatter as formatter
+import mankkoo.util.data_formatter as formatter
 import datetime
 
 

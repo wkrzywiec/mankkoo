@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "accounting"
+name = "mankkoo"
 version = "0.1.0"
 description = ""
 authors = ["Wojtek Krzywiec <wojciechkrzywiec@gmail.com>"]

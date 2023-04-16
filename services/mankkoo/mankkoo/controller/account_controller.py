@@ -1,9 +1,9 @@
 from apiflask import APIBlueprint, Schema
 from apiflask.fields import String, Boolean, Float, File
 from flask import request
-from accounting.base_logger import log
-from accounting.account import account_db as database
-from accounting.account import account
+from mankkoo.base_logger import log
+from mankkoo.account import account_db as database
+from mankkoo.account import account
 
 account_endpoints = APIBlueprint('account_endpoints', __name__, tag='Account')
 

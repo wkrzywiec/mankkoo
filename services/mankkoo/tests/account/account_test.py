@@ -1,11 +1,11 @@
 import pytest
 import base64
 import pathlib
-import accounting.account.account as account
+import mankkoo.account.account as account
 import numpy as np
 from pandas._testing import assert_frame_equal
-import accounting.data_for_test as td
-import accounting.util.config as config
+import mankkoo.data_for_test as td
+import mankkoo.util.config as config
 
 
 start_data = td.account_data([
@@ -28,7 +28,7 @@ end_data = td.account_data([
 
 def test_add_new_operation_for_incorrect_bank(mocker):
     # GIVEN
-    mocker.patch('accounting.util.config.load_user_config', side_effect=[td.user_config])
+    mocker.patch('mankkoo.util.config.load_user_config', side_effect=[td.user_config])
 
     # WHEN
     with pytest.raises(ValueError) as ex:
@@ -39,11 +39,11 @@ def test_add_new_operation_for_incorrect_bank(mocker):
 
 def test_add_new_operations_by_filename(mocker):
     # GIVEN
-    mocker.patch('accounting.util.config.load_user_config', side_effect=[td.user_config])
-    mocker.patch('accounting.account.importer.importer.load_bank_data', side_effect=[millenium_data])
-    mocker.patch('accounting.account.account_db.load_all_operations_as_df', side_effect=[start_data])
-    mocker.patch('accounting.total.update_total_money')
-    mocker.patch('accounting.total.update_monthly_profit')
+    mocker.patch('mankkoo.util.config.load_user_config', side_effect=[td.user_config])
+    mocker.patch('mankkoo.account.importer.importer.load_bank_data', side_effect=[millenium_data])
+    mocker.patch('mankkoo.account.account_db.load_all_operations_as_df', side_effect=[start_data])
+    mocker.patch('mankkoo.total.update_total_money')
+    mocker.patch('mankkoo.total.update_monthly_profit')
     mocker.patch('pandas.DataFrame.to_csv')
 
     # WHEN
@@ -57,11 +57,11 @@ def test_add_new_operations_by_contents(mocker):
     account_raw_data = open(str(pathlib.Path(__file__).parent.absolute()) + '/data/test_pl_millenium.csv', "r", encoding="utf8").read().encode('utf8')
     encoded_account = base64.b64encode(account_raw_data)
 
-    mocker.patch('accounting.util.config.load_user_config', side_effect=[td.user_config])
-    mocker.patch('accounting.account.importer.importer.load_bank_data', side_effect=[millenium_data])
-    mocker.patch('accounting.account.account_db.load_all_operations_as_df', side_effect=[start_data])
-    mocker.patch('accounting.total.update_total_money')
-    mocker.patch('accounting.total.update_monthly_profit')
+    mocker.patch('mankkoo.util.config.load_user_config', side_effect=[td.user_config])
+    mocker.patch('mankkoo.account.importer.importer.load_bank_data', side_effect=[millenium_data])
+    mocker.patch('mankkoo.account.account_db.load_all_operations_as_df', side_effect=[start_data])
+    mocker.patch('mankkoo.total.update_total_money')
+    mocker.patch('mankkoo.total.update_monthly_profit')
     mocker.patch('pandas.DataFrame.to_csv')
 
     # WHEN
@@ -82,11 +82,11 @@ def test_add_new_operations_multiple_banks(mocker):
         ['iban-1', '2021-02-15', 'Train ticket', 'Detail new', np.NaN, np.NaN, -500, 'PLN', np.NaN]
     ])
 
-    mocker.patch('accounting.util.config.load_user_config', side_effect=[td.user_config])
-    mocker.patch('accounting.account.importer.importer.load_bank_data', side_effect=[millenium])
-    mocker.patch('accounting.account.account_db.load_all_operations_as_df', side_effect=[start_data])
-    mocker.patch('accounting.total.update_total_money')
-    mocker.patch('accounting.total.update_monthly_profit')
+    mocker.patch('mankkoo.util.config.load_user_config', side_effect=[td.user_config])
+    mocker.patch('mankkoo.account.importer.importer.load_bank_data', side_effect=[millenium])
+    mocker.patch('mankkoo.account.account_db.load_all_operations_as_df', side_effect=[start_data])
+    mocker.patch('mankkoo.total.update_total_money')
+    mocker.patch('mankkoo.total.update_monthly_profit')
     mocker.patch('pandas.DataFrame.to_csv')
 
     # WHEN

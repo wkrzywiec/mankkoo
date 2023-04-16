@@ -1,4 +1,4 @@
-from accounting.app import app
+from mankkoo.app import app
 
 #todo add mocks/stubs
 

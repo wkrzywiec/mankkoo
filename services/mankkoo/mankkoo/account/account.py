@@ -1,10 +1,10 @@
 import pandas as pd
-import accounting.account.importer.importer as importer
-import accounting.account.account_db as db
-import accounting.account.models as models
-import accounting.util.config as config
-import accounting.total as total
-from accounting.base_logger import log
+import mankkoo.account.importer.importer as importer
+import mankkoo.account.account_db as db
+import mankkoo.account.models as models
+import mankkoo.util.config as config
+import mankkoo.total as total
+from mankkoo.base_logger import log
 
 log.basicConfig(level=log.DEBUG)
 

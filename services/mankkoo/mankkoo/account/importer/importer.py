@@ -1,8 +1,8 @@
 import pandas as pd
 from sys import platform
-import accounting.account.models as models
-import accounting.account.importer.pl as pl_importer
-from accounting.base_logger import log
+import mankkoo.account.models as models
+import mankkoo.account.importer.pl as pl_importer
+from mankkoo.base_logger import log
 
 
 def load_bank_data(file_path: str, contents, kind: models.Bank, account_id: str)-> pd.DataFrame:
@@ -11,7 +11,7 @@ def load_bank_data(file_path: str, contents, kind: models.Bank, account_id: str)
     Args:
         file_path (str): absolut file location
         contents (bytes): content of a file
-        kind (accounting.account.models.Bank): bank name
+        kind (mankkoo.account.models.Bank): bank name
         account_id: id of an account
 
     Returns:

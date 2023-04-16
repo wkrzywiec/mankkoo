@@ -1,6 +1,6 @@
 import pytest
 
-import accounting.util.ui as ui
+import mankkoo.util.ui as ui
 
 def test_decode_bank_ids():
     # GIVEN

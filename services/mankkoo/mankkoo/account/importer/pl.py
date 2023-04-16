@@ -3,9 +3,9 @@ import numpy as np
 import pandas as pd
 import base64
 import io
-import accounting.account.models as models
-import accounting.util.config as config
-import accounting.database as db
+import mankkoo.account.models as models
+import mankkoo.util.config as config
+import mankkoo.database as db
 
 class Ing(models.Importer):
     # ING bank (PL) - https://www.ing.pl

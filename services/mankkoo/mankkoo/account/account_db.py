@@ -1,5 +1,5 @@
-import accounting.util.config as config
-from accounting.base_logger import log
+import mankkoo.util.config as config
+from mankkoo.base_logger import log
 import pandas as pd
 
 def load_all_accounts() -> dict:

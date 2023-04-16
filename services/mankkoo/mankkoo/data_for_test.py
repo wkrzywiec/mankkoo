@@ -1,7 +1,7 @@
 from datetime import datetime
 import numpy as np
 import pandas as pd
-import accounting.database as db
+import mankkoo.database as db
 
 user_config = {
     'accounts': {

@@ -1,11 +1,11 @@
 import pytest
 import copy
-from accounting.app import app
-import accounting.data_for_test as td
+from mankkoo.app import app
+import mankkoo.data_for_test as td
 
 def test_load_all_accounts(mocker):
     # GIVEN
-    mocker.patch('accounting.util.config.load_user_config', side_effect=[copy.deepcopy(td.user_config)])
+    mocker.patch('mankkoo.util.config.load_user_config', side_effect=[copy.deepcopy(td.user_config)])
     expected_account = td.user_config['accounts']['definitions'][0]
     
     #WHEN
@@ -30,8 +30,8 @@ def test_load_all_accounts(mocker):
 def test_load_all_operations(mocker):
 
     #GIVEN
-    mocker.patch('accounting.account.account_db.load_all_operations_as_df', side_effect=[td.account_data(td.start_data)])
-    mocker.patch('accounting.util.config.load_user_config', side_effect=[copy.deepcopy(td.user_config)])
+    mocker.patch('mankkoo.account.account_db.load_all_operations_as_df', side_effect=[td.account_data(td.start_data)])
+    mocker.patch('mankkoo.util.config.load_user_config', side_effect=[copy.deepcopy(td.user_config)])
     # expected_account = td.user_config['accounts']['definitions'][0].copy()
     
     #WHEN

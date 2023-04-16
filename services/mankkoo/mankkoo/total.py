@@ -2,9 +2,9 @@ import pandas as pd
 import numpy as np
 import datetime
 from dateutil.relativedelta import relativedelta
-import accounting.util.config as config
-import accounting.database as db
-from accounting.base_logger import log
+import mankkoo.util.config as config
+import mankkoo.database as db
+from mankkoo.base_logger import log
 
 def total_money_data(data: dict) -> pd.DataFrame:
     """Get summary data of all assets sorted by categories
