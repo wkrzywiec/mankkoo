@@ -9,7 +9,9 @@ def load_all_accounts() -> dict:
 def load_all_operations_as_df() -> pd.DataFrame:
     log.info('Loading ACCOUNT file...')
     df = pd.read_csv(config.mankkoo_file_path('account'), parse_dates=['Date'], index_col=0)
-    df = df.astype({'Account': 'string', 'Balance': 'float', 'Operation': 'float', 'Date': 'datetime64[ns]'}, errors='coerce')
+    if df.empty:
+        return df
+    df = df.astype({'Account': 'string', 'Balance': 'float', 'Operation': 'float', 'Date': 'datetime64[ns]'})
     df['Date'] = df['Date'].dt.date
     return df
 
