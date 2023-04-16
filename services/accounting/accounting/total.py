@@ -44,12 +44,14 @@ def total_money_data(data: dict) -> pd.DataFrame:
     ])
 
 def __latest_account_balance(data: dict, type: str, accounts: dict) -> float:
-    
-    accounts = [acc['id'] for acc in accounts if acc['type'] == type]
-    df = data['account'].loc[data['account']['Account'].isin(accounts)]
-    if not df.empty:
-        return accounts_balance_for_day(df, df['Date'].max())
-    return 0.00
+    try:
+        accounts = [acc['id'] for acc in accounts if acc['type'] == type]
+        df = data['account'].loc[data['account']['Account'].isin(accounts)]
+        if not df.empty:
+            return accounts_balance_for_day(df, df['Date'].max())
+        return 0.00
+    except KeyError:
+        return 0.00
 
 def update_total_money(accounts: pd.DataFrame, from_date: datetime.date, till_date = datetime.date.today()) -> pd.DataFrame:
     """Calculate and add rows of totals for each day from pd.Series
@@ -136,7 +138,6 @@ def stock_for_day(stock: pd.DataFrame, date: datetime.date) -> float:
     Returns:
         float: calculated total sum of all stock value
     """
-    # C:\work\mankkoo\app\scripts\main\total.py:138: SettingWithCopyWarning:
     #
     #
     #A value is trying to be set on a copy of a slice from a DataFrame.
