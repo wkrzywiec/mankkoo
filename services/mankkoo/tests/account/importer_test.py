@@ -1,8 +1,8 @@
 import pytest
 import pathlib
-import accounting.importer.importer as importer
-import accounting.models as models
-import accounting.data_for_test as td
+import mankkoo.account.importer.importer as importer
+import mankkoo.account.models as models
+import mankkoo.data_for_test as td
 import numpy as np
 from pandas._testing import assert_frame_equal
 
@@ -51,7 +51,6 @@ def test_load_pl_millenium():
     # THEN
     expected = __prepare_expected()
     result = __drop_empty_columns(result)
-    print(result)
     assert_frame_equal(expected.reset_index(drop=True), result.reset_index(drop=True))
 
 

@@ -48,7 +48,6 @@ def test_load_pl_millenium():
     # THEN
     expected = __prepare_expected()
     result = __drop_empty_columns(result)
-    print(result)
     assert_frame_equal(expected.reset_index(drop=True), result.reset_index(drop=True))
 
 def __prepare_expected():

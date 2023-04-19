@@ -1,10 +1,10 @@
 import pandas as pd
-import accounting.importer.importer as importer
-import accounting.database as db
-import accounting.models as models
-import accounting.config as config
-import accounting.total as total
-from accounting.base_logger import log
+import mankkoo.account.importer.importer as importer
+import mankkoo.account.account_db as db
+import mankkoo.account.models as models
+import mankkoo.util.config as config
+import mankkoo.total as total
+from mankkoo.base_logger import log
 
 log.basicConfig(level=log.DEBUG)
 
@@ -15,6 +15,7 @@ def add_new_operations(account_id: str, file_name=None, contents=None) -> pd.Dat
     Args:
         bank (importer.Bank): enum of a bank company
         file_name (str): name of a file from which data will be loaded
+        contents (bytes): content of a file
 
     Raises:
         KeyError: raised when unsupported bank enum is provided
@@ -25,7 +26,7 @@ def add_new_operations(account_id: str, file_name=None, contents=None) -> pd.Dat
     log.info('Adding new operations for %s account', account_id)
     bank = __get_bank_type(account_id)
     df_new = importer.load_bank_data(file_name, contents, bank, account_id)
-    df = db.load_accounts()
+    df = db.load_all_operations_as_df()
     __make_account_backup(df)
 
     df = pd.concat([df, df_new]).reset_index(drop=True)

@@ -3,10 +3,10 @@ import numpy as np
 from pandas._testing import assert_frame_equal
 import datetime
 from dateutil.relativedelta import relativedelta
-import accounting.total as total
-import accounting.data_for_test as td
-import accounting.database as real_data
-import accounting.data_formatter as formatter
+import mankkoo.total as total
+import mankkoo.data_for_test as td
+import mankkoo.database as real_data
+import mankkoo.util.data_formatter as formatter
 
 # not actual test, used only to debug real data, uncomment to use
 # def test_real_total_money_data():
@@ -21,7 +21,7 @@ import accounting.data_formatter as formatter
 
 def test_total_money_data(mocker):
     # GIVEN
-    mocker.patch('accounting.config.load_user_config', side_effect=[td.user_config])
+    mocker.patch('mankkoo.util.config.load_user_config', side_effect=[td.user_config])
 
     all_data = dict(
         account=td.account_data(td.start_data),
@@ -44,7 +44,7 @@ def test_total_money_data(mocker):
 
 def test_total_money_data_for_checking_accounts(mocker):
     # GIVEN
-    mocker.patch('accounting.config.load_user_config', side_effect=[td.user_config])
+    mocker.patch('mankkoo.util.config.load_user_config', side_effect=[td.user_config])
 
     all_data = dict(
         account=td.account_data([
@@ -153,9 +153,9 @@ def test_update_total_money(mocker):
         ['Bank A', '2021-01-01', 'ETFSP500', 'Buy', 1000.00, 10, 'PLN', np.NaN, np.NaN, np.NaN],
         ['Bank A', '2021-01-01', 'ETFDAX', 'Buy', 1000.00, 10, 'PLN', np.NaN, np.NaN, np.NaN]
     ])
-    mocker.patch('accounting.database.load_total', side_effect=[old_total])
-    mocker.patch('accounting.database.load_investments', side_effect=[inv_data])
-    mocker.patch('accounting.database.load_stocks', side_effect=[stocks])
+    mocker.patch('mankkoo.database.load_total', side_effect=[old_total])
+    mocker.patch('mankkoo.database.load_investments', side_effect=[inv_data])
+    mocker.patch('mankkoo.database.load_stocks', side_effect=[stocks])
     mocker.patch('pandas.DataFrame.to_csv')
 
     from_date = formatter.map_date('2021-01-01')
@@ -181,7 +181,7 @@ def test_update_monthly_profit(mocker):
         ['2021-02-01', 0, 0, 200]
     ])
 
-    mocker.patch('accounting.database.load_total_monthly', side_effect=[old_total_monthly])
+    mocker.patch('mankkoo.database.load_total_monthly', side_effect=[old_total_monthly])
     
     
     total_data = td.total_data([
@@ -193,7 +193,7 @@ def test_update_monthly_profit(mocker):
         ['2021-06-01', 600]
     ])
 
-    mocker.patch('accounting.database.load_total', side_effect=[total_data])
+    mocker.patch('mankkoo.database.load_total', side_effect=[total_data])
     mocker.patch('pandas.DataFrame.to_csv')
 
     # WHEN

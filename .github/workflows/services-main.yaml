@@ -9,12 +9,12 @@ on:
 
 jobs:
 
-  accounting:
-    name: accounting
+  mankkoo:
+    name: mankkoo-core
     runs-on: ubuntu-20.04
     defaults:
       run: 
-        working-directory: services/accounting
+        working-directory: services/mankkoo
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v3
@@ -35,13 +35,13 @@ jobs:
 
       - name: Unit tests 🧪
         run: |
-          poetry run pytest -s -vv --cov=./accounting --cov-report=xml
+          poetry run pytest -s -vv --cov=./mankkoo --cov-report=xml
 
       - name: Upload coverage to Codecov 
         uses: codecov/codecov-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./services/accounting/coverage.xml
+          file: ./services/mankkoo/coverage.xml
           flags: unittests
 
   mankkoo-legacy:

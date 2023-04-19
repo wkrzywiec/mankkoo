@@ -1,22 +1,18 @@
 import pandas as pd
 from sys import platform
-import accounting.models as models
-import accounting.importer.pl as pl_importer
-from accounting.base_logger import log
+import mankkoo.account.models as models
+import mankkoo.account.importer.pl as pl_importer
+from mankkoo.base_logger import log
 
 
 def load_bank_data(file_path: str, contents, kind: models.Bank, account_id: str)-> pd.DataFrame:
     """Load data from a CSV file
 
     Args:
-        file_type (importer.FileType)*: define which kind of a file needs to be loaded. Currently supported:
-            - ACCOUNT - account.csv (from .mankkkoo dir) with operations history from multiple bank accounts
-            - INVESTMENT - investment.csv (from .mankkoo dir) with investments history
-            - STOCK - stock.csv (from .mankkoo dir) with history of bought and sold shares
-            - TOTAL - total.csv (from .mankkoo dir) with total money history
-            - BANK - loads an exported file from a bank with transaction history. It requires to provide two addition params kind and file_path
-        kind (importer.Bank): used only to load a data from bank exported file
         file_path (str): absolut file location
+        contents (bytes): content of a file
+        kind (mankkoo.account.models.Bank): bank name
+        account_id: id of an account
 
     Returns:
         [pd.Dataframe]: holds history of operations for an account
