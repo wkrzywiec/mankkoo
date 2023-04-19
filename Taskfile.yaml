@@ -20,6 +20,17 @@ tasks:
       - curl -sSL https://install.python-poetry.org | python3 -
       - poetry --version
 
+  install:npm:
+    desc: Install npm, NodeJS, npx
+    cmds:
+      - sudo apt update
+      - sudo apt install npm
+      - npm install -g node
+      - npm install -g npx 
+      - npm -v
+      - node -v
+      - npx -v
+
   dev:
     desc: Run all services in a dev mode
     cmds:
