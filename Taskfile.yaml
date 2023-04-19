@@ -1,0 +1,57 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+  PYTHON_VERSION: '3.10.3'
+
+tasks:
+
+  install:python:
+    desc: Install pyenv & Python v. {{.PYTHON_VERSION}}
+    cmds:
+      - curl https://pyenv.run | bash
+      - pyenv install -v {{.PYTHON_VERSION}}
+      - python3 --version
+
+  install:poetry:
+    desc: Install poetry
+    cmds:
+      - curl -sSL https://install.python-poetry.org | python3 -
+      - poetry --version
+
+  dev:
+    desc: Run all services in a dev mode
+    cmds:
+      - task: dev:mankkoo
+
+  dev:mankkoo:
+    desc: Run mankkoo core backend in a dev mode
+    dir: services/mankkoo/mankkoo
+    cmds:
+      - echo "Starting mankkoo core..."
+      - poetry run flask run --reload
+
+  test:
+    desc: Run all tests
+    cmds:
+      - task: test:mankkoo
+
+  test:mankkoo:
+    desc: Run tests for mankkoo core
+    dir: services/mankkoo
+    cmds:
+      - echo "Running tests for mankkoo core..."
+      - poetry run pytest -s -vv --cov=./mankkoo
+
+  update:
+    desc: Update dependencies for all services
+    cmds:
+      - task: update:mankkoo
+
+  update:mankkoo:
+    desc: Update dependencies for mankkoo core
+    dir: services/mankkoo
+    cmds:
+      - echo "Updating dependencies for mankkoo core..."
+      - poetry update
