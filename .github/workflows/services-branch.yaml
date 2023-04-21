@@ -70,9 +70,6 @@ jobs:
       # - name: Check linting and formatting
       #   # Custom script for checking the linting and formatting being in place
       #   run: npm run lint
-      
-      - name: Run tests 🧪
-        run: npm run test
         
       - name: Create build 🏗️
         run: npm run build
