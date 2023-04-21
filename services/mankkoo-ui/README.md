@@ -2,6 +2,12 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app), using the [Redux](https://redux.js.org/) and [Redux Toolkit](https://redux-toolkit.js.org/) TS template.
 
+## Requirements
+
+* npm 9.5.1
+* NodeJS 18.16.0
+* npx 9.6.4
+
 ## Available Scripts
 
 In the project directory, you can run:
