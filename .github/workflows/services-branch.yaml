@@ -4,7 +4,6 @@ on:
     branches-ignore:
       - 'main'
     paths:
-      - 'app/**'
       - 'services/**'
 
 jobs:
@@ -36,32 +35,3 @@ jobs:
       - name: Unit tests 🧪
         run: |
           poetry run pytest -s -vv --cov=./mankkoo
-
-
-  mankkoo-legacy:
-    name: mankkoo-legacy
-    runs-on: ${{ matrix.os }}
-    defaults:
-      run: 
-        working-directory: app
-    strategy:
-            matrix:
-                os: [ubuntu-20.04, windows-2019]
-    
-    steps:
-      - name: Checkout 🛎️
-        uses: actions/checkout@v3
-      
-      - name: Set up Python 🐍
-        uses: actions/setup-python@master
-        with:
-          python-version: 3.10.3
-      
-      - name: Set up Python 🐍
-        run: |
-          python -m pip install pipenv
-          pipenv install --dev
-      
-      - name: Run unit tests 🧪
-        run: |
-          pipenv run test
