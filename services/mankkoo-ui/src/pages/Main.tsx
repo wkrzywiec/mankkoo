@@ -20,6 +20,21 @@ function calcLastMonthName() {
     return now.toLocaleDateString('en-US', {year: 'numeric', month: 'long'})
 }
 
+function CardIndicator(props: {title : string, value?: string, color?: string, caption?: string}) {
+    return (
+        <div className="card card-indicator">
+            <div className="card-body card-body-indicator">
+                <span className="card-body-title">{props.title}</span>
+                <span style={{'color': props.color ? props.color : '#212529'}}>{props.value ? props.value : 'No Data'}</span>
+                {
+                    props.caption != undefined ? (<span className="card-indicator-caption">{props.caption}</span>) : ''
+                }
+                
+            </div>
+        </div>
+    )
+}
+
 
 export function Main() {
 
@@ -52,43 +67,32 @@ export function Main() {
         <div className="height-100 container main-body">
             <div className="row">
                 <div className="col-3">
-                    <div className="card card-indicator">
-                        <div className="card-body card-body-indicator">
-                            <span className="card-body-title">Savings</span>
-                            <span>{mainIndicatorsData?.savings.toLocaleString('pl-PL')} PLN</span>
-                        </div>
-                    </div>
+                    <CardIndicator 
+                        title='Savings'
+                        value={mainIndicatorsData?.savings?.toLocaleString('pl-PL') + ' PLN'} 
+                    />
                 </div>
                 <div className="col-3">
-                    <div className="card card-indicator">
-                        <div className="card-body card-body-indicator">
-                            <span className="card-body-title">Debt</span>
-                            <span style={{'color': '#A40E4C'}}>{mainIndicatorsData?.debt ?? 'No Data'}</span>
-                        </div>
-                    </div>
+                    <CardIndicator 
+                        title='Debt'
+                        value={mainIndicatorsData?.debt?.toLocaleString('pl-PL')} 
+                        color='#A40E4C'
+                    />
                 </div>
                 <div className="col-3">
-                    <div className="card card-indicator">
-                        <div className="card-body card-body-indicator">
-                            <span className="card-body-title">Last Month Profit</span>
-                            <span style={{'color': calcLastMonthIncomeColor(mainIndicatorsData?.lastMonthProfit)}}>
-                                
-                                {mainIndicatorsData?.lastMonthProfit && 
-                                    mainIndicatorsData?.lastMonthProfit > 0 ? '+' : ''}
-                                
-                                {mainIndicatorsData?.lastMonthProfit.toLocaleString('pl-PL')} PLN
-                            </span>
-                            <span className="last-month-name">{calcLastMonthName()}</span>
-                        </div>
-                    </div>
+                    <CardIndicator 
+                        title='Last Month Profit'
+                        value={mainIndicatorsData?.lastMonthProfit && mainIndicatorsData?.lastMonthProfit > 0 ? '+' : '' + mainIndicatorsData?.lastMonthProfit.toLocaleString('pl-PL') + ' PLN'}
+                        color={calcLastMonthIncomeColor(mainIndicatorsData?.lastMonthProfit)}
+                        caption={calcLastMonthName()}
+                    />
                 </div>
                 <div className="col-3">
-                    <div className="card card-indicator">
-                        <div className="card-body card-body-indicator">
-                            <span className="card-body-title">Investments</span>
-                            <span style={{'color': '#A40E4C'}}>{mainIndicatorsData?.investments ?? 'No Data'}</span>
-                        </div>
-                    </div>
+                    <CardIndicator 
+                        title='Investments'
+                        value={mainIndicatorsData?.investments?.toLocaleString('pl-PL')} 
+                        color='#A40E4C'
+                    />
                 </div>
             </div>
 
