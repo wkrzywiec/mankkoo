@@ -9,7 +9,7 @@ main_endpoints = APIBlueprint('main_endpoints', __name__, tag='Main Page')
 class MainIndicators(Schema):
     savings = Float()
     debt = Float()
-    lasyMonthProfit = Float()
+    lastMonthProfit = Float()
     investments = Float()
 
 @main_endpoints.route("/indicators")
@@ -21,28 +21,24 @@ def indicators():
     last_month_income = total.last_month_income(db.load_total(), date.today())
     return {
         'savings': total_money,
-        'debt': 0.00,
-        'lasyMonthProfit': last_month_income,
-        'investments': 0.00
+        'debt': None,
+        'lastMonthProfit': last_month_income,
+        'investments': None
     }
 
 class SavingsDistribution(Schema):
+    type = String()
     total = Float()
-    keys = List(String())
-    values = List(Float())
+    percentage = Float()
 
 @main_endpoints.route("/savings-distribution")
-@main_endpoints.output(SavingsDistribution, status_code = 200)
+@main_endpoints.output(SavingsDistribution(many=True), status_code = 200)
 @main_endpoints.doc(summary='Savings Distribution', description='Information about the distribution of wealth')
 def savings_distribution():
     data = db.load_all()
-    total_money = total.total_money_data(data)
-    
-    result = total_money.to_dict('list')
-    result['keys'] = result.pop('Type')
-    result['values'] = result.pop('Total')
-    result['total'] = total_money['Total'].sum()
-    return result
+    total_money = total.total_money_data(data).copy()
+    total_money = total_money.rename(columns={'Total': 'total', 'Type': 'type', 'Percentage': 'percentage'})
+    return total_money.to_dict('records')
 
 class TotalHistoryPerDay(Schema):
     date = List(String(), required=True)

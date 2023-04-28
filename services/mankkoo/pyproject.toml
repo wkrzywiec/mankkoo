@@ -15,6 +15,7 @@ python-dateutil = "*"
 pycountry = "^22.3.5"
 flask = "^2.2.2"
 apiflask = {extras = ["yaml"], version = "^1.2.3"}
+flask-cors = "^3.0.10"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "~=6.2"

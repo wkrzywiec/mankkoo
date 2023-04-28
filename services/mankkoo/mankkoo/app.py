@@ -2,8 +2,10 @@ from apiflask import APIFlask
 from mankkoo.controller.main_controller import main_endpoints
 from mankkoo.controller.account_controller import account_endpoints
 from mankkoo.util import config
+from flask_cors import CORS
 
 app = APIFlask(__name__, title="Mankkoo - 'accounting' service API", version='1.0', spec_path='/openapi.yaml', docs_ui='elements')
+CORS(app)
 
 app.config['SPEC_FORMAT'] = 'yaml'
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
