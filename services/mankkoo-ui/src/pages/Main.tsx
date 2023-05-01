@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Plot from 'react-plotly.js';
 // import Ploty.Data from "react-plotly.js"
-import { MainIndicators, SavingsDistributionCategory, TotalMoneyHistory } from './mainTypes';
+import { MainIndicators, SavingsDistributionCategory, TotalMoneyHistory, TotalMonthlyProfit } from './mainTypes';
 
 const baseUrl = 'http://localhost:5000'
 
@@ -92,6 +92,26 @@ export function Main() {
             x: totalMoneyHistoryData?.date,
             y: totalMoneyHistoryData?.total,
             line: {color: '#A40E4C'}
+        }
+      ]
+
+      const [totalMonthlyProfitData, setTotalMonthlyProfitData] = useState<TotalMonthlyProfit>()
+      useEffect(() => {
+          axios.get(baseUrl + '/api/main/monthly-profits')
+          .then(response => {
+                setTotalMonthlyProfitData(response.data);
+            })
+          .catch(error => {
+              console.error(error);
+          });
+      }, [])
+
+      var totalMonthlyProfitChartData: Plotly.Data[] = [
+        {
+            x: totalMonthlyProfitData?.date,
+            y: totalMonthlyProfitData?.total,
+            type: 'bar',
+            marker: {color: '#ACC3A6'},
         }
       ]
 
@@ -193,6 +213,22 @@ export function Main() {
             </div>
 
             <div className="row">
+                <div className='col-12'>
+                    <div className="card card-indicator">
+                        <div className='card-body card-body-plotly'>
+                            <span className='card-body-title'>Monthly Profit History</span>
+                            <div>
+                                <Plot 
+                                    data={totalMonthlyProfitChartData}
+                                    layout={{
+                                        font: {'family': 'Rubik'}
+                                    }}
+                                    style={{'width': '1200px'}}      
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     )

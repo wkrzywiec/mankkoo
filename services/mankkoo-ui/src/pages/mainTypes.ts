@@ -16,3 +16,8 @@ export interface TotalMoneyHistory {
     date: string[];
     total: number[]
 }
+
+export interface TotalMonthlyProfit {
+    date: string[];
+    total: number[]
+}
