@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Plot from 'react-plotly.js';
 // import Ploty.Data from "react-plotly.js"
-import { MainIndicators, SavingsDistributionCategory } from './mainTypes';
+import { MainIndicators, SavingsDistributionCategory, TotalMoneyHistory } from './mainTypes';
 
 const baseUrl = 'http://localhost:5000'
 
@@ -75,6 +75,25 @@ export function Main() {
           marker: {colors: ['#A40E4C', '#ACC3A6', '#F5D6BA', '#F49D6E', '#27474E', '#BEB8EB', '#6BBF59', '#C2E812', '#5299D3']}
         },
       ];
+
+      const [totalMoneyHistoryData, setTotalMoneyHistoryData] = useState<TotalMoneyHistory>()
+      useEffect(() => {
+          axios.get(baseUrl + '/api/main/total-history')
+          .then(response => {
+                setTotalMoneyHistoryData(response.data);
+            })
+          .catch(error => {
+              console.error(error);
+          });
+      }, [])
+
+      var totalMoneyHistoryChartData: Plotly.Data[] = [
+        {
+            x: totalMoneyHistoryData?.date,
+            y: totalMoneyHistoryData?.total,
+            line: {color: '#A40E4C'}
+        }
+      ]
 
 
     return (
@@ -155,6 +174,22 @@ export function Main() {
             </div>
 
             <div className="row">
+                <div className='col-12'>
+                    <div className="card card-indicator">
+                        <div className='card-body card-body-plotly'>
+                            <span className='card-body-title'>Savings History</span>
+                            <div>
+                                <Plot 
+                                    data={totalMoneyHistoryChartData}
+                                    layout={{
+                                        font: {'family': 'Rubik'}
+                                    }}
+                                    style={{'width': '1200px'}}      
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div className="row">
