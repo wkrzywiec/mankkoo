@@ -2,6 +2,7 @@ import './Main.css'
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Plot from 'react-plotly.js';
+// import Ploty.Data from "react-plotly.js"
 import { MainIndicators, SavingsDistributionCategory } from './mainTypes';
 
 const baseUrl = 'http://localhost:5000'
@@ -61,7 +62,20 @@ export function Main() {
         });
     }, [])
 
-    console.log(mainIndicatorsData)
+    const savingTypes = savingsDistributionData.map(saving => saving.type);
+    const savingValues = savingsDistributionData.map(saving => saving.total);
+    var savingsPieChartData: Plotly.Data[] = [
+        {
+          values: savingValues,
+          labels: savingTypes,
+          type: "pie",
+          hole: 0.4,
+          textposition: 'inside',
+          textinfo: 'label+percent',
+          marker: {colors: ['#A40E4C', '#ACC3A6', '#F5D6BA', '#F49D6E', '#27474E', '#BEB8EB', '#6BBF59', '#C2E812', '#5299D3']}
+        },
+      ];
+
 
     return (
         <div className="height-100 container main-body">
@@ -119,6 +133,22 @@ export function Main() {
                                 ))}
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+                </div>
+                <div className='col-5'>
+                    <div className="card card-indicator">
+                        <div className='card-body card-body-plotly'>
+                            <span className='card-body-title'>Savings Distribution</span>
+                            <div>
+                                <Plot 
+                                    data={savingsPieChartData}
+                                    layout={{width: 400, height: 300, autosize: false,
+                                        margin: {'l': 50, 'r': 50, 'b': 0, 't': 0, 'pad': 20},
+                                        font: {'family': 'Rubik'}
+                                    }}
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>

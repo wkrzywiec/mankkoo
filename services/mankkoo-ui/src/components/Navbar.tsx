@@ -8,7 +8,7 @@ export function Navbar() {
             <nav className="nav">
                 <div>
                     <a href='/' className="nav_logo">
-                        <img src={logo} className="navbar-logo-image"></img>
+                        <img src={logo} alt='mankkoo' className="navbar-logo-image"></img>
                         <span className='nav_logo-name'>mankkoo</span>
                     </a>
                     <div className='nav_list'>

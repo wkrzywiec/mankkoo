@@ -1,7 +1,6 @@
 import React from 'react';
 import { Navbar } from './components/Navbar'
 import { Main } from './pages/Main'
-import { Counter } from './features/counter/Counter';
 import './App.css';
 
 function App() {
