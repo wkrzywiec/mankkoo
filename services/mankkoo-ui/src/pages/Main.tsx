@@ -2,6 +2,7 @@ import './Main.css'
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Plot from 'react-plotly.js';
+import { Card } from '../components/Card'
 // import Ploty.Data from "react-plotly.js"
 import { MainIndicators, SavingsDistributionCategory, TotalMoneyHistory, TotalMonthlyProfit } from './mainTypes';
 
@@ -22,18 +23,14 @@ function calcLastMonthName() {
 }
 
 function CardIndicator(props: {title : string, value?: string, color?: string, caption?: string}) {
-    return (
-        <div className="card card-indicator">
-            <div className="card-body card-body-indicator">
-                <span className="card-body-title">{props.title}</span>
-                <span style={{'color': props.color ? props.color : '#212529'}}>{props.value ? props.value : 'No Data'}</span>
-                {
-                    props.caption != undefined ? (<span className="card-indicator-caption">{props.caption}</span>) : ''
-                }
-                
-            </div>
-        </div>
-    )
+    const cardBody = (<span style={{'color': props.color ? props.color : '#212529'}}>{props.value ? props.value : 'No Data'}</span>)
+    
+    return (<Card 
+        title={props.title}
+        body={cardBody}
+        bodyClass='card-body-indicator'
+        caption={props.caption}
+    />)
 }
 
 
@@ -151,83 +148,87 @@ export function Main() {
 
             <div className="row">
                 <div className='col-4'>
-                    <div className="card card-indicator savings-distribution-table">
-                        <div className='card-body card-body-plotly'>
-                            <span className='card-body-title'>Savings Distribution</span>
-                            <table className="table table-striped table-hover">
-                                <thead>
-                                    <tr>
-                                        <th scope="col">Type</th>
-                                        <th scope="col">Total</th>
-                                        <th scope="col">Percentage</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                {savingsDistributionData.map(row => (
-                                    <tr>
-                                        <td>{row.type}</td>
-                                        <td>{row.total.toLocaleString('pl-PL')}</td>
-                                        <td>{(100 * row.percentage).toFixed(2)} %</td>
-                                    </tr>
-                                ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                    <Card 
+                        title='Savings Distribution'
+                        bodyClass='card-body-plotly'
+                        body={
+                        <table className="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Type</th>
+                                    <th scope="col">Total</th>
+                                    <th scope="col">Percentage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {savingsDistributionData.map(row => (
+                                <tr>
+                                    <td>{row.type}</td>
+                                    <td>{row.total.toLocaleString('pl-PL')}</td>
+                                    <td>{(100 * row.percentage).toFixed(2)} %</td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
+                        }
+                    />
                 </div>
                 <div className='col-5'>
-                    <div className="card card-indicator">
-                        <div className='card-body card-body-plotly'>
-                            <span className='card-body-title'>Savings Distribution</span>
-                            <div>
-                                <Plot 
-                                    data={savingsPieChartData}
-                                    layout={{width: 400, height: 300, autosize: false,
-                                        margin: {'l': 50, 'r': 50, 'b': 0, 't': 0, 'pad': 20},
-                                        font: {'family': 'Rubik'}
-                                    }}
-                                />
-                            </div>
+                    <Card 
+                        title='Savings Distribution'
+                        bodyClass='card-body-plotly'
+                        body={
+                        <div>
+                            <Plot 
+                                data={savingsPieChartData}
+                                layout={{width: 400, height: 300, autosize: false,
+                                    margin: {'l': 50, 'r': 50, 'b': 0, 't': 0, 'pad': 20},
+                                    font: {'family': 'Rubik'}
+                                }}
+                            />
                         </div>
-                    </div>
+                        }
+                    />
                 </div>
             </div>
 
             <div className="row">
                 <div className='col-12'>
-                    <div className="card card-indicator">
-                        <div className='card-body card-body-plotly'>
-                            <span className='card-body-title'>Savings History</span>
-                            <div>
-                                <Plot 
-                                    data={totalMoneyHistoryChartData}
-                                    layout={{
-                                        font: {'family': 'Rubik'}
-                                    }}
-                                    style={{'width': '1200px'}}      
-                                />
-                            </div>
+                    <Card 
+                        title='Savings History'
+                        bodyClass='card-body-plotly'
+                        body={
+                        <div>
+                            <Plot 
+                                data={totalMoneyHistoryChartData}
+                                layout={{
+                                    font: {'family': 'Rubik'}
+                                }}
+                                style={{'width': '1200px'}}      
+                            />
                         </div>
-                    </div>
+                        }
+                    />
                 </div>
             </div>
 
             <div className="row">
                 <div className='col-12'>
-                    <div className="card card-indicator">
-                        <div className='card-body card-body-plotly'>
-                            <span className='card-body-title'>Monthly Profit History</span>
-                            <div>
-                                <Plot 
-                                    data={totalMonthlyProfitChartData}
-                                    layout={{
-                                        font: {'family': 'Rubik'}
-                                    }}
-                                    style={{'width': '1200px'}}      
-                                />
-                            </div>
+                    <Card 
+                        title='Monthly Profit History'
+                        bodyClass='card-body-plotly'
+                        body={
+                        <div>
+                            <Plot 
+                            data={totalMonthlyProfitChartData}
+                            layout={{
+                                font: {'family': 'Rubik'}
+                            }}
+                            style={{'width': '1200px'}}      
+                            />
                         </div>
-                    </div>
+                        }
+                    />
                 </div>
             </div>
         </div>
