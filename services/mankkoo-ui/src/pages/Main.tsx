@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Plot from 'react-plotly.js';
 import { Card } from '../components/Card'
-// import Ploty.Data from "react-plotly.js"
 import { MainIndicators, SavingsDistributionCategory, TotalMoneyHistory, TotalMonthlyProfit } from './mainTypes';
 
 const baseUrl = 'http://localhost:5000'
