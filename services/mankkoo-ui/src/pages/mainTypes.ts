@@ -1,4 +1,3 @@
-
 export interface MainIndicators {
     savings: number;
     debt: number;
@@ -20,4 +19,16 @@ export interface TotalMoneyHistory {
 export interface TotalMonthlyProfit {
     date: string[];
     total: number[]
+}
+
+export interface AccountInfo {
+    id: string;
+    name: string;
+    number: string;
+    alias: string;
+    type: string;
+    importer: string;
+    active: boolean;
+    bankName: string;
+    bankUrl: string;
 }

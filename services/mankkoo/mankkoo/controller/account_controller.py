@@ -148,7 +148,7 @@ def import_operations(account_id, data):
         return {
             'result': 'Failure',
             'details': str(ex)
-        }
+        }, 500
     
     
     
