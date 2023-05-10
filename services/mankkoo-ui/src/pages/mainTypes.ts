@@ -31,4 +31,16 @@ export interface AccountInfo {
     active: boolean;
     bankName: string;
     bankUrl: string;
+    hidden: boolean;
+}
+
+export interface Operation {
+    id: string;
+    date: string;
+    title: string;
+    details: string;
+    operation: number;
+    balance: number;
+    currency: string;
+    comment: string;
 }

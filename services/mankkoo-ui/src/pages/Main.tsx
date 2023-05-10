@@ -219,11 +219,11 @@ export function Main() {
                         body={
                         <div>
                             <Plot 
-                            data={totalMonthlyProfitChartData}
-                            layout={{
-                                font: {'family': 'Rubik'}
-                            }}
-                            style={{'width': '1200px'}}      
+                                data={totalMonthlyProfitChartData}
+                                layout={{
+                                    font: {'family': 'Rubik'}
+                                }}
+                                style={{'width': '1200px'}}      
                             />
                         </div>
                         }

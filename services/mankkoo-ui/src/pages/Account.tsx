@@ -1,9 +1,11 @@
 import './Account.css'
 import { ChangeEvent, useState, useEffect } from 'react';
 import axios from 'axios';
-import { AccountInfo } from './mainTypes'
+import { AccountInfo, Operation } from './mainTypes'
+import { Card } from '../components/Card'
 import Swal from 'sweetalert2'
 import withReactContent from 'sweetalert2-react-content'
+import Plot from 'react-plotly.js';
 
 const baseUrl = 'http://localhost:5000'
 const MySwal = withReactContent(Swal)
@@ -65,6 +67,32 @@ export function Account() {
         });
     };
 
+    const [activeTab, setActiveTab] = useState('');
+    const handleSelect = (event: React.MouseEvent<HTMLAnchorElement>) => {
+      setActiveTab(event.currentTarget.id);
+    };
+
+
+    const [operationsData, setOperationsData] = useState<Operation[]>([])
+    useEffect(() => {
+        axios.get(baseUrl + '/api/accounts/operations')
+        .then(response => {
+            setOperationsData(response.data);
+          })
+        .catch(error => {
+            console.error(error);
+        });
+    }, [])
+
+    var totalOperationsChartData: Plotly.Data[] = [
+        {
+            x: operationsData?.filter(row => (row.id === activeTab))?.map(row => (row.date)),
+            y: operationsData?.filter(row => (row.id === activeTab))?.map(row => (row.balance)),
+            line: {color: '#A40E4C'}
+        }
+      ]
+    
+
     return (
     <div className="height-100 container main-body">
         <h1 className="title">Accounts</h1>
@@ -84,6 +112,88 @@ export function Account() {
                 <label htmlFor="actual-btn" className='upload-btn btn btn-light btn-lg' style={{padding: '.8rem 1rem'}}>Browse File</label>
                 <input type="file" id="actual-btn" hidden onChange={handleFileUpload}/>
             </div>
+        </div>
+
+        <div className='row'>
+            <Card
+                body={
+                    <div className='row accounts-tabs-container'>
+                        <ul className="nav nav-tabs" style={{flexDirection: 'row'}}>
+                            {accountsData?.filter(row => row.active)?.filter(row => !row.hidden).map((acc) => (
+                                <li key={acc.name} className="nav-item">
+                                    <a
+                                        className={`nav-link ${activeTab === acc.id ? 'active' : ''}`}
+                                        id={acc.id}
+                                        onClick={handleSelect}
+                                    >
+                                        {acc.bankName} - {acc.name}
+                                    </a>
+                                </li>
+                            ))}
+                        </ul>
+                        <div className="tab-content">
+                            {activeTab == '' ? '' : 
+                                <div>
+                                    <div className='row'>
+                                        <Plot 
+                                            data={totalOperationsChartData}
+                                            layout={{
+                                                font: {'family': 'Rubik'}
+                                            }}
+                                            style={{'width': '1200px'}}      
+                                        />
+                                    </div>
+                                    <div className='row'>
+                                        <table className="table table-striped table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col">Date</th>
+                                                    <th scope="col">Title</th>
+                                                    <th scope="col">Details</th>
+                                                    <th scope="col">Operation</th>
+                                                    <th scope="col">Balance</th>
+                                                    <th scope="col">Currency</th>
+                                                    <th scope="col">Comment</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {operationsData?.filter(row => row.id == activeTab)?.map(row => (
+                                                    <tr>
+                                                        <td>{row.date}</td>
+                                                        <td>{row.title}</td>
+                                                        <td>{row.details}</td>
+                                                        <td>{row.operation.toLocaleString('pl-PL')}</td>
+                                                        <td>{row.balance.toLocaleString('pl-PL')}</td>
+                                                        <td>{row.currency}</td>
+                                                        <td>{row.comment}</td>
+                                                    </tr>
+                                                ))}
+                                            {/* {savingsDistributionData.map(row => (
+                                                <tr>
+                                                    <td>{row.type}</td>
+                                                    <td>{row.total.toLocaleString('pl-PL')}</td>
+                                                    <td>{(100 * row.percentage).toFixed(2)} %</td>
+                                                </tr>
+                                            ))} */}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            }
+                            {/* {tabNames.map((name) => (
+                                <div
+                                key={name}
+                                className={`tab-pane fade ${activeTab === name ? 'show active' : ''}`}
+                                id={name}
+                                >
+                                {activeTab}
+                                </div>
+                            ))} */}
+                        </div>
+                  </div>
+                }
+                bodyClass='accounts-tabs-container'
+            />
         </div>
     </div>)
 }
