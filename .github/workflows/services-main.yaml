@@ -4,7 +4,6 @@ on:
     branches:
       - 'main'
     paths:
-      - 'app/**'
       - 'services/**'
 
 jobs:
@@ -44,83 +43,43 @@ jobs:
           file: ./services/mankkoo/coverage.xml
           flags: unittests
 
-  mankkoo-legacy:
-    name: Quality Check
-    runs-on: ${{ matrix.os }}
-    strategy:
-            matrix:
-                os: [ubuntu-20.04, windows-2019]
-    defaults:
-      run:
-        working-directory: 'app'
-
-    steps:
-      - name: Checkout 🛎️
-        uses: actions/checkout@v3
-      
-      - name: Set up Python 🐍
-        uses: actions/setup-python@master
-        with:
-          python-version: 3.10.3
-    
-      - name: Install dependencies 🧰
-        run: |
-          python -m pip install pipenv
-          pipenv install --dev
-      
-      - name: Run unit tests 🧪
-        run: |
-          pipenv run test
-  
-  coverage-legacy:
-    name: Code coverage
+  ui:
+    name: mankkoo-ui
     runs-on: ubuntu-20.04
     defaults:
-      run:
-        working-directory: 'app'
+      run: 
+        working-directory: services/mankkoo-ui
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v3
       
-      - name: Set up Python 🐍
-        uses: actions/setup-python@master
+      - name: Set up NodeJS ✨
+        uses: actions/setup-node@v3
         with:
-          python-version: 3.10.3
-      
-      - name: Install dependencies 🧰
-        run: |
-          python -m pip install pipenv
-          pipenv install --dev
-      
-      - name: Generate coverage report 📝
-        run: |
-          pipenv run test-coverage
-      
-      - name: Upload coverage to Codecov 
-        uses: codecov/codecov-action@v1
+          node-version: 18
+        
+      - name: Cache node modules
+        id: cache-npm
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-node-modules
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./app/coverage.xml
-          flags: unittests
-
-  docs:
-    name: Generate Documentation
-    needs: mankkoo-legacy
-    runs-on: ubuntu-20.04
-
-    steps:
-      - name: Checkout 🛎️
-        uses: actions/checkout@v3
-
-      - name: Set up Python 🐍
-        uses: actions/setup-python@master
-        with:
-          python-version: 3.10.3
-
-      - name: Install dependencies 🧰
-        run: |
-          python -m pip install pipenv
-          pipenv install --dev
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+        
+      - name: Install package dependencies
+        run: npm install
+      
+      # - name: Check linting and formatting
+      #   # Custom script for checking the linting and formatting being in place
+      #   run: npm run lint
+        
+      - name: Create build 🏗️
+        run: npm run build
 
 # TODO enable docs generation
       # - name: Build docs 🏗️

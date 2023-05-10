@@ -7,6 +7,14 @@ vars:
 
 tasks:
 
+  install:
+    desc: Install all dependencies
+    cmds: 
+      - task: install:python
+      - task: install:poetry
+      - task: install:npm
+
+
   install:python:
     desc: Install pyenv & Python v. {{.PYTHON_VERSION}}
     cmds:
@@ -20,10 +28,22 @@ tasks:
       - curl -sSL https://install.python-poetry.org | python3 -
       - poetry --version
 
+  install:npm:
+    desc: Install npm, NodeJS, npx
+    cmds:
+      - sudo apt update
+      - sudo apt install npm
+      - npm install -g node
+      - npm install -g npx 
+      - npm -v
+      - node -v
+      - npx -v
+
   dev:
     desc: Run all services in a dev mode
     cmds:
       - task: dev:mankkoo
+      - task: dev:ui
 
   dev:mankkoo:
     desc: Run mankkoo core backend in a dev mode
@@ -31,6 +51,13 @@ tasks:
     cmds:
       - echo "Starting mankkoo core..."
       - poetry run flask run --reload
+
+  dev:ui:
+    desc: Run mankkoo UI in a dev mode
+    dir: services/mankkoo-ui
+    cmds:
+      - echo "Starting mankkoo UI..."
+      - npm start
 
   test:
     desc: Run all tests

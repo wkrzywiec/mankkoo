@@ -1,7 +1,0 @@
-Bank,Account,Active,Date,Title,Details,Category,Comment,Operation,Currency,Balance
-Bank A,Account A,True,2021-01-31,Init money,,,init,888.48,PLN,888.48
-Bank A,Account A,True,2021-02-01,Italian restaurant,,,anniversary,-38.26,PLN,850.22
-Bank A,Account A,True,2021-02-02,Market A,,,,-14.72,PLN,835.50
-Bank A,Account A,True,2021-02-03,Netflix,,,,-100,PLN,735.50
-Bank A,Account A,True,2021-02-04,Canteen,,,,-16.20,PLN,719.30
-Bank A,Account A,True,2021-02-28,Salary,,,January salary,1000.56,PLN,1719.86

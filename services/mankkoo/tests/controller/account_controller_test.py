@@ -5,7 +5,10 @@ import mankkoo.data_for_test as td
 
 def test_load_all_accounts(mocker):
     # GIVEN
-    mocker.patch('mankkoo.util.config.load_user_config', side_effect=[copy.deepcopy(td.user_config)])
+    user_config = copy.deepcopy(td.user_config)
+    mocker.patch('mankkoo.util.config.load_user_config', side_effect=[user_config, user_config])
+    
+
     expected_account = td.user_config['accounts']['definitions'][0]
     
     #WHEN
