@@ -13,9 +13,9 @@ def test_main_indicators():
     res_body = response.get_json()
 
     assert res_body['savings'] >= 0
-    assert 'lasyMonthProfit' in res_body.keys()
-    assert res_body['debt'] == 0
-    assert res_body['investments'] == 0
+    assert 'lastMonthProfit' in res_body.keys()
+    assert res_body['debt'] == None
+    assert res_body['investments'] == None
 
 def test_savings_distribution():
     #GIVEN
@@ -27,9 +27,10 @@ def test_savings_distribution():
     assert response.status_code == 200
     res_body = response.get_json()
 
-    assert 'keys' in res_body.keys()
-    assert 'values' in res_body.keys()
-    assert 'total' in res_body.keys()
+    assert len(res_body) > 0
+    assert 'type' in res_body[0].keys()
+    assert 'percentage' in res_body[0].keys()
+    assert 'total' in res_body[0].keys()
 
 def test_total_history():
     #GIVEN

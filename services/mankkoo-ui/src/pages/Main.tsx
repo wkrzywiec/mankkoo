@@ -8,7 +8,7 @@ import { MainIndicators, SavingsDistributionCategory, TotalMoneyHistory, TotalMo
 const baseUrl = 'http://localhost:5000'
 
 function calcLastMonthIncomeColor(lastMonthIncome: number | undefined) {
-    if (lastMonthIncome != undefined) {
+    if (lastMonthIncome !== undefined) {
         if (lastMonthIncome > 0) return '#ACC3A6'
         if (lastMonthIncome < 0) return '#A40E4C'
     }

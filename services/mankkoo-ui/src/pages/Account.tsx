@@ -68,7 +68,7 @@ export function Account() {
     };
 
     const [activeTab, setActiveTab] = useState('');
-    const handleSelect = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    const handleSelect = (event: React.MouseEvent<HTMLButtonElement>) => {
       setActiveTab(event.currentTarget.id);
     };
 
@@ -121,18 +121,18 @@ export function Account() {
                         <ul className="nav nav-tabs" style={{flexDirection: 'row'}}>
                             {accountsData?.filter(row => row.active)?.filter(row => !row.hidden).map((acc) => (
                                 <li key={acc.name} className="nav-item">
-                                    <a
+                                    <button
                                         className={`nav-link ${activeTab === acc.id ? 'active' : ''}`}
                                         id={acc.id}
                                         onClick={handleSelect}
                                     >
                                         {acc.bankName} - {acc.name}
-                                    </a>
+                                    </button>
                                 </li>
                             ))}
                         </ul>
                         <div className="tab-content">
-                            {activeTab == '' ? '' : 
+                            {activeTab === '' ? '' : 
                                 <div>
                                     <div className='row'>
                                         <Plot 
@@ -157,7 +157,7 @@ export function Account() {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {operationsData?.filter(row => row.id == activeTab)?.map(row => (
+                                                {operationsData?.filter(row => row.id === activeTab)?.map(row => (
                                                     <tr>
                                                         <td>{row.date}</td>
                                                         <td>{row.title}</td>

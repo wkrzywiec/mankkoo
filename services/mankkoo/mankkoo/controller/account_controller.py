@@ -29,12 +29,13 @@ class AccountOperationResult(Schema):
 def accounts():
     log.info('Fetching account info...')
     accounts = database.load_all_accounts()
-    print(config.load_user_config()['accounts']['ui']['hide_accounts'])
+    
+    hidden_accounts = config.load_user_config()['accounts']['ui']['hide_accounts']
     for acc in accounts:
         acc['number'] = acc['id']
         acc['bankName'] = acc.pop('bank')
         acc['bankUrl'] = acc.pop('bank_url')
-        acc['hidden'] = False if "{} - {}".format(acc['bankName'], acc['name']) not in config.load_user_config()['accounts']['ui']['hide_accounts'] else True
+        acc['hidden'] = False if "{} - {}".format(acc['bankName'], acc['name']) not in hidden_accounts else True
         
     return accounts
 
