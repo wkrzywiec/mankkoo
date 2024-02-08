@@ -1,3 +1,4 @@
+import traceback
 from apiflask import APIBlueprint, Schema
 from apiflask.fields import String, Boolean, Float, File
 from mankkoo.base_logger import log
@@ -29,7 +30,7 @@ class AccountOperationResult(Schema):
 def accounts():
     log.info('Fetching account info...')
     accounts = database.load_all_accounts()
-    
+
     hidden_accounts = config.load_user_config()['accounts']['ui']['hide_accounts']
     for acc in accounts:
         acc['number'] = acc['id']
@@ -74,12 +75,8 @@ def import_operations(account_id, data):
             'details': 'New account operations have been added!'
         }
     except Exception as ex:
-        log.info(f'Failed to add new operations. Err: {ex}')
+        log.info(f'Failed to add new operations. Err: {ex}, traceback: {traceback.format_exc()}')
         return {
             'result': 'Failure',
             'details': str(ex)
         }, 500
-    
-    
-    
-    
