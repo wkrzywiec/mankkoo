@@ -12,7 +12,7 @@ class Ing(models.Importer):
         return pd.read_csv(file_path, sep=";")
 
     def load_file_by_contents(self, contents):
-        return pd.read_csv(io.StringIO(contents.decode('utf-8')), sep=";")
+        return pd.read_csv(io.StringIO(contents.decode('iso-8859-2')), sep=";")
 
     def format_file(self, df: pd.DataFrame, account_id: str):
         df = self.__clean_data(df)
@@ -50,6 +50,7 @@ class Ing(models.Importer):
     def __clean_data(self, df: pd.DataFrame):
         # remove first rows without data
         column = df.iloc[:, 0]
+        log.info(column)
         start_row_index = column.index[column == 'Data transakcji'].item()
         df = df.iloc[start_row_index:, :]
 
