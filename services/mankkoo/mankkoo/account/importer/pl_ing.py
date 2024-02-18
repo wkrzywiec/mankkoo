@@ -24,7 +24,7 @@ def remove_non_tabular_data(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def prepare_tile(df: pd.DataFrame) -> pd.DataFrame:
-    df['Title'] = df['Dane kontrahenta'] + ' - ' + df['Tytuďż˝']
+    df['Title'] = df['Dane kontrahenta'] + ' - ' + df['Tytuł']
     df['Title'] = df['Title'].str.replace(',', '')
     df['Title'] = df['Title'].str.replace(r'\s+', ' ', regex=True)
     df['Title'] = df['Title'].str.strip()
@@ -36,7 +36,8 @@ def select_only_required_columns(df: pd.DataFrame) -> pd.DataFrame:
             'Data transakcji',
             'Title',
             'Kwota transakcji (waluta rachunku)',
-            'Waluta']]
+            'Waluta',
+            'Kwota blokady/zwolnienie blokady']]
     return df
 
 
@@ -48,7 +49,6 @@ def remove_duplicated_columns(df: pd.DataFrame) -> pd.DataFrame:
 def rename_columns(df: pd.DataFrame) -> pd.DataFrame:
     df = df.rename(columns={
         'Data transakcji': 'Date',
-        'Kwota transakcji (waluta rachunku)': 'Operation',
         'Waluta': 'Currency'})
     return df
 
@@ -59,13 +59,26 @@ def format_date_column(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def format_operation_column(df: pd.DataFrame) -> pd.DataFrame:
+def get_operation(df: pd.DataFrame) -> pd.DataFrame:
+    df['Operation'] = np.where(
+        df['Kwota transakcji (waluta rachunku)'].isna(),
+        df['Kwota blokady/zwolnienie blokady'],
+        df['Kwota transakcji (waluta rachunku)'])
     df['Operation'] = df['Operation'].str.replace(',', '.')
     df['Operation'] = pd.to_numeric(df['Operation'])
     return df
 
 
-def add_account_id_to_each_row(df: pd.DataFrame, account_id: str) -> pd.DataFrame:
+def remove_unnecessary_columns(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.drop(columns=[
+        'Kwota transakcji (waluta rachunku)',
+        'Kwota blokady/zwolnienie blokady'])
+    return df
+
+
+def add_account_id_to_each_row(
+        df: pd.DataFrame,
+        account_id: str) -> pd.DataFrame:
     df['Account'] = account_id
     df['Account'] = df['Account'].astype('string')
     return df
@@ -113,7 +126,8 @@ class Ing(models.Importer):
                 .pipe(remove_duplicated_columns)\
                 .pipe(rename_columns)\
                 .pipe(format_date_column)\
-                .pipe(format_operation_column)\
+                .pipe(get_operation)\
+                .pipe(remove_unnecessary_columns)\
                 .pipe(add_account_id_to_each_row, account_id)\
                 .pipe(add_details_and_balance_columns)\
                 .pipe(add_empty_columns, ['Category', 'Comment'])\
