@@ -37,7 +37,7 @@ def accounts():
         acc['bankName'] = acc.pop('bank')
         acc['bankUrl'] = acc.pop('bank_url')
         acc['hidden'] = False if "{} - {}".format(acc['bankName'], acc['name']) not in hidden_accounts else True
-        
+    
     return accounts
 
 class AccountOperations(Schema):
@@ -51,11 +51,16 @@ class AccountOperations(Schema):
     comment = String()
 
 @account_endpoints.route("/operations")
-@account_endpoints.output(AccountOperations(many=True), status_code = 200)
-@account_endpoints.doc(summary='All Accounts operations', description='Get a list of all operations for all account')
+@account_endpoints.output(AccountOperations(many=True), status_code=200)
+@account_endpoints.doc(
+    summary='All Accounts operations',
+    description='Get a list of all operations for all account'
+)
 def operations():
     log.info('Fetching operations for all accounts...')
-    return database.load_all_operations_as_dict()
+    result = database.load_all_operations_as_dict()
+    return result
+
 
 class OperationsImport(Schema):
     operations = File()

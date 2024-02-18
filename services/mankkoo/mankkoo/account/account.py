@@ -8,8 +8,12 @@ from mankkoo.base_logger import log
 
 log.basicConfig(level=log.DEBUG)
 
-def add_new_operations(account_id: str, file_name=None, contents=None) -> pd.DataFrame:
-    """Append bank accounts history with new operations. 
+
+def add_new_operations(
+        account_id: str,
+        file_name=None,
+        contents=None) -> pd.DataFrame:
+    """Append bank accounts history with new operations.
     This method return a pandas DataFrame with calculated balance.
 
     Args:
@@ -21,7 +25,8 @@ def add_new_operations(account_id: str, file_name=None, contents=None) -> pd.Dat
         KeyError: raised when unsupported bank enum is provided
 
     Returns:
-        pandas.DataFrame: DataFrame that holds transactions history with newly added operations
+        pandas.DataFrame: DataFrame that holds transactions history
+        with newly added operations
     """
     log.info('Adding new operations for %s account', account_id)
     bank = __get_bank_type(account_id)
@@ -33,12 +38,18 @@ def add_new_operations(account_id: str, file_name=None, contents=None) -> pd.Dat
     df = df.sort_values(by=['Date', 'Account'])
     df = df.reset_index(drop=True)
     df = calculate_balance(df, account_id)
-    df.to_csv(config.mankkoo_file_path('account'), index=True, index_label='Row')
+    df.to_csv(config.mankkoo_file_path('account'),
+              index=True,
+              index_label='Row')
 
     total.update_total_money(df, df_new['Date'].min())
     total.update_monthly_profit(from_date=df_new['Date'].min(), force=True)
-    log.info('%d new operations for %s account were added.', df_new['Account'].size, account_id)
+    log.info(
+        '%d new operations for %s account were added.',
+        df_new['Account'].size,
+        account_id)
     return df
+
 
 def calculate_balance(df: pd.DataFrame, account_id: str) -> pd.DataFrame:
     """Calculates balance for new operations
@@ -63,21 +74,24 @@ def calculate_balance(df: pd.DataFrame, account_id: str) -> pd.DataFrame:
 
     return df
 
+
 def __get_bank_type(account_id: str):
     account_defs = config.load_user_config()['accounts']['definitions']
     account_list = [acc for acc in account_defs if acc['id'] == account_id]
-    
+
     if len(account_list) == 0:
         raise ValueError(f"Failed to load bank definition. There is no bank account definition with an id '{account_id}'")
 
     importer = account_list[0]['importer']
-    
+
     try:
         bank = models.Bank[importer]
         log.info(f"Found bank by account_id ({account_id}): {bank}")
         return bank
-    except Exception as ex:
-        raise ValueError(f"Failed to load importer for bank. Importer with a code: '{importer}' is not known")
+    except Exception:
+        raise ValueError("Failed to load importer for bank." +
+                         f"Importer with a code: '{importer}' is not known")
+
 
 def __latest_balance_for_account(df: pd.DataFrame, account_id: str):
 
@@ -86,8 +100,10 @@ def __latest_balance_for_account(df: pd.DataFrame, account_id: str):
     try:
         return result.iloc[-1]['Balance']
     except IndexError:
-        log.info('There are no latest balance for %s account. Therefore assuming 0.', account_id)
+        log.info('There are no latest balance for %s account. Therefore assuming 0.',
+                 account_id)
         return 0
+
 
 def __make_account_backup(df: pd.DataFrame):
     df.to_csv(config.mankkoo_file_path('account-backup'), index=True)
