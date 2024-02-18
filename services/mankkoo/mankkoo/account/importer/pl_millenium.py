@@ -4,6 +4,12 @@ import io
 import mankkoo.account.models as models
 import mankkoo.database as db
 
+def prepare_tile(df: pd.DataFrame) -> pd.DataFrame:
+    df['Title'] = df['Odbiorca/Zleceniodawca'] + ' - ' + df['Opis']
+    df['Title'] = df['Title'].str.replace(',', '')
+    df['Title'] = df['Title'].str.replace(r'\s+', ' ', regex=True)
+    df['Title'] = df['Title'].str.strip()
+    return df
 
 class Millenium(models.Importer):
     # Millenium bank (PL) - https://www.bankmillennium.pl
@@ -15,12 +21,13 @@ class Millenium(models.Importer):
         return pd.read_csv(io.StringIO(contents.decode('utf-8')))
 
     def format_file(self, df: pd.DataFrame, account_id: str):
-        df = df[['Data transakcji', 'Opis', 'Obciążenia', 'Uznania', 'Waluta']]
+        df = df[['Data transakcji', 'Odbiorca/Zleceniodawca', 'Opis', 'Obciążenia', 'Uznania', 'Waluta']]
 
         df['Operation'] = np.where(df['Obciążenia'] < 0, df['Obciążenia'], df['Uznania'])
         df = df.drop(columns=['Obciążenia', 'Uznania'])
 
-        df = df.rename(columns={'Data transakcji': 'Date', 'Opis': 'Title', 'Waluta': 'Currency'})
+        df = df.pipe(prepare_tile)
+        df = df.rename(columns={'Data transakcji': 'Date', 'Waluta': 'Currency'})
 
         df['Date'] = pd.to_datetime(df.Date)
         df['Date'] = df['Date'].dt.date

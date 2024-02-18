@@ -7,12 +7,12 @@ import numpy as np
 from pandas._testing import assert_frame_equal
 
 exp_result = td.account_data([
-    ['iban-1', '2021-01-01', 'Init money - Telefon', np.NaN, np.NaN, np.NaN, 1000.00, 'PLN', np.NaN],
-    ['iban-1', '2021-02-02', 'Out 1 - Pizza', np.NaN, np.NaN, np.NaN, -200.00, 'PLN', np.NaN],
-    ['iban-1', '2021-03-03', 'Out 2 - Penska', np.NaN, np.NaN, np.NaN, -3.33, 'PLN', np.NaN],
-    ['iban-1', '2021-04-04', 'In 1 - Przelew', np.NaN, np.NaN, np.NaN, 3.33, 'PLN', np.NaN],
-    ['iban-1', '2021-05-05', 'Out 3 - Spotify', np.NaN, np.NaN, np.NaN, -400.00, 'PLN', np.NaN],
-    ['iban-1', '2021-06-06', 'In 2 - Train ticket PKP', np.NaN, np.NaN, np.NaN, 50.00, 'PLN', np.NaN]
+    ['iban-1', '2021-01-01', 'Jane Doe - Init money', np.NaN, np.NaN, np.NaN, 1000.00, 'PLN', np.NaN],
+    ['iban-1', '2021-02-02', 'Pizzeria - Out 1', np.NaN, np.NaN, np.NaN, -200.00, 'PLN', np.NaN],
+    ['iban-1', '2021-03-03', 'John Doe - Out 2', np.NaN, np.NaN, np.NaN, -3.33, 'PLN', np.NaN],
+    ['iban-1', '2021-04-04', 'Jane Doe - In 1', np.NaN, np.NaN, np.NaN, 3.33, 'PLN', np.NaN],
+    ['iban-1', '2021-05-05', 'Spotify - Out 3', np.NaN, np.NaN, np.NaN, -400.00, 'PLN', np.NaN],
+    ['iban-1', '2021-06-06', 'PKP - In 2', np.NaN, np.NaN, np.NaN, 50.00, 'PLN', np.NaN]
 ])
 
 test_data_path = str(pathlib.Path(__file__).parent.absolute()) + '/data/'
