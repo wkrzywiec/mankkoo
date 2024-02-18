@@ -126,7 +126,7 @@ export function Account() {
                                         id={acc.id}
                                         onClick={handleSelect}
                                     >
-                                        {acc.bankName} - {acc.name}
+                                        {acc.bankName} - {acc.name} ({acc.alias})
                                     </button>
                                 </li>
                             ))}
