@@ -64,7 +64,6 @@ class TotalMonthlyProfits(Schema):
 def monthly_profits():
     data = db.load_all()
     result = data['total_monthly']
-    print(result)
     result['total'] = result.pop('Profit')
     result['date'] = result.pop('Date')
     return result.to_dict('list')

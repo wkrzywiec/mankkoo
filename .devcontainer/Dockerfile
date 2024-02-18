@@ -3,7 +3,6 @@ FROM mcr.microsoft.com/vscode/devcontainers/base:ubuntu-22.04
 ENV PYTHON_VERSION=3.10
 ENV POETRY_VERSION=1.3.2
 ENV POETRY_HOME=/opt/poetry
-ENV POETRY_VENV=/opt/poetry-venv
 ENV POETRY_CACHE_DIR=/opt/.cache
 ENV POETRY_VIRTUALENVS_CREATE=false
 ENV POETRY_NO_INTERACTION=1
@@ -21,16 +20,14 @@ RUN apt-get update \
     && apt-get update \
     && apt-get install -y python${PYTHON_VERSION} \ 
     && ln -s /usr/bin/python3 /usr/bin/python \
-    && apt-get install -y python3-pip \
-    && apt install -y python${PYTHON_VERSION}-venv
+    && apt-get install -y python3-pip
 
 # Poetry
-RUN python -m venv $POETRY_VENV \
-	&& $POETRY_VENV/bin/pip install -U pip setuptools \
-	&& $POETRY_VENV/bin/pip install poetry==${POETRY_VERSION}
+RUN pip install -U pip setuptools \
+	&& pip install poetry==${POETRY_VERSION}
 
 # Add `poetry` to PATH
-ENV PATH="${PATH}:${POETRY_VENV}/bin"
+# ENV PATH="${PATH}:${POETRY_VENV}/bin"
 
 RUN python --version
 RUN poetry --version

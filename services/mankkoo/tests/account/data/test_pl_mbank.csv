@@ -24,10 +24,10 @@ Lista operacji;
 PLN;1 053,33;-603,33;
 
 #Data operacji;#Opis operacji;#Rachunek;#Kategoria;#Kwota;
-2021-06-06;"In 2";"eKonto 2222 ... 2222";"Bez kategorii";50,00 PLN;;
-2021-05-05;"Out 3";"eKonto 2222 ... 2222";"Bez kategorii";-400,00 PLN;;
-2021-04-04;"In 1";"eKonto 2222 ... 2222";"Bez kategorii";3,33 PLN;;
-2021-03-03;"Out 2";"eKonto 2222 ... 2222";"Bez kategorii";-3,33 PLN;;
-2021-02-02;"Out 1";"eKonto 2222 ... 2222";"Bez kategorii";-200,00 PLN;;
-2021-01-01;"Init money";"eKonto 2222 ... 2222";"Bez kategorii";1 000,0 PLN;;
+2021-06-06;"PKP - In 2";"eKonto 2222 ... 2222";"Bez kategorii";50,00 PLN;;
+2021-05-05;"Spotify - Out 3";"eKonto 2222 ... 2222";"Bez kategorii";-400,00 PLN;;
+2021-04-04;"Jane Doe - In 1";"eKonto 2222 ... 2222";"Bez kategorii";3,33 PLN;;
+2021-03-03;"John Doe - Out 2";"eKonto 2222 ... 2222";"Bez kategorii";-3,33 PLN;;
+2021-02-02;"Pizzeria - Out 1";"eKonto 2222 ... 2222";"Bez kategorii";-200,00 PLN;;
+2021-01-01;"Jane Doe - Init money";"eKonto 2222 ... 2222";"Bez kategorii";1 000,0 PLN;;
 

@@ -39,12 +39,6 @@ tasks:
       - node -v
       - npx -v
 
-  dev:
-    desc: Run all services in a dev mode
-    cmds:
-      - task: dev:mankkoo
-      - task: dev:ui
-
   dev:mankkoo:
     desc: Run mankkoo core backend in a dev mode
     dir: services/mankkoo/mankkoo

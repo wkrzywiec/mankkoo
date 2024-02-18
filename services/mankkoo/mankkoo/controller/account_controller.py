@@ -1,3 +1,4 @@
+import traceback
 from apiflask import APIBlueprint, Schema
 from apiflask.fields import String, Boolean, Float, File
 from mankkoo.base_logger import log
@@ -29,14 +30,14 @@ class AccountOperationResult(Schema):
 def accounts():
     log.info('Fetching account info...')
     accounts = database.load_all_accounts()
-    
+
     hidden_accounts = config.load_user_config()['accounts']['ui']['hide_accounts']
     for acc in accounts:
         acc['number'] = acc['id']
         acc['bankName'] = acc.pop('bank')
         acc['bankUrl'] = acc.pop('bank_url')
         acc['hidden'] = False if "{} - {}".format(acc['bankName'], acc['name']) not in hidden_accounts else True
-        
+    
     return accounts
 
 class AccountOperations(Schema):
@@ -50,11 +51,16 @@ class AccountOperations(Schema):
     comment = String()
 
 @account_endpoints.route("/operations")
-@account_endpoints.output(AccountOperations(many=True), status_code = 200)
-@account_endpoints.doc(summary='All Accounts operations', description='Get a list of all operations for all account')
+@account_endpoints.output(AccountOperations(many=True), status_code=200)
+@account_endpoints.doc(
+    summary='All Accounts operations',
+    description='Get a list of all operations for all account'
+)
 def operations():
     log.info('Fetching operations for all accounts...')
-    return database.load_all_operations_as_dict()
+    result = database.load_all_operations_as_dict()
+    return result
+
 
 class OperationsImport(Schema):
     operations = File()
@@ -74,12 +80,8 @@ def import_operations(account_id, data):
             'details': 'New account operations have been added!'
         }
     except Exception as ex:
-        log.info(f'Failed to add new operations. Err: {ex}')
+        log.info(f'Failed to add new operations. Err: {ex}, traceback: {traceback.format_exc()}')
         return {
             'result': 'Failure',
             'details': str(ex)
         }, 500
-    
-    
-    
-    

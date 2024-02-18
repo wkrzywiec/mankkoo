@@ -23,6 +23,7 @@ pytest-cov = "~=2.11"
 pytest-sugar = "~=0.9.4"
 pytest-mock = "~=3.5.1"
 flake8 = "*"
+mypy = "^1.8.0"
 
 
 [build-system]

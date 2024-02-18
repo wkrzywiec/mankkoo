@@ -7,7 +7,6 @@
 
 "Wybrane rachunki:";
 "KONTO Z LWEM Direct (PLN)";;"22 22 2222 2222 2222 2222 2222";
-"Otwarte Konto Oszcz�dno�ciowe (PLN)";;"22 22 2222 2222 2222 2222 2222";
 
 "Zastosowane kryteria wyboru";;;;;"Podsumowanie";;
 
@@ -17,13 +16,13 @@
 
 ;;;;;"Suma obci��e� (1):";1,70;PLN;;;;;;;;;;;;;
 
-"Data transakcji";"Data ksi�gowania";"Dane kontrahenta";"Tytu�";"Nr rachunku";"Nazwa banku";"Szczeg�y";"Nr transakcji";"Kwota transakcji (waluta rachunku)";"Waluta";"Kwota blokady/zwolnienie blokady";"Waluta";"Kwota p�atno�ci w walucie";"Waluta";"Konto";"Saldo po transakcji";"Waluta";;;;
-2021-06-06;2021-06-06;"In 2";"Train ticket PKP";'1111';"";"";;50,00;PLN;;;;;"KONTO Z LWEM Direct";2178,36;PLN;;;;
-2021-05-05;2021-05-05;"Out 3";" Spotify";'1111';"";"ZAKUP - BEZ FIZ. UŻYCIA KARTY";'1';-400,00;PLN;;;;;"KONTO Z LWEM Direct";2200,14;PLN;;;;
-2021-04-04;2021-04-04;"In 1";" Przelew";'1111';"";"";'1';3,33;PLN;;;;;"KONTO Z LWEM Direct";2220,13;PLN;;;;
-2021-03-03;2021-03-03;"Out 2";" Penska";'1111';"bank pl";"Przelew ";'1';-3,33;PLN;;;;;"KONTO Z LWEM Direct";2170,13;PLN;;;;
-2021-02-02;2021-02-02;"Out 1";" Pizza";'1111';"";"Hawajska :P  ";'1';-200,00;PLN;;;;;"KONTO Z LWEM Direct";935,35;PLN;;;;
-2021-01-01;2021-01-01;"Init money";" Telefon ";'1111';"";"";'1';1000,00;PLN;;;;;"KONTO Z LWEM Direct";1000,25;PLN;;;;
+"Data transakcji";"Data ksi�gowania";"Dane kontrahenta";"Tytuł";"Nr rachunku";"Nazwa banku";"Szczeg�y";"Nr transakcji";"Kwota transakcji (waluta rachunku)";"Waluta";"Kwota blokady/zwolnienie blokady";"Waluta";"Kwota p�atno�ci w walucie";"Waluta";"Konto";"Saldo po transakcji";"Waluta";;;;
+2021-06-06;2021-06-06;"PKP";"In 2";'1111';"";"";;;PLN;50,00;;;;"KONTO Z LWEM Direct";2178,36;PLN;;;;
+2021-05-05;2021-05-05;"Spotify";" Out 3";'1111';"";"ZAKUP - BEZ FIZ. UŻYCIA KARTY";'1';-400,00;PLN;;;;;"KONTO Z LWEM Direct";2200,14;PLN;;;;
+2021-04-04;2021-04-04;"Jane Doe";" In 1";'1111';"";"";'1';3,33;PLN;;;;;"KONTO Z LWEM Direct";2220,13;PLN;;;;
+2021-03-03;2021-03-03;"John Doe";" Out 2";'1111';"bank pl";"Przelew ";'1';-3,33;PLN;;;;;"KONTO Z LWEM Direct";2170,13;PLN;;;;
+2021-02-02;2021-02-02;"Pizzeria";" Out 1";'1111';"";"Hawajska :P  ";'1';-200,00;PLN;;;;;"KONTO Z LWEM Direct";935,35;PLN;;;;
+2021-01-01;2021-01-01;"Jane Doe";" Init money ";'1111';"";"";'1';1000,00;PLN;;;;;"KONTO Z LWEM Direct";1000,25;PLN;;;;
 
 
 "Dokument ma charakter informacyjny, nie stanowi dowodu ksi�gowego";

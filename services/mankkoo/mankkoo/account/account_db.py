@@ -2,23 +2,30 @@ import mankkoo.util.config as config
 from mankkoo.base_logger import log
 import pandas as pd
 
+
 def load_all_accounts() -> dict:
     log.info("Loading all accounts...")
     return config.load_user_config()['accounts']['definitions']
 
+
 def load_all_operations_as_df() -> pd.DataFrame:
     log.info('Loading ACCOUNT file...')
-    df = pd.read_csv(config.mankkoo_file_path('account'), parse_dates=['Date'], index_col=0)
+    df = pd.read_csv(
+        config.mankkoo_file_path('account'),
+        parse_dates=['Date'],
+        index_col=0,
+        encoding='iso-8859-2')
     if df.empty:
         return df
     df = df.astype({'Account': 'string', 'Balance': 'float', 'Operation': 'float', 'Date': 'datetime64[ns]'})
     df['Date'] = df['Date'].dt.date
     return df
 
+
 def load_all_operations_as_dict() -> dict:
     user_config = config.load_user_config()
     df = __load_and_format_all_operations()
-    
+
     accounts = user_config['accounts']['definitions']
     formatted_accounts = []
 
