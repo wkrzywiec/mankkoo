@@ -1,3 +1,11 @@
+CREATE TABLE IF NOT EXISTS streams
+(
+    id              UUID                      NOT NULL    PRIMARY KEY,
+    type            TEXT                      NOT NULL,
+    version         BIGINT                    NOT NULL,
+    metadata        JSONB
+);
+
 CREATE TABLE IF NOT EXISTS events
 (
     id              UUID                      NOT NULL    PRIMARY KEY,
@@ -8,6 +16,7 @@ CREATE TABLE IF NOT EXISTS events
     occured_at      timestamp with time zone  NOT NULL,
     added_at        timestamp with time zone  NOT NULL    default (now()),
     
+    FOREIGN KEY(stream_id) REFERENCES streams(id),
     CONSTRAINT events_stream_and_version UNIQUE(stream_id, version)
 );
 
@@ -29,14 +38,19 @@ CREATE OR REPLACE FUNCTION append_event
         
         -- get stream version
         SELECT
-            MAX(version) INTO stream_version
-        FROM events as s
+            version INTO stream_version
+        FROM streams as s
         WHERE
             s.id = stream_id FOR UPDATE;
 
         -- if stream doesn't exist - create new one with version 0
         IF stream_version IS NULL THEN
             stream_version := 0;
+
+            INSERT INTO streams
+                (id, type, version)
+            VALUES
+                (stream_id, stream_type, stream_version);
         END IF;
 
         -- check optimistic concurrency
@@ -52,6 +66,13 @@ CREATE OR REPLACE FUNCTION append_event
             (id, data, stream_id, type, version, occured_at)
         VALUES
             (id, data::jsonb, stream_id, type, stream_version, occured_at);
+
+
+        -- update stream version
+        UPDATE streams as s
+            SET version = stream_version
+        WHERE
+            s.id = stream_id;
 
         RETURN TRUE;
     END;
