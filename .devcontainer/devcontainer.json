@@ -9,7 +9,12 @@
 	},
 
 	"features": {
+		//get access to docker on host
 		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+			"version": "latest"
+		},
+		//enables running testcontainers
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {
 			"version": "latest"
 		}
 	},
@@ -17,7 +22,8 @@
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	"forwardPorts": [5000, 3000],
 	"runArgs": [
-        // "--network=host", 
+        "--network=host", 
+		// "--add-host=host.docker.internal:host-gateway", //dont work?
 		"--name", "mankkoo_devcontainer"
     ],
 
@@ -57,6 +63,7 @@
 		"source=${localEnv:HOME}${localEnv:USERPROFILE}/.mankkoo,target=/root/.mankkoo,type=bind,consistency=cached", // Establishing a persistent volume for maven local repository downloads
 		"source=${localEnv:HOME}${localEnv:USERPROFILE}/.gitconfig,target=/root/.gitconfig,type=bind,consistency=cached",
 		"source=${localEnv:HOME}${localEnv:USERPROFILE}/.cache/pypoetry,target=/opt/.cache,type=bind,consistency=cached"
+		// "source=/var/run/docker.sock,target=/var/run/docker-host.sock,type=bind" //dont work?
 	],
 
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.

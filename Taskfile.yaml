@@ -39,14 +39,40 @@ tasks:
       - node -v
       - npx -v
 
-  dev:mankkoo:
+  mankkoo:dev:
     desc: Run mankkoo core backend in a dev mode
     dir: services/mankkoo/mankkoo
     cmds:
       - echo "Starting mankkoo core..."
       - poetry run flask run --reload
 
-  dev:ui:
+  mankkoo:test:
+    desc: Run tests for mankkoo core
+    dir: services/mankkoo
+    cmds:
+      - echo "Running tests for mankkoo core..."
+      - poetry run pytest tests/event_store_test.py -s -vv --cov=./mankkoo
+
+  update:
+    desc: Update dependencies for all services
+    cmds:
+      - task: mankkoo:update
+
+  mankkoo:update:
+    desc: Update dependencies for mankkoo core
+    dir: services/mankkoo
+    cmds:
+      - echo "Updating dependencies for mankkoo core..."
+      - poetry update
+
+  mankkoo:req:
+    desc: Generate requirements.txt file from Poetry
+    dir: services/mankkoo
+    cmds:
+      - echo "Generate requirements.txt file..."
+      - poetry export --without-hashes --format=requirements.txt > requirements.txt
+
+  ui:dev:
     desc: Run mankkoo UI in a dev mode
     dir: services/mankkoo-ui
     cmds:
@@ -56,23 +82,4 @@ tasks:
   test:
     desc: Run all tests
     cmds:
-      - task: test:mankkoo
-
-  test:mankkoo:
-    desc: Run tests for mankkoo core
-    dir: services/mankkoo
-    cmds:
-      - echo "Running tests for mankkoo core..."
-      - poetry run pytest -s -vv --cov=./mankkoo
-
-  update:
-    desc: Update dependencies for all services
-    cmds:
-      - task: update:mankkoo
-
-  update:mankkoo:
-    desc: Update dependencies for mankkoo core
-    dir: services/mankkoo
-    cmds:
-      - echo "Updating dependencies for mankkoo core..."
-      - poetry update
+      - task: mankkoo:test
