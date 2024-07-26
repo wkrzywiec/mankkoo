@@ -51,7 +51,7 @@ tasks:
     dir: services/mankkoo
     cmds:
       - echo "Running tests for mankkoo core..."
-      - poetry run pytest tests/event_store_test.py -s -vv --cov=./mankkoo
+      - poetry run pytest -s -vv --cov=./mankkoo
 
   update:
     desc: Update dependencies for all services

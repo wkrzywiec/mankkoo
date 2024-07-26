@@ -8,8 +8,24 @@ import mankkoo.event_store as es
 import mankkoo.database as db
 
 postgres = PostgresContainer("postgres:16-alpine")
-initPostgresContainer = False
+initPostgresContainer = True
 
+accountOpenedData = {
+        "balance": 0.00,
+        "number": "PL1234567890",
+        "isActive": True,
+        "openedAt": "2017-08-15 21:05:15.723336-07"
+}
+
+moneyDepositedData = {
+    "amount": 100.00,
+    "balance": 100.00
+}
+
+moneyWithdrawnData = {
+    "amount": 50.50,
+    "balance": 49.50
+}
 
 @pytest.fixture(scope="module", autouse=True)
 def setup(request):
@@ -41,53 +57,121 @@ def setup_data():
         "TRUNCATE events, streams;"
     )
 
-# add multiple events
-# Next event is saved in the event store if it has the succeeding version in the stream
-# Next event is not saved in the event store if it has the same version as the latest event in the stream
-# Next event is not saved in the event store if it has the same version as one of the events in the stream
-# Next event is not saved in the event store if it has a version that skips couple versions in the stream
 
-# Events are loaded from a store and are ordered by version
-# 
-
-def __test1():
-    with db.get_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute("SELECT 1")
-            (cid) = cur.fetchone()
-            return cid
-
-
-def test_add_new_event():
-    assert __test1()[0] == 1
+def test_add_new_events():
     # given
-    
     stream_type = 'account'
     stream_id = uuid.uuid4()
-    accountOpenedData = {
-        "balance": 0.00,
-        "number": "PL1234567890",
-        "isActive": True,
-        "openedAt": "2017-08-15 21:05:15.723336-07"
-    }
-    moneyDepositedData = {
-        "amount": 100.00,
-        "balance": 100.00
-    }
-    moneyWithdrawnData = {
-        "amount": 50.50,
-        "balance": 49.50
-    }
     occured_at = datetime.now(timezone.utc) - timedelta(days=10)
-    
+
     events = [
         es.Event(stream_type, stream_id, 'AccountOpened', accountOpenedData, occured_at),
         es.Event(stream_type, stream_id, 'MoneyDeposited', moneyDepositedData, occured_at + timedelta(days=1), 2),
         es.Event(stream_type, stream_id, 'MoneyWithdrawn', moneyWithdrawnData, occured_at + timedelta(days=2), 3)
     ]
-    
+
     # when
     es.store(events)
 
     # then
-    
+    saved_events = __load_events(stream_id)
+    assert len(saved_events) == 3
+    assert events[0] == saved_events[0]
+
+
+def test_event_is_not_stored_if_it_has_the_same_version_as_the_latest_event():
+    # given
+    stream_type = 'account'
+    stream_id = uuid.uuid4()
+    occured_at = datetime.now(timezone.utc) - timedelta(days=10)
+
+    es.store([es.Event(stream_type, stream_id, 'AccountOpened', accountOpenedData, occured_at, 1)])
+
+    # when
+    with pytest.raises(Exception):
+        es.store([es.Event(stream_type, stream_id, 'MoneyDeposited', moneyDepositedData, occured_at + timedelta(days=1), 1)])
+
+    # then
+    saved_events = __load_events(stream_id)
+    assert len(saved_events) == 1
+
+
+# Next event is not saved in the event store if it has the same version as one of the events in the stream
+def test_event_is_not_stored_if_it_has_the_same_version_as_one_of_events():
+    # given
+    stream_type = 'account'
+    stream_id = uuid.uuid4()
+    occured_at = datetime.now(timezone.utc) - timedelta(days=10)
+
+    events = [
+        es.Event(stream_type, stream_id, 'AccountOpened', accountOpenedData, occured_at),
+        es.Event(stream_type, stream_id, 'MoneyDeposited', moneyDepositedData, occured_at + timedelta(days=1), 2),
+        es.Event(stream_type, stream_id, 'MoneyWithdrawn', moneyWithdrawnData, occured_at + timedelta(days=2), 3)
+    ]
+
+    es.store(events)
+
+    # when
+    with pytest.raises(Exception):
+        es.store([es.Event(stream_type, stream_id, 'MoneyDeposited', moneyDepositedData, occured_at + timedelta(days=1), 2)])
+
+    # then
+    saved_events = __load_events(stream_id)
+    assert len(saved_events) == 3
+
+
+# Next event is not saved in the event store if it has a version that skips couple versions in the stream
+def test_event_is_not_stored_if_it_skips_couple_versions():
+    # given
+    stream_type = 'account'
+    stream_id = uuid.uuid4()
+    occured_at = datetime.now(timezone.utc) - timedelta(days=10)
+
+    es.store([es.Event(stream_type, stream_id, 'AccountOpened', accountOpenedData, occured_at, 1)])
+
+    # when
+    with pytest.raises(Exception):
+        es.store([es.Event(stream_type, stream_id, 'MoneyDeposited', moneyDepositedData, occured_at + timedelta(days=1), 8)])
+
+    # then
+    saved_events = __load_events(stream_id)
+    assert len(saved_events) == 1
+
+
+def test_load_events():
+    # given
+    stream_type = 'account'
+    stream_id = uuid.uuid4()
+    occured_at = datetime.now(timezone.utc) - timedelta(days=10)
+
+    events = [
+        es.Event(stream_type, stream_id, 'AccountOpened', accountOpenedData, occured_at),
+        es.Event(stream_type, stream_id, 'MoneyDeposited', moneyDepositedData, occured_at + timedelta(days=1), 2),
+        es.Event(stream_type, stream_id, 'MoneyWithdrawn', moneyWithdrawnData, occured_at + timedelta(days=2), 3)
+    ]
+
+    es.store(events)
+
+    # when
+    saved_events = es.load(stream_id)
+
+    # then
+    assert len(saved_events) == 3
+    assert events[0] == saved_events[0]
+
+
+def __load_events(stream_id: uuid.UUID) -> list[es.Event]:
+    result = []
+
+    with db.get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT id, stream_id, type, data, version, occured_at from events WHERE stream_id = '" + str(stream_id) + "' ORDER BY version")
+            rows = cur.fetchall()
+
+            for row in rows:
+                print(row)
+                result.append(
+                    es.Event(event_id=uuid.UUID(row[0]), stream_id=uuid.UUID(row[1]), event_type=row[2], data=row[3], version=row[4], occured_at=row[5], stream_type="account")
+                )
+
+    return result

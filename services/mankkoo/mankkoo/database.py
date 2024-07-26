@@ -152,7 +152,7 @@ def init_db():
 
                 -- check optimistic concurrency
                 IF expected_stream_version IS NOT NULL AND stream_version != expected_stream_version THEN
-                    RAISE EXCEPTION 'Provided expected_stream_version: %', expected_stream_version || ' but was ' || stream_version;
+                    RAISE EXCEPTION 'Expecting "%', stream_version || '" as next stream version but "' || expected_stream_version || '" was provided';
                 END IF;
 
                 -- append event
