@@ -179,6 +179,19 @@ def test_udpate_streams_filled_metadata():
     stored_metadata == new_metadata
 
 
+def test_get_stream_metadata():
+    # given
+    es.store([ initEvent ])
+    metadata={"name": "bank", "number": 1234, "isActive": True}
+    es.update_stream_metadata(stream_id, metadata)
+
+    # when
+    stored_metadata = es.get_stream_metadata(stream_id)
+
+    # then
+    stored_metadata == metadata
+
+
 def __load_events(stream_id: uuid.UUID) -> list[es.Event]:
     result = []
 

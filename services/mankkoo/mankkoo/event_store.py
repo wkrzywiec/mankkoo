@@ -67,10 +67,15 @@ def load(stream_id: UUID) -> list[Event]:
 
 
 def get_stream_metadata(stream_id: UUID) -> dict:
-    pass
+    log.info(f"Loading stream's '{stream_id}' metadata...")
+    with db.get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT metadata from streams WHERE id = '" + str(stream_id) + "'")
+            (metadata, ) = cur.fetchone()
+    return metadata
 
 def update_stream_metadata(stream_id: UUID, metadata: dict):
-    log.info(f"Updating stream {stream_id} with metdata '{metadata}'...")
+    log.info(f"Updating stream '{stream_id}' with metdata '{metadata}'...")
     with db.get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
