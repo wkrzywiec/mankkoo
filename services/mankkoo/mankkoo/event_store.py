@@ -49,6 +49,7 @@ def store(events: list[Event]):
 
 
 def load(stream_id: UUID) -> list[Event]:
+    log.info(f"Loading events for a stream {stream_id}...")
     result = []
 
     with db.get_connection() as conn:
@@ -64,5 +65,16 @@ def load(stream_id: UUID) -> list[Event]:
 
     return result
 
-def update_stream_metadata(stream_id: UUID, metadata: dict):
+
+def get_stream_metadata(stream_id: UUID) -> dict:
     pass
+
+def update_stream_metadata(stream_id: UUID, metadata: dict):
+    log.info(f"Updating stream {stream_id} with metdata '{metadata}'...")
+    with db.get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "UPDATE streams SET metadata = %s::jsonb WHERE id = %s::uuid;",
+                (json.dumps(metadata), str(stream_id))
+            )
+            conn.commit()

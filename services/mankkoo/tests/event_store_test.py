@@ -8,7 +8,11 @@ import mankkoo.event_store as es
 import mankkoo.database as db
 
 postgres = PostgresContainer("postgres:16-alpine")
-initPostgresContainer = True
+initPostgresContainer = False
+
+stream_type = 'account'
+stream_id = uuid.uuid4()
+occured_at = datetime.now(timezone.utc) - timedelta(days=10)
 
 accountOpenedData = {
         "balance": 0.00,
@@ -26,6 +30,8 @@ moneyWithdrawnData = {
     "amount": 50.50,
     "balance": 49.50
 }
+
+initEvent = es.Event(stream_type, stream_id, 'AccountOpened', accountOpenedData, occured_at)
 
 @pytest.fixture(scope="module", autouse=True)
 def setup(request):
@@ -60,12 +66,8 @@ def setup_data():
 
 def test_add_new_events():
     # given
-    stream_type = 'account'
-    stream_id = uuid.uuid4()
-    occured_at = datetime.now(timezone.utc) - timedelta(days=10)
-
     events = [
-        es.Event(stream_type, stream_id, 'AccountOpened', accountOpenedData, occured_at),
+        initEvent,
         es.Event(stream_type, stream_id, 'MoneyDeposited', moneyDepositedData, occured_at + timedelta(days=1), 2),
         es.Event(stream_type, stream_id, 'MoneyWithdrawn', moneyWithdrawnData, occured_at + timedelta(days=2), 3)
     ]
@@ -81,11 +83,7 @@ def test_add_new_events():
 
 def test_event_is_not_stored_if_it_has_the_same_version_as_the_latest_event():
     # given
-    stream_type = 'account'
-    stream_id = uuid.uuid4()
-    occured_at = datetime.now(timezone.utc) - timedelta(days=10)
-
-    es.store([es.Event(stream_type, stream_id, 'AccountOpened', accountOpenedData, occured_at, 1)])
+    es.store([initEvent])
 
     # when
     with pytest.raises(Exception):
@@ -96,15 +94,10 @@ def test_event_is_not_stored_if_it_has_the_same_version_as_the_latest_event():
     assert len(saved_events) == 1
 
 
-# Next event is not saved in the event store if it has the same version as one of the events in the stream
 def test_event_is_not_stored_if_it_has_the_same_version_as_one_of_events():
     # given
-    stream_type = 'account'
-    stream_id = uuid.uuid4()
-    occured_at = datetime.now(timezone.utc) - timedelta(days=10)
-
     events = [
-        es.Event(stream_type, stream_id, 'AccountOpened', accountOpenedData, occured_at),
+        initEvent,
         es.Event(stream_type, stream_id, 'MoneyDeposited', moneyDepositedData, occured_at + timedelta(days=1), 2),
         es.Event(stream_type, stream_id, 'MoneyWithdrawn', moneyWithdrawnData, occured_at + timedelta(days=2), 3)
     ]
@@ -120,14 +113,9 @@ def test_event_is_not_stored_if_it_has_the_same_version_as_one_of_events():
     assert len(saved_events) == 3
 
 
-# Next event is not saved in the event store if it has a version that skips couple versions in the stream
 def test_event_is_not_stored_if_it_skips_couple_versions():
     # given
-    stream_type = 'account'
-    stream_id = uuid.uuid4()
-    occured_at = datetime.now(timezone.utc) - timedelta(days=10)
-
-    es.store([es.Event(stream_type, stream_id, 'AccountOpened', accountOpenedData, occured_at, 1)])
+    es.store([ initEvent ])
 
     # when
     with pytest.raises(Exception):
@@ -140,12 +128,8 @@ def test_event_is_not_stored_if_it_skips_couple_versions():
 
 def test_load_events():
     # given
-    stream_type = 'account'
-    stream_id = uuid.uuid4()
-    occured_at = datetime.now(timezone.utc) - timedelta(days=10)
-
     events = [
-        es.Event(stream_type, stream_id, 'AccountOpened', accountOpenedData, occured_at),
+        initEvent,
         es.Event(stream_type, stream_id, 'MoneyDeposited', moneyDepositedData, occured_at + timedelta(days=1), 2),
         es.Event(stream_type, stream_id, 'MoneyWithdrawn', moneyWithdrawnData, occured_at + timedelta(days=2), 3)
     ]
@@ -158,6 +142,41 @@ def test_load_events():
     # then
     assert len(saved_events) == 3
     assert events[0] == saved_events[0]
+
+
+def test_udpate_streams_empty_metadata():
+    # given
+    es.store([ initEvent ])
+
+    # when
+    metadata = {"name": "bank", "number": 1234, "isActive": True}
+    es.update_stream_metadata(stream_id, metadata)
+
+    # then
+    with db.get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT metadata from streams WHERE id = '" + str(stream_id) + "'")
+            (stored_metadata, ) = cur.fetchone()
+
+    stored_metadata == metadata
+
+
+def test_udpate_streams_filled_metadata():
+    # given
+    es.store([ initEvent ])
+    es.update_stream_metadata(stream_id, metadata={"name": "bank", "number": 1234, "isActive": True})
+
+    # when
+    new_metadata = {"name": "something new"}
+    es.update_stream_metadata(stream_id, new_metadata)
+
+    # then
+    with db.get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT metadata from streams WHERE id = '" + str(stream_id) + "'")
+            (stored_metadata, ) = cur.fetchone()
+
+    stored_metadata == new_metadata
 
 
 def __load_events(stream_id: uuid.UUID) -> list[es.Event]:
