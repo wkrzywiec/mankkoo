@@ -65,29 +65,6 @@ def load_stocks() -> pd.DataFrame:
     result['Date'] = result['Date'].dt.date
     return result
 
-def execute(sql: str):
-    log.info(f"Executing sql: {sql}")
-    with get_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute(sql)
-            conn.commit()
-
-def get_connection():
-    host = os.getenv("DB_HOST", "localhost")
-    port = os.getenv("DB_PORT", "5432")
-    database = os.getenv("DB_NAME", "postgres")
-    username = os.getenv("DB_USERNAME", "postgres")
-    password = os.getenv("DB_PASSWORD", "postgres")
-
-    conn = psycopg2.connect(
-        host=host,
-        port=port,
-        database=database,
-        user=username,
-        password=password
-    )
-    return conn
-
 def init_db():
     log.info("Initializing database with tables and functions...")
     execute("""
@@ -174,3 +151,27 @@ def init_db():
         """)
 
     log.info("Database initialized")
+
+
+def execute(sql: str):
+    log.info(f"Executing sql: {sql}")
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(sql)
+            conn.commit()
+
+def get_connection():
+    host = os.getenv("DB_HOST", "localhost")
+    port = os.getenv("DB_PORT", "5432")
+    database = os.getenv("DB_NAME", "postgres")
+    username = os.getenv("DB_USERNAME", "postgres")
+    password = os.getenv("DB_PASSWORD", "postgres")
+
+    conn = psycopg2.connect(
+        host=host,
+        port=port,
+        database=database,
+        user=username,
+        password=password
+    )
+    return conn

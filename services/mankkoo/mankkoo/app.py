@@ -2,6 +2,9 @@ from apiflask import APIFlask
 from mankkoo.controller.main_controller import main_endpoints
 from mankkoo.controller.account_controller import account_endpoints
 from mankkoo.util import config
+
+import mankkoo.config as app_profile
+import mankkoo.database as db
 from flask_cors import CORS
 
 app = APIFlask(__name__, title="Mankkoo - 'accounting' service API", version='1.0', spec_path='/openapi.yaml', docs_ui='elements')
@@ -18,13 +21,20 @@ app.config['INFO'] = {
     }
 }
 
+db_name = ''
+
 # to enable 'prod' config first run: export FLASK_ENV=prod
 if app.config["ENV"] == 'prod':
     app.config.from_object('mankkoo.config.ProdConfig')
+    db_name = app_profile.ProdConfig.DB_NAME
 else:
     app.config.from_object('mankkoo.config.DevConfig')
+    db_name = app_profile.DevConfig.DB_NAME
 
 app.register_blueprint(main_endpoints, url_prefix='/api/main')
 app.register_blueprint(account_endpoints, url_prefix='/api/accounts')
+
+print(db_name)
+# db.init_db()
 
 config.init_data_folder()

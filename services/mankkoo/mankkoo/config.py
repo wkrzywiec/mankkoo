@@ -7,6 +7,7 @@ class DevConfig(Config):
     DEBUG = True
     TESTING = False
     ENV = 'dev'
+    DB_NAME = 'dev'
 
 
 class ProdConfig(Config):
@@ -14,3 +15,4 @@ class ProdConfig(Config):
     DEBUG = False
     TESTING = False
     ENV = 'prod'
+    DB_NAME = 'mankkoo'

@@ -14,6 +14,7 @@ stream_type = 'account'
 stream_id = uuid.uuid4()
 occured_at = datetime.now(timezone.utc) - timedelta(days=10)
 
+## test data
 accountOpenedData = {
         "balance": 0.00,
         "number": "PL1234567890",
@@ -32,6 +33,7 @@ moneyWithdrawnData = {
 }
 
 initEvent = es.Event(stream_type, stream_id, 'AccountOpened', accountOpenedData, occured_at)
+
 
 @pytest.fixture(scope="module", autouse=True)
 def setup(request):
@@ -53,6 +55,7 @@ def setup(request):
         print(f'Testcontainers postgres connection: {postgres.get_connection_url()}')
     else:
         print("Using local PostgreSQL instance for tests...")
+        os.environ["DB_NAME"] = 'test'
     db.init_db()
 
 
