@@ -1,3 +1,5 @@
+import os
+
 from apiflask import APIFlask
 from mankkoo.controller.main_controller import main_endpoints
 from mankkoo.controller.account_controller import account_endpoints
@@ -34,7 +36,7 @@ else:
 app.register_blueprint(main_endpoints, url_prefix='/api/main')
 app.register_blueprint(account_endpoints, url_prefix='/api/accounts')
 
-print(db_name)
-# db.init_db()
+os.environ["DB_NAME"] = db_name
+db.init_db()
 
 config.init_data_folder()

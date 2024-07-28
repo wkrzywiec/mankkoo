@@ -20,7 +20,7 @@
 	},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	"forwardPorts": [5000, 3000],
+	"forwardPorts": [5000, 3000, 5432, 5050],
 	"runArgs": [
         "--network=host", 
 		// "--add-host=host.docker.internal:host-gateway", //dont work?
