@@ -158,7 +158,7 @@ def test_udpate_streams_empty_metadata():
             cur.execute("SELECT metadata from streams WHERE id = '" + str(stream_id) + "'")
             (stored_metadata, ) = cur.fetchone()
 
-    stored_metadata == metadata
+    assert stored_metadata == metadata
 
 
 def test_udpate_streams_filled_metadata():
@@ -176,7 +176,46 @@ def test_udpate_streams_filled_metadata():
             cur.execute("SELECT metadata from streams WHERE id = '" + str(stream_id) + "'")
             (stored_metadata, ) = cur.fetchone()
 
-    stored_metadata == new_metadata
+    assert stored_metadata == new_metadata
+
+
+def test_get_stream_by_metadata_if_key_exists():
+    # given
+    es.store([ initEvent ])
+    metadata={"name": "bank", "number": 1234, "isActive": True}
+    es.update_stream_metadata(stream_id, metadata)
+
+    # when
+    stream = es.get_stream_by_metadata('name', 'bank')
+
+    # then
+    assert stream == es.Stream(stream_id, stream_type, 1, metadata)
+
+
+def test_get_none_stream_by_metadata_if_key_does_not_exist():
+    # given
+    es.store([ initEvent ])
+    metadata={"name": "bank", "number": 1234, "isActive": True}
+    es.update_stream_metadata(stream_id, metadata)
+
+    # when
+    stream = es.get_stream_by_metadata('otherField', 'otherValue')
+
+    # then
+    assert stream == None
+
+
+def test_get_none_stream_by_metadata_if_key_has_different_value():
+    # given
+    es.store([ initEvent ])
+    metadata={"name": "bank", "number": 1234, "isActive": True}
+    es.update_stream_metadata(stream_id, metadata)
+
+    # when
+    stream = es.get_stream_by_metadata('name', 'otherBank')
+
+    # then
+    assert stream == None
 
 
 def test_get_stream_metadata():
@@ -189,7 +228,7 @@ def test_get_stream_metadata():
     stored_metadata = es.get_stream_metadata(stream_id)
 
     # then
-    stored_metadata == metadata
+    assert stored_metadata == metadata
 
 
 def __load_events(stream_id: uuid.UUID) -> list[es.Event]:

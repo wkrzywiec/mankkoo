@@ -8,6 +8,24 @@ from mankkoo.base_logger import log
 
 log.basicConfig(level=log.DEBUG)
 
+class Stream:
+    def __init__(self, id: UUID, type: str, version: int, metadata: dict):
+        self.id = id
+        self.type = type
+        self.version = version
+        self.metadata = metadata
+
+    def __str__(self):
+        return f"Stream(id={self.id}, type={self.type}, version={self.version}, metadata={self.metadata})"
+
+    def __eq__(self, other):
+        if not isinstance(other, Stream):
+            return NotImplemented
+
+        return self.id == other.id and self.type == other.type and self.version == other.version and self.metadata == other.metadata
+
+    def __hash__(self):
+        return hash(self.id, self.type, self.version, self.metadata)
 
 class Event:
     def __init__(self, stream_type: str, stream_id: UUID, event_type: str, data: dict, occured_at: datetime, version=1, event_id: UUID = None):
@@ -31,7 +49,7 @@ class Event:
         return self.id == other.id and self.stream_type == other.stream_type and self.stream_id== other.stream_id and self.event_type == other.event_type and self.version == other.version and self.occured_at == other.occured_at and self.data == other.data
 
     def __hash__(self):
-        return hash((self.id, self.stream_type, self.stream_id, self.event_type, self.version, self.occured_at, self.data))
+        return hash(self.id, self.stream_type, self.stream_id, self.event_type, self.version, self.occured_at, self.data)
 
 
 def store(events: list[Event]):
@@ -54,7 +72,7 @@ def load(stream_id: UUID) -> list[Event]:
 
     with db.get_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT id, stream_id, type, data, version, occured_at from events WHERE stream_id = '" + str(stream_id) + "' ORDER BY version")
+            cur.execute(f"SELECT id, stream_id, type, data, version, occured_at from events WHERE stream_id = '{str(stream_id)}' ORDER BY version")
             rows = cur.fetchall()
 
             for row in rows:
@@ -64,6 +82,18 @@ def load(stream_id: UUID) -> list[Event]:
                 )
 
     return result
+
+def get_stream_by_metadata(key: str, value) -> Stream:
+    log.info(f"Loading stream by its matadata property key '{key}' and value '{value}'...")
+    with db.get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(f"SELECT id, type, version, metadata from streams WHERE metadata ->> '{key}' = '{value}'")
+            result = cur.fetchone()
+            if result == None:
+                return None
+            else:
+                (id, type, version, metadata, ) = result
+    return Stream(uuid.UUID(id), type, version, metadata)
 
 
 def get_stream_metadata(stream_id: UUID) -> dict:
