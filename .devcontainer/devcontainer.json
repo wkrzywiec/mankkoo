@@ -22,13 +22,13 @@
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	"forwardPorts": [5000, 3000, 5432, 5050],
 	"runArgs": [
-        "--network=host", 
-		// "--add-host=host.docker.internal:host-gateway", //dont work?
+        "--network=host",  //allows to access internet
+		"--add-host=host.docker.internal:host-gateway",
 		"--name", "mankkoo_devcontainer"
     ],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "cd services/mankkoo && poetry install --no-interaction && cd ../mankkoo-ui && npm install",
+	"postCreateCommand": "cd services/mankkoo && pip install -r requirements.txt --ignore-installed && cd ../mankkoo-ui && npm install",
 
 	// Configure tool-specific properties.
 	"customizations": {

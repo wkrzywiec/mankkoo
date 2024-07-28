@@ -39,19 +39,32 @@ tasks:
       - node -v
       - npx -v
 
+  infra:
+    desc: Spin up infra
+    cmds: 
+      - echo "Starting docker containers..."
+      - docker compose up -d
+
+  infra:down:
+    desc: Tear down infra
+    cmds: 
+      - echo "Stopping docker containers..."
+      - docker compose down
+
   mankkoo:dev:
     desc: Run mankkoo core backend in a dev mode
     dir: services/mankkoo/mankkoo
     cmds:
+      - task: infra
       - echo "Starting mankkoo core..."
-      - poetry run flask run --reload
+      - flask run --reload
 
   mankkoo:test:
     desc: Run tests for mankkoo core
     dir: services/mankkoo
     cmds:
       - echo "Running tests for mankkoo core..."
-      - poetry run pytest -s -vv --cov=./mankkoo
+      - pytest -s -vv --cov=./mankkoo
 
   update:
     desc: Update dependencies for all services
