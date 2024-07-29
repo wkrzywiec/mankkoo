@@ -113,3 +113,17 @@ def update_stream_metadata(stream_id: UUID, metadata: dict):
                 (json.dumps(metadata), str(stream_id))
             )
             conn.commit()
+
+
+def get_all_streams() -> dict:
+    result = {}
+
+    with db.get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT metadata-> 'accountNumber' AS account_number, id FROM streams;")
+            rows = cur.fetchall()
+
+            for row in rows:
+                result[row[0]] = row[1]
+
+    return result
