@@ -116,6 +116,7 @@ def update_stream_metadata(stream_id: UUID, metadata: dict):
 
 
 def get_all_streams() -> dict:
+    # get map of accountNumber: stream_id (uuid)
     result = {}
 
     with db.get_connection() as conn:
@@ -124,6 +125,6 @@ def get_all_streams() -> dict:
             rows = cur.fetchall()
 
             for row in rows:
-                result[row[0]] = row[1]
+                result[row[0]] = uuid.UUID(row[1])
 
     return result
