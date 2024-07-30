@@ -1,9 +1,23 @@
 from datetime import datetime
-import pandas as pd
 
-import mankkoo.util.config as config
-from mankkoo.account import account_db
-import mankkoo.event_store as es
+from account import account_db
+import event_store as es
+import numpy as np
+
+
+def emptyOrDefault(argument):
+    if argument is np.nan:
+        return ''
+    else:
+        return argument
+
+
+def plnOrDefault(argument):
+    if argument is np.nan:
+        return 'PLN'
+    else:
+        return argument
+
 
 streams = es.get_all_streams()
 streams_version = {key: 0 for key in streams.keys()}
@@ -18,14 +32,14 @@ for index, row in df.iterrows():
 
     version = streams_version[row['Account']]
     version += 1
-    
+
     event = es.Event(
         stream_type="account",
         stream_id=streams[row['Account']],
         event_type="MoneyDeposited" if row['Operation'] > 0 else "MoneyWithdrawn",
-        data={ "title": row['Title'], "amount": row['Operation'], "currency": row['Currency'], "balance": row['Balance'], "details": row['Details'], "comment": row['Comment']},
-        occured_at= datetime.strptime(row['Date'], "%Y-%m-%d"),
-        version=1
+        data={ "title": emptyOrDefault(row['Title']), "amount": row['Operation'], "currency": plnOrDefault(row['Currency']), "balance": row['Balance']},
+        occured_at=datetime.combine(row['Date'], datetime.min.time()),
+        version=version
     )
 
     events.append(event)
@@ -35,3 +49,4 @@ print(f"{df.size} events prepared. Storing them...")
 
 es.store(events)
 
+print("All events were stored")
