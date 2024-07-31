@@ -1,3 +1,6 @@
+# This is a script used only once for migrating data from account.csv file
+# to PostgreSQL database.
+
 from datetime import datetime
 
 from account import account_db
@@ -9,7 +12,7 @@ def emptyOrDefault(argument):
     if argument is np.nan:
         return ''
     else:
-        return argument
+        return " ".join(argument.split())
 
 
 def plnOrDefault(argument):
@@ -37,7 +40,7 @@ for index, row in df.iterrows():
         stream_type="account",
         stream_id=streams[row['Account']],
         event_type="MoneyDeposited" if row['Operation'] > 0 else "MoneyWithdrawn",
-        data={ "title": emptyOrDefault(row['Title']), "amount": row['Operation'], "currency": plnOrDefault(row['Currency']), "balance": row['Balance']},
+        data={"title": emptyOrDefault(row['Title']), "amount": row['Operation'], "currency": plnOrDefault(row['Currency']), "balance": row['Balance']},
         occured_at=datetime.combine(row['Date'], datetime.min.time()),
         version=version
     )
