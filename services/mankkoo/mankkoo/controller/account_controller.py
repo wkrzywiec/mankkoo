@@ -4,7 +4,6 @@ from apiflask.fields import String, Boolean, Float, File
 from mankkoo.base_logger import log
 from mankkoo.account import account_db as database
 from mankkoo.account import account
-from mankkoo.util import config
 
 account_endpoints = APIBlueprint('account_endpoints', __name__, tag='Account')
 
@@ -37,7 +36,7 @@ def accounts():
     return accounts
 
 
-class AccountOperations(Schema):
+class AccountOperation(Schema):
     id = String()
     date = String()
     title = String()
@@ -49,7 +48,7 @@ class AccountOperations(Schema):
 
 
 @account_endpoints.route("/operations")
-@account_endpoints.output(AccountOperations(many=True), status_code=200)
+@account_endpoints.output(AccountOperation(many=True), status_code=200)
 @account_endpoints.doc(
     summary='All Accounts operations',
     description='Get a list of all operations for all account'
@@ -61,14 +60,14 @@ def operations():
 
 
 @account_endpoints.route("/<account_id>/operations")
-@account_endpoints.output(AccountOperations(many=True), status_code=200)
+@account_endpoints.output(AccountOperation(many=True), status_code=200)
 @account_endpoints.doc(
     summary='Operations for an account',
     description='Get a list of all operations for an account'
 )
-def operations_by_account_id():
+def operations_by_account_id(account_id):
     log.info('Fetching operations for all accounts...')
-    result = database.load_all_operations_as_dict()
+    result = database.load_operations_for_account_as_dict(account_id)
     return result
 
 
