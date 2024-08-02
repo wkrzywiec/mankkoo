@@ -3,7 +3,7 @@ import mankkoo.util.config as config
 import mankkoo.database as db
 
 from mankkoo.base_logger import log
-from mankkoo.controller.account_controller import Account
+from mankkoo.controller.account_controller import Account, AccountOperation
 
 
 def load_all_accounts() -> list[Account]:
@@ -80,28 +80,42 @@ def load_all_operations_as_dict() -> dict:
     return pd.concat(formatted_accounts).to_dict('records')
 
 
-def load_operations_for_account_as_dict(stream_id: str) -> dict:
+def load_operations_for_account_as_dict(stream_id: str) -> list[AccountOperation]:
 
+    query = f"""
+    SELECT
+        id,
+        occured_at AS date,
+        data->>'title' AS title,
+        data->>'details' AS details,
+        data->>'amount' AS operation,
+        data->>'balance' AS balance,
+        data->>'currency' AS currency,
+        '' AS comment
+    FROM events
+    WHERE stream_id = '{stream_id}'
+    ORDER BY occured_at
+    """
+
+    result = []
     with db.get_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute()
+            cur.execute(query)
+            rows = cur.fetchall()
 
+            for row in rows:
+                operation = AccountOperation()
+                operation.id = row[0]
+                operation.date = row[1]
+                operation.title = row[2]
+                operation.details = row[3]
+                operation.operation = row[4]
+                operation.balance = row[5]
+                operation.currency = row[6]
+                operation.comment = row[7]
 
-    user_config = config.load_user_config()
-    df = __load_and_format_all_operations()
-
-    accounts = user_config['accounts']['definitions']
-    formatted_accounts = []
-
-    for acc in accounts:
-        acc_name = str(acc['bank']) + ' - ' + str(acc['name'])
-        if __account_is_inactive(user_config, acc, acc_name):
-            continue
-
-        single_account = df[df['id'] == acc['id']]
-        formatted_accounts.append(single_account)
-
-    return pd.concat(formatted_accounts).to_dict('records')
+                result.append(operation)
+    return result
 
 
 def __load_and_format_all_operations() -> pd.DataFrame:
