@@ -34,13 +34,6 @@ def accounts():
     log.info('Fetching account info...')
     accounts = database.load_all_accounts()
 
-    hidden_accounts = config.load_user_config()['accounts']['ui']['hide_accounts']
-    for acc in accounts:
-        acc['number'] = acc['id']
-        acc['bankName'] = acc.pop('bank')
-        acc['bankUrl'] = acc.pop('bank_url')
-        acc['hidden'] = False if "{} - {}".format(acc['bankName'], acc['name']) not in hidden_accounts else True
-
     return accounts
 
 
@@ -62,6 +55,18 @@ class AccountOperations(Schema):
     description='Get a list of all operations for all account'
 )
 def operations():
+    log.info('Fetching operations for all accounts...')
+    result = database.load_all_operations_as_dict()
+    return result
+
+
+@account_endpoints.route("/<account_id>/operations")
+@account_endpoints.output(AccountOperations(many=True), status_code=200)
+@account_endpoints.doc(
+    summary='Operations for an account',
+    description='Get a list of all operations for an account'
+)
+def operations_by_account_id():
     log.info('Fetching operations for all accounts...')
     result = database.load_all_operations_as_dict()
     return result
