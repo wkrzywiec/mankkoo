@@ -1,10 +1,9 @@
 # todo add mocks/stubs
-
 def test_main_indicators(test_client):
     # GIVEN
 
     # WHEN
-    response = test_client.test_client().get('/api/main/indicators')
+    response = test_client.get('/api/main/indicators')
 
     # THEN
     assert response.status_code == 200
@@ -20,7 +19,7 @@ def test_savings_distribution(test_client):
     # GIVEN
 
     # WHEN
-    response = test_client.test_client().get('/api/main/savings-distribution')
+    response = test_client.get('/api/main/savings-distribution')
 
     # THEN
     assert response.status_code == 200
@@ -36,7 +35,7 @@ def test_total_history(test_client):
     # GIVEN
 
     # WHEN
-    response = test_client.test_client().get('/api/main/total-history')
+    response = test_client.get('/api/main/total-history')
 
     # THEN
     assert response.status_code == 200
@@ -50,7 +49,7 @@ def test_monthly_profits(test_client):
     # GIVEN
 
     # WHEN
-    response = test_client.test_client().get('/api/main/monthly-profits')
+    response = test_client.get('/api/main/monthly-profits')
 
     # THEN
     assert response.status_code == 200

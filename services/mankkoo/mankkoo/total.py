@@ -23,7 +23,7 @@ def total_money_data(data: dict) -> pd.DataFrame:
     cash = __latest_account_balance(data, 'cash', accounts_definition)
     ppk = __latest_account_balance(data, 'retirement', accounts_definition)
 
-    inv = data['investment'].loc[data['investment']['Active'] is True]
+    inv = data['investment'].loc[data['investment']['Active'] == True]
     inv = inv['Start Amount'].sum()
 
     stock_buy = data['stock'].loc[data['stock']['Operation'] == 'Buy']

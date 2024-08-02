@@ -116,7 +116,7 @@ def __make_account_backup(df: pd.DataFrame):
 
 def __prepare_and_store_events(account_id: str, df: pd.DataFrame, latest_balance: float):
 
-    version = 1
+    version = 0
     stream_id = uuid.uuid4()
 
     stream = es.get_stream_by_metadata('accountNumber', account_id)

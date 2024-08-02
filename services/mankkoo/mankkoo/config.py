@@ -1,5 +1,6 @@
 class Config(object):
     APP_NAME = 'mankkoo-accounting'
+    DB_NAME = ''
 
 
 class DevConfig(Config):
@@ -16,3 +17,11 @@ class ProdConfig(Config):
     TESTING = False
     ENV = 'prod'
     DB_NAME = 'mankkoo'
+
+
+class TestConfig(Config):
+    PORT = 5555
+    DEBUG = True
+    TESTING = True
+    ENV = 'test'
+    DB_NAME = 'test'

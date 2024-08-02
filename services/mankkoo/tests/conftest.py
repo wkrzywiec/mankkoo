@@ -3,8 +3,10 @@ import os
 from testcontainers.postgres import PostgresContainer
 
 import mankkoo.database as db
+from mankkoo.app import create_app
+from mankkoo.config import TestConfig
 
-postgres = PostgresContainer("postgres:16")
+postgres = PostgresContainer("postgres:16-alpine")
 initPostgresContainer = True
 
 
@@ -45,3 +47,10 @@ def setup_data():
 @pytest.fixture
 def test_client(app):
     return app.test_client()
+
+
+@pytest.fixture(scope="session")
+def app():
+    app = create_app(TestConfig)
+
+    return app

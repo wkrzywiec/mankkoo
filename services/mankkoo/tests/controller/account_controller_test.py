@@ -1,6 +1,4 @@
-import pytest
 import copy
-# from mankkoo.app import app
 import mankkoo.data_for_test as td
 
 

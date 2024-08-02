@@ -1,11 +1,16 @@
 import pytest
 import base64
 import pathlib
-import mankkoo.account.account as account
 import numpy as np
 from pandas._testing import assert_frame_equal
-import mankkoo.data_for_test as td
 
+import mankkoo.account.account as account
+import mankkoo.data_for_test as td
+import mankkoo.event_store as es
+
+# todo add tests for event store
+# e.g. adding operations to an existing and non existing stream
+# are correct versions created for new events
 
 start_data = td.account_data([
     ['iban-1', '2021-01-31', 'Init money', 'Detail 1', np.NaN, 'init', 1000, 'PLN', 1000],
