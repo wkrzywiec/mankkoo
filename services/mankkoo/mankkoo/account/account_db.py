@@ -62,30 +62,12 @@ def load_all_operations_as_df() -> pd.DataFrame:
     return df
 
 
-def load_all_operations_as_dict() -> dict:
-    user_config = config.load_user_config()
-    df = __load_and_format_all_operations()
-
-    accounts = user_config['accounts']['definitions']
-    formatted_accounts = []
-
-    for acc in accounts:
-        acc_name = str(acc['bank']) + ' - ' + str(acc['name'])
-        if __account_is_inactive(user_config, acc, acc_name):
-            continue
-
-        single_account = df[df['id'] == acc['id']]
-        formatted_accounts.append(single_account)
-
-    return pd.concat(formatted_accounts).to_dict('records')
-
-
 def load_operations_for_account_as_dict(stream_id: str) -> list[AccountOperation]:
 
     query = f"""
     SELECT
         id,
-        occured_at AS date,
+        occured_at::date AS date,
         data->>'title' AS title,
         data->>'details' AS details,
         data->>'amount' AS operation,
@@ -94,7 +76,7 @@ def load_operations_for_account_as_dict(stream_id: str) -> list[AccountOperation
         '' AS comment
     FROM events
     WHERE stream_id = '{stream_id}'
-    ORDER BY occured_at
+    ORDER BY occured_at DESC
     """
 
     result = []
@@ -116,26 +98,3 @@ def load_operations_for_account_as_dict(stream_id: str) -> list[AccountOperation
 
                 result.append(operation)
     return result
-
-
-def __load_and_format_all_operations() -> pd.DataFrame:
-    df = load_all_operations_as_df()
-    df = df.iloc[::-1]
-
-    df = df[['Account', 'Date', 'Title', 'Details', 'Operation', 'Balance', 'Currency', 'Comment']]
-    df = df.rename(columns={
-            'Account': 'id',
-            'Date': 'date',
-            'Title': 'title',
-            'Details': 'details',
-            'Operation': 'operation',
-            'Balance': 'balance',
-            'Currency': 'currency',
-            'Comment': 'comment'
-        })
-    df = df.fillna('')
-    return df
-
-
-def __account_is_inactive(user_config, acc, acc_name):
-    return acc_name in user_config['accounts']['ui']['hide_accounts'] or acc['active'] is False

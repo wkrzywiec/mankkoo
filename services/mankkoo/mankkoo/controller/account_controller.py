@@ -47,18 +47,6 @@ class AccountOperation(Schema):
     comment = String()
 
 
-@account_endpoints.route("/operations")
-@account_endpoints.output(AccountOperation(many=True), status_code=200)
-@account_endpoints.doc(
-    summary='All Accounts operations',
-    description='Get a list of all operations for all account'
-)
-def operations():
-    log.info('Fetching operations for all accounts...')
-    result = database.load_all_operations_as_dict()
-    return result
-
-
 @account_endpoints.route("/<account_id>/operations")
 @account_endpoints.output(AccountOperation(many=True), status_code=200)
 @account_endpoints.doc(
@@ -66,7 +54,7 @@ def operations():
     description='Get a list of all operations for an account'
 )
 def operations_by_account_id(account_id):
-    log.info('Fetching operations for all accounts...')
+    log.info('Fetching all operations for an account...')
     result = database.load_operations_for_account_as_dict(account_id)
     return result
 
