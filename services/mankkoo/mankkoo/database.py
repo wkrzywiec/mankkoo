@@ -1,7 +1,6 @@
 import os
 import pandas as pd
 import psycopg2
-from sys import platform
 
 import mankkoo.util.config as config
 from mankkoo.base_logger import log
@@ -14,6 +13,7 @@ invest_columns = ['Active', 'Category', 'Bank', 'Investment', 'Start Date', 'End
 stock_columns = ['Broker', 'Date', 'Title', 'Operation', 'Total Value', 'Units', 'Currency', 'Details', 'Url', 'Comment']
 total_columns = ['Date', 'Total']
 total_monthly_columns = ['Date', 'Income', 'Spending', 'Profit']
+
 
 def load_all() -> dict:
     """Load aggregated data of all financial data (accounts, investments, etc.)
@@ -31,6 +31,7 @@ def load_all() -> dict:
         total_monthly=load_total_monthly()
     )
 
+
 def load_total() -> pd.DataFrame:
     log.info('Loading TOTAL file')
 
@@ -39,6 +40,7 @@ def load_total() -> pd.DataFrame:
     result['Date'] = result['Date'].dt.date
     return result
 
+
 def load_total_monthly() -> pd.DataFrame:
     log.info('Loading TOTAL MONTHLY file')
 
@@ -46,6 +48,7 @@ def load_total_monthly() -> pd.DataFrame:
     result = result.astype({'Date': 'datetime64[ns]', 'Income': 'float', 'Spending': 'float', 'Profit': 'float'})
     result['Date'] = result['Date'].dt.date
     return result
+
 
 def load_investments() -> pd.DataFrame:
     log.info('Loading INVESTMENT file')
@@ -57,6 +60,7 @@ def load_investments() -> pd.DataFrame:
     result['End Date'] = result['End Date'].dt.date
     return result
 
+
 def load_stocks() -> pd.DataFrame:
     log.info('Loading STOCK file')
 
@@ -64,6 +68,7 @@ def load_stocks() -> pd.DataFrame:
     result = result.astype({'Total Value': 'float', 'Date': 'datetime64[ns]'})
     result['Date'] = result['Date'].dt.date
     return result
+
 
 def init_db():
     log.info("Initializing database with tables and functions...")
@@ -85,7 +90,7 @@ def init_db():
             version         BIGINT                    NOT NULL,
             occured_at      timestamp with time zone  NOT NULL,
             added_at        timestamp with time zone  NOT NULL    default (now()),
-            
+
             FOREIGN KEY(stream_id) REFERENCES streams(id),
             CONSTRAINT events_stream_and_version UNIQUE(stream_id, version)
         );
@@ -106,7 +111,7 @@ def init_db():
                 stream_version int;
                 error_message text;
             BEGIN
-                
+
                 -- get stream version
                 SELECT
                     version INTO stream_version
@@ -123,7 +128,7 @@ def init_db():
                     VALUES
                         (stream_id, stream_type, stream_version);
                 END IF;
-            
+
                 -- increment event_version
                 stream_version := stream_version + 1;
 
@@ -159,6 +164,7 @@ def execute(sql: str):
         with conn.cursor() as cur:
             cur.execute(sql)
             conn.commit()
+
 
 def get_connection():
     host = os.getenv("DB_HOST", "localhost")

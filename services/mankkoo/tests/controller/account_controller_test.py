@@ -1,20 +1,20 @@
 import pytest
 import copy
-from mankkoo.app import app
+# from mankkoo.app import app
 import mankkoo.data_for_test as td
 
-def test_load_all_accounts(mocker):
+
+def test_load_all_accounts(mocker, test_client):
     # GIVEN
     user_config = copy.deepcopy(td.user_config)
     mocker.patch('mankkoo.util.config.load_user_config', side_effect=[user_config, user_config])
-    
 
     expected_account = td.user_config['accounts']['definitions'][0]
-    
-    #WHEN
-    response = app.test_client().get('/api/accounts')
 
-    #THEN
+    # WHEN
+    response = test_client.get('/api/accounts')
+
+    # THEN
     assert response.status_code == 200
 
     payload = response.get_json()
@@ -30,17 +30,17 @@ def test_load_all_accounts(mocker):
     assert payload[0]['importer'] == expected_account['importer']
 
 
-def test_load_all_operations(mocker):
+def test_load_all_operations(mocker, test_client):
 
-    #GIVEN
+    # GIVEN
     mocker.patch('mankkoo.account.account_db.load_all_operations_as_df', side_effect=[td.account_data(td.start_data)])
     mocker.patch('mankkoo.util.config.load_user_config', side_effect=[copy.deepcopy(td.user_config)])
     # expected_account = td.user_config['accounts']['definitions'][0].copy()
-    
-    #WHEN
-    response = app.test_client().get('/api/accounts/operations')
-    
-    #THEN
+
+    # WHEN
+    response = test_client.get('/api/accounts/operations')
+
+    # THEN
     assert response.status_code == 200
 
     payload = response.get_json()

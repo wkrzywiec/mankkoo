@@ -1,14 +1,14 @@
 import pytest
-import os
+# import os
 import uuid
 from datetime import datetime, timezone, timedelta
-from testcontainers.postgres import PostgresContainer
+# from testcontainers.postgres import PostgresContainer
 
 import mankkoo.event_store as es
 import mankkoo.database as db
 
-postgres = PostgresContainer("postgres:16-alpine")
-initPostgresContainer = False
+# postgres = PostgresContainer("postgres:16-alpine")
+# initPostgresContainer = False
 
 stream_type = 'account'
 stream_id = uuid.uuid4()
@@ -35,36 +35,36 @@ moneyWithdrawnData = {
 initEvent = es.Event(stream_type, stream_id, 'AccountOpened', accountOpenedData, occured_at)
 
 
-@pytest.fixture(scope="module", autouse=True)
-def setup(request):
-    if initPostgresContainer:
-        print('Starting PostgreSQL testcontainer...')
-        postgres.start()
+# @pytest.fixture(scope="module", autouse=True)
+# def setup(request):
+#     if initPostgresContainer:
+#         print('Starting PostgreSQL testcontainer...')
+#         postgres.start()
 
-        def remove_container():
-            postgres.stop()
+#         def remove_container():
+#             postgres.stop()
 
-        request.addfinalizer(remove_container)
-        os.environ["DB_CONN"] = postgres.get_connection_url()
-        os.environ["DB_HOST"] = postgres.get_container_host_ip()
-        os.environ["DB_PORT"] = postgres.get_exposed_port(5432)
-        os.environ["DB_USERNAME"] = postgres.username
-        os.environ["DB_PASSWORD"] = postgres.password
-        os.environ["DB_NAME"] = postgres.dbname
+#         request.addfinalizer(remove_container)
+#         os.environ["DB_CONN"] = postgres.get_connection_url()
+#         os.environ["DB_HOST"] = postgres.get_container_host_ip()
+#         os.environ["DB_PORT"] = postgres.get_exposed_port(5432)
+#         os.environ["DB_USERNAME"] = postgres.username
+#         os.environ["DB_PASSWORD"] = postgres.password
+#         os.environ["DB_NAME"] = postgres.dbname
 
-        print(f'Testcontainers postgres connection: {postgres.get_connection_url()}')
-    else:
-        print("Using local PostgreSQL instance for tests...")
-        os.environ["DB_NAME"] = 'test'
-    db.init_db()
+#         print(f'Testcontainers postgres connection: {postgres.get_connection_url()}')
+#     else:
+#         print("Using local PostgreSQL instance for tests...")
+#         os.environ["DB_NAME"] = 'test'
+#     db.init_db()
 
 
-@pytest.fixture(scope="function", autouse=True)
-def setup_data():
-    print("Cleaning database...")
-    db.execute(
-        "TRUNCATE events, streams;"
-    )
+# @pytest.fixture(scope="function", autouse=True)
+# def setup_data():
+#     print("Cleaning database...")
+#     db.execute(
+#         "TRUNCATE events, streams;"
+#     )
 
 
 def test_add_new_events():
@@ -118,7 +118,7 @@ def test_event_is_not_stored_if_it_has_the_same_version_as_one_of_events():
 
 def test_event_is_not_stored_if_it_skips_couple_versions():
     # given
-    es.store([ initEvent ])
+    es.store([initEvent])
 
     # when
     with pytest.raises(Exception):
@@ -149,7 +149,7 @@ def test_load_events():
 
 def test_udpate_streams_empty_metadata():
     # given
-    es.store([ initEvent ])
+    es.store([initEvent])
 
     # when
     metadata = {"name": "bank", "number": 1234, "isActive": True}
@@ -166,7 +166,7 @@ def test_udpate_streams_empty_metadata():
 
 def test_udpate_streams_filled_metadata():
     # given
-    es.store([ initEvent ])
+    es.store([initEvent])
     es.update_stream_metadata(stream_id, metadata={"name": "bank", "number": 1234, "isActive": True})
 
     # when
@@ -184,8 +184,8 @@ def test_udpate_streams_filled_metadata():
 
 def test_get_stream_by_metadata_if_key_exists():
     # given
-    es.store([ initEvent ])
-    metadata={"name": "bank", "number": 1234, "isActive": True}
+    es.store([initEvent])
+    metadata = {"name": "bank", "number": 1234, "isActive": True}
     es.update_stream_metadata(stream_id, metadata)
 
     # when
@@ -197,34 +197,34 @@ def test_get_stream_by_metadata_if_key_exists():
 
 def test_get_none_stream_by_metadata_if_key_does_not_exist():
     # given
-    es.store([ initEvent ])
-    metadata={"name": "bank", "number": 1234, "isActive": True}
+    es.store([initEvent])
+    metadata = {"name": "bank", "number": 1234, "isActive": True}
     es.update_stream_metadata(stream_id, metadata)
 
     # when
     stream = es.get_stream_by_metadata('otherField', 'otherValue')
 
     # then
-    assert stream == None
+    assert stream is None
 
 
 def test_get_none_stream_by_metadata_if_key_has_different_value():
     # given
-    es.store([ initEvent ])
-    metadata={"name": "bank", "number": 1234, "isActive": True}
+    es.store([initEvent])
+    metadata = {"name": "bank", "number": 1234, "isActive": True}
     es.update_stream_metadata(stream_id, metadata)
 
     # when
     stream = es.get_stream_by_metadata('name', 'otherBank')
 
     # then
-    assert stream == None
+    assert stream is None
 
 
 def test_get_stream_metadata():
     # given
-    es.store([ initEvent ])
-    metadata={"name": "bank", "number": 1234, "isActive": True}
+    es.store([initEvent])
+    metadata = {"name": "bank", "number": 1234, "isActive": True}
     es.update_stream_metadata(stream_id, metadata)
 
     # when

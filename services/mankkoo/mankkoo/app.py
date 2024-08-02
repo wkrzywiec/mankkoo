@@ -28,7 +28,7 @@ app.config['INFO'] = {
 db_name = ''
 
 # to enable 'prod' config first run: export FLASK_ENV=prod
-app.config["ENV"] = os.getenv("FLASK_ENV", "dev")
+app.config["ENV"] = os.getenv("FLASK_ENV", "prod")
 log.info(f'Starting mankkoo backend service with profile: {app.config["ENV"]}')
 
 if app.config["ENV"] == 'prod':
