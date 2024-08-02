@@ -1,10 +1,10 @@
 import pandas as pd
-import numpy as np
 import datetime
 from dateutil.relativedelta import relativedelta
 import mankkoo.util.config as config
 import mankkoo.database as db
 from mankkoo.base_logger import log
+
 
 def total_money_data(data: dict) -> pd.DataFrame:
     """Get summary data of all assets sorted by categories
@@ -23,7 +23,7 @@ def total_money_data(data: dict) -> pd.DataFrame:
     cash = __latest_account_balance(data, 'cash', accounts_definition)
     ppk = __latest_account_balance(data, 'retirement', accounts_definition)
 
-    inv = data['investment'].loc[data['investment']['Active'] == True]
+    inv = data['investment'].loc[data['investment']['Active'] is True]
     inv = inv['Start Amount'].sum()
 
     stock_buy = data['stock'].loc[data['stock']['Operation'] == 'Buy']
@@ -43,6 +43,7 @@ def total_money_data(data: dict) -> pd.DataFrame:
         {'Type': 'Stocks', 'Total': stock, 'Percentage': stock / total}
     ])
 
+
 def __latest_account_balance(data: dict, type: str, accounts: dict) -> float:
     try:
         accounts = [acc['id'] for acc in accounts if acc['type'] == type]
@@ -52,6 +53,7 @@ def __latest_account_balance(data: dict, type: str, accounts: dict) -> float:
         return 0.00
     except KeyError:
         return 0.00
+
 
 def update_total_money(accounts: pd.DataFrame, from_date: datetime.date, till_date = datetime.date.today()) -> pd.DataFrame:
     """Calculate and add rows of totals for each day from pd.Series
@@ -73,8 +75,10 @@ def update_total_money(accounts: pd.DataFrame, from_date: datetime.date, till_da
     log.info('Total money data was updated successfully')
     return total
 
+
 def __drop_from_total_days(total: pd.DataFrame, min_date: datetime.date):
     return total.drop(total[total['Date'] >= min_date].index)
+
 
 def __calc_totals(accounts: pd.DataFrame, from_date: datetime.date, till_date: datetime.date):
     investments = db.load_investments()
@@ -94,6 +98,7 @@ def __calc_totals(accounts: pd.DataFrame, from_date: datetime.date, till_date: d
 
     return pd.DataFrame(result_list)
 
+
 def accounts_balance_for_day(accounts: pd.DataFrame, date: datetime.date):
     account_ids = accounts['Account'].unique()
 
@@ -101,6 +106,7 @@ def accounts_balance_for_day(accounts: pd.DataFrame, date: datetime.date):
     for acc_id in account_ids:
         result = result + __get_balance_for_day_or_earlier(accounts, acc_id, date)
     return result
+
 
 def __get_balance_for_day_or_earlier(accounts: pd.DataFrame, account_id: str, date: datetime.date):
 
@@ -110,6 +116,7 @@ def __get_balance_for_day_or_earlier(accounts: pd.DataFrame, account_id: str, da
     if only_specific_dates_accounts.empty:
         return 0
     return only_specific_dates_accounts['Balance'].iloc[-1]
+
 
 def investments_for_day(investments: pd.DataFrame, date: datetime.date) -> float:
     """Sums all investments in particular day
@@ -128,6 +135,7 @@ def investments_for_day(investments: pd.DataFrame, date: datetime.date) -> float
     active_inv = investments.loc[after_start & (before_end | is_na)]
     return active_inv['Start Amount'].to_numpy().sum()
 
+
 def stock_for_day(stock: pd.DataFrame, date: datetime.date) -> float:
     """Sums all stock data in particular day
 
@@ -140,18 +148,18 @@ def stock_for_day(stock: pd.DataFrame, date: datetime.date) -> float:
     """
     #
     #
-    #A value is trying to be set on a copy of a slice from a DataFrame.
-    #Try using .loc[row_indexer,col_indexer] = value instead
+    # A value is trying to be set on a copy of a slice from a DataFrame.
+    # Try using .loc[row_indexer,col_indexer] = value instead
     #
-    #See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-
+    # See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
 
     df = stock.loc[stock['Date'] <= date]
     df['Change'] = [1 if x == 'Buy' else -1 for x in df['Operation']]
     df['Val'] = df['Total Value'] * df['Change']
     return df['Val'].sum()
 
-def update_monthly_profit(from_date: datetime.date, till_date = datetime.datetime.now(), force = False) -> pd.DataFrame:
+
+def update_monthly_profit(from_date: datetime.date, till_date=datetime.datetime.now(), force=False) -> pd.DataFrame:
     log.info('Updating monthly profit info starting from %s', from_date.strftime("%m-%Y"))
 
     from_month = datetime.date(from_date.year, from_date.month, 1)
@@ -171,19 +179,20 @@ def update_monthly_profit(from_date: datetime.date, till_date = datetime.datetim
         row_dict = {'Date': month, 'Income': round(0, 2), 'Spending': round(0, 2), 'Profit': round(profit, 2)}
         result_list.append(row_dict)
 
-
     df = pd.DataFrame(result_list)
-    total_monthly = total_monthly.drop(total_monthly[total_monthly['Date'] >= from_month ].index )
-    total_monthly = pd.concat([total_monthly, df], ignore_index=True) 
+    total_monthly = total_monthly.drop(total_monthly[total_monthly['Date'] >= from_month].index)
+    total_monthly = pd.concat([total_monthly, df], ignore_index=True)
 
     total_monthly.to_csv(config.mankkoo_file_path('total_monthly'), index=False)
     log.info('Total monthly profit data was updated successfully')
 
     return total_monthly
 
+
 def __should_monthly_total_be_updated(total_monthly: pd.DataFrame, from_month: datetime.date, force: bool) -> bool:
     df = total_monthly.loc[total_monthly['Date'] >= from_month]
     return df.empty or force
+
 
 def last_month_income(total: pd.DataFrame, date: datetime.date) -> float:
     """Calculate income from previous month.
@@ -211,7 +220,7 @@ def last_month_income(total: pd.DataFrame, date: datetime.date) -> float:
 
     month_1_data = month_1_data.sort_index()
     month_2_data = month_2_data.sort_index()
-    
+
     if (month_1_data.empty):
         month_1_total = 0
     else:

@@ -63,5 +63,6 @@ def __prepare_expected():
     result = __drop_empty_columns(result)
     return result
 
+
 def __drop_empty_columns(df):
     return df.drop(columns=['Details', 'Category', 'Comment', 'Balance'])

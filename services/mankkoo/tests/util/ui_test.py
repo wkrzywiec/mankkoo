@@ -2,6 +2,7 @@ import pytest
 
 import mankkoo.util.ui as ui
 
+
 def test_decode_bank_ids():
     # GIVEN
     bank_ids = ['PL_MBANK', 'GB_REVOLUT']
@@ -14,6 +15,7 @@ def test_decode_bank_ids():
         {'label': 'Poland - MBANK', 'value': 'PL_MBANK'},
         {'label': 'United Kingdom - REVOLUT', 'value': 'GB_REVOLUT'}
     ] == actual
+
 
 def test_decode_mankkoo_id():
     # GIVEN

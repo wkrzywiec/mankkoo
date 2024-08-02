@@ -31,7 +31,8 @@ def setup(request):
     else:
         print("Using local PostgreSQL instance for tests...")
         os.environ["DB_NAME"] = 'test'
-    # db.init_db()
+    db.init_db()
+
 
 @pytest.fixture(scope="function", autouse=True)
 def setup_data():
@@ -39,6 +40,7 @@ def setup_data():
     db.execute(
         "TRUNCATE events, streams;"
     )
+
 
 @pytest.fixture
 def test_client(app):

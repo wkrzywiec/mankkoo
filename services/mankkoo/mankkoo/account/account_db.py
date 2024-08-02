@@ -39,6 +39,7 @@ def load_all_operations_as_dict() -> dict:
 
     return pd.concat(formatted_accounts).to_dict('records')
 
+
 def __load_and_format_all_operations() -> pd.DataFrame:
     df = load_all_operations_as_df()
     df = df.iloc[::-1]
@@ -57,5 +58,6 @@ def __load_and_format_all_operations() -> pd.DataFrame:
     df = df.fillna('')
     return df
 
+
 def __account_is_inactive(user_config, acc, acc_name):
-    return acc_name in user_config['accounts']['ui']['hide_accounts'] or acc['active'] == False
+    return acc_name in user_config['accounts']['ui']['hide_accounts'] or acc['active'] is False

@@ -1,25 +1,20 @@
 import pytest
-# import os
 import uuid
 from datetime import datetime, timezone, timedelta
-# from testcontainers.postgres import PostgresContainer
 
 import mankkoo.event_store as es
 import mankkoo.database as db
 
-# postgres = PostgresContainer("postgres:16-alpine")
-# initPostgresContainer = False
 
 stream_type = 'account'
 stream_id = uuid.uuid4()
 occured_at = datetime.now(timezone.utc) - timedelta(days=10)
 
-## test data
 accountOpenedData = {
-        "balance": 0.00,
-        "number": "PL1234567890",
-        "isActive": True,
-        "openedAt": "2017-08-15 21:05:15.723336-07"
+    "balance": 0.00,
+    "number": "PL1234567890",
+    "isActive": True,
+    "openedAt": "2017-08-15 21:05:15.723336-07"
 }
 
 moneyDepositedData = {
@@ -33,38 +28,6 @@ moneyWithdrawnData = {
 }
 
 initEvent = es.Event(stream_type, stream_id, 'AccountOpened', accountOpenedData, occured_at)
-
-
-# @pytest.fixture(scope="module", autouse=True)
-# def setup(request):
-#     if initPostgresContainer:
-#         print('Starting PostgreSQL testcontainer...')
-#         postgres.start()
-
-#         def remove_container():
-#             postgres.stop()
-
-#         request.addfinalizer(remove_container)
-#         os.environ["DB_CONN"] = postgres.get_connection_url()
-#         os.environ["DB_HOST"] = postgres.get_container_host_ip()
-#         os.environ["DB_PORT"] = postgres.get_exposed_port(5432)
-#         os.environ["DB_USERNAME"] = postgres.username
-#         os.environ["DB_PASSWORD"] = postgres.password
-#         os.environ["DB_NAME"] = postgres.dbname
-
-#         print(f'Testcontainers postgres connection: {postgres.get_connection_url()}')
-#     else:
-#         print("Using local PostgreSQL instance for tests...")
-#         os.environ["DB_NAME"] = 'test'
-#     db.init_db()
-
-
-# @pytest.fixture(scope="function", autouse=True)
-# def setup_data():
-#     print("Cleaning database...")
-#     db.execute(
-#         "TRUNCATE events, streams;"
-#     )
 
 
 def test_add_new_events():

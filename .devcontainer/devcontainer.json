@@ -41,6 +41,9 @@
 				"python.testing.pytestEnabled": true,
 				"python.testing.pytestArgs": [
 					"services"
+				],
+				"flake8.args": [
+					"--max-line-length=160"
 				]
 			},
 			

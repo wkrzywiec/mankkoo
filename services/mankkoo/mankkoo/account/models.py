@@ -2,6 +2,7 @@ from enum import Enum
 from abc import ABC, abstractmethod
 import pandas as pd
 
+
 class Importer(ABC):
     """Parent class for every bank account importer, which takes care for transforming bank specific format into Mankkoo's
     """
@@ -43,6 +44,7 @@ class Importer(ABC):
         """
         raise NotImplementedError
 
+
 class FileType(Enum):
     """Representation of file type supported in Mankkoo
 
@@ -55,6 +57,7 @@ class FileType(Enum):
     TOTAL = 'total'
     BANK = 'bank'
 
+
 class Bank(Enum):
     """Representations of supported bank reports exports. Special value is MANKKOO, which is used to load a file in mankkoo format
 
@@ -65,6 +68,7 @@ class Bank(Enum):
     PL_MBANK = 'PL_MBANK'
     PL_MILLENIUM = 'PL_MILLENIUM'
     PL_ING = 'PL_ING'
+
 
 class Account(Enum):
     """Representations of different kinds of account, like checking, savings, cash or for retirement

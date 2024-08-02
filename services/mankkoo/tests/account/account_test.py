@@ -5,7 +5,6 @@ import mankkoo.account.account as account
 import numpy as np
 from pandas._testing import assert_frame_equal
 import mankkoo.data_for_test as td
-import mankkoo.util.config as config
 
 
 start_data = td.account_data([
@@ -37,6 +36,7 @@ def test_add_new_operation_for_incorrect_bank(mocker):
     # THEN
     assert "Failed to load bank definition. There is no bank account definition with an id 'not known account'" in str(ex.value)
 
+
 def test_add_new_operations_by_filename(mocker):
     # GIVEN
     mocker.patch('mankkoo.util.config.load_user_config', side_effect=[td.user_config])
@@ -51,6 +51,7 @@ def test_add_new_operations_by_filename(mocker):
 
     # THEN
     assert_frame_equal(end_data, df)
+
 
 def test_add_new_operations_by_contents(mocker):
     # GIVEN
@@ -69,6 +70,7 @@ def test_add_new_operations_by_contents(mocker):
 
     # THEN
     assert_frame_equal(end_data, df)
+
 
 def test_add_new_operations_multiple_banks(mocker):
     # GIVEN

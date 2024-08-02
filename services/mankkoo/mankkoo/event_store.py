@@ -8,6 +8,7 @@ from mankkoo.base_logger import log
 
 log.basicConfig(level=log.DEBUG)
 
+
 class Stream:
     def __init__(self, id: UUID, type: str, version: int, metadata: dict):
         self.id = id
@@ -27,9 +28,10 @@ class Stream:
     def __hash__(self):
         return hash(self.id, self.type, self.version, self.metadata)
 
+
 class Event:
     def __init__(self, stream_type: str, stream_id: UUID, event_type: str, data: dict, occured_at: datetime, version=1, event_id: UUID = None):
-        if event_id == None:
+        if event_id is None:
             event_id = uuid.uuid4()
         self.id = event_id
         self.stream_type = stream_type
@@ -46,7 +48,7 @@ class Event:
         if not isinstance(other, Event):
             return NotImplemented
 
-        return self.id == other.id and self.stream_type == other.stream_type and self.stream_id== other.stream_id and self.event_type == other.event_type and self.version == other.version and self.occured_at == other.occured_at and self.data == other.data
+        return self.id == other.id and self.stream_type == other.stream_type and self.stream_id == other.stream_id and self.event_type == other.event_type and self.version == other.version and self.occured_at == other.occured_at and self.data == other.data
 
     def __hash__(self):
         return hash(self.id, self.stream_type, self.stream_id, self.event_type, self.version, self.occured_at, self.data)
@@ -83,13 +85,14 @@ def load(stream_id: UUID) -> list[Event]:
 
     return result
 
-def get_stream_by_metadata(key: str, value) -> Stream:
+
+def get_stream_by_metadata(key: str, value) -> Stream | None:
     log.info(f"Loading stream by its matadata property key '{key}' and value '{value}'...")
     with db.get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(f"SELECT id, type, version, metadata from streams WHERE metadata ->> '{key}' = '{value}'")
             result = cur.fetchone()
-            if result == None:
+            if result is None:
                 return None
             else:
                 (id, type, version, metadata, ) = result
@@ -103,6 +106,7 @@ def get_stream_metadata(stream_id: UUID) -> dict:
             cur.execute("SELECT metadata from streams WHERE id = '" + str(stream_id) + "'")
             (metadata, ) = cur.fetchone()
     return metadata
+
 
 def update_stream_metadata(stream_id: UUID, metadata: dict):
     log.info(f"Updating stream '{stream_id}' with metdata '{metadata}'...")

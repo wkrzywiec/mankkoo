@@ -5,7 +5,7 @@ import mankkoo.account.importer.pl_ing as pl_ing_importer
 import mankkoo.account.importer.pl_mbank as pl_mbank_importer
 
 
-def load_bank_data(file_path: str, contents, kind: models.Bank, account_id: str)-> pd.DataFrame:
+def load_bank_data(file_path: str, contents, kind: models.Bank, account_id: str) -> pd.DataFrame:
     """Load data from a CSV file
 
     Args:

@@ -53,7 +53,7 @@ def add_new_operations(
         '%d new operations for %s account were added.',
         df_new['Account'].size,
         account_id)
-    
+
     __prepare_and_store_events(account_id, df_new, latest_balance)
     return df
 
@@ -96,8 +96,7 @@ def __get_bank_type(account_id: str):
         log.info(f"Found bank by account_id ({account_id}): {bank}")
         return bank
     except Exception:
-        raise ValueError("Failed to load importer for bank." +
-                         f"Importer with a code: '{importer}' is not known")
+        raise ValueError(f"Failed to load importer for bank. Importer with a code: '{importer}' is not known")
 
 
 def __latest_balance_for_account(df: pd.DataFrame, account_id: str):
