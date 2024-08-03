@@ -1,4 +1,3 @@
-from datetime import datetime
 import numpy as np
 import pandas as pd
 import mankkoo.database as db
@@ -120,6 +119,7 @@ total = [
     ['2021-01-01', 20]
 ]
 
+
 def account_data(rows=start_data):
     result = pd.DataFrame(
         data=np.array(rows),
@@ -128,6 +128,7 @@ def account_data(rows=start_data):
     result['Date'] = pd.to_datetime(result['Date'], format='%Y-%m-%d', errors='coerce')
     result['Date'] = result['Date'].dt.date
     return result
+
 
 def investment_data(rows=investment):
     result = pd.DataFrame(
@@ -139,6 +140,7 @@ def investment_data(rows=investment):
     result['End Date'] = result['End Date'].dt.date
     return result
 
+
 def stock_data(rows=stock):
     result = pd.DataFrame(
         data=np.array(rows),
@@ -146,6 +148,7 @@ def stock_data(rows=stock):
     ).astype({'Total Value': 'float', 'Date': 'datetime64[ns]'})
     result['Date'] = result['Date'].dt.date
     return result
+
 
 def total_data(rows=total):
     result = pd.DataFrame(
@@ -155,6 +158,7 @@ def total_data(rows=total):
     result['Date'] = pd.to_datetime(result['Date'], format='%Y-%m-%d', errors='coerce')
     result['Date'] = result['Date'].dt.date
     return result
+
 
 def total_monthly_data(rows=total):
     result = pd.DataFrame(

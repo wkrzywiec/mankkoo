@@ -14,7 +14,6 @@ tasks:
       - task: install:poetry
       - task: install:npm
 
-
   install:python:
     desc: Install pyenv & Python v. {{.PYTHON_VERSION}}
     cmds:
@@ -39,14 +38,53 @@ tasks:
       - node -v
       - npx -v
 
-  dev:mankkoo:
+  infra:
+    desc: Spin up infra
+    cmds: 
+      - echo "Starting docker containers..."
+      - docker compose up -d
+
+  infra:down:
+    desc: Tear down infra
+    cmds: 
+      - echo "Stopping docker containers..."
+      - docker compose down
+
+  mankkoo:dev:
     desc: Run mankkoo core backend in a dev mode
     dir: services/mankkoo/mankkoo
     cmds:
+      - task: infra
       - echo "Starting mankkoo core..."
-      - poetry run flask run --reload
+      - flask run --reload
 
-  dev:ui:
+  mankkoo:test:
+    desc: Run tests for mankkoo core
+    dir: services/mankkoo
+    cmds:
+      - echo "Running tests for mankkoo core..."
+      - pytest -s -vv --cov=./mankkoo
+
+  update:
+    desc: Update dependencies for all services
+    cmds:
+      - task: mankkoo:update
+
+  mankkoo:update:
+    desc: Update dependencies for mankkoo core
+    dir: services/mankkoo
+    cmds:
+      - echo "Updating dependencies for mankkoo core..."
+      - poetry update
+
+  mankkoo:req:
+    desc: Generate requirements.txt file from Poetry
+    dir: services/mankkoo
+    cmds:
+      - echo "Generate requirements.txt file..."
+      - poetry export --without-hashes --format=requirements.txt > requirements.txt
+
+  ui:dev:
     desc: Run mankkoo UI in a dev mode
     dir: services/mankkoo-ui
     cmds:
@@ -56,23 +94,51 @@ tasks:
   test:
     desc: Run all tests
     cmds:
-      - task: test:mankkoo
+      - task: mankkoo:test
 
-  test:mankkoo:
-    desc: Run tests for mankkoo core
-    dir: services/mankkoo
+  backup:
+    desc: Create PostgreSQL backup
+    vars:
+      db: mankkoo
     cmds:
-      - echo "Running tests for mankkoo core..."
-      - poetry run pytest -s -vv --cov=./mankkoo
+      - echo "Starting backuping '{{.db}}' database..."
+      - |
+        docker exec postgres /bin/bash \
+                -c "export PGPASSWORD=postgres \
+                && /usr/bin/pg_dump -U postgres {{.db}} -F c -b -v" \
+                | gzip -9 > backup/{{.db}}_$(date +"%Y%m%d_%H%M").dump.gz 
+      - echo "Backup for '{{.db}}' database completed."
+      - ls backup | grep {{.db}}_
 
-  update:
-    desc: Update dependencies for all services
+  restore:
+    desc: Restoring backup data for PostgreSQL
+    vars:
+      file: mankkoo_20240731_1323
+      db: test
     cmds:
-      - task: update:mankkoo
-
-  update:mankkoo:
-    desc: Update dependencies for mankkoo core
-    dir: services/mankkoo
-    cmds:
-      - echo "Updating dependencies for mankkoo core..."
-      - poetry update
+      - echo "Starting restoring `{{.db}}` database. Copying backup..."
+      - docker cp backup/{{.file}}.dump.gz postgres:{{.file}}.dump.gz
+      
+      - echo "Unpacking backup..."
+      - |
+        docker exec postgres /bin/bash \
+        -c "gunzip {{.file}}.dump.gz"
+      
+      - echo "Droping old database and creating a new one..."
+      - |
+        docker exec postgres /bin/bash \
+        -c "export PGPASSWORD=postgres \
+        && psql -U postgres -c \"DROP DATABASE IF EXISTS {{.db}} WITH (FORCE);\""
+      - |
+        docker exec postgres /bin/bash \
+        -c "export PGPASSWORD=postgres \
+        && psql -U postgres -c \"CREATE DATABASE {{.db}};\""
+      
+      - echo "Restoring backup..."
+      - |
+        docker exec postgres /bin/bash \
+        -c "export PGPASSWORD=postgres \
+        && /usr/bin/pg_restore -U postgres -d {{.db}} -v {{.file}}.dump"
+      
+      - echo "Backup restored. Cleaning up..."
+      - docker exec postgres /bin/bash -c "rm {{.file}}.dump"

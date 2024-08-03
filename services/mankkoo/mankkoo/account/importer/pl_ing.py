@@ -95,6 +95,11 @@ def add_empty_columns(df: pd.DataFrame, columns) -> pd.DataFrame:
     return df.reindex(columns=existing_columns + columns)
 
 
+def add_pln_currency_if_empty(df: pd.DataFrame) -> pd.DataFrame:
+    df['Currency'] = df['Currency'].fillna('PLN')
+    return df
+
+
 def sort_rows_by_date(df: pd.DataFrame) -> pd.DataFrame:
     return df.sort_values(by="Date")
 
@@ -117,7 +122,7 @@ class Ing(models.Importer):
         return pd.read_csv(file_path, sep=";")
 
     def load_file_by_contents(self, contents):
-        return pd.read_csv(io.StringIO(contents.decode('iso-8859-2')), sep=";")
+        return pd.read_csv(io.StringIO(contents.decode('windows-1250')), sep=";")
 
     def format_file(self, df: pd.DataFrame, account_id: str):
         return df.pipe(remove_non_tabular_data)\
@@ -131,6 +136,7 @@ class Ing(models.Importer):
                 .pipe(add_account_id_to_each_row, account_id)\
                 .pipe(add_details_and_balance_columns)\
                 .pipe(add_empty_columns, ['Category', 'Comment'])\
+                .pipe(add_pln_currency_if_empty)\
                 .pipe(sort_rows_by_date)\
                 .pipe(reset_row_indexes)\
                 .pipe(order_columns, db.account_columns)

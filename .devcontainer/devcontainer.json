@@ -9,20 +9,26 @@
 	},
 
 	"features": {
+		//get access to docker on host
 		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+			"version": "latest"
+		},
+		//enables running testcontainers
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {
 			"version": "latest"
 		}
 	},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	"forwardPorts": [5000, 3000],
+	"forwardPorts": [5000, 3000, 5432, 5050],
 	"runArgs": [
-        // "--network=host", 
+        "--network=host",  //allows to access internet
+		// "--add-host=host.docker.internal:host-gateway",
 		"--name", "mankkoo_devcontainer"
     ],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "cd services/mankkoo && poetry install --no-interaction && cd ../mankkoo-ui && npm install",
+	"postCreateCommand": "cd services/mankkoo && pip install -r requirements.txt --ignore-installed && cd ../mankkoo-ui && npm install",
 
 	// Configure tool-specific properties.
 	"customizations": {
@@ -35,6 +41,9 @@
 				"python.testing.pytestEnabled": true,
 				"python.testing.pytestArgs": [
 					"services"
+				],
+				"flake8.args": [
+					"--max-line-length=160"
 				]
 			},
 			
@@ -47,7 +56,8 @@
 				"ms-vscode.vscode-typescript-tslint-plugin",
 				"dbaeumer.vscode-eslint",
 				"formulahendry.code-runner",
-				"mechatroner.rainbow-csv"
+				"mechatroner.rainbow-csv",
+				"ckolkman.vscode-postgres"
 			]
 		}
 	},
@@ -57,6 +67,7 @@
 		"source=${localEnv:HOME}${localEnv:USERPROFILE}/.mankkoo,target=/root/.mankkoo,type=bind,consistency=cached", // Establishing a persistent volume for maven local repository downloads
 		"source=${localEnv:HOME}${localEnv:USERPROFILE}/.gitconfig,target=/root/.gitconfig,type=bind,consistency=cached",
 		"source=${localEnv:HOME}${localEnv:USERPROFILE}/.cache/pypoetry,target=/opt/.cache,type=bind,consistency=cached"
+		// "source=/var/run/docker.sock,target=/var/run/docker-host.sock,type=bind" //dont work?
 	],
 
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.

@@ -16,6 +16,7 @@ config_file = 'config.yaml'
 
 mankkoo_files = {account_file, investment_file, stock_file, total_file, total_monthly_file}
 
+
 def init_data_folder():
     """Initilize .mankkoo directory in home folder, config file and all storage files
     """
@@ -49,6 +50,7 @@ def init_data_folder():
         save_user_config(config_d)
         log.info(f"User {config_file} file was created in .mankkoo directory")
 
+
 def __select_columns(file: str):
     if file == account_file:
         return db.account_columns
@@ -60,6 +62,7 @@ def __select_columns(file: str):
         return db.total_columns
     if file == total_monthly_file:
         return db.total_monthly_columns
+
 
 def mankkoo_file_path(file: str) -> str:
     """Get full path of one of mankkoo's files.
@@ -83,6 +86,7 @@ def mankkoo_file_path(file: str) -> str:
 
     raise ValueError("Can't get mankkoo file. Unsupported file type: {}".format(file))
 
+
 def mankkoo_path() -> str:
     """Get full path to the .mankkoo directory
 
@@ -90,6 +94,7 @@ def mankkoo_path() -> str:
         str: full path to .mankkoo directory
     """
     return os.path.expanduser("~") + __slash() + mankkoo_dir
+
 
 def __slash():
     if platform == "linux":
@@ -99,6 +104,7 @@ def __slash():
     if platform == "darwin":
         raise ValueError("MacOS is currently not supported")
     raise ValueError("{} OS is not supported".format(platform))
+
 
 def data_path() -> str:
     """Get full path of data directory. Currently supporrted only for Linux and Windows
@@ -119,6 +125,7 @@ def data_path() -> str:
         raise ValueError("MacOS is currently not supported")
     raise ValueError("{} OS is not supported".format(platform))
 
+
 def load_global_config() -> dict:
     """Load global configuration from /data folder
 
@@ -129,6 +136,7 @@ def load_global_config() -> dict:
     with open(data_path() + config_file) as c:
         return yaml.safe_load(c)
 
+
 def load_user_config() -> dict:
     """Load user configuration from .mankkoo directory
 
@@ -138,27 +146,28 @@ def load_user_config() -> dict:
     log.info(f"Loading user {config_file} file")
     with open(mankkoo_path() + __slash() + config_file, 'r', encoding='utf-8') as c:
         result = yaml.safe_load(c)
-    
+
     accounts = result['accounts']['definitions']
     accounts_sorted = []
     keyorder = ['id', 'bank', 'name', 'alias', 'type', 'importer', 'active', 'bank_url']
 
-    for acc in accounts: 
+    for acc in accounts:
         acc_sorted = {k: acc[k] for k in keyorder if k in acc}
         accounts_sorted.append(acc_sorted)
-    
+
     result['accounts']['definitions'] = accounts_sorted
 
     return result
 
+
 def save_user_config(user_config: dict):
     log.info(f"Saving user config file. New file: {user_config}")
-    
+
     try:
         with open(mankkoo_path() + __slash() + config_file, 'w', encoding="utf-8") as outfile:
             yaml.dump(user_config, outfile, allow_unicode=True, default_flow_style=False)
     except Exception as err:
         log.info(err)
 
-    log.info(f"User config file was updated in .mankkoo directory")
-    # todo: if bank id changed -> update the account info 
+    log.info("User config file was updated in .mankkoo directory")
+    # todo: if bank id changed -> update the account info

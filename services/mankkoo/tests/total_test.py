@@ -2,10 +2,8 @@ import pytest
 import numpy as np
 from pandas._testing import assert_frame_equal
 import datetime
-from dateutil.relativedelta import relativedelta
 import mankkoo.total as total
 import mankkoo.data_for_test as td
-import mankkoo.database as real_data
 import mankkoo.util.data_formatter as formatter
 
 # not actual test, used only to debug real data, uncomment to use
@@ -18,6 +16,7 @@ import mankkoo.util.data_formatter as formatter
 
 #     # THEN
 #     assert True
+
 
 def test_total_money_data(mocker):
     # GIVEN
@@ -42,6 +41,7 @@ def test_total_money_data(mocker):
         {'Type': 'Stocks', 'Total': 2000.00, 'Percentage': 0.41889378529180143}
     ]
 
+
 def test_total_money_data_for_checking_accounts(mocker):
     # GIVEN
     mocker.patch('mankkoo.util.config.load_user_config', side_effect=[td.user_config])
@@ -62,6 +62,7 @@ def test_total_money_data_for_checking_accounts(mocker):
     # THEN
     assert total_money[total_money['Type'] == 'Checking Account'].iloc[0]['Total'] == 2000.0
 
+
 def test_accounts_balance_for_day_multiple_accounts():
     # GIVEN
     account = td.account_data([
@@ -80,6 +81,7 @@ def test_accounts_balance_for_day_multiple_accounts():
     # THEN
     assert total_balance == 6000
 
+
 def test_accounts_balance_for_day_multiple_accounts_in_different_days():
     # GIVEN
     account = td.account_data([
@@ -95,6 +97,7 @@ def test_accounts_balance_for_day_multiple_accounts_in_different_days():
 
     # THEN
     assert total_balance == 5000
+
 
 def test_investments_for_day():
     # GIVEN
@@ -112,6 +115,7 @@ def test_investments_for_day():
     # THEN
     assert total_inv == 3000
 
+
 def test_stock_for_day():
     # GIVEN
     stock = td.stock_data([
@@ -127,6 +131,7 @@ def test_stock_for_day():
     # THEN
     assert total_stock == 1900
 
+
 def test_update_total_money(mocker):
     # GIVEN
     account = td.account_data([
@@ -137,7 +142,6 @@ def test_update_total_money(mocker):
         ['iban-2', '2021-01-04', 'a', 'a', np.NaN, np.NaN, -222.22, 'PLN', 2000],
         ['iban-3', '2021-01-05', 'a', 'a', np.NaN, np.NaN, 10000, 'PLN', 10000]
     ])
-    updated_dates = account.tail(3)['Date']
 
     # set other data
     old_total = td.total_data([
@@ -174,6 +178,7 @@ def test_update_total_money(mocker):
     ])
     assert_frame_equal(expected, result)
 
+
 def test_update_monthly_profit(mocker):
     # GIVEN
     old_total_monthly = td.total_monthly_data([
@@ -182,8 +187,7 @@ def test_update_monthly_profit(mocker):
     ])
 
     mocker.patch('mankkoo.database.load_total_monthly', side_effect=[old_total_monthly])
-    
-    
+
     total_data = td.total_data([
         ['2021-01-01', 100],
         ['2021-02-01', 200],
@@ -209,7 +213,6 @@ def test_update_monthly_profit(mocker):
         ['2021-06-01', 0, 0, 100]
     ])
     assert_frame_equal(expected, result)
-
 
 
 def test_last_month_income():

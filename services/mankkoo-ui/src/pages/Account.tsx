@@ -68,26 +68,24 @@ export function Account() {
     };
 
     const [activeTab, setActiveTab] = useState('');
+    const [operationsData, setOperationsData] = useState<Operation[]>([]);
+
     const handleSelect = (event: React.MouseEvent<HTMLButtonElement>) => {
-      setActiveTab(event.currentTarget.id);
-    };
-
-
-    const [operationsData, setOperationsData] = useState<Operation[]>([])
-    useEffect(() => {
-        axios.get(baseUrl + '/api/accounts/operations')
+        console.log(event.currentTarget.id);
+      axios.get(baseUrl + '/api/accounts/' + event.currentTarget.id +'/operations')
         .then(response => {
             setOperationsData(response.data);
           })
         .catch(error => {
             console.error(error);
         });
-    }, [])
+       setActiveTab(event.currentTarget.id);
+    };
 
     var totalOperationsChartData: Plotly.Data[] = [
         {
-            x: operationsData?.filter(row => (row.id === activeTab))?.map(row => (row.date)),
-            y: operationsData?.filter(row => (row.id === activeTab))?.map(row => (row.balance)),
+            x: operationsData?.map(row => (row.date)),
+            y: operationsData?.map(row => (row.balance)),
             line: {color: '#A40E4C'}
         }
       ]
@@ -157,7 +155,7 @@ export function Account() {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {operationsData?.filter(row => row.id === activeTab)?.map(row => (
+                                                {operationsData?.map(row => (
                                                     <tr>
                                                         <td>{row.date}</td>
                                                         <td>{row.title}</td>
