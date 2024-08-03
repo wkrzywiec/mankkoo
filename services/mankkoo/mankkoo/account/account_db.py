@@ -62,7 +62,7 @@ def load_all_operations_as_df() -> pd.DataFrame:
     return df
 
 
-def load_operations_for_account_as_dict(stream_id: str) -> list[AccountOperation]:
+def load_operations_for_account(stream_id: str) -> list[AccountOperation]:
 
     query = f"""
     SELECT

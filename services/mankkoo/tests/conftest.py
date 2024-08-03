@@ -1,8 +1,12 @@
 import pytest
 import os
+import uuid
+
+from datetime import datetime, timezone, timedelta
 from testcontainers.postgres import PostgresContainer
 
 import mankkoo.database as db
+import mankkoo.event_store as es
 from mankkoo.app import create_app
 from mankkoo.config import TestConfig
 
@@ -52,5 +56,36 @@ def test_client(app):
 @pytest.fixture(scope="session")
 def app():
     app = create_app(TestConfig)
-
     return app
+
+@pytest.fixture
+def account_with_two_operations():
+
+    stream_type = 'account'
+    stream_id = uuid.uuid4()
+    occured_at = datetime.now(timezone.utc) - timedelta(days=10)
+
+    accountOpenedData = {
+        "balance": 0.00,
+        "number": "PL1234567890",
+        "isActive": True,
+        "openedAt": "2017-08-15 21:05:15.723336-07"
+    }
+
+    moneyDepositedData = {
+        "amount": 100.00,
+        "balance": 100.00
+    }
+
+    moneyWithdrawnData = {
+        "amount": 50.50,
+        "balance": 49.50
+    }
+
+    initEvent = es.Event(stream_type, stream_id, 'AccountOpened', accountOpenedData, occured_at)
+
+    return [
+        initEvent,
+        es.Event(stream_type, stream_id, 'MoneyDeposited', moneyDepositedData, occured_at + timedelta(days=1), 2),
+        es.Event(stream_type, stream_id, 'MoneyWithdrawn', moneyWithdrawnData, occured_at + timedelta(days=2), 3)
+    ]

@@ -1,13 +1,20 @@
-import copy
-import mankkoo.data_for_test as td
+import json
+import uuid
+import mankkoo.database as db
+import mankkoo.event_store as es
 
 
-def test_load_all_accounts(mocker, test_client):
+def test_load_all_accounts(test_client):
     # GIVEN
-    user_config = copy.deepcopy(td.user_config)
-    mocker.patch('mankkoo.util.config.load_user_config', side_effect=[user_config, user_config])
-
-    expected_account = td.user_config['accounts']['definitions'][0]
+    streams = [
+        es.Stream(uuid.uuid4(), 'account', 1,
+                  {"active": True, "alias": "Bank account A", "bankName": "Bank A", "bankUrl": "https://www.bank-a.com", "accountNumber": "iban-1", "accountName": "Super Personal account", "accountType": "checking", "importer": "MANKKOO"}),
+        es.Stream(uuid.uuid4(), 'account', 1,
+                  {"active": True, "alias": "Saving account", "bankName": "Bank A", "bankUrl": "https://www.bank-a.com", "accountNumber": "iban-11", "accountName": "'Super Savings account", "accountType": "savigs", "importer": "MANKKOO"}),
+        es.Stream(uuid.uuid4(), 'retirement', 1,
+                  {"active": True, "alias": "PPK", "bank": "Bank PPK", "bankUrl": "https://www.ppk.com", "accountNumber": "ppk-bank-acc-11", "accountName": "'PPK", "accountType": "retirement", "importer": "MANKKOO"})
+    ]
+    __store_streams(streams)
 
     # WHEN
     response = test_client.get('/api/accounts')
@@ -16,39 +23,41 @@ def test_load_all_accounts(mocker, test_client):
     assert response.status_code == 200
 
     payload = response.get_json()
-    assert len(payload) == 7
+    print(type(payload))
+    print(type(payload[0]))
+    assert len(payload) == 2
 
-    assert payload[0]['active'] == expected_account['active']
-    assert payload[0]['alias'] == expected_account['alias']
-    assert payload[0]['bankName'] == expected_account['bank']
-    assert payload[0]['bankUrl'] == expected_account['bank_url']
-    assert payload[0]['id'] == expected_account['id']
-    assert payload[0]['name'] == expected_account['name']
-    assert payload[0]['type'] == expected_account['type']
-    assert payload[0]['importer'] == expected_account['importer']
+    first_account = next(x for x in payload if x['id'] == str(streams[0].id))
+    assert first_account['active'] is True
+    assert first_account['alias'] == streams[0].metadata['alias']
+    assert first_account['bankName'] == streams[0].metadata['bankName']
+    assert first_account['bankUrl'] == streams[0].metadata['bankUrl']
+    assert first_account['number'] == streams[0].metadata['accountNumber']
+    assert first_account['name'] == streams[0].metadata['accountName']
+    assert first_account['type'] == streams[0].metadata['accountType']
+    assert first_account['importer'] == streams[0].metadata['importer']
 
 
-def test_load_all_operations(mocker, test_client):
+def __store_streams(streams: list[es.Stream]):
+    with db.get_connection() as conn:
+        with conn.cursor() as cur:
+            for stream in streams:
+                cur.execute(
+                    "INSERT INTO streams (id, type, version, metadata) VALUES (%s, %s, %s, %s)",
+                    (str(stream.id), stream.type, stream.version, json.dumps(stream.metadata)))
+            conn.commit()
 
+
+def test_load_all_operations(test_client, account_with_two_operations):
     # GIVEN
-    mocker.patch('mankkoo.account.account_db.load_all_operations_as_df', side_effect=[td.account_data(td.start_data)])
-    mocker.patch('mankkoo.util.config.load_user_config', side_effect=[copy.deepcopy(td.user_config)])
-    # expected_account = td.user_config['accounts']['definitions'][0].copy()
+    es.store(account_with_two_operations)
+    stream_id = account_with_two_operations[0].stream_id
 
     # WHEN
-    response = test_client.get('/api/accounts/operations')
+    response = test_client.get(f'/api/accounts/{stream_id}/operations')
 
     # THEN
     assert response.status_code == 200
 
     payload = response.get_json()
-    assert len(payload) == len(td.start_data)
-
-    # assert payload[0]['active'] == expected_account['active']
-    # assert payload[0]['alias'] == expected_account['alias']
-    # assert payload[0]['bankName'] == expected_account['bank']
-    # assert payload[0]['bankUrl'] == expected_account['bank_url']
-    # assert payload[0]['id'] == expected_account['id']
-    # assert payload[0]['name'] == expected_account['name']
-    # assert payload[0]['type'] == expected_account['type']
-    # assert payload[0]['importer'] == expected_account['importer']
+    assert len(payload) == len(account_with_two_operations)

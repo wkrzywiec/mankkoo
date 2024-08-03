@@ -55,7 +55,7 @@ class AccountOperation(Schema):
 )
 def operations_by_account_id(account_id):
     log.info('Fetching all operations for an account...')
-    result = database.load_operations_for_account_as_dict(account_id)
+    result = database.load_operations_for_account(account_id)
     return result
 
 
