@@ -91,7 +91,7 @@ def current_total_savings() -> float:
         with conn.cursor() as cur:
             cur.execute(query)
             (result, ) = cur.fetchone()
-    return result
+    return 0 if result is None else result
 
 
 def current_total_savings_distribution() -> list[SavingsDistribution]:
