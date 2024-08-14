@@ -4,6 +4,197 @@ from dateutil.relativedelta import relativedelta
 import mankkoo.util.config as config
 import mankkoo.database as db
 from mankkoo.base_logger import log
+from mankkoo.controller.main_controller import SavingsDistribution
+
+
+def current_total_savings() -> float:
+    log.info("Loading current total savings value...")
+    query = """
+    WITH
+    account_latest_version AS (
+        SELECT id, version, metadata ->> 'accountName' as name, metadata ->> 'accountType' as type
+        FROM streams
+        WHERE type = 'account'
+        AND (metadata ->> 'active')::boolean = true
+    ),
+
+    accounts_balance AS (
+        SELECT SUM((data->>'balance')::numeric) AS balance, l.type
+        FROM events e
+        JOIN account_latest_version l ON e.stream_id = l.id AND l.version = e.version
+        GROUP BY l.type
+    ),
+
+    retirement_latest_version AS (
+        SELECT id, version, metadata ->> 'accountName' as name, metadata ->> 'accountType' as type
+        FROM streams
+        WHERE type = 'retirement'
+        AND (metadata ->> 'active')::boolean = true
+    ),
+
+    retirement_balance AS (
+        SELECT SUM((data->>'balance')::numeric) AS balance, 'retirement' as name
+        FROM events e
+        JOIN retirement_latest_version l ON e.stream_id = l.id AND l.version = e.version
+    ),
+
+    investment_latest_version AS (
+        SELECT id, version, metadata ->> 'investmentName' as name, metadata ->> 'category' as type
+        FROM streams
+        WHERE type = 'investment'
+        AND (metadata ->> 'active')::boolean = true
+    ),
+
+    investment_balance AS (
+        SELECT (data->>'balance')::numeric AS balance, l.name
+        FROM events e
+        JOIN investment_latest_version l ON e.stream_id = l.id AND l.version = e.version
+    ),
+
+    stocks_balance AS (
+        SELECT (
+            SUM(CASE WHEN e.type = 'ETFBought' THEN (e.data->>'totalValue')::float ELSE 0 END)
+            -
+            SUM(CASE WHEN e.type = 'ETFSold' THEN (e.data->>'totalValue')::float ELSE 0 END))::numeric as balance,
+            s.metadata ->> 'etfName' as name
+        FROM events e
+        JOIN streams s ON s.id = e.stream_id
+        WHERE s.type = 'stocks'
+        GROUP BY
+            s.id
+        HAVING
+            (SUM(CASE WHEN e.type = 'ETFBought' THEN (e.data->>'units')::int ELSE 0 END)
+            -
+            SUM(CASE WHEN e.type = 'ETFSold' THEN (e.data->>'units')::int ELSE 0 END))
+            > 0
+    ),
+
+    all_buckets AS (
+        SELECT *
+        FROM accounts_balance
+            UNION
+        SELECT *
+        FROM retirement_balance
+            UNION
+        SELECT *
+        FROM investment_balance
+            UNION
+        SELECT round(SUM(balance), 2), 'stocks' as name
+        FROM stocks_balance
+    )
+
+    SELECT SUM(balance)
+    FROM all_buckets;
+    """
+
+    with db.get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(query)
+            (result, ) = cur.fetchone()
+    return result
+
+
+def current_total_savings_distribution() -> list[SavingsDistribution]:
+    log.info("Loading current savings distribution by type...")
+    query = """
+    WITH
+    account_latest_version AS (
+        SELECT id, version, metadata ->> 'accountName' as name, metadata ->> 'accountType' as type
+        FROM streams
+        WHERE type = 'account'
+        AND (metadata ->> 'active')::boolean = true
+    ),
+
+    accounts_balance AS (
+        SELECT SUM((data->>'balance')::numeric) AS total, l.type as type
+        FROM events e
+        JOIN account_latest_version l ON e.stream_id = l.id AND l.version = e.version
+        GROUP BY l.type
+        ),
+
+    retirement_latest_version AS (
+        SELECT id, version, metadata ->> 'accountName' as name, metadata ->> 'accountType' as type
+        FROM streams
+        WHERE type = 'retirement'
+        AND (metadata ->> 'active')::boolean = true
+    ),
+
+    retirement_balance AS (
+        SELECT SUM((data->>'balance')::numeric) AS total, 'retirement' as type
+        FROM events e
+        JOIN retirement_latest_version l ON e.stream_id = l.id AND l.version = e.version
+    ),
+
+    investment_latest_version AS (
+        SELECT id, version, metadata ->> 'investmentName' as name, metadata ->> 'category' as type
+        FROM streams
+        WHERE type = 'investment'
+        AND (metadata ->> 'active')::boolean = true
+    ),
+
+    investment_balance AS (
+        SELECT (data->>'balance')::numeric AS total, l.type
+        FROM events e
+        JOIN investment_latest_version l ON e.stream_id = l.id AND l.version = e.version
+    ),
+
+    stocks_balance AS (
+        SELECT (
+            SUM(CASE WHEN e.type = 'ETFBought' THEN (e.data->>'totalValue')::float ELSE 0 END)
+            -
+            SUM(CASE WHEN e.type = 'ETFSold' THEN (e.data->>'totalValue')::float ELSE 0 END))::numeric as balance,
+            s.metadata ->> 'etfName' as name
+        FROM events e
+        JOIN streams s ON s.id = e.stream_id
+        WHERE s.type = 'stocks'
+        GROUP BY
+            s.id
+        HAVING
+            (SUM(CASE WHEN e.type = 'ETFBought' THEN (e.data->>'units')::int ELSE 0 END)
+            -
+            SUM(CASE WHEN e.type = 'ETFSold' THEN (e.data->>'units')::int ELSE 0 END))
+            > 0
+    ),
+
+    all_buckets AS (
+        SELECT *
+        FROM accounts_balance
+            UNION
+        SELECT *
+        FROM retirement_balance
+            UNION
+        SELECT *
+        FROM investment_balance
+            UNION
+        SELECT round(SUM(balance), 2) as total, 'stocks' as type
+        FROM stocks_balance
+    )
+
+SELECT
+    type,
+    total,
+    round(
+        total
+        /
+        (SELECT SUM(total) FROM all_buckets)
+        , 4) as percentage
+FROM all_buckets
+ORDER BY type='retirement', type='stocks', type='cash', type='savings', type='checking';
+    """
+
+    result = []
+    with db.get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(query)
+            rows = cur.fetchall()
+
+            for row in rows:
+                savings = SavingsDistribution()
+                savings.type = row[0]
+                savings.total = row[1]
+                savings.percentage = row[2]
+                result.append(savings)
+    return result
 
 
 def total_money_data(data: dict) -> pd.DataFrame:

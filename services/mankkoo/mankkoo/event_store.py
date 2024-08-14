@@ -78,7 +78,6 @@ def load(stream_id: UUID) -> list[Event]:
             rows = cur.fetchall()
 
             for row in rows:
-                print(row)
                 result.append(
                     Event(event_id=uuid.UUID(row[0]), stream_id=uuid.UUID(row[1]), event_type=row[2], data=row[3], version=row[4], occured_at=row[5], stream_type="account")
                 )

@@ -113,7 +113,7 @@ tasks:
   restore:
     desc: Restoring backup data for PostgreSQL
     vars:
-      file: mankkoo_20240731_1323
+      file: mankkoo_20240805_0554
       db: test
     cmds:
       - echo "Starting restoring `{{.db}}` database. Copying backup..."

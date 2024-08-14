@@ -18,13 +18,11 @@ class MainIndicators(Schema):
 @main_endpoints.output(MainIndicators, status_code=200)
 @main_endpoints.doc(summary='Main Indicators', description='Key indicators of a total wealth')
 def indicators():
-    data = db.load_all()
-    total_money = total.total_money_data(data)['Total'].sum()
-    last_month_income = total.last_month_income(db.load_total(), date.today())
+    current_total_savings = total.current_total_savings()
     return {
-        'savings': total_money,
+        'savings': current_total_savings,
         'debt': None,
-        'lastMonthProfit': last_month_income,
+        'lastMonthProfit': 0,
         'investments': None
     }
 
@@ -39,10 +37,8 @@ class SavingsDistribution(Schema):
 @main_endpoints.output(SavingsDistribution(many=True), status_code=200)
 @main_endpoints.doc(summary='Savings Distribution', description='Information about the distribution of wealth')
 def savings_distribution():
-    data = db.load_all()
-    total_money = total.total_money_data(data).copy()
-    total_money = total_money.rename(columns={'Total': 'total', 'Type': 'type', 'Percentage': 'percentage'})
-    return total_money.to_dict('records')
+    savings_distribution = total.current_total_savings_distribution()
+    return savings_distribution
 
 
 class TotalHistoryPerDay(Schema):
