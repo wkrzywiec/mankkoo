@@ -153,6 +153,19 @@ def init_db():
                 RETURN TRUE;
             END;
             $$;
+
+        CREATE OR REPLACE FUNCTION notification_trigger() RETURNS TRIGGER AS
+            $$
+            BEGIN
+                PERFORM pg_notify('events_added', 
+                        to_json(NEW)::TEXT
+                );
+                RETURN NEW;
+            END;
+            $$ LANGUAGE plpgsql;
+
+        CREATE OR REPLACE TRIGGER capture_event_added_trigger AFTER INSERT ON events
+        FOR EACH ROW EXECUTE FUNCTION notification_trigger();
         """)
 
     log.info("Database initialized")
