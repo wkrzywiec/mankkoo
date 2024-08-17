@@ -1,4 +1,7 @@
 import os
+import psycopg2
+import select
+import threading
 
 from apiflask import APIFlask
 from flask_cors import CORS
@@ -50,7 +53,36 @@ def create_app(app_config=None):
     db.init_db()
 
     config.init_data_folder()
+    start_listener_thread()
     return app
+
+
+def start_listener_thread():
+    thread = threading.Thread(target=listen_to_notifications, daemon=True)
+    thread.start()
+
+
+def listen_to_notifications():
+    log.info('starting listening to notifications...')
+
+    conn = db.get_connection()
+    conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+
+    cursor = conn.cursor()
+    cursor.execute("LISTEN events_added;")
+
+    while True:
+        if select.select([conn], [], [], 5) == ([], [], []):
+            continue
+        conn.poll()
+        while conn.notifies:
+            notify = conn.notifies.pop(0)
+            handle_notification(notify)
+
+
+def handle_notification(notify):
+    log.info(f"Received notification: {notify.channel} - {notify.payload}")
+    log.info(f"{notify}")
 
 
 if __name__ == "__main__":
