@@ -4,7 +4,6 @@ from dateutil.relativedelta import relativedelta
 import mankkoo.util.config as config
 import mankkoo.database as db
 from mankkoo.base_logger import log
-from mankkoo.controller.main_controller import SavingsDistribution
 
 
 def current_total_savings() -> float:
@@ -94,7 +93,7 @@ def current_total_savings() -> float:
     return 0 if result is None else result
 
 
-def current_total_savings_distribution() -> list[SavingsDistribution]:
+def current_total_savings_distribution() -> list[dict]:
     log.info("Loading current savings distribution by type...")
     query = """
     WITH
@@ -189,10 +188,11 @@ ORDER BY type='retirement', type='stocks', type='cash', type='savings', type='ch
             rows = cur.fetchall()
 
             for row in rows:
-                savings = SavingsDistribution()
-                savings.type = row[0]
-                savings.total = row[1]
-                savings.percentage = row[2]
+                savings = {
+                    "type": row[0],
+                    "total": row[1],
+                    "percentage": row[2]
+                }
                 result.append(savings)
     return result
 

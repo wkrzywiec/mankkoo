@@ -1,8 +1,7 @@
-from datetime import date
 from apiflask import APIBlueprint, Schema
 from apiflask.fields import String, Float, List
 import mankkoo.database as db
-import mankkoo.total as total
+import mankkoo.views as views
 
 main_endpoints = APIBlueprint('main_endpoints', __name__, tag='Main Page')
 
@@ -18,13 +17,7 @@ class MainIndicators(Schema):
 @main_endpoints.output(MainIndicators, status_code=200)
 @main_endpoints.doc(summary='Main Indicators', description='Key indicators of a total wealth')
 def indicators():
-    current_total_savings = total.current_total_savings()
-    return {
-        'savings': current_total_savings,
-        'debt': None,
-        'lastMonthProfit': 0,
-        'investments': None
-    }
+    return views.load_view(views.main_indicators_key)
 
 
 class SavingsDistribution(Schema):
@@ -37,8 +30,7 @@ class SavingsDistribution(Schema):
 @main_endpoints.output(SavingsDistribution(many=True), status_code=200)
 @main_endpoints.doc(summary='Savings Distribution', description='Information about the distribution of wealth')
 def savings_distribution():
-    savings_distribution = total.current_total_savings_distribution()
-    return savings_distribution
+    return views.load_view(views.current_savings_distribution_key)
 
 
 class TotalHistoryPerDay(Schema):

@@ -95,6 +95,13 @@ def init_db():
             CONSTRAINT events_stream_and_version UNIQUE(stream_id, version)
         );
 
+        CREATE TABLE IF NOT EXISTS views
+        (
+            name            TEXT                      NOT NULL    PRIMARY KEY,
+            content         JSONB,
+            updated_at      timestamp with time zone  NOT NULL    default (now())
+        );
+
         CREATE OR REPLACE FUNCTION append_event
         (
             id uuid,
@@ -160,7 +167,7 @@ def init_db():
                 oldest_occured_date text;
             BEGIN
 
-                SELECT min(occured_at)::text
+                SELECT min(occured_at)::date::text
                 INTO oldest_occured_date
                 FROM events WHERE added_at >= NOW() - interval '20 days';
 

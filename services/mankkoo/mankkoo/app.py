@@ -8,6 +8,7 @@ from flask_cors import CORS
 
 import mankkoo.config as app_profile
 import mankkoo.database as db
+import mankkoo.views as views
 
 from mankkoo.controller.main_controller import main_endpoints
 from mankkoo.controller.account_controller import account_endpoints
@@ -82,6 +83,7 @@ def listen_to_db_notifications():
 
 def handle_notification(notify):
     log.info(f"Received notification. Channel: '{notify.channel}'. Payload: '{notify.payload}'")
+    views.update_views(notify.payload)
 
 
 if __name__ == "__main__":
