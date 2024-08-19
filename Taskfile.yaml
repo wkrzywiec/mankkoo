@@ -113,8 +113,8 @@ tasks:
   restore:
     desc: Restoring backup data for PostgreSQL
     vars:
-      file: mankkoo_20240805_0554
-      db: test
+      file: mankkoo_20240812_0452
+      db: dev
     cmds:
       - echo "Starting restoring `{{.db}}` database. Copying backup..."
       - docker cp backup/{{.file}}.dump.gz postgres:{{.file}}.dump.gz

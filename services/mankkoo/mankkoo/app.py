@@ -58,12 +58,12 @@ def create_app(app_config=None):
 
 
 def start_listener_thread():
-    thread = threading.Thread(target=listen_to_notifications, daemon=True)
+    thread = threading.Thread(target=listen_to_db_notifications, daemon=True)
     thread.start()
 
 
-def listen_to_notifications():
-    log.info('starting listening to notifications...')
+def listen_to_db_notifications():
+    log.info('Starting listening to database notifications...')
 
     conn = db.get_connection()
     conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
@@ -81,8 +81,7 @@ def listen_to_notifications():
 
 
 def handle_notification(notify):
-    log.info(f"Received notification: {notify.channel} - {notify.payload}")
-    log.info(f"{notify}")
+    log.info(f"Received notification. Channel: '{notify.channel}'. Payload: '{notify.payload}'")
 
 
 if __name__ == "__main__":

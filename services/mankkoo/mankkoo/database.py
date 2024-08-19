@@ -156,11 +156,16 @@ def init_db():
 
         CREATE OR REPLACE FUNCTION notification_trigger() RETURNS TRIGGER AS
             $$
+            DECLARE
+                oldest_occured_date text;
             BEGIN
-                PERFORM pg_notify('events_added',
-                        to_json(NEW)::TEXT
-                );
-                RETURN NEW;
+
+                SELECT min(occured_at)::text
+                INTO oldest_occured_date
+                FROM events WHERE added_at >= NOW() - interval '20 days';
+
+                PERFORM pg_notify('events_added', oldest_occured_date);
+                RETURN NULL;
             END;
             $$ LANGUAGE plpgsql;
 
