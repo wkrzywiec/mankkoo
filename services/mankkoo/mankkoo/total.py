@@ -197,6 +197,80 @@ ORDER BY type='retirement', type='stocks', type='cash', type='savings', type='ch
     return result
 
 
+def total_history_per_day(oldest_occured_event_date: datetime.date) -> dict[str, list]:
+    log.info(f"Loading total history per day starting from {oldest_occured_event_date}...")
+    query = f"""
+    WITH date_range AS (
+    SELECT
+        '{oldest_occured_event_date.strftime('%Y-%m-%d')}'::timestamptz AS from_date,  -- Start date (earliest event date)
+        (SELECT MAX(occured_at) FROM events) AS till_date -- End date (latest event date)
+    ),
+
+    date_series AS (
+    SELECT
+    generate_series(
+            date_range.from_date,
+            date_range.till_date,
+            '1 day'::interval
+    )::date AS occured_at
+    FROM date_range
+    ),
+
+    all_day_and_accounts AS (
+    SELECT
+        date_series.occured_at,
+        stream_ids.id AS stream_id
+    FROM
+        date_series
+    CROSS JOIN (SELECT id FROM streams WHERE type = 'account') stream_ids
+    ORDER BY
+        stream_ids.id, date_series.occured_at
+    ),
+
+    all_account_balances_per_day AS (
+    SELECT al.occured_at, al.stream_id,
+       COALESCE((
+           SELECT events.data ->> 'balance'
+           FROM events
+           WHERE events.stream_id = al.stream_id
+             AND events.occured_at <= al.occured_at
+           ORDER BY events.version DESC
+           LIMIT 1
+       )::numeric, 0) AS balance
+    FROM all_day_and_accounts al
+    )
+
+
+    SELECT
+        occured_at,
+        SUM(balance) as balance
+    FROM
+        all_account_balances_per_day
+    LEFT JOIN streams ON all_account_balances_per_day.stream_id = streams.id
+    GROUP BY
+        occured_at
+    ORDER BY
+        occured_at DESC;
+    """
+
+    result = {
+        "date": [],
+        "total": []
+    }
+    with db.get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(query)
+            rows = cur.fetchall()
+
+            for row in rows:
+                # day = {
+                #     row[0].strftime('%Y-%m-%d'): row[1]
+                # }
+                result["date"].append(row[0].strftime('%Y-%m-%d'))
+                result["total"].append(row[1])
+    return result
+
+
 def total_money_data(data: dict) -> pd.DataFrame:
     """Get summary data of all assets sorted by categories
 

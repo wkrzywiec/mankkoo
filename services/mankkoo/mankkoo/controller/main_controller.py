@@ -42,11 +42,7 @@ class TotalHistoryPerDay(Schema):
 @main_endpoints.output(TotalHistoryPerDay, status_code=200)
 @main_endpoints.doc(summary='Total History', description='A history of a total wealth in each day')
 def total_history():
-    data = db.load_all()
-    result = data['total']
-    result['total'] = result.pop('Total')
-    result['date'] = result.pop('Date')
-    return result.to_dict('list')
+    return views.load_view(views.total_history_per_day_key)
 
 
 class TotalMonthlyProfits(Schema):

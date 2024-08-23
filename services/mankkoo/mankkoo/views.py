@@ -9,6 +9,7 @@ from mankkoo.base_logger import log
 
 main_indicators_key = 'main-indicators'
 current_savings_distribution_key = 'current-savings-distribution'
+total_history_per_day_key = 'total-history-per-day'
 
 
 def load_view(view_name):
@@ -33,6 +34,7 @@ def update_views(oldest_occured_event_date: date):
     log.info(f'Updating views... (input: {oldest_occured_event_date})')
     __main_indicators()
     __current_total_savings_distribution()
+    __total_history_per_day(oldest_occured_event_date)
 
 
 def __main_indicators():
@@ -55,6 +57,14 @@ def __current_total_savings_distribution():
 
     __store_view(current_savings_distribution_key, view_content)
     log.info(f"The '{current_savings_distribution_key}' view was updated")
+
+
+def __total_history_per_day(oldest_occured_event_date: date):
+    log.info(f"Updating '{total_history_per_day_key}' view...")
+    view_content = total.total_history_per_day(oldest_occured_event_date)
+
+    __store_view(total_history_per_day_key, view_content)
+    log.info(f"The '{total_history_per_day_key}' view was updated")
 
 
 class JSONEncoder(json.JSONEncoder):
