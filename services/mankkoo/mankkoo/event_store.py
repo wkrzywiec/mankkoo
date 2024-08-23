@@ -85,6 +85,19 @@ def load(stream_id: UUID) -> list[Event]:
     return result
 
 
+def get_stream_by_id(stream_id: str) -> Stream | None:
+    log.info(f"Loading stream by id '{stream_id}'...")
+    with db.get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(f"SELECT id, type, version, metadata from streams WHERE id = '{stream_id}'")
+            result = cur.fetchone()
+            if result is None:
+                return None
+            else:
+                (id, type, version, metadata, ) = result
+    return Stream(uuid.UUID(id), type, version, metadata)
+
+
 def get_stream_by_metadata(key: str, value) -> Stream | None:
     log.info(f"Loading stream by its matadata property key '{key}' and value '{value}'...")
     with db.get_connection() as conn:
