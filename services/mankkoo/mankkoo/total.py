@@ -11,61 +11,88 @@ def current_total_savings() -> float:
     query = """
     WITH
     account_latest_version AS (
-        SELECT id, version, metadata ->> 'accountName' as name, metadata ->> 'accountType' as type
+        SELECT
+            id,
+            version,
+            metadata ->> 'accountName' as name,
+            metadata ->> 'accountType' as type
         FROM streams
         WHERE type = 'account'
         AND (metadata ->> 'active')::boolean = true
     ),
 
     accounts_balance AS (
-        SELECT SUM((data->>'balance')::numeric) AS balance, l.type
-        FROM events e
-        JOIN account_latest_version l ON e.stream_id = l.id AND l.version = e.version
-        GROUP BY l.type
-    ),
+        SELECT
+            SUM((data->>'balance')::numeric) AS total,
+            l.type as type
+        FROM
+            events e
+        JOIN
+            account_latest_version l ON e.stream_id = l.id AND l.version = e.version
+        GROUP BY
+            l.type
+        ),
 
     retirement_latest_version AS (
-        SELECT id, version, metadata ->> 'accountName' as name, metadata ->> 'accountType' as type
-        FROM streams
-        WHERE type = 'retirement'
-        AND (metadata ->> 'active')::boolean = true
+        SELECT
+            id,
+            version,
+            metadata ->> 'accountName' as name,
+            metadata ->> 'accountType' as type
+        FROM
+            streams
+        WHERE
+            type = 'retirement'
+        AND
+            (metadata ->> 'active')::boolean = true
     ),
 
     retirement_balance AS (
-        SELECT SUM((data->>'balance')::numeric) AS balance, 'retirement' as name
-        FROM events e
-        JOIN retirement_latest_version l ON e.stream_id = l.id AND l.version = e.version
+        SELECT
+            SUM((data->>'balance')::numeric) AS total,
+             'retirement' as type
+        FROM
+            events e
+        JOIN
+            retirement_latest_version l ON e.stream_id = l.id AND l.version = e.version
     ),
 
     investment_latest_version AS (
-        SELECT id, version, metadata ->> 'investmentName' as name, metadata ->> 'category' as type
-        FROM streams
-        WHERE type = 'investment'
-        AND (metadata ->> 'active')::boolean = true
+        SELECT
+            id,
+            version, metadata ->> 'investmentName' as name,
+            metadata ->> 'category' as type
+        FROM
+            streams
+        WHERE
+            type = 'investment'
+        AND
+            (metadata ->> 'active')::boolean = true
     ),
 
     investment_balance AS (
-        SELECT (data->>'balance')::numeric AS balance, l.name
+        SELECT
+            (data->>'balance')::numeric AS total,
+            l.type
         FROM events e
         JOIN investment_latest_version l ON e.stream_id = l.id AND l.version = e.version
     ),
 
+
+    stocks_latest_version AS (
+        SELECT id, version
+        FROM streams
+        WHERE type = 'stocks'
+    ),
+
     stocks_balance AS (
-        SELECT (
-            SUM(CASE WHEN e.type = 'ETFBought' THEN (e.data->>'totalValue')::float ELSE 0 END)
-            -
-            SUM(CASE WHEN e.type = 'ETFSold' THEN (e.data->>'totalValue')::float ELSE 0 END))::numeric as balance,
-            s.metadata ->> 'etfName' as name
-        FROM events e
-        JOIN streams s ON s.id = e.stream_id
-        WHERE s.type = 'stocks'
-        GROUP BY
-            s.id
-        HAVING
-            (SUM(CASE WHEN e.type = 'ETFBought' THEN (e.data->>'units')::int ELSE 0 END)
-            -
-            SUM(CASE WHEN e.type = 'ETFSold' THEN (e.data->>'units')::int ELSE 0 END))
-            > 0
+        SELECT
+            ROUND(SUM((data->>'balance')::numeric), 2) AS total,
+            'stocks' AS type
+        FROM
+            events e
+        JOIN
+            stocks_latest_version l ON e.stream_id = l.id AND l.version = e.version
     ),
 
     all_buckets AS (
@@ -78,11 +105,11 @@ def current_total_savings() -> float:
         SELECT *
         FROM investment_balance
             UNION
-        SELECT round(SUM(balance), 2), 'stocks' as name
+        SELECT *
         FROM stocks_balance
     )
 
-    SELECT SUM(balance)
+    SELECT SUM(total)
     FROM all_buckets;
     """
 
@@ -98,61 +125,88 @@ def current_total_savings_distribution() -> list[dict]:
     query = """
     WITH
     account_latest_version AS (
-        SELECT id, version, metadata ->> 'accountName' as name, metadata ->> 'accountType' as type
+        SELECT
+            id,
+            version,
+            metadata ->> 'accountName' as name,
+            metadata ->> 'accountType' as type
         FROM streams
         WHERE type = 'account'
         AND (metadata ->> 'active')::boolean = true
     ),
 
     accounts_balance AS (
-        SELECT SUM((data->>'balance')::numeric) AS total, l.type as type
-        FROM events e
-        JOIN account_latest_version l ON e.stream_id = l.id AND l.version = e.version
-        GROUP BY l.type
+        SELECT
+            SUM((data->>'balance')::numeric) AS total,
+            l.type as type
+        FROM
+            events e
+        JOIN
+            account_latest_version l ON e.stream_id = l.id AND l.version = e.version
+        GROUP BY
+            l.type
         ),
 
     retirement_latest_version AS (
-        SELECT id, version, metadata ->> 'accountName' as name, metadata ->> 'accountType' as type
-        FROM streams
-        WHERE type = 'retirement'
-        AND (metadata ->> 'active')::boolean = true
+        SELECT
+            id,
+            version,
+            metadata ->> 'accountName' as name,
+            metadata ->> 'accountType' as type
+        FROM
+            streams
+        WHERE
+            type = 'retirement'
+        AND
+            (metadata ->> 'active')::boolean = true
     ),
 
     retirement_balance AS (
-        SELECT SUM((data->>'balance')::numeric) AS total, 'retirement' as type
-        FROM events e
-        JOIN retirement_latest_version l ON e.stream_id = l.id AND l.version = e.version
+        SELECT
+            SUM((data->>'balance')::numeric) AS total,
+             'retirement' as type
+        FROM
+            events e
+        JOIN
+            retirement_latest_version l ON e.stream_id = l.id AND l.version = e.version
     ),
 
     investment_latest_version AS (
-        SELECT id, version, metadata ->> 'investmentName' as name, metadata ->> 'category' as type
-        FROM streams
-        WHERE type = 'investment'
-        AND (metadata ->> 'active')::boolean = true
+        SELECT
+            id,
+            version, metadata ->> 'investmentName' as name,
+            metadata ->> 'category' as type
+        FROM
+            streams
+        WHERE
+            type = 'investment'
+        AND
+            (metadata ->> 'active')::boolean = true
     ),
 
     investment_balance AS (
-        SELECT (data->>'balance')::numeric AS total, l.type
+        SELECT
+            (data->>'balance')::numeric AS total,
+            l.type
         FROM events e
         JOIN investment_latest_version l ON e.stream_id = l.id AND l.version = e.version
     ),
 
+
+    stocks_latest_version AS (
+        SELECT id, version
+        FROM streams
+        WHERE type = 'stocks'
+    ),
+
     stocks_balance AS (
-        SELECT (
-            SUM(CASE WHEN e.type = 'ETFBought' THEN (e.data->>'totalValue')::float ELSE 0 END)
-            -
-            SUM(CASE WHEN e.type = 'ETFSold' THEN (e.data->>'totalValue')::float ELSE 0 END))::numeric as balance,
-            s.metadata ->> 'etfName' as name
-        FROM events e
-        JOIN streams s ON s.id = e.stream_id
-        WHERE s.type = 'stocks'
-        GROUP BY
-            s.id
-        HAVING
-            (SUM(CASE WHEN e.type = 'ETFBought' THEN (e.data->>'units')::int ELSE 0 END)
-            -
-            SUM(CASE WHEN e.type = 'ETFSold' THEN (e.data->>'units')::int ELSE 0 END))
-            > 0
+        SELECT
+            ROUND(SUM((data->>'balance')::numeric), 2) AS total,
+            'stocks' AS type
+        FROM
+            events e
+        JOIN
+            stocks_latest_version l ON e.stream_id = l.id AND l.version = e.version
     ),
 
     all_buckets AS (
@@ -165,20 +219,20 @@ def current_total_savings_distribution() -> list[dict]:
         SELECT *
         FROM investment_balance
             UNION
-        SELECT round(SUM(balance), 2) as total, 'stocks' as type
+        SELECT *
         FROM stocks_balance
     )
 
-SELECT
-    type,
-    total,
-    round(
-        total
-        /
-        (SELECT SUM(total) FROM all_buckets)
-        , 4) as percentage
-FROM all_buckets
-ORDER BY type='retirement', type='stocks', type='cash', type='savings', type='checking';
+    SELECT
+        type,
+        total,
+        round(
+            total
+            /
+            (SELECT SUM(total) FROM all_buckets)
+            , 4) as percentage
+    FROM all_buckets
+    ORDER BY type='retirement', type='stocks', type='cash', type='savings', type='checking';
     """
 
     result = []
