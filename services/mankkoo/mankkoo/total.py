@@ -198,11 +198,11 @@ ORDER BY type='retirement', type='stocks', type='cash', type='savings', type='ch
 
 
 def total_history_per_day(oldest_occured_event_date: datetime.date) -> dict[str, list]:
-    log.info(f"Loading total history per day starting from {oldest_occured_event_date}...")
-    query = f"""
+    log.info("Loading total history per day starting from oldest occured event date...")
+    query = """
     WITH date_range AS (
     SELECT
-        '{oldest_occured_event_date.strftime('%Y-%m-%d')}'::timestamptz AS from_date,  -- Start date (earliest event date)
+        (SELECT MIN(occured_at) FROM events) AS from_date,  -- Start date (earliest event date)
         (SELECT MAX(occured_at) FROM events) AS till_date -- End date (latest event date)
     ),
 
@@ -222,7 +222,7 @@ def total_history_per_day(oldest_occured_event_date: datetime.date) -> dict[str,
         stream_ids.id AS stream_id
     FROM
         date_series
-    CROSS JOIN (SELECT id FROM streams WHERE type = 'account') stream_ids
+    CROSS JOIN (SELECT id FROM streams) stream_ids
     ORDER BY
         stream_ids.id, date_series.occured_at
     ),
@@ -239,7 +239,6 @@ def total_history_per_day(oldest_occured_event_date: datetime.date) -> dict[str,
        )::numeric, 0) AS balance
     FROM all_day_and_accounts al
     )
-
 
     SELECT
         occured_at,
