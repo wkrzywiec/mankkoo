@@ -121,7 +121,7 @@ class Ing(models.Importer):
     def load_file_by_filename(self, file_path: str):
         return pd.read_csv(file_path, sep=";")
 
-    def load_file_by_contents(self, contents):
+    def load_file_by_contents(self, contents: bytes):
         return pd.read_csv(io.StringIO(contents.decode('windows-1250')), sep=";")
 
     def format_file(self, df: pd.DataFrame, account_id: str):

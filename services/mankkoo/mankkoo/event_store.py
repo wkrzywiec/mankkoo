@@ -1,10 +1,12 @@
 from datetime import datetime
-import json
-import uuid
 from uuid import UUID
 
-import mankkoo.database as db
+import json
+import uuid
+
 from mankkoo.base_logger import log
+import mankkoo.database as db
+
 
 log.basicConfig(level=log.DEBUG)
 
@@ -30,7 +32,7 @@ class Stream:
 
 
 class Event:
-    def __init__(self, stream_type: str, stream_id: UUID, event_type: str, data: dict, occured_at: datetime, version=1, event_id: UUID = None):
+    def __init__(self, stream_type: str, stream_id: UUID, event_type: str, data: dict, occured_at: datetime, version=1, event_id: UUID | None = None):
         if event_id is None:
             event_id = uuid.uuid4()
         self.id = event_id
@@ -52,6 +54,18 @@ class Event:
 
     def __hash__(self):
         return hash(self.id, self.stream_type, self.stream_id, self.event_type, self.version, self.occured_at, self.data)
+
+
+def create(streams: list[Stream]):
+    log.info(f"Storing {len(streams)} stream(s)...")
+    with db.get_connection() as conn:
+        with conn.cursor() as cur:
+            for stream in streams:
+                log.info(f"Inserting stream: {stream}...")
+                cur.execute(
+                    "INSERT INTO streams (id, type, version, metadata) VALUES (%s, %s, %s, %s)",
+                    (str(stream.id), stream.type, stream.version, json.dumps(stream.metadata)))
+            conn.commit()
 
 
 def store(events: list[Event]):

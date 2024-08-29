@@ -4,7 +4,10 @@ import pandas as pd
 import base64
 import mankkoo.account.models as models
 import mankkoo.database as db
-import mankkoo.util.config as config
+import pathlib
+
+
+data_path = str(pathlib.Path(__file__).parent.absolute()) + '/data/'
 
 
 class Mbank(models.Importer):
@@ -15,12 +18,12 @@ class Mbank(models.Importer):
 
         return pd.read_csv(file_path, sep=";", skiprows=skip_lines["skiprows"])
 
-    def load_file_by_contents(self, contents: str) -> pd.DataFrame:
+    def load_file_by_contents(self, contents: bytes) -> pd.DataFrame:
         raise Exception('Loading file by its content is not supported!')
         content_type, content_string = contents.split(',')
         decoded = base64.b64decode(content_string)
 
-        temp_file_path = config.data_path() + 'temp_mbank.csv'
+        temp_file_path = data_path + 'temp_mbank.csv'
         temp_file = open(temp_file_path, 'w', encoding="utf-8")
 
         decoded_str = decoded.decode("utf-8")

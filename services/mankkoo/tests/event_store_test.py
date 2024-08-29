@@ -202,7 +202,7 @@ def __load_events(stream_id: uuid.UUID) -> list[es.Event]:
 
     with db.get_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT id, stream_id, type, data, version, occured_at from events WHERE stream_id = '" + str(stream_id) + "' ORDER BY version")
+            cur.execute(f"SELECT id, stream_id, type, data, version, occured_at FROM events WHERE stream_id = '{str(stream_id)}' ORDER BY version")
             rows = cur.fetchall()
 
             for row in rows:

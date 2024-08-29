@@ -1,86 +1,8 @@
 import numpy as np
 import pandas as pd
+import uuid
 import mankkoo.database as db
-
-user_config = {
-    'accounts': {
-        'definitions': [
-            {
-                'active': True,
-                'alias': 'Bank account A',
-                'bank': 'Bank A',
-                'bank_url': 'https://www.bank-a.com',
-                'id': 'iban-1',
-                'name': 'Super Personal account',
-                'type': 'checking',
-                'importer': 'PL_MILLENIUM'
-            },
-            {
-                'active': True,
-                'alias': 'Saving account',
-                'bank': 'Bank A',
-                'bank_url': 'https://www.bank-a.com',
-                'id': 'iban-11',
-                'name': 'Super Savings account',
-                'type': 'savigs',
-                'importer': 'PL_MILLENIUM'
-            },
-            {
-                'active': True,
-                'alias': 'Bank account B',
-                'bank': 'Bank B',
-                'bank_url': 'https://www.bank-b.com',
-                'id': 'iban-2',
-                'name': 'Super Personal account',
-                'type': 'checking',
-                'importer': 'PL_MILLENIUM'
-            },
-            {
-                'active': True,
-                'alias': 'Bank account C',
-                'bank': 'Bank C',
-                'bank_url': 'https://www.bank-c.com',
-                'id': 'iban-3',
-                'name': 'Super Personal account',
-                'type': 'checking',
-                'importer': 'PL_MBANK'
-            },
-            {
-                'active': True,
-                'alias': 'Bank account D',
-                'bank': 'Bank D',
-                'bank_url': 'https://www.bank-d.com',
-                'id': 'iban-4',
-                'name': 'Super Personal account',
-                'type': 'checking',
-                'importer': 'PL_ING'
-            },
-            {
-                'active': True,
-                'alias': 'Wallet',
-                'bank': 'My Socks',
-                'bank_url': '',
-                'id': 'cash',
-                'name': 'Cash',
-                'type': 'checking',
-                'importer': 'MANKKOO'
-            },
-            {
-                'active': True,
-                'alias': 'PPK',
-                'bank': 'PPK',
-                'bank_url': 'https://www.ppk.com',
-                'id': 'pko-ppk',
-                'name': 'PPK account',
-                'type': 'retirement',
-                'importer': 'MANKKOO'
-            }
-        ],
-        "ui": {
-            "hide_accounts": []
-        }
-    }
-}
+import mankkoo.event_store as es
 
 start_data = [
     ['iban-1', '2021-01-31', 'Init money', 'Detail 1', np.NaN, 'init', 1000, 'PLN', 1000],
@@ -118,6 +40,19 @@ total = [
     ['2021-01-01', 10],
     ['2021-01-01', 20]
 ]
+
+
+def any_account_stream():
+    return any_stream()
+
+
+def any_stream(type='account'):
+    return es.Stream(uuid.uuid4(), type, 0,
+    {
+        "active": True, "alias": "Bank account A", "bankName": "Bank A",
+        "bankUrl": "https://www.bank-a.com", "accountNumber": "iban-1",
+        "accountName": "Super Personal account", "accountType": "checking", "importer": "PL_MILLENIUM"
+    })
 
 
 def account_data(rows=start_data):

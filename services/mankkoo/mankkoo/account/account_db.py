@@ -1,5 +1,3 @@
-import pandas as pd
-import mankkoo.util.config as config
 import mankkoo.database as db
 
 from mankkoo.base_logger import log
@@ -55,7 +53,8 @@ def get_bank_type(account_id: str) -> Bank:
     SELECT
         metadata->>'importer' AS importer
     FROM streams
-    WHERE id = '{account_id}';
+    WHERE id = '{account_id}'
+    AND type = 'account';
     """
     with db.get_connection() as conn:
         with conn.cursor() as cur:
@@ -96,20 +95,6 @@ def get_account_balance(account_id: str) -> float:
             else:
                 (balance, ) = result
     return float(balance)
-
-
-def load_all_operations_as_df() -> pd.DataFrame:
-    log.info('Loading ACCOUNT file...')
-    df = pd.read_csv(
-        config.mankkoo_file_path('account'),
-        parse_dates=['Date'],
-        index_col=0,
-        encoding='iso-8859-2')
-    if df.empty:
-        return df
-    df = df.astype({'Account': 'string', 'Balance': 'float', 'Operation': 'float', 'Date': 'datetime64[ns]'})
-    df['Date'] = df['Date'].dt.date
-    return df
 
 
 def load_operations_for_account(stream_id: str) -> list[AccountOperation]:

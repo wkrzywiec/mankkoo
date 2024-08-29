@@ -78,7 +78,7 @@ class Millenium(models.Importer):
     def load_file_by_filename(self, file_path: str):
         return pd.read_csv(file_path)
 
-    def load_file_by_contents(self, contents: str):
+    def load_file_by_contents(self, contents: bytes):
         return pd.read_csv(io.StringIO(contents.decode('utf-8')))
 
     def format_file(self, df: pd.DataFrame, account_id: str):

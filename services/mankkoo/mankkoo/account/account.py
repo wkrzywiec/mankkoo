@@ -13,7 +13,7 @@ log.basicConfig(level=log.DEBUG)
 def add_new_operations(
         account_id: str,
         file_name=None,
-        contents=None):
+        contents=None) -> None:
     """Append bank accounts history with new operations.
     This method return a pandas DataFrame with calculated balance.
 
@@ -24,10 +24,6 @@ def add_new_operations(
 
     Raises:
         KeyError: raised when unsupported bank enum is provided
-
-    Returns:
-        pandas.DataFrame: DataFrame that holds transactions history
-        with newly added operations
     """
     log.info('Adding new operations for %s account', account_id)
     bank = db.get_bank_type(account_id)
