@@ -1,9 +1,11 @@
 import datetime
+import numpy as np
 import pytest
 import pathlib
-import numpy as np
+import time
 import uuid
 
+import mankkoo.app as app
 import mankkoo.account.account as account
 import mankkoo.account.account_db as account_db
 import mankkoo.database as db
@@ -32,38 +34,6 @@ end_data = td.account_data([
     ['iban-1', '2021-03-16', 'Bus ticket', 'Detail new', np.NaN, np.NaN, -200.00, 'PLN', 474.48],
     ['iban-1', '2021-03-17', 'Salary', 'Detail new', np.NaN, np.NaN, 3000.33, 'PLN', 3474.81]
 ])
-
-
-def test_new_operations_are_added_and_balance_is_calculated(mocker):
-    # GIVEN
-    account_stream = td.any_account_stream()
-    account_id = account_stream.id
-    es.create([account_stream])
-
-    mocker.patch('mankkoo.account.account_db.get_bank_type', side_effect=[Bank.PL_MILLENIUM])
-
-    # WHEN
-    account.add_new_operations(account_id, contents=account_operations_raw_data)
-
-    # THEN
-    assert es.get_stream_by_id(account_id).version == 6
-
-    operations = account_db.load_operations_for_account(account_id)
-    operations.reverse()
-
-    assert len(operations) == 6
-
-    assert float(operations[0].operation) == 1000.00
-    assert operations[0].title == 'Jane Doe - Init money'
-    assert float(operations[0].balance) == 1000.00
-    assert operations[0].currency == 'PLN'
-
-    assert float(operations[1].operation) == -200.00
-    assert operations[1].title == 'Pizzeria - Out 1'
-    assert float(operations[1].balance) == 800.00
-
-    assert float(operations[2].operation) == -3.33
-    assert float(operations[2].balance) == 796.67
 
 
 def test_new_operations_are_added_to_event_store(mocker):
@@ -118,6 +88,72 @@ def __load_events(stream_id: uuid.UUID) -> list[es.Event]:
                 )
 
     return result
+
+
+def test_new_operations_are_added_and_balance_is_calculated(mocker):
+    # GIVEN
+    account_stream = td.any_account_stream()
+    account_id = account_stream.id
+    es.create([account_stream])
+
+    mocker.patch('mankkoo.account.account_db.get_bank_type', side_effect=[Bank.PL_MILLENIUM])
+
+    # WHEN
+    account.add_new_operations(account_id, contents=account_operations_raw_data)
+
+    # THEN
+    assert es.get_stream_by_id(account_id).version == 6
+
+    operations = account_db.load_operations_for_account(account_id)
+    operations.reverse()
+
+    assert len(operations) == 6
+
+    assert float(operations[0].operation) == 1000.00
+    assert operations[0].title == 'Jane Doe - Init money'
+    assert float(operations[0].balance) == 1000.00
+    assert operations[0].currency == 'PLN'
+
+    assert float(operations[1].operation) == -200.00
+    assert operations[1].title == 'Pizzeria - Out 1'
+    assert float(operations[1].balance) == 800.00
+
+    assert float(operations[2].operation) == -3.33
+    assert float(operations[2].balance) == 796.67
+
+
+def test_new_operations_are_added_and_views_are_updated(mocker):
+    # GIVEN
+    account_stream = td.any_account_stream()
+    account_id = account_stream.id
+    es.create([account_stream])
+
+    mocker.patch('mankkoo.account.account_db.get_bank_type', side_effect=[Bank.PL_MILLENIUM])
+
+    app.start_listener_thread()
+
+    # WHEN
+    account.add_new_operations(account_id, contents=account_operations_raw_data)
+
+    # THEN
+    def all_views_are_created():
+        with db.get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT count(*) FROM views")
+                (views_count, ) = cur.fetchone()
+        print(f"Found {views_count} views")
+        return views_count == 3
+
+    __wait_for_condition(condition_func=all_views_are_created, timeout=10, interval=1)
+
+
+def __wait_for_condition(condition_func, timeout=10, interval=1):
+    start_time = time.time()
+    while time.time() - start_time < timeout:
+        if condition_func():
+            return True
+        time.sleep(interval)
+    raise TimeoutError(f"Condition was not met within {timeout} seconds.")
 
 
 def test_new_operations_are_added_to_a_correct_stream_only(mocker):

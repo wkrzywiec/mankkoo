@@ -12,7 +12,6 @@ import mankkoo.views as views
 
 from mankkoo.controller.main_controller import main_endpoints
 from mankkoo.controller.account_controller import account_endpoints
-from mankkoo.util import config
 from mankkoo.base_logger import log
 from mankkoo.config import ProdConfig, DevConfig
 
@@ -53,7 +52,6 @@ def create_app(app_config=None):
 
     db.init_db()
 
-    config.init_data_folder()
     start_listener_thread()
     return app
 
