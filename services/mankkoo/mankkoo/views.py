@@ -74,7 +74,7 @@ class JSONEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
-def __store_view(view_name: str, view_content: dict):
+def __store_view(view_name: str, view_content):
     json_string = json.dumps(view_content, cls=JSONEncoder)
 
     insert_statement = f"""

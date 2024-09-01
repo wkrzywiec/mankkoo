@@ -186,7 +186,7 @@ def current_total_savings_distribution() -> list[dict]:
     investment_balance AS (
         SELECT
             (data->>'balance')::numeric AS total,
-            l.type
+            'investments' AS type
         FROM events e
         JOIN investment_latest_version l ON e.stream_id = l.id AND l.version = e.version
     ),
