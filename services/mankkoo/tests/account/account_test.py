@@ -1,5 +1,4 @@
 import datetime
-import numpy as np
 import pytest
 import pathlib
 import time
@@ -17,23 +16,6 @@ from mankkoo.account.models import Bank
 
 
 account_operations_raw_data = open(str(pathlib.Path(__file__).parent.absolute()) + '/data/test_pl_millenium.csv', "r", encoding="utf8").read().encode('utf8')
-
-start_data = td.account_data([
-    ['iban-1', '2021-01-31', 'Init money', 'Detail 1', np.NaN, 'init', 1000, 'PLN', 1000],
-    ['iban-1', '2021-01-31', 'Armchair', 'Detail 2', np.NaN, np.NaN, -222.22, 'PLN', 777.78],
-    ['iban-1', '2021-01-31', 'Candies', 'Detail 3', np.NaN, np.NaN, -3.3, 'PLN', 774.48]
-])
-
-millenium_data = td.account_data(td.millenium_data)
-
-end_data = td.account_data([
-    ['iban-1', '2021-01-31', 'Init money', 'Detail 1', np.NaN, 'init', 1000.00, 'PLN', 1000.00],
-    ['iban-1', '2021-01-31', 'Armchair', 'Detail 2', np.NaN, np.NaN, -222.22, 'PLN', 777.78],
-    ['iban-1', '2021-01-31', 'Candies', 'Detail 3', np.NaN, np.NaN, -3.30, 'PLN', 774.48],
-    ['iban-1', '2021-03-15', 'Train ticket', 'Detail new', np.NaN, np.NaN, -100.00, 'PLN', 674.48],
-    ['iban-1', '2021-03-16', 'Bus ticket', 'Detail new', np.NaN, np.NaN, -200.00, 'PLN', 474.48],
-    ['iban-1', '2021-03-17', 'Salary', 'Detail new', np.NaN, np.NaN, 3000.33, 'PLN', 3474.81]
-])
 
 
 def test_new_operations_are_added_to_event_store(mocker):

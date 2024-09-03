@@ -3,8 +3,6 @@ import psycopg2
 import select
 import threading
 
-import datetime
-
 from apiflask import APIFlask
 from flask_cors import CORS
 
@@ -55,7 +53,6 @@ def create_app(app_config=None):
     db.init_db()
 
     start_listener_thread()
-    # views.update_views(datetime.datetime.strptime('24052010', '%d%m%Y').date())
     return app
 
 
