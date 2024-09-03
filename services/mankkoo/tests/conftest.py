@@ -11,7 +11,7 @@ from mankkoo.app import create_app
 from mankkoo.config import TestConfig
 
 postgres = PostgresContainer("postgres:16-alpine")
-initPostgresContainer = True
+initPostgresContainer = False
 
 
 @pytest.fixture(scope="session", autouse=True)
