@@ -44,7 +44,7 @@ def setup(request):
 def setup_data():
     print("Cleaning database...")
     db.execute(
-        "TRUNCATE events, streams;"
+        "TRUNCATE events, streams, views;"
     )
 
 
@@ -57,6 +57,7 @@ def test_client(app):
 def app():
     app = create_app(TestConfig)
     return app
+
 
 @pytest.fixture
 def account_with_two_operations():

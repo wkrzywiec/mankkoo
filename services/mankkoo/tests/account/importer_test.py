@@ -1,12 +1,24 @@
 import pytest
 import pathlib
+import pandas as pd
 import mankkoo.account.importer.importer as importer
 import mankkoo.account.models as models
-import mankkoo.data_for_test as td
+import mankkoo.database as db
 import numpy as np
 from pandas._testing import assert_frame_equal
 
-exp_result = td.account_data([
+
+def __account_data(rows):
+    result = pd.DataFrame(
+        data=np.array(rows),
+        columns=db.account_columns
+    ).astype({'Balance': 'float', 'Operation': 'float'})
+    result['Date'] = pd.to_datetime(result['Date'], format='%Y-%m-%d', errors='coerce')
+    result['Date'] = result['Date'].dt.date
+    return result
+
+
+exp_result = __account_data([
     ['iban-1', '2021-01-01', 'Jane Doe - Init money', np.NaN, np.NaN, np.NaN, 1000.00, 'PLN', np.NaN],
     ['iban-1', '2021-02-02', 'Pizzeria - Out 1', np.NaN, np.NaN, np.NaN, -200.00, 'PLN', np.NaN],
     ['iban-1', '2021-03-03', 'John Doe - Out 2', np.NaN, np.NaN, np.NaN, -3.33, 'PLN', np.NaN],

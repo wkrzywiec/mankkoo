@@ -1,14 +1,17 @@
 import os
+import psycopg2
+import select
+import threading
 
 from apiflask import APIFlask
 from flask_cors import CORS
 
 import mankkoo.config as app_profile
 import mankkoo.database as db
+import mankkoo.views as views
 
 from mankkoo.controller.main_controller import main_endpoints
 from mankkoo.controller.account_controller import account_endpoints
-from mankkoo.util import config
 from mankkoo.base_logger import log
 from mankkoo.config import ProdConfig, DevConfig
 
@@ -49,8 +52,36 @@ def create_app(app_config=None):
 
     db.init_db()
 
-    config.init_data_folder()
+    start_listener_thread()
     return app
+
+
+def start_listener_thread():
+    thread = threading.Thread(target=listen_to_db_notifications, daemon=True)
+    thread.start()
+
+
+def listen_to_db_notifications():
+    log.info('Starting listening to database notifications...')
+
+    conn = db.get_connection()
+    conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+
+    cursor = conn.cursor()
+    cursor.execute("LISTEN events_added;")
+
+    while True:
+        if select.select([conn], [], [], 5) == ([], [], []):
+            continue
+        conn.poll()
+        while conn.notifies:
+            notify = conn.notifies.pop(0)
+            handle_notification(notify)
+
+
+def handle_notification(notify):
+    log.info(f"Received notification. Channel: '{notify.channel}'. Payload: '{notify.payload}'")
+    views.update_views(notify.payload)
 
 
 if __name__ == "__main__":

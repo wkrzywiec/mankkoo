@@ -20,7 +20,7 @@ class Importer(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def load_file_by_contents(self, contents: str) -> pd.DataFrame:
+    def load_file_by_contents(self, contents: bytes) -> pd.DataFrame:
         """Load bank specific account history from 64base encoded string, provided from UI
 
         Args:

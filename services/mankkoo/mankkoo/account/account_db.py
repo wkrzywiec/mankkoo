@@ -1,9 +1,8 @@
-import pandas as pd
-import mankkoo.util.config as config
 import mankkoo.database as db
 
 from mankkoo.base_logger import log
 from mankkoo.controller.account_controller import Account, AccountOperation
+from mankkoo.account.models import Bank
 
 
 def load_all_accounts() -> list[Account]:
@@ -48,22 +47,57 @@ def load_all_accounts() -> list[Account]:
     return result
 
 
-def load_all_operations_as_df() -> pd.DataFrame:
-    log.info('Loading ACCOUNT file...')
-    df = pd.read_csv(
-        config.mankkoo_file_path('account'),
-        parse_dates=['Date'],
-        index_col=0,
-        encoding='iso-8859-2')
-    if df.empty:
-        return df
-    df = df.astype({'Account': 'string', 'Balance': 'float', 'Operation': 'float', 'Date': 'datetime64[ns]'})
-    df['Date'] = df['Date'].dt.date
-    return df
+def get_bank_type(account_id: str) -> Bank:
+    log.info(f"Looking for bank enum for account_id {account_id}...")
+    query = f"""
+    SELECT
+        metadata->>'importer' AS importer
+    FROM streams
+    WHERE id = '{account_id}'
+    AND type = 'account';
+    """
+    with db.get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(query)
+            result = cur.fetchone()
+            if result is None:
+                raise ValueError(f"Failed to load bank definition. There is no bank account definition with an id '{account_id}'")
+            else:
+                (importer, ) = result
+
+    try:
+        bank = Bank[importer]
+        log.info(f"Found bank by account_id ({account_id}): {bank}")
+        return bank
+    except Exception:
+        raise ValueError(f"Failed to load importer for bank. Importer with a code: '{importer}' is not known")
+
+
+def get_account_balance(account_id: str) -> float:
+    log.info(f"Getting balance for an account: {account_id}...")
+    query = f"""
+    SELECT
+        (data ->> 'balance')::numeric AS balance
+    FROM
+        events
+    WHERE
+        stream_id = '{account_id}'
+    ORDER BY
+        version DESC
+    LIMIT 1;
+    """
+    with db.get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(query)
+            result = cur.fetchone()
+            if result is None:
+                return 0
+            else:
+                (balance, ) = result
+    return float(balance)
 
 
 def load_operations_for_account(stream_id: str) -> list[AccountOperation]:
-
     query = f"""
     SELECT
         id,
