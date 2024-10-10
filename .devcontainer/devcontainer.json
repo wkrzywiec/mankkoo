@@ -78,7 +78,6 @@
 	"remoteUser": "root",
 
 	"remoteEnv": {
-		"NEXT_WEBPACK_USEPOLLING": "1",
-		"CHOKIDAR_USEPOLLING": "true"
+		"WATCHPACK_POLLING": "true"
 	}
 }

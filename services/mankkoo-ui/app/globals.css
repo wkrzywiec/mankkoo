@@ -1,0 +1,58 @@
+:root {
+  --main-bg-color: #F8F7F2;
+  --secondary-bg-color: #463F3A;
+  --font-color: black;
+}
+
+
+body {
+  margin: 50px;
+}
+
+.main {
+  display: flex;
+  height: 100vh;
+}
+
+
+/* ================================= */
+/* LEFT SIDE MENU  */
+/* ================================= */
+.menu {
+  background-color: var(--secondary-bg-color);
+  display: flex;
+  flex-direction: column;
+  width: 200px;
+}
+
+/* Smaller screens - menu width is changing size to meet screen proportions*/
+@media (max-width: 800px) {
+  .menu {
+    width: 20vw;
+  }
+}
+
+.menu ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.menu ul li {
+  margin: 5%;
+  color: var(--main-bg-color);
+  text-align: center;
+}
+
+.menu li.menuHeader {
+  font-size: 1.1em;
+  text-align: center;
+  padding: 10%;
+}
+
+
+/* ================================= */
+/* PAGE CONTENT  */
+/* ================================= */
+.content {
+  background-color: var(--main-bg-color);
+}
