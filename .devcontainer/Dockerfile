@@ -9,7 +9,7 @@ ENV POETRY_NO_INTERACTION=1
 
 ENV NVM_DIR=/usr/local/nvm
 # ENV NVM_DIR=~/.nvm
-ENV NODE_VERSION=20.11.0
+ENV NODE_VERSION=20.18.0
 # replace shell with bash so we can source files
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
@@ -53,6 +53,7 @@ ENV PATH=$NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 # confirm installation
 RUN node -v
 RUN npm -v
+RUN npm install -g pnpm
 
 
 # install Taskfile

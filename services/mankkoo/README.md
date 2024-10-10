@@ -46,7 +46,7 @@ insert into streams (id, type, version, metadata) values
 Add new event:
 
 ```sql
-SELECT append_event(gen_random_uuid(), '{"units": 3,"balance": 300,"currency": "PLN","totalValue": 300,"pricePerUnit": 100}'::jsonb, 'TreasuryBondsBought'::text, 'a32a09bc-4907-48d6-96e8-989b70acd5c2'::uuid, 'investment'::text, 1::bigint)
+SELECT append_event(gen_random_uuid(), '{"units": 3,"balance": 300,"currency": "PLN","totalValue": 300,"pricePerUnit": 100}'::jsonb, 'TreasuryBondsBought'::text, 'a32a09bc-4907-48d6-96e8-989b70acd5c2'::uuid, 'investment'::text, to_timestamp('2024-01-01', 'YYYY-MM-DD')::timestamp without time zone at time zone 'Etc/UTC', 1::bigint)
 ```
 
 

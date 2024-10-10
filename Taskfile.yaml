@@ -89,7 +89,7 @@ tasks:
     dir: services/mankkoo-ui
     cmds:
       - echo "Starting mankkoo UI..."
-      - npm start
+      - npm run dev
 
   test:
     desc: Run all tests

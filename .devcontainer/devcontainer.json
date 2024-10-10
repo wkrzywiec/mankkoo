@@ -53,7 +53,6 @@
 				"ms-toolsai.jupyter",
 				"ms-python.flake8",
 				"ms-python.mypy-type-checker",
-				"ms-vscode.vscode-typescript-tslint-plugin",
 				"dbaeumer.vscode-eslint",
 				"formulahendry.code-runner",
 				"mechatroner.rainbow-csv",
