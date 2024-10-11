@@ -30,16 +30,11 @@
     list-style-type: none;
 }
 
-/* .menu ul li {
-    margin: 5%;
-    color: var(--main-bg-color);
-    text-align: center;
-} */
-
 .menu li:first-child {
     font-size: 1.1em;
     text-align: center;
     padding: 10%;
+    margin-bottom: 15%;
 }
 
 .menu ul li:last-child {

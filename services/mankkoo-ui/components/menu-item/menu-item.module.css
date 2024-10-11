@@ -1,9 +1,18 @@
 .menuItem {
     margin: 5%;
     text-align: center;
+    color: var(--main-bg-color);
+}
+
+.menuItem svg {
+    width: 10%;
 }
 
 .menuItem a {
-    color: var(--main-bg-color);
     text-decoration: none;
+    color: inherit;
+}
+
+.menuItem p {
+    margin-top: 5px;
 }
