@@ -1,0 +1,47 @@
+/* ================================= */
+/* LEFT SIDE MENU  */
+/* ================================= */
+
+.menu {
+    width: 200px;
+    background-color: var(--secondary-bg-color);
+    display: flex;
+    flex-direction: column;
+}
+  
+/* Smaller screens - menu width is changing size to meet screen proportions*/
+@media (max-width: 800px) {
+    .menu {
+        width: 20vw;
+    }
+}
+  
+.menu nav {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.menu ul {
+    height: 100%;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    list-style-type: none;
+}
+
+.menu ul li {
+    margin: 5%;
+    color: var(--main-bg-color);
+    text-align: center;
+}
+
+.menu li:first-child {
+    font-size: 1.1em;
+    text-align: center;
+    padding: 10%;
+}
+
+.menu ul li:last-child {
+    margin-top: auto;
+}

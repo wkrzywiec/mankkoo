@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import Menu from '@/components/menu/menu'
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -24,18 +25,7 @@ export default function RootLayout({ children, }: Readonly<{children: React.Reac
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <div className="main">
-          <div className="menu">
-            <nav>
-              <ul>
-                <li>Mankkoo</li>
-                <li>Overview</li>
-                <li>Investments</li>
-                <li>Financial Fortress</li>
-                <li>Real Estate</li>
-                <li>Streams</li>
-              </ul>
-            </nav>  
-          </div>
+          <Menu />
           <div className="content">
             {children}
           </div>
