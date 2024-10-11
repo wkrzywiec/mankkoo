@@ -30,11 +30,11 @@
     list-style-type: none;
 }
 
-.menu ul li {
+/* .menu ul li {
     margin: 5%;
     color: var(--main-bg-color);
     text-align: center;
-}
+} */
 
 .menu li:first-child {
     font-size: 1.1em;

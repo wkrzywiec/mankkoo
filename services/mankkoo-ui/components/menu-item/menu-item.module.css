@@ -1,0 +1,9 @@
+.menuItem {
+    margin: 5%;
+    text-align: center;
+}
+
+.menuItem a {
+    color: var(--main-bg-color);
+    text-decoration: none;
+}
