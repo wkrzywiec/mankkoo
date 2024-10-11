@@ -6,7 +6,7 @@
 
 
 body {
-  margin: 50px;
+  margin: 0px;
 }
 
 .main {
@@ -19,10 +19,10 @@ body {
 /* LEFT SIDE MENU  */
 /* ================================= */
 .menu {
+  width: 200px;
   background-color: var(--secondary-bg-color);
   display: flex;
   flex-direction: column;
-  width: 200px;
 }
 
 /* Smaller screens - menu width is changing size to meet screen proportions*/
@@ -32,9 +32,18 @@ body {
   }
 }
 
+.menu nav {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
 .menu ul {
-  list-style-type: none;
+  height: 100%;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  list-style-type: none;
 }
 
 .menu ul li {
@@ -43,10 +52,14 @@ body {
   text-align: center;
 }
 
-.menu li.menuHeader {
+.menu li:first-child {
   font-size: 1.1em;
   text-align: center;
   padding: 10%;
+}
+
+.menu ul li:last-child {
+  margin-top: auto;
 }
 
 
@@ -55,4 +68,5 @@ body {
 /* ================================= */
 .content {
   background-color: var(--main-bg-color);
+  flex-grow: 1;
 }

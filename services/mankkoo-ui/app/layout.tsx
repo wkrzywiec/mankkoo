@@ -25,12 +25,16 @@ export default function RootLayout({ children, }: Readonly<{children: React.Reac
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <div className="main">
           <div className="menu">
-            <ul>
-              <li className="menuHeader">Mankkoo</li>
-              <li>Overview</li>
-              <li>Investments</li>
-              <li>Streams</li>
-            </ul>
+            <nav>
+              <ul>
+                <li>Mankkoo</li>
+                <li>Overview</li>
+                <li>Investments</li>
+                <li>Financial Fortress</li>
+                <li>Real Estate</li>
+                <li>Streams</li>
+              </ul>
+            </nav>  
           </div>
           <div className="content">
             {children}
