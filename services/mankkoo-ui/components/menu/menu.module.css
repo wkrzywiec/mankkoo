@@ -3,6 +3,7 @@
 /* ================================= */
 
 .menu {
+    height: 100%;
     width: 200px;
     background-color: var(--secondary-bg-color);
     display: flex;
@@ -15,15 +16,8 @@
         width: 20vw;
     }
 }
-  
-.menu nav {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-}
 
 .menu ul {
-    height: 100%;
     padding: 0;
     display: flex;
     flex-direction: column;

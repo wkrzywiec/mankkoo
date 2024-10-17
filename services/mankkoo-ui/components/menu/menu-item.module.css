@@ -8,6 +8,21 @@
     width: 10%;
 }
 
+/* Smaller screens - menu width is changing size to meet screen proportions*/
+@media (max-width: 1600px) {
+    .menuItem * {
+        font-size: 0.9em;
+    }
+    
+    .menuItem svg {
+        width: 8%;
+    }
+
+    .menuItem p {
+        margin-top: 2px;
+    }
+}
+
 .menuItem a {
     text-decoration: none;
     color: inherit;
