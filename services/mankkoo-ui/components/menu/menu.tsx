@@ -1,5 +1,5 @@
 import classes from './menu.module.css'
-import MenuItem from '@/components/menu-item/menu-item'
+import MenuItem from '@/components/menu/menu-item'
 
 import { 
     faGaugeHigh, faMoneyBillWave, faChartLine,
