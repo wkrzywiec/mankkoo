@@ -1,4 +1,5 @@
 import styles from "./page.module.css";
+import Indicator from "@/components/elements/indicator"
 
 export default function Home() {
   return (
@@ -17,18 +18,17 @@ export default function Home() {
       </div>
       
       <div className={styles.gridItem}>
-        <h3>Savings</h3>
-        <p>123 456.78 PLN</p>
+        <Indicator headline="Net Worth" text="1 123 456.78 PLN" />
       </div>
       <div className={styles.gridItem}>
-        <h3>Last Month Income</h3>
-        <p style={{color: "#659B5E"}}>9 876.54 PLN</p>
+        <Indicator headline="Savings" text="123 456.78 PLN" />
       </div>
       <div className={styles.gridItem}>
-        <h3>Last Month Spendings</h3>
-        <p style={{color: "#ED6B53"}}>10 456.23 PLN</p>
+        <Indicator headline="Last Month Income" text="9 876.54 PLN" textColor="#659B5E" />
       </div>
-      <div className={styles.gridItem}></div>
+      <div className={styles.gridItem}>
+        <Indicator headline="Last Month Spendings" text="10 456.23 PLN" textColor="#ED6B53" />
+      </div>
 
       <div className={`${styles.gridItem} ${styles.dummyGridItem}`}></div>
       <div className={`${styles.gridItem} ${styles.dummyGridItem}`}></div>
