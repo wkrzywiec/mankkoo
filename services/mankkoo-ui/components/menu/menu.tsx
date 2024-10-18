@@ -7,7 +7,7 @@ import {
 
 export default function Menu() {
     return (
-        <div className={classes.menu}>
+        <nav className={classes.menu}>
             <ul>
                 <MenuItem text="Mankkoo" link="/" icon={undefined}/>
                 <MenuItem text="Overview" link="/" icon={faGaugeHigh}/>
@@ -17,6 +17,6 @@ export default function Menu() {
                 <MenuItem text="Real Estate" link="/estate" icon={faBuildingUser}/>
                 <MenuItem text="Streams" link="/streams" icon={faServer}/>
             </ul>
-        </div>
+        </nav>
     )
 }

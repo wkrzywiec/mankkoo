@@ -2,8 +2,46 @@ import styles from "./page.module.css";
 
 export default function Home() {
   return (
-    <div className={styles.blackBox}>
-      Test
-    </div>
+    <main className={styles.mainContainer}>
+      <div className={styles.gridItem}></div>
+      <div className={styles.gridItem}></div>
+      <div className={styles.gridItem}></div>
+      <div className={styles.gridItem}></div>
+
+      <div className={styles.gridItem}></div>
+      <div className={styles.gridItem}></div>
+      <div className={styles.gridItem}></div>
+      <div className={styles.gridItem}></div>
+
+      <div className={styles.gridItem}></div>
+      <div className={styles.gridItem}></div>
+      <div className={styles.gridItem}></div>
+      <div className={styles.gridItem}></div>
+
+      <div className={styles.gridItem}></div>
+      <div className={styles.gridItem}></div>
+      <div className={styles.gridItem}></div>
+      <div className={styles.gridItem}></div>
+
+      <div className={styles.gridItem}></div>
+      <div className={styles.gridItem}></div>
+      <div className={styles.gridItem}></div>
+      <div className={styles.gridItem}></div>
+
+      <div className={styles.gridItem}></div>
+      <div className={styles.gridItem}></div>
+      <div className={styles.gridItem}></div>
+      <div className={styles.gridItem}></div>
+
+      <div className={styles.gridItem}></div>
+      <div className={styles.gridItem}></div>
+      <div className={styles.gridItem}></div>
+      <div className={styles.gridItem}></div>
+
+      <div className={styles.gridItem}></div>
+      <div className={styles.gridItem}></div>
+      <div className={styles.gridItem}></div>
+      <div className={styles.gridItem}></div>
+    </main>
   );
 }

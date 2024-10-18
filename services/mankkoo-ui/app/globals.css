@@ -4,17 +4,12 @@
   --font-color: black;
 }
 
-
 body {
   margin: 0px;
-}
-
-.main {
   display: flex;
   height: 100vh;
   overflow: hidden;
 }
-
 
 /* ================================= */
 /* PAGE CONTENT  */

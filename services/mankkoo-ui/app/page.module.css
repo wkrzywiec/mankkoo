@@ -1,3 +1,13 @@
-.blackBox {
-  background-color: black;
+.mainContainer {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  column-gap: 5px;
+  row-gap: 5px;
+}
+
+.gridItem {
+  background-color: coral;
+  height: 200px;
+  width: 200px;
+  margin: 10px;
 }
