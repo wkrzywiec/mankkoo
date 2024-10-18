@@ -18,4 +18,5 @@ body {
   background-color: var(--main-bg-color);
   flex-grow: 1;
   overflow-y: auto; /* This part is needed to add a scrollbar for main contnent but not for a menu */
+  padding-left: 3%;
 }

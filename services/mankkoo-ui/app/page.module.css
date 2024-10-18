@@ -6,8 +6,31 @@
 }
 
 .gridItem {
+  margin: 10px;
+}
+
+.dummyGridItem {
   background-color: coral;
   height: 200px;
   width: 200px;
-  margin: 10px;
+}
+
+.span2Columns {
+  grid-column: span 2;
+}
+
+.gridItem h1 {
+  font-size: 4rem;
+  font-weight: 700;
+  margin-bottom: 0%;
+}
+
+.gridItem h2 {
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+.gridItem p {
+  font-weight: 200;
+  margin-top: 0.2rem;
 }
