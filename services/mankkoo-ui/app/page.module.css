@@ -6,7 +6,7 @@
 }
 
 .gridItem {
-  margin: 10px;
+  margin: 5px;
 }
 
 .dummyGridItem {
@@ -28,9 +28,33 @@
 .gridItem h2 {
   font-size: 2rem;
   font-weight: 800;
+  margin-bottom: 0%;
+}
+
+.gridItem h3 {
+  font-size: 1.5rem;
+  font-weight: 400;
+  position: relative; /* Ensure the pseudo-element is positioned relative to the h3 */
+  padding-bottom: 10px; /* Add some space between the text and the line */
+  margin-bottom: 10px; /* Optional: space below the h3 */
+}
+
+.gridItem h3::after {
+  content: ""; /* Pseudo-element to create the line */
+  position: absolute;
+  left: 0;
+  bottom: 0; /* Position the line at the bottom of the h3 */
+  width: 80%; /* Make the line span the entire width */
+  height: 2px; /* Thickness of the line */
+  background-color: var(--font-color);; /* Color of the line */
 }
 
 .gridItem p {
   font-weight: 200;
   margin-top: 0.2rem;
+}
+
+.gridItem h3 + p {
+  font-weight: 800;
+  font-size: 1.5rem;;
 }

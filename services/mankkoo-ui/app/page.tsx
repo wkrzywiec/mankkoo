@@ -16,10 +16,19 @@ export default function Home() {
       <div className={styles.span2Columns}>
       </div>
       
-      <div className={`${styles.gridItem} ${styles.dummyGridItem}`}></div>
-      <div className={`${styles.gridItem} ${styles.dummyGridItem}`}></div>
-      <div className={`${styles.gridItem} ${styles.dummyGridItem}`}></div>
-      <div className={`${styles.gridItem} ${styles.dummyGridItem}`}></div>
+      <div className={styles.gridItem}>
+        <h3>Savings</h3>
+        <p>123 456.78 PLN</p>
+      </div>
+      <div className={styles.gridItem}>
+        <h3>Last Month Income</h3>
+        <p style={{color: "#659B5E"}}>9 876.54 PLN</p>
+      </div>
+      <div className={styles.gridItem}>
+        <h3>Last Month Spendings</h3>
+        <p style={{color: "#ED6B53"}}>10 456.23 PLN</p>
+      </div>
+      <div className={styles.gridItem}></div>
 
       <div className={`${styles.gridItem} ${styles.dummyGridItem}`}></div>
       <div className={`${styles.gridItem} ${styles.dummyGridItem}`}></div>
