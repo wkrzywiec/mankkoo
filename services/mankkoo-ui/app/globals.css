@@ -12,6 +12,7 @@ body {
 .main {
   display: flex;
   height: 100vh;
+  overflow: hidden;
 }
 
 
@@ -21,4 +22,5 @@ body {
 .content {
   background-color: var(--main-bg-color);
   flex-grow: 1;
+  overflow-y: auto
 }
