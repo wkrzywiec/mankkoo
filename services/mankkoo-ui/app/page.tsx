@@ -1,5 +1,8 @@
 import styles from "./page.module.css";
+
 import Indicator from "@/components/elements/indicator"
+import PieChart from "@/components/charts/piechart";
+import TileHeader from "@/components/elements/tile-header"
 
 export default function Home() {
   return (
@@ -30,11 +33,13 @@ export default function Home() {
         <Indicator headline="Last Month Spendings" text="10 456.23 PLN" textColor="#ED6B53" />
       </div>
 
-      <div className={`${styles.gridItem} ${styles.dummyGridItem}`}></div>
-      <div className={`${styles.gridItem} ${styles.dummyGridItem}`}></div>
-      <div className={`${styles.gridItem} ${styles.dummyGridItem}`}></div>
-      <div className={`${styles.gridItem} ${styles.dummyGridItem}`}></div>
+      <div className={`${styles.gridItem} ${styles.span2Columns}`}>
+        <TileHeader headline="Total Net Worth" text="Including estimated real-estate value, cumulated retirement funds and all financial assets (all accounts and investments)." />
+        <PieChart />
+      </div>
+      <div className={`${styles.gridItem} ${styles.span2Columns}`}>
 
+      </div>
       <div className={`${styles.gridItem} ${styles.span2Columns}`}>
         <h2>History</h2>
       </div>
