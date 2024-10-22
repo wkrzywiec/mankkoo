@@ -1,10 +1,13 @@
-// import classes from "./piechart.module.css"
 "use client";
-import { Chart, ArcElement, ChartDataLabel } from 'chart.js'
-import { Pie } from "react-chartjs-2";
 
-Chart.register(ArcElement);
-Chart.register(ChartDataLabels);
+import classes from "./piechart.module.css"
+import { Chart as ChartJS, ArcElement, Tooltip} from 'chart.js'
+import { Pie } from "react-chartjs-2";
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+
+import { mankkooColors } from "@/app/colors";
+
+ChartJS.register(ArcElement, Tooltip, ChartDataLabels);
 
 export default function PieChart() {
     const data = {
@@ -15,28 +18,27 @@ export default function PieChart() {
           ],
           datasets: [{
             label: 'My First Dataset',
-            data: [300, 50, 100],
-            backgroundColor: [
-              'rgb(255, 99, 132)',
-              'rgb(54, 162, 235)',
-              'rgb(255, 205, 86)'
-            ],
+            data: [30, 50, 20, 60,],
+            backgroundColor: mankkooColors,
             hoverOffset: 10
           }]
     }
     return (
-        <>
+        <div style={{height: "200px", width: "200px"}}>
             <Pie
+                className={classes.pie}
                 data={data}
                 options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    radius: "95%",
                     plugins: {
-                        title: {
-                            display: true,
-                            text: "Users Gained between 2016-2020"
+                        datalabels: {
+                            display: true
                         }
                     }
                 }}
             />
-        </>
+        </div>
     )
 }
