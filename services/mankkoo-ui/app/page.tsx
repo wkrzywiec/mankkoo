@@ -38,7 +38,7 @@ export default function Home() {
         <TileHeader headline="Total Net Worth" text="Including estimated real-estate value, cumulated retirement funds and all financial assets (all accounts and investments)." />
         <div className={styles.row}>
           <PieChart />
-          <Table boldLastRow={true}/>
+          <Table boldLastRow={true} colorsColumn={1}/>
         </div>
       </div>
       <div className={`${styles.gridItem} ${styles.span2Columns}`}>

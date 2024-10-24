@@ -1,6 +1,7 @@
 .table {
     border-collapse: collapse;
     font-weight: 300;
+    text-align: left;
 }
 
 .row {
@@ -15,4 +16,16 @@
 .boldedRow {
     font-weight: bold;
     border-top: 5px solid black;
+}
+
+.boldedRow td {
+    padding: 10px;
+}
+
+.dot {
+    height: 25px;
+    width: 25px;
+    background-color: #bbb;
+    border-radius: 50%;
+    display: inline-block;
 }

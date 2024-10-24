@@ -10,3 +10,8 @@ export enum Colors {
 }
 
 export const mankkooColors = Object.values(Colors);
+
+// todo: make sure that index can be bigger 
+export function getColor(index: number) {
+    return mankkooColors[index]
+}
