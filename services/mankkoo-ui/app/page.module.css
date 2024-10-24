@@ -39,6 +39,6 @@
 .row {
   display: flex;
   flex-direction: row;
-  /* justify-content: space-between; */
-  padding-right: 20%;
+  gap: 10%;
+  justify-content: space-around;
 }

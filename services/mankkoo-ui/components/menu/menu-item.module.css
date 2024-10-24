@@ -13,10 +13,6 @@
     .menuItem * {
         font-size: 0.9em;
     }
-    
-    .menuItem svg {
-        width: 8%;
-    }
 
     .menuItem p {
         margin-top: 2px;

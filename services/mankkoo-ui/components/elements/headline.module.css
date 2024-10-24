@@ -11,7 +11,7 @@
     position: absolute;
     left: 0;
     bottom: 0; /* Position the line at the bottom of the h3 */
-    width: 80%; /* Make the line span the entire width */
+    width: 90%; /* Make the line span the entire width */
     height: 2px; /* Thickness of the line */
     background-color: var(--font-color);; /* Color of the line */
 }
