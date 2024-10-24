@@ -17,7 +17,6 @@ export default function PieChart() {
             'Yellow'
           ],
           datasets: [{
-            label: 'My First Dataset',
             data: [30, 50, 20, 60,],
             backgroundColor: mankkooColors,
             hoverOffset: 10

@@ -35,3 +35,10 @@
   font-weight: 800;
   margin-bottom: 0%;
 }
+
+.row {
+  display: flex;
+  flex-direction: row;
+  /* justify-content: space-between; */
+  padding-right: 20%;
+}

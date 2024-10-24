@@ -2,6 +2,7 @@ import styles from "./page.module.css";
 
 import Indicator from "@/components/elements/indicator"
 import PieChart from "@/components/charts/piechart";
+import Table from "@/components/charts/table";
 import TileHeader from "@/components/elements/tile-header"
 
 export default function Home() {
@@ -35,7 +36,10 @@ export default function Home() {
 
       <div className={`${styles.gridItem} ${styles.span2Columns}`}>
         <TileHeader headline="Total Net Worth" text="Including estimated real-estate value, cumulated retirement funds and all financial assets (all accounts and investments)." />
-        <PieChart />
+        <div className={styles.row}>
+          <PieChart />
+          <Table />
+        </div>
       </div>
       <div className={`${styles.gridItem} ${styles.span2Columns}`}>
 
