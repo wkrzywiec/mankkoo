@@ -19,6 +19,10 @@
   grid-column: span 2;
 }
 
+.span4Columns {
+  grid-column: span 4;
+}
+
 .span2Rows {
   grid-row-end: span 2;
 }

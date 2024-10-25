@@ -5,22 +5,20 @@ import PieChart from "@/components/charts/piechart";
 import Table from "@/components/charts/table";
 import TileHeader from "@/components/elements/tile-header"
 import Link from "next/link";
+import LineChart from "@/components/charts/line";
 
 export default function Home() {
   return (
     <main className={styles.mainContainer}>
-      <div className={`${styles.gridItem} ${styles.span2Columns}`}>
+      <div className={`${styles.gridItem} ${styles.span4Columns}`}>
         <h1>Finance Overview</h1>
-        <p>Detailed overview of your personal finances, summarizing your current wealth, displaying historical data, and highlighting trends.</p>
+        <p>A detailed overview of your personal finances, summarizing current wealth, presenting historical data, and highlighting key trends.</p>
       </div>
-      <div className={styles.span2Columns}>
-      </div>
-
-      <div className={`${styles.gridItem} ${styles.span2Columns}`}>
+      
+      <div className={`${styles.gridItem} ${styles.span4Columns}`}>
         <h2>Current Indicators</h2>
       </div>
-      <div className={styles.span2Columns}>
-      </div>
+      
       
       <div className={styles.gridItem}>
         <Indicator headline="Net Worth" text="1 123 456.78 PLN" />
@@ -37,7 +35,7 @@ export default function Home() {
 
       <div className={`${styles.gridItem} ${styles.span2Columns}`}>
         <TileHeader headline="Total Net Worth">
-          Including estimated real-estate value, cumulated retirement funds and all financial assets (all accounts and investments).
+          Includes estimated real estate value, total retirement funds, and all financial assets (accounts and investments).
         </TileHeader>
         <div className={styles.row}>
           <PieChart />
@@ -57,7 +55,7 @@ export default function Home() {
 
       <div className={`${styles.gridItem} ${styles.span2Columns}`}>
         <TileHeader headline="Financial Savings">
-          Entire wealth located on bank accounts and easy to sell assets (i.e. excluding real-estate and all retirement funds).
+          Total wealth held in bank accounts and liquid assets (excluding real estate and retirement funds).
         </TileHeader>
         <div className={styles.row}>
           <Table boldLastRow={true} colorsColumn={1}/>
@@ -65,16 +63,20 @@ export default function Home() {
         </div>
       </div>
 
-      <div className={`${styles.gridItem} ${styles.span2Columns}`}>
+
+
+      <div className={`${styles.gridItem} ${styles.span4Columns}`}>
         <h2>History</h2>
       </div>
-      <div className={styles.span2Columns}>
-      </div>
 
-      <div className={`${styles.gridItem} ${styles.dummyGridItem}`}></div>
-      <div className={`${styles.gridItem} ${styles.dummyGridItem}`}></div>
-      <div className={`${styles.gridItem} ${styles.dummyGridItem}`}></div>
-      <div className={`${styles.gridItem} ${styles.dummyGridItem}`}></div>
+      <div className={`${styles.gridItem} ${styles.span4Columns}`}>
+        <TileHeader headline="Total Net Worth">
+          Includes estimated real estate value, total retirement funds, and all financial assets (accounts and investments).
+        </TileHeader>
+        <div className={styles.row}>
+          <LineChart />
+        </div>
+      </div>
 
       <div className={`${styles.gridItem} ${styles.dummyGridItem}`}></div>
       <div className={`${styles.gridItem} ${styles.dummyGridItem}`}></div>
