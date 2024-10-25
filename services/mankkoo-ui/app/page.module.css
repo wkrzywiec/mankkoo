@@ -19,6 +19,10 @@
   grid-column: span 2;
 }
 
+.span2Rows {
+  grid-row-end: span 2;
+}
+
 .gridItem h1 {
   font-size: 4rem;
   font-weight: 700;
@@ -41,4 +45,12 @@
   flex-direction: row;
   gap: 10%;
   justify-content: space-around;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 10%;
+  justify-content: space-around;
+  align-items: center;
 }

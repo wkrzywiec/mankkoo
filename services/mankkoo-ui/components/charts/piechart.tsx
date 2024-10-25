@@ -9,7 +9,8 @@ import { mankkooColors } from "@/app/colors";
 
 ChartJS.register(ArcElement, Tooltip, ChartDataLabels);
 
-export default function PieChart() {
+export default function PieChart({size=1} : {size?: number}) {
+    const sizeInPx = (size * 200).toString() + "px"
     const data = {
         labels: [
             'Red',
@@ -23,7 +24,7 @@ export default function PieChart() {
           }]
     }
     return (
-        <div style={{height: "200px", width: "200px"}}>
+        <div style={{height: sizeInPx, width: sizeInPx}}>
             <Pie
                 className={classes.pie}
                 data={data}

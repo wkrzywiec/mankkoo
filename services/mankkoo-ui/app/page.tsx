@@ -4,6 +4,7 @@ import Indicator from "@/components/elements/indicator"
 import PieChart from "@/components/charts/piechart";
 import Table from "@/components/charts/table";
 import TileHeader from "@/components/elements/tile-header"
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -35,15 +36,35 @@ export default function Home() {
       </div>
 
       <div className={`${styles.gridItem} ${styles.span2Columns}`}>
-        <TileHeader headline="Total Net Worth" text="Including estimated real-estate value, cumulated retirement funds and all financial assets (all accounts and investments)." />
+        <TileHeader headline="Total Net Worth">
+          Including estimated real-estate value, cumulated retirement funds and all financial assets (all accounts and investments).
+        </TileHeader>
         <div className={styles.row}>
           <PieChart />
           <Table boldLastRow={true} colorsColumn={1}/>
         </div>
       </div>
-      <div className={`${styles.gridItem} ${styles.span2Columns}`}>
 
+      <div className={`${styles.gridItem} ${styles.span2Columns} ${styles.span2Rows}`}>
+        <TileHeader headline="Financial Fortress">
+          Based on a book <Link href="https://finansowaforteca.pl/">Finansowa Forteca by Marcin Iwuć</Link>.
+        </TileHeader>
+        <div className={styles.column}>
+          <PieChart size={2}/>
+          <Table boldLastRow={true} colorsColumn={1}/>
+        </div>
       </div>
+
+      <div className={`${styles.gridItem} ${styles.span2Columns}`}>
+        <TileHeader headline="Financial Savings">
+          Entire wealth located on bank accounts and easy to sell assets (i.e. excluding real-estate and all retirement funds).
+        </TileHeader>
+        <div className={styles.row}>
+          <Table boldLastRow={true} colorsColumn={1}/>
+          <PieChart />
+        </div>
+      </div>
+
       <div className={`${styles.gridItem} ${styles.span2Columns}`}>
         <h2>History</h2>
       </div>
