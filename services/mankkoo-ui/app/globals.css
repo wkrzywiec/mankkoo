@@ -35,4 +35,5 @@ body {
   flex-grow: 1;
   overflow-y: auto; /* This part is needed to add a scrollbar for main contnent but not for a menu */
   padding-left: 3%;
+  padding-right: 3%;
 }

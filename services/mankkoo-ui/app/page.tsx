@@ -73,9 +73,7 @@ export default function Home() {
         <TileHeader headline="Total Net Worth">
           Includes estimated real estate value, total retirement funds, and all financial assets (accounts and investments).
         </TileHeader>
-        <div className={styles.row}>
-          <LineChart />
-        </div>
+        <LineChart />
       </div>
 
       <div className={`${styles.gridItem} ${styles.dummyGridItem}`}></div>
