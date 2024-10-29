@@ -44,14 +44,14 @@
   margin-bottom: 0%;
 }
 
-.row {
+.horizontalAlignment {
   display: flex;
   flex-direction: row;
   gap: 10%;
   justify-content: space-around;
 }
 
-.column {
+.verticalAlignment {
   display: flex;
   flex-direction: column;
   gap: 10%;

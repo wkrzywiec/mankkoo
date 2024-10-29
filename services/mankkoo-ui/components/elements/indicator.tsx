@@ -1,5 +1,5 @@
-import classes from "./indicator.module.css"
-import Headline from "@/components/elements/headline"
+import classes from "./Indicator.module.css"
+import Headline from "@/components/elements/Headline"
 
 export default function Indicator({headline, text, textColor="var(--font-color)"}: {headline: string, text: string, textColor?: string}) {
     return (

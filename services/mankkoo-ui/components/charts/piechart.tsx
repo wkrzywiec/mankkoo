@@ -1,6 +1,6 @@
 "use client";
 
-import classes from "./piechart.module.css"
+import classes from "./Piechart.module.css"
 import { Chart as ChartJS, ArcElement, Tooltip} from 'chart.js'
 import { Pie } from "react-chartjs-2";
 import ChartDataLabels from 'chartjs-plugin-datalabels';

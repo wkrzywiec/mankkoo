@@ -1,4 +1,4 @@
-import styles from "./table.module.css";
+import styles from "./Table.module.css";
 
 import { CSSProperties } from 'react';
 import { getColor } from "@/app/colors";

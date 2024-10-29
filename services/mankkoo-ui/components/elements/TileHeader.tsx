@@ -1,14 +1,14 @@
-import classes from "./tile-header.module.css"
-import Headline from "@/components/elements/headline"
+import Headline from "@/components/elements/Headline"
+import SubHeadline from "@/components/elements/SubHeadline"
 import { ReactNode } from 'react';
 
 export default function TileHeader({headline, children}: {headline: string, children: ReactNode}) {
     return (
         <>
             <Headline text={headline} fontSize="2" />
-            <p className={classes.tileText}>
+            <SubHeadline>
                 {children}
-            </p>
+            </SubHeadline>
         </>
     )
 }
