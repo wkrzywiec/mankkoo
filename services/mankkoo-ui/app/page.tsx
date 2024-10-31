@@ -94,20 +94,32 @@ export default function Home() {
         </div>
       </div>
 
-      <div className={`${styles.gridItem} ${styles.dummyGridItem}`}></div>
-      <div className={`${styles.gridItem} ${styles.dummyGridItem}`}></div>
-      <div className={`${styles.gridItem} ${styles.dummyGridItem}`}></div>
-      <div className={`${styles.gridItem} ${styles.dummyGridItem}`}></div>
+      <div className={`${styles.gridItem} ${styles.span2Columns}`}>
+        <TileHeader headline="Financial Savings">
+          💸 Entire wealth located on bank accounts and easy to sell assets.
+        </TileHeader>
+        <LineChart />
+      </div>
+      <div className={`${styles.gridItem} ${styles.span2Columns}`}>
+        <TileHeader headline="Real-estate Value">
+          🏠 Historical value of all real-estates (including the ones for investments and not).
+        </TileHeader>
+        <LineChart />
+      </div>
 
-      <div className={`${styles.gridItem} ${styles.dummyGridItem}`}></div>
-      <div className={`${styles.gridItem} ${styles.dummyGridItem}`}></div>
-      <div className={`${styles.gridItem} ${styles.dummyGridItem}`}></div>
-      <div className={`${styles.gridItem} ${styles.dummyGridItem}`}></div>
+      <div className={`${styles.gridItem} ${styles.span2Columns}`}>
+        <TileHeader headline="Investments">
+          💸 Historical value of all investments divided by the asset type excluding real-estate.
+        </TileHeader>
+        <LineChart />
+      </div>
+      <div className={`${styles.gridItem} ${styles.span2Columns}`}>
+        <TileHeader headline="Retirement">
+          👴Cumultive resources collected for a retirement.
+        </TileHeader>
+        <LineChart />
+      </div>
 
-      <div className={`${styles.gridItem} ${styles.dummyGridItem}`}></div>
-      <div className={`${styles.gridItem} ${styles.dummyGridItem}`}></div>
-      <div className={`${styles.gridItem} ${styles.dummyGridItem}`}></div>
-      <div className={`${styles.gridItem} ${styles.dummyGridItem}`}></div>
     </main>
   );
 }

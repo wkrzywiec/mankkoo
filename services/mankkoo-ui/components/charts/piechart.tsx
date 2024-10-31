@@ -35,6 +35,9 @@ export default function PieChart({size=1} : {size?: number}) {
                     plugins: {
                         datalabels: {
                             display: true
+                        },
+                        legend: {
+                            display: false
                         }
                     }
                 }}
