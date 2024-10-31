@@ -1,12 +1,17 @@
 import styles from "./page.module.css";
 
+import BarChart from "@/components/charts/Bar";
 import Indicator from "@/components/elements/Indicator"
 import PieChart from "@/components/charts/Piechart";
 import Table from "@/components/charts/Table";
 import TileHeader from "@/components/elements/TileHeader"
 import Link from "next/link";
-import LineChart from "@/components/charts/Line";
 import SubHeadline from "@/components/elements/SubHeadline";
+import dynamic from 'next/dynamic';
+
+const LineChart = dynamic(() => import('@/components/charts/Line'), {
+  ssr: false, // Disable server-side rendering
+});
 
 export default function Home() {
   return (
@@ -79,7 +84,7 @@ export default function Home() {
       <div className={`${styles.gridItem} ${styles.span2Columns}`}>
         <div className={styles.verticalAlignment}>
           <SubHeadline>Total Net Worth Distribution per each month</SubHeadline>
-          <LineChart />
+          <BarChart />
         </div>
       </div>
       <div className={`${styles.gridItem} ${styles.span2Columns}`}>

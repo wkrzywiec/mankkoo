@@ -5,9 +5,10 @@ import { Line } from "react-chartjs-2";
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import zoomPlugin from 'chartjs-plugin-zoom';
 
+
 import { mankkooColors } from "@/app/colors";
 
-ChartJS.register(zoomPlugin, ArcElement, Tooltip, ChartDataLabels, CategoryScale, LinearScale, PointElement, LineElement);
+ChartJS.register(zoomPlugin, Tooltip, ChartDataLabels, CategoryScale, LinearScale, PointElement, LineElement);
 
 export default function LineChart() {
     
