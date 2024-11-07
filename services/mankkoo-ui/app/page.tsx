@@ -12,8 +12,7 @@ import SubHeadline from "@/components/elements/SubHeadline";
 import dynamic from 'next/dynamic';
 
 import MainIndicatorsResponse from "@/api/MainIndicatorsResponse";
-import { useEffect, useState } from "react";
-import { fetchIndicators } from "@/api/MainIndicators";
+import { useGetHttp } from '@/hooks/useHttp.ts';
 
 const LineChart = dynamic(() => import('@/components/charts/Line'), {
   ssr: false, // Disable server-side rendering
@@ -21,31 +20,24 @@ const LineChart = dynamic(() => import('@/components/charts/Line'), {
 
 export default function Home() {
 
-  const [indicators, setIndicators] = useState<MainIndicatorsResponse | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    isFetching: isFetchingMainIndicators,
+    fetchedData: indicators,
+    setFetchedData: setIndicators,
+    error: indicatorsError
+  } = useGetHttp<MainIndicatorsResponse>('http://localhost:5000/api/main/indicators')
 
-  useEffect(() => {
-    const getIndicators = async () => {
-      try {
-        const data = await fetchIndicators();
-        setIndicators(data);
-      } catch (err) {
-        setError('Failed to fetch indicators');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    getIndicators();
-  }, []);
-
-  const formattedSavings: string = new Intl.NumberFormat('pl-PL', {
-    style: 'currency',
-    currency: 'PLN',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }).format(indicators === null ? 0 : indicators.savings);
+  function currencyFormat(value: number | undefined): string {
+    const number = value === undefined ? 0 : value;
+    return new Intl.NumberFormat('pl-PL', {
+      style: 'currency',
+      currency: 'PLN',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(number);
+  }
+  
+  const formattedSavings = currencyFormat(indicators?.savings);
 
   return (
     <main className={styles.mainContainer}>
@@ -60,16 +52,16 @@ export default function Home() {
       
       
       <div className={styles.gridItem}>
-        <Indicator headline="Net Worth" text="1 123 456.78 PLN" />
+        <Indicator headline="Net Worth" text="no data" />
       </div>
       <div className={styles.gridItem}>
         <Indicator headline="Savings" text={formattedSavings} />
       </div>
       <div className={styles.gridItem}>
-        <Indicator headline="Last Month Income" text="9 876.54 PLN" textColor="#659B5E" />
+        <Indicator headline="Last Month Income" text="no data" textColor="#659B5E" />
       </div>
       <div className={styles.gridItem}>
-        <Indicator headline="Last Month Spendings" text="10 456.23 PLN" textColor="#ED6B53" />
+        <Indicator headline="Last Month Spendings" text="no data" textColor="#ED6B53" />
       </div>
 
       <div className={`${styles.gridItem} ${styles.span2Columns}`}>
@@ -156,3 +148,4 @@ export default function Home() {
     </main>
   );
 }
+
