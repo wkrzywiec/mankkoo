@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./page.module.css";
 
 import BarChart from "@/components/charts/Bar";
@@ -9,11 +11,42 @@ import Link from "next/link";
 import SubHeadline from "@/components/elements/SubHeadline";
 import dynamic from 'next/dynamic';
 
+import MainIndicatorsResponse from "@/api/MainIndicatorsResponse";
+import { useEffect, useState } from "react";
+import { fetchIndicators } from "@/api/MainIndicators";
+
 const LineChart = dynamic(() => import('@/components/charts/Line'), {
   ssr: false, // Disable server-side rendering
 });
 
 export default function Home() {
+
+  const [indicators, setIndicators] = useState<MainIndicatorsResponse | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const getIndicators = async () => {
+      try {
+        const data = await fetchIndicators();
+        setIndicators(data);
+      } catch (err) {
+        setError('Failed to fetch indicators');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getIndicators();
+  }, []);
+
+  const formattedSavings: string = new Intl.NumberFormat('pl-PL', {
+    style: 'currency',
+    currency: 'PLN',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(indicators === null ? 0 : indicators.savings);
+
   return (
     <main className={styles.mainContainer}>
       <div className={`${styles.gridItem} ${styles.span4Columns}`}>
@@ -30,7 +63,7 @@ export default function Home() {
         <Indicator headline="Net Worth" text="1 123 456.78 PLN" />
       </div>
       <div className={styles.gridItem}>
-        <Indicator headline="Savings" text="123 456.78 PLN" />
+        <Indicator headline="Savings" text={formattedSavings} />
       </div>
       <div className={styles.gridItem}>
         <Indicator headline="Last Month Income" text="9 876.54 PLN" textColor="#659B5E" />

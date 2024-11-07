@@ -1,12 +1,12 @@
 "use client";
 
-import { Chart as ChartJS, BarElement, Legend} from 'chart.js'
+import { Chart as ChartJS, BarElement, Legend, CategoryScale, LinearScale} from 'chart.js'
 import { Bar } from "react-chartjs-2";
 
 
 import { mankkooColors } from "@/app/colors";
 
-ChartJS.register(BarElement, Legend);
+ChartJS.register(BarElement, Legend, CategoryScale, LinearScale);
 
 export default function BarChart() {
     

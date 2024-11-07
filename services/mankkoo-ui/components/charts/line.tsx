@@ -1,6 +1,6 @@
 "use client";
 
-import { Chart as ChartJS, ArcElement, Tooltip, CategoryScale, LinearScale, PointElement, LineElement} from 'chart.js'
+import { Chart as ChartJS, Tooltip, CategoryScale, LinearScale, PointElement, LineElement} from 'chart.js'
 import { Line } from "react-chartjs-2";
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import zoomPlugin from 'chartjs-plugin-zoom';
@@ -8,7 +8,7 @@ import zoomPlugin from 'chartjs-plugin-zoom';
 
 import { mankkooColors } from "@/app/colors";
 
-ChartJS.register(zoomPlugin, Tooltip, ChartDataLabels, CategoryScale, LinearScale, PointElement, LineElement);
+ChartJS.register(zoomPlugin, Tooltip, ChartDataLabels, LinearScale, CategoryScale, PointElement, LineElement);
 
 export default function LineChart() {
     
