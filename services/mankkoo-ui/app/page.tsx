@@ -11,8 +11,9 @@ import Link from "next/link";
 import SubHeadline from "@/components/elements/SubHeadline";
 import dynamic from 'next/dynamic';
 
+import { useGetHttp } from '@/hooks/useHttp';
 import MainIndicatorsResponse from "@/api/MainIndicatorsResponse";
-import { useGetHttp } from '@/hooks/useHttp.ts';
+
 
 const LineChart = dynamic(() => import('@/components/charts/Line'), {
   ssr: false, // Disable server-side rendering
@@ -25,7 +26,7 @@ export default function Home() {
     fetchedData: indicators,
     setFetchedData: setIndicators,
     error: indicatorsError
-  } = useGetHttp<MainIndicatorsResponse>('http://localhost:5000/api/main/indicators')
+  } = useGetHttp<MainIndicatorsResponse>('/main/indicators')
 
   function currencyFormat(value: number | undefined): string {
     const number = value === undefined ? 0 : value;

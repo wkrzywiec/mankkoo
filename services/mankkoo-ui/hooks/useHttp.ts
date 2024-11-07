@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { API_BASE } from '@/api/ApiUrl';
 
-export function useGetHttp<Type>(url: string): {isFetching?: boolean, fetchedData?: Type, setFetchedData?: unknown, error?: string } {
+export function useGetHttp<Type>(apiPath: string): {isFetching?: boolean, fetchedData?: Type, setFetchedData?: unknown, error?: string } {
   
     const [isFetching, setIsFetching] = useState<boolean>();
     const [error, setError] = useState<string>();
@@ -11,7 +12,7 @@ export function useGetHttp<Type>(url: string): {isFetching?: boolean, fetchedDat
         async function fetchData() {
         setIsFetching(true);
         try {
-            const response = await axios.get<Type>(url);
+            const response = await axios.get<Type>(API_BASE + apiPath);
             setFetchedData(response.data);
         } catch (error) {
             let errorMessage = 'Failed to fetch data from ';
@@ -26,7 +27,7 @@ export function useGetHttp<Type>(url: string): {isFetching?: boolean, fetchedDat
         }
 
         fetchData();
-    }, [url]);
+    }, [apiPath]);
 
     return {
         isFetching,
