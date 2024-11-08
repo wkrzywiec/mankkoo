@@ -6,19 +6,24 @@ import { Pie } from "react-chartjs-2";
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 import { mankkooColors } from "@/app/colors";
+import { currencyFormat } from "@/utils/Formatter";
 
 ChartJS.register(ArcElement, Tooltip, ChartDataLabels);
 
-export default function PieChart({size=1} : {size?: number}) {
+export interface PieChartData {
+    labels: string[];
+    data: number[]
+}
+
+export default function PieChart({ 
+        input={data: [30, 50, 20], labels: ['Red','Black','Blue']}, 
+        size=1 } : { data?: PieChartData, size?: number}) {
+
     const sizeInPx = (size * 200).toString() + "px"
-    const data = {
-        labels: [
-            'Red',
-            'Blue',
-            'Yellow'
-          ],
+    const pieData = {
+        labels: input.labels,
           datasets: [{
-            data: [30, 50, 20, 60,],
+            data: input.data,
             backgroundColor: mankkooColors,
             hoverOffset: 10
           }]
@@ -27,19 +32,31 @@ export default function PieChart({size=1} : {size?: number}) {
         <div style={{height: sizeInPx, width: sizeInPx}}>
             <Pie
                 className={classes.pie}
-                data={data}
+                data={pieData}
                 options={{
                     responsive: true,
                     maintainAspectRatio: false,
                     radius: "95%",
                     plugins: {
                         datalabels: {
-                            display: true
+                            display: false,
                         },
                         legend: {
-                            display: false
+                            display: false,
+                        },
+                        tooltip: {
+                            callbacks: {
+                              label: function(context) {
+                                const currentValue: number = context.raw,
+                                    total = context.chart._metasets[context.datasetIndex].total;
+                      
+                                const percentage = (currentValue/total * 100).toFixed(1);
+                      
+                                return currencyFormat(currentValue) + ' (' + percentage + '%)';
+                              }
+                            }
                         }
-                    }
+                    },
                 }}
             />
         </div>

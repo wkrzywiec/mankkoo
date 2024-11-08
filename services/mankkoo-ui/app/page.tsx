@@ -1,3 +1,4 @@
+/* eslint-disable prefer-const */
 "use client";
 
 import styles from "./page.module.css";
@@ -12,11 +13,12 @@ import Table from "@/components/charts/Table";
 import TileHeader from "@/components/elements/TileHeader"
 import SubHeadline from "@/components/elements/SubHeadline";
 
-import MainIndicatorsResponse from "@/api/MainIndicatorsResponse";
+import { MainIndicatorsResponse, SavingsDistribution } from "@/api/MainPageResponses";
 
 import { currencyFormat } from "@/utils/Formatter";
 
 import { useGetHttp } from '@/hooks/useHttp';
+import { PieChartData } from "@/components/charts/piechart";
 
 
 const LineChart = dynamic(() => import('@/components/charts/Line'), {
@@ -28,11 +30,22 @@ export default function Home() {
   const {
     isFetching: isFetchingMainIndicators,
     fetchedData: indicators,
-    setFetchedData: setIndicators,
     error: indicatorsError
-  } = useGetHttp<MainIndicatorsResponse>('/main/indicators')
-  
+  } = useGetHttp<MainIndicatorsResponse>('/main/indicators');
   const formattedSavings = currencyFormat(indicators?.savings);
+
+  const {
+    isFetching: isFetchingSavingsDistribution,
+    fetchedData: savingsDistributionRaw,
+    error: savingsDistributionError
+  } = useGetHttp<SavingsDistribution[]>('/main/savings-distribution');
+  
+  const savingsDistribution: PieChartData = {data: [], labels: []};
+  savingsDistributionRaw?.forEach(value => {
+    savingsDistribution.labels.push(value.type);
+    savingsDistribution.data.push(value.total);
+  })
+
 
   return (
     <main className={styles.mainContainer}>
@@ -85,7 +98,7 @@ export default function Home() {
         </TileHeader>
         <div className={styles.horizontalAlignment}>
           <Table boldLastRow={true} colorsColumn={1}/>
-          <PieChart />
+          <PieChart input={savingsDistribution}/>
         </div>
       </div>
 
