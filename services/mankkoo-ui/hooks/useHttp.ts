@@ -4,7 +4,7 @@ import { API_BASE } from '@/api/ApiUrl';
 
 export function useGetHttp<Type>(apiPath: string): {isFetching?: boolean, fetchedData?: Type, setFetchedData?: unknown, error?: string } {
   
-    const [isFetching, setIsFetching] = useState<boolean>();
+    const [isFetching, setIsFetching] = useState<boolean>(false);
     const [error, setError] = useState<string>();
     const [fetchedData, setFetchedData] = useState<Type>();
 

@@ -9,7 +9,6 @@ import Link from "next/link";
 import BarChart from "@/components/charts/Bar";
 import Indicator from "@/components/elements/Indicator"
 import PieChart from "@/components/charts/Piechart";
-import Table from "@/components/charts/Table";
 import TileHeader from "@/components/elements/TileHeader"
 import SubHeadline from "@/components/elements/SubHeadline";
 
@@ -19,10 +18,16 @@ import { currencyFormat } from "@/utils/Formatter";
 
 import { useGetHttp } from '@/hooks/useHttp';
 import { PieChartData } from "@/components/charts/piechart";
+import { TableData } from "@/components/charts/table";
+import { useEffect, useState } from "react";
 
 
 const LineChart = dynamic(() => import('@/components/charts/Line'), {
-  ssr: false, // Disable server-side rendering
+  ssr: false, // Disable server-side rendering, more info: https://nextjs.org/docs/messages/react-hydration-error
+});
+
+const Table = dynamic(() => import('@/components/charts/Table'), {
+  ssr: false, // Disable server-side rendering, more info: https://nextjs.org/docs/messages/react-hydration-error
 });
 
 export default function Home() {
@@ -34,17 +39,35 @@ export default function Home() {
   } = useGetHttp<MainIndicatorsResponse>('/main/indicators');
   const formattedSavings = currencyFormat(indicators?.savings);
 
+
+  const [savingsDistributionTable, setSavingsDistributionTable] = useState<TableData>({ data: [] })
   const {
     isFetching: isFetchingSavingsDistribution,
-    fetchedData: savingsDistributionRaw,
+    fetchedData: savingsDistribution,
     error: savingsDistributionError
   } = useGetHttp<SavingsDistribution[]>('/main/savings-distribution');
   
-  const savingsDistribution: PieChartData = {data: [], labels: []};
-  savingsDistributionRaw?.forEach(value => {
-    savingsDistribution.labels.push(value.type);
-    savingsDistribution.data.push(value.total);
-  })
+  const savingsDistributionPie: PieChartData = { data: [], labels: [] };
+  savingsDistribution?.forEach(value => {
+    savingsDistributionPie.labels.push(value.type);
+    savingsDistributionPie.data.push(value.total);
+  });
+
+  
+  useEffect(() => {
+    async function test() {
+      if (savingsDistribution !== undefined && savingsDistribution.length > 0 && !isFetchingSavingsDistribution ) {
+        const savingsTable: TableData = { data: [] };
+        
+        savingsDistribution?.forEach(value => {
+          savingsTable.data.push([value.type, currencyFormat(value.total), value.percentage.toFixed(1)]);
+        });
+        setSavingsDistributionTable(savingsTable);
+      } 
+    }
+    test();
+  }, [savingsDistribution, isFetchingSavingsDistribution])
+  
 
 
   return (
@@ -78,7 +101,7 @@ export default function Home() {
         </TileHeader>
         <div className={styles.horizontalAlignment}>
           <PieChart />
-          <Table boldLastRow={true} colorsColumn={1}/>
+          <Table boldLastRow={true} colorsColumnIdx={1}/>
         </div>
       </div>
 
@@ -88,7 +111,7 @@ export default function Home() {
         </TileHeader>
         <div className={styles.verticalAlignment}>
           <PieChart size={2}/>
-          <Table boldLastRow={true} colorsColumn={1}/>
+          <Table boldLastRow={true} colorsColumnIdx={1}/>
         </div>
       </div>
 
@@ -97,8 +120,8 @@ export default function Home() {
           Total wealth held in bank accounts and liquid assets (excluding real estate and retirement funds).
         </TileHeader>
         <div className={styles.horizontalAlignment}>
-          <Table boldLastRow={true} colorsColumn={1}/>
-          <PieChart input={savingsDistribution}/>
+          <Table input={savingsDistributionTable} boldLastRow={true} colorsColumnIdx={1}/>
+          <PieChart input={savingsDistributionPie}/>
         </div>
       </div>
 

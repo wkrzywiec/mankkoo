@@ -5,20 +5,39 @@ import { getColor } from "@/app/colors";
 
 const COLOR_CIRCLE_CELL_PATTERN = "circle_#"
 
-export default function Table({style, colorsColumn, boldLastRow=false}: {style?: CSSProperties, colorsColumn?:number, boldLastRow?: boolean}) {
-    const data = [
-        ["01", "Checking accounts", "50 000 PLN", "85%"],
-        ["02", "Savings accounts", "5 000 PLN", "5%"],
-        ["03", "Treasury bonds", "10 000 PLN", "10%"],
-        ["04", "Shares & ETFs", "10 000 PLN", "10%"],
-        ["Total", "", "54 000.45 PLN", ""],
-    ]
+export interface TableData {
+    data: string [][]
+}
 
-    const preparedData = [...data]
+export default function Table({input, style, colorsColumnIdx, boldLastRow=false}: {input?: TableData, style?: CSSProperties, colorsColumnIdx?: number, boldLastRow?: boolean}) {
+    let preparedData: string [][];
+    const pid = (Math.random() * 1000).toString();
 
-    if (colorsColumn != undefined) {
-        addColorCircleColumn(preparedData, colorsColumn)
+    if (input === undefined) {
+        const data = [
+            ["Checking accounts", "50 000 PLN", "85%"],
+            ["Savings accounts", "5 000 PLN", "5%"],
+            ["Treasury bonds", "10 000 PLN", "10%"],
+            ["Shares & ETFs", "10 000 PLN", "10%"],
+            ["Total", "", "54 000.45 PLN", ""],
+        ]
+        preparedData = [...data]
+    } else {
+        preparedData = [...input.data]
+        console.log(pid + ' input.data: ', input.data)
     }
+
+    console.log(pid + ' input: ', preparedData)
+
+    // if (colorsColumnIdx != undefined && preparedData.length > 0) {
+    //     addColorCircleColumn(preparedData, colorsColumnIdx)
+    // }
+
+    console.log(pid + ' addedCircles: ', preparedData)
+
+    addRowNumberColumn(preparedData, boldLastRow);
+
+    console.log(pid + ' addedRowNumbers: ', preparedData)
 
     const rows = preparedData.map((rowData, rowIndex) => 
         <tr key={rowIndex} className={shouldBoldLastRow(preparedData, rowIndex, boldLastRow) ? styles.boldedRow : styles.row}>
@@ -45,6 +64,25 @@ export default function Table({style, colorsColumn, boldLastRow=false}: {style?:
             </tbody>
         </table>
     )
+}
+
+function addRowNumberColumn(data: string[][], boldLastRow: boolean): void {
+    const rowNumberColumnIsNotPresent: boolean = data !== undefined && data[0] !== undefined && data[0][0] != '01';
+    
+    if (rowNumberColumnIsNotPresent) {
+        data.forEach((row, rowIndex) => {
+            if (data.length - 1 === rowIndex && boldLastRow) {
+                row.splice(0, 0, '')
+            } else {
+                row.splice(0, 0, rowNumberAsString(rowIndex + 1))
+            }
+        })
+    }
+}
+
+function rowNumberAsString(rowIndex: number): string {
+    const rowIndexStr = rowIndex.toString();
+    return rowIndexStr.length === 1 ? '0' + rowIndexStr : rowIndexStr;
 }
 
 function addColorCircleColumn(data: string[][], colorsColumn: number): void {
