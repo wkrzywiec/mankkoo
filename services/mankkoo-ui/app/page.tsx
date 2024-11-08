@@ -2,17 +2,21 @@
 
 import styles from "./page.module.css";
 
+import dynamic from 'next/dynamic';
+import Link from "next/link";
+
 import BarChart from "@/components/charts/Bar";
 import Indicator from "@/components/elements/Indicator"
 import PieChart from "@/components/charts/Piechart";
 import Table from "@/components/charts/Table";
 import TileHeader from "@/components/elements/TileHeader"
-import Link from "next/link";
 import SubHeadline from "@/components/elements/SubHeadline";
-import dynamic from 'next/dynamic';
+
+import MainIndicatorsResponse from "@/api/MainIndicatorsResponse";
+
+import { currencyFormat } from "@/utils/Formatter";
 
 import { useGetHttp } from '@/hooks/useHttp';
-import MainIndicatorsResponse from "@/api/MainIndicatorsResponse";
 
 
 const LineChart = dynamic(() => import('@/components/charts/Line'), {
@@ -27,16 +31,6 @@ export default function Home() {
     setFetchedData: setIndicators,
     error: indicatorsError
   } = useGetHttp<MainIndicatorsResponse>('/main/indicators')
-
-  function currencyFormat(value: number | undefined): string {
-    const number = value === undefined ? 0 : value;
-    return new Intl.NumberFormat('pl-PL', {
-      style: 'currency',
-      currency: 'PLN',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(number);
-  }
   
   const formattedSavings = currencyFormat(indicators?.savings);
 
