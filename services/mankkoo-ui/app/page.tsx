@@ -120,8 +120,8 @@ export default function Home() {
           Total wealth held in bank accounts and liquid assets (excluding real estate and retirement funds).
         </TileHeader>
         <div className={styles.horizontalAlignment}>
-          <Table input={savingsDistributionTable} boldLastRow={true} colorsColumnIdx={1}/>
-          <PieChart input={savingsDistributionPie}/>
+          <Table input={savingsDistributionTable} colorsColumnIdx={1} totalColumnIdx={3}/>
+          <PieChart input={savingsDistributionPie} size={1.5}/>
         </div>
       </div>
 
