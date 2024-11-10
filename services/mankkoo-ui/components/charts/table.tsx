@@ -11,7 +11,6 @@ export interface TableData {
 
 export default function Table({input, style, colorsColumnIdx, boldLastRow=false}: {input?: TableData, style?: CSSProperties, colorsColumnIdx?: number, boldLastRow?: boolean}) {
     let preparedData: string [][];
-    const pid = (Math.random() * 1000).toString();
 
     if (input === undefined) {
         const data = [
@@ -24,20 +23,13 @@ export default function Table({input, style, colorsColumnIdx, boldLastRow=false}
         preparedData = [...data]
     } else {
         preparedData = [...input.data]
-        console.log(pid + ' input.data: ', input.data)
     }
 
-    console.log(pid + ' input: ', preparedData)
-
-    // if (colorsColumnIdx != undefined && preparedData.length > 0) {
-    //     addColorCircleColumn(preparedData, colorsColumnIdx)
-    // }
-
-    console.log(pid + ' addedCircles: ', preparedData)
+    if (colorsColumnIdx != undefined && preparedData.length > 0) {
+        addColorCircleColumn(preparedData, colorsColumnIdx)
+    }
 
     addRowNumberColumn(preparedData, boldLastRow);
-
-    console.log(pid + ' addedRowNumbers: ', preparedData)
 
     const rows = preparedData.map((rowData, rowIndex) => 
         <tr key={rowIndex} className={shouldBoldLastRow(preparedData, rowIndex, boldLastRow) ? styles.boldedRow : styles.row}>
@@ -86,9 +78,14 @@ function rowNumberAsString(rowIndex: number): string {
 }
 
 function addColorCircleColumn(data: string[][], colorsColumn: number): void {
-    data.forEach((row, rowIndex) => {
-        row.splice(colorsColumn, 0, COLOR_CIRCLE_CELL_PATTERN + getColor(rowIndex))
-    })
+    const colorCircleIsPresent: boolean = data !== undefined && data[0] !== undefined && data[0].some(cell => cell.includes(COLOR_CIRCLE_CELL_PATTERN));
+
+    if (!colorCircleIsPresent) {
+        data.forEach((row, rowIndex) => {
+            row.splice(colorsColumn, 0, COLOR_CIRCLE_CELL_PATTERN + getColor(rowIndex))
+        })
+    }
+    
 }
 
 function shouldBoldLastRow(data: string[][], rowIndex: number, boldLastRow: boolean): boolean {
