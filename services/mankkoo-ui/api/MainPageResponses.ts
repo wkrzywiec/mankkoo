@@ -10,3 +10,8 @@ export interface SavingsDistribution {
     total: number;
     percentage: number;
 }
+
+export interface TotalHistory {
+    date: string[];
+    total: number[];
+}

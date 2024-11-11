@@ -12,7 +12,7 @@ import PieChart from "@/components/charts/Piechart";
 import TileHeader from "@/components/elements/TileHeader"
 import SubHeadline from "@/components/elements/SubHeadline";
 
-import { MainIndicatorsResponse, SavingsDistribution } from "@/api/MainPageResponses";
+import { MainIndicatorsResponse, SavingsDistribution, TotalHistory } from "@/api/MainPageResponses";
 
 import { currencyFormat, percentage } from "@/utils/Formatter";
 
@@ -41,35 +41,38 @@ export default function Home() {
 
 
   const [savingsDistributionTable, setSavingsDistributionTable] = useState<TableData>({ data: []})
+  const savingsDistributionPie: PieChartData = { data: [], labels: [] };
   const {
     isFetching: isFetchingSavingsDistribution,
     fetchedData: savingsDistribution,
     error: savingsDistributionError
   } = useGetHttp<SavingsDistribution[]>('/main/savings-distribution');
   
-  const savingsDistributionPie: PieChartData = { data: [], labels: [] };
-  
   savingsDistribution?.forEach(value => {
     savingsDistributionPie.labels.push(value.type);
     savingsDistributionPie.data.push(value.total);
   });
 
+
+  const {
+    isFetching: isFetchingTotalHistory,
+    fetchedData: totalHistory,
+    error: totalHistoryError
+  } = useGetHttp<TotalHistory>('/main/total-history');
   
   useEffect(() => {
-    async function prepareSavingsTableData() {
-      if (savingsDistribution !== undefined && savingsDistribution.length > 0 && !isFetchingSavingsDistribution ) {
-        const savingsTable: TableData = { data: [], currencyColumnIdx: 3, colorsColumnIdx: 1, boldLastRow: true };
-        
-        savingsDistribution?.forEach(value => {
-          savingsTable.data.push([value.type, value.total.toString(), percentage(value.percentage)]);
-        });
+    
+    if (savingsDistribution !== undefined && savingsDistribution.length > 0 && !isFetchingSavingsDistribution ) {
+      const savingsTable: TableData = { data: [], currencyColumnIdx: 3, colorsColumnIdx: 1, boldLastRow: true };
+      
+      savingsDistribution?.forEach(value => {
+        savingsTable.data.push([value.type, value.total.toString(), percentage(value.percentage)]);
+      });
 
-        savingsTable.data.push(['Total', indicators?.savings.toString(), '']);
-        setSavingsDistributionTable(savingsTable);
-      } 
-    }
+      savingsTable.data.push(['Total', indicators?.savings.toString(), '']);
+      setSavingsDistributionTable(savingsTable);
+    } 
 
-    prepareSavingsTableData();
   }, [savingsDistribution, isFetchingSavingsDistribution, indicators])
   
 
@@ -158,7 +161,7 @@ export default function Home() {
         <TileHeader headline="Financial Savings">
           💸 Entire wealth located on bank accounts and easy to sell assets.
         </TileHeader>
-        <LineChart />
+        <LineChart x={totalHistory?.date} y={totalHistory?.total} seriesName="Savings History"/>
       </div>
       <div className={`${styles.gridItem} ${styles.span2Columns}`}>
         <TileHeader headline="Real-estate Value">
