@@ -7,18 +7,18 @@ import { currencyFormat } from "@/utils/Formatter";
 const COLOR_CIRCLE_CELL_PATTERN = "circle_#"
 
 export interface TableData {
-    data: string [][]
+    data: string [][];
+    currencyColumnIdx: number;
+    totalColumnIdx?: number;
+    colorsColumnIdx?: number;
 }
 
 export default function Table({
     input,
-    style,
-    colorsColumnIdx,
-    totalColumnIdx
+    style
 }: {input?: TableData,
-    style?: CSSProperties,
-    colorsColumnIdx?: number,
-    totalColumnIdx?: number}) {
+    style?: CSSProperties
+    }) {
 
     let preparedData: string [][];
 
@@ -35,15 +35,10 @@ export default function Table({
         preparedData = [...input.data]
     }
 
-    const shouldAddTotalRow = totalColumnIdx !== undefined;
+    const shouldAddTotalRow = input?.totalColumnIdx !== undefined;
 
-    
-    addColorCircleColumn(preparedData, colorsColumnIdx)
-    addRowNumberColumn(preparedData);
-    
-    if (shouldAddTotalRow) {
-        addTotalRow(preparedData, totalColumnIdx)
-    } 
+    addColorCircleColumn(preparedData, input?.colorsColumnIdx);
+    addRowNumberColumn(preparedData, shouldAddTotalRow);
 
     const rows = preparedData.map((rowData, rowIndex) => 
         <tr key={rowIndex} className={shouldBoldLastRow(preparedData, rowIndex, shouldAddTotalRow) ? styles.boldedRow : styles.row}>
@@ -57,7 +52,7 @@ export default function Table({
                     return <td key={rowIndex + "_" + cellIndex}></td>
                 }
 
-                return <td key={rowIndex + "_" + cellIndex}>{cellData}</td>
+                return <td key={rowIndex + "_" + cellIndex}>{cellIndex === input?.currencyColumnIdx ? currencyFormat(cellData) : cellData}</td>
             }
                 
             )}
@@ -72,12 +67,16 @@ export default function Table({
     )
 }
 
-function addRowNumberColumn(data: string[][]): void {
+function addRowNumberColumn(data: string[][], shouldAddTotalRow: boolean): void {
     const rowNumberColumnIsNotPresent: boolean = data !== undefined && data[0] !== undefined && data[0][0] != '01';
     
     if (rowNumberColumnIsNotPresent) {
         data.forEach((row, rowIndex) => {
-            row.splice(0, 0, rowNumberAsString(rowIndex + 1))
+            if (rowIndex === data.length - 1 && shouldAddTotalRow) {
+                row.splice(0, 0, '');
+            } else {
+                row.splice(0, 0, rowNumberAsString(rowIndex + 1));
+            }
         })
     }
 }
@@ -111,12 +110,3 @@ function shouldSkipAddColorCircleToCellAndLeaveItEmpty(cellData: string, data: s
     return cellData.includes(COLOR_CIRCLE_CELL_PATTERN) && shouldBoldLastRow(data, rowIndex, boldLastRow)
 }
 
-function addTotalRow(data: string[][], totalColumnIdx: number | undefined) {
-    if (totalColumnIdx !== undefined && data[0] !== undefined) {
-        const totalRow = Array(data[0].length).fill("");
-        
-        totalRow.splice(1, 1, "Total");
-        totalRow.splice(totalColumnIdx, 1, "0 000 zł");
-        data.splice(data.length, 0, totalRow);
-    }
-}

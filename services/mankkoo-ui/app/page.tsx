@@ -14,7 +14,7 @@ import SubHeadline from "@/components/elements/SubHeadline";
 
 import { MainIndicatorsResponse, SavingsDistribution } from "@/api/MainPageResponses";
 
-import { currencyFormat } from "@/utils/Formatter";
+import { currencyFormat, percentage } from "@/utils/Formatter";
 
 import { useGetHttp } from '@/hooks/useHttp';
 import { PieChartData } from "@/components/charts/piechart";
@@ -40,7 +40,7 @@ export default function Home() {
   const formattedSavings = currencyFormat(indicators?.savings);
 
 
-  const [savingsDistributionTable, setSavingsDistributionTable] = useState<TableData>({ data: [] })
+  const [savingsDistributionTable, setSavingsDistributionTable] = useState<TableData>({ data: []})
   const {
     isFetching: isFetchingSavingsDistribution,
     fetchedData: savingsDistribution,
@@ -48,6 +48,7 @@ export default function Home() {
   } = useGetHttp<SavingsDistribution[]>('/main/savings-distribution');
   
   const savingsDistributionPie: PieChartData = { data: [], labels: [] };
+  
   savingsDistribution?.forEach(value => {
     savingsDistributionPie.labels.push(value.type);
     savingsDistributionPie.data.push(value.total);
@@ -55,18 +56,21 @@ export default function Home() {
 
   
   useEffect(() => {
-    async function test() {
+    async function prepareSavingsTableData() {
       if (savingsDistribution !== undefined && savingsDistribution.length > 0 && !isFetchingSavingsDistribution ) {
-        const savingsTable: TableData = { data: [] };
+        const savingsTable: TableData = { data: [], currencyColumnIdx: 3, colorsColumnIdx: 1, totalColumnIdx: 3 };
         
         savingsDistribution?.forEach(value => {
-          savingsTable.data.push([value.type, currencyFormat(value.total), value.percentage.toFixed(1)]);
+          savingsTable.data.push([value.type, value.total.toString(), percentage(value.percentage)]);
         });
+
+        savingsTable.data.push(['Total', indicators?.savings.toString(), '']);
         setSavingsDistributionTable(savingsTable);
       } 
     }
-    test();
-  }, [savingsDistribution, isFetchingSavingsDistribution])
+
+    prepareSavingsTableData();
+  }, [savingsDistribution, isFetchingSavingsDistribution, indicators])
   
 
 
@@ -120,7 +124,7 @@ export default function Home() {
           Total wealth held in bank accounts and liquid assets (excluding real estate and retirement funds).
         </TileHeader>
         <div className={styles.horizontalAlignment}>
-          <Table input={savingsDistributionTable} colorsColumnIdx={1} totalColumnIdx={3}/>
+          <Table input={savingsDistributionTable}/>
           <PieChart input={savingsDistributionPie} size={1.5}/>
         </div>
       </div>
