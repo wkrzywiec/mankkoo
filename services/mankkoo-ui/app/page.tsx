@@ -58,7 +58,7 @@ export default function Home() {
   useEffect(() => {
     async function prepareSavingsTableData() {
       if (savingsDistribution !== undefined && savingsDistribution.length > 0 && !isFetchingSavingsDistribution ) {
-        const savingsTable: TableData = { data: [], currencyColumnIdx: 3, colorsColumnIdx: 1, totalColumnIdx: 3 };
+        const savingsTable: TableData = { data: [], currencyColumnIdx: 3, colorsColumnIdx: 1, boldLastRow: true };
         
         savingsDistribution?.forEach(value => {
           savingsTable.data.push([value.type, value.total.toString(), percentage(value.percentage)]);
