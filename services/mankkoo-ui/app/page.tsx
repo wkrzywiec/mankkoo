@@ -78,31 +78,31 @@ export default function Home() {
 
 
   return (
-    <main className={styles.mainContainer}>
-      <div className={`${styles.gridItem} ${styles.span4Columns}`}>
+    <main className="mainContainer">
+      <div className="gridItem span4Columns">
         <h1>Finance Overview</h1>
         <p>A detailed overview of your personal finances, summarizing current wealth, presenting historical data, and highlighting key trends.</p>
       </div>
       
-      <div className={`${styles.gridItem} ${styles.span4Columns}`}>
+      <div className="gridItem span4Columns">
         <h2>Current Indicators</h2>
       </div>
       
       
-      <div className={styles.gridItem}>
+      <div className="gridItem">
         <Indicator headline="Net Worth" text="no data" />
       </div>
-      <div className={styles.gridItem}>
+      <div className="gridItem">
         <Indicator headline="Savings" text={formattedSavings} />
       </div>
-      <div className={styles.gridItem}>
+      <div className="gridItem">
         <Indicator headline="Last Month Income" text="no data" textColor="#659B5E" />
       </div>
-      <div className={styles.gridItem}>
+      <div className="gridItem">
         <Indicator headline="Last Month Spendings" text="no data" textColor="#ED6B53" />
       </div>
 
-      <div className={`${styles.gridItem} ${styles.span2Columns}`}>
+      <div className="gridItem span2Columns">
         <TileHeader headline="Total Net Worth">
           Includes estimated real estate value, total retirement funds, and all financial assets (accounts and investments).
         </TileHeader>
@@ -112,7 +112,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className={`${styles.gridItem} ${styles.span2Columns} ${styles.span2Rows}`}>
+      <div className="gridItem span2Columns span2Rows">
         <TileHeader headline="Financial Fortress">
           Based on a book <Link href="https://finansowaforteca.pl/">Finansowa Forteca by Marcin Iwuć</Link>.
         </TileHeader>
@@ -122,7 +122,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className={`${styles.gridItem} ${styles.span2Columns}`}>
+      <div className="gridItem span2Columns">
         <TileHeader headline="Financial Savings">
           Total wealth held in bank accounts and liquid assets (excluding real estate and retirement funds).
         </TileHeader>
@@ -133,50 +133,50 @@ export default function Home() {
       </div>
 
 
-      <div className={`${styles.gridItem} ${styles.span4Columns}`}>
+      <div className="gridItem span4Columns">
         <h2>History</h2>
       </div>
 
-      <div className={`${styles.gridItem} ${styles.span4Columns}`}>
+      <div className="gridItem span4Columns">
         <TileHeader headline="Total Net Worth">
           Includes estimated real estate value, total retirement funds, and all financial assets (accounts and investments).
         </TileHeader>
         <LineChart />
       </div>
 
-      <div className={`${styles.gridItem} ${styles.span2Columns}`}>
+      <div className="gridItem span2Columns">
         <div className={styles.verticalAlignment}>
           <SubHeadline>Total Net Worth Distribution per each month</SubHeadline>
           <BarChart />
         </div>
       </div>
-      <div className={`${styles.gridItem} ${styles.span2Columns}`}>
+      <div className="gridItem span2Columns">
         <div className={styles.verticalAlignment}>
           <SubHeadline>Income per each month by comparing value from the previous year for the same month</SubHeadline>
           <LineChart />
         </div>
       </div>
 
-      <div className={`${styles.gridItem} ${styles.span2Columns}`}>
+      <div className="gridItem span2Columns">
         <TileHeader headline="Financial Savings">
           💸 Entire wealth located on bank accounts and easy to sell assets.
         </TileHeader>
         <LineChart x={totalHistory?.date} y={totalHistory?.total} seriesName="Savings History"/>
       </div>
-      <div className={`${styles.gridItem} ${styles.span2Columns}`}>
+      <div className="gridItem span2Columns">
         <TileHeader headline="Real-estate Value">
           🏠 Historical value of all real-estates (including the ones for investments and not).
         </TileHeader>
         <LineChart />
       </div>
 
-      <div className={`${styles.gridItem} ${styles.span2Columns}`}>
+      <div className="gridItem span2Columns">
         <TileHeader headline="Investments">
           💸 Historical value of all investments divided by the asset type excluding real-estate.
         </TileHeader>
         <LineChart />
       </div>
-      <div className={`${styles.gridItem} ${styles.span2Columns}`}>
+      <div className="gridItem span2Columns">
         <TileHeader headline="Retirement">
           👴Cumultive resources collected for a retirement.
         </TileHeader>

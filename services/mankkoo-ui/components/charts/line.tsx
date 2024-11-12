@@ -6,7 +6,6 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 import zoomPlugin from 'chartjs-plugin-zoom';
 import 'chartjs-adapter-moment';
 
-
 import { mankkooColors } from "@/app/colors";
 
 ChartJS.register(zoomPlugin, Tooltip, ChartDataLabels, LinearScale, CategoryScale, PointElement, LineElement, TimeScale);
