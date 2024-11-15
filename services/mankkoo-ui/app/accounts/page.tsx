@@ -1,18 +1,55 @@
+"use client";
+
 import Link from "next/link";
 import dynamic from "next/dynamic";
 
 import Table from "@/components/charts/Table";
-import Button from "@/components/elements/Button";
 import TileHeader from "@/components/elements/TileHeader";
 
 import styles from './page.module.css'
+import { useGetHttp } from "@/hooks/useHttp";
+import { AccountInfoResponse } from "@/api/AccountsPageResponses";
+import React, { useEffect, useState } from "react";
+import { iban } from "@/utils/Formatter";
 
 
 const LineChart = dynamic(() => import('@/components/charts/Line'), {
   ssr: false, // Disable server-side rendering, more info: https://nextjs.org/docs/messages/react-hydration-error
 });
 
-export default function Home() {
+const Button = dynamic(() => import('@/components/elements/Button'), {
+  ssr: false, // Disable server-side rendering, more info: https://nextjs.org/docs/messages/react-hydration-error
+});
+
+export default function Accounts() {
+
+  function accountHeader(acc?: AccountInfoResponse): string | undefined {
+    return acc?.bankName + " - " + (acc?.alias !== undefined ? acc?.alias : acc?.name)
+  }
+
+  const handleAccountSelected = (event: React.SyntheticEvent) => {
+    setSelectedAccount(accounts?.findLast(acc => acc.id === event.currentTarget.getAttribute('value')))
+  }
+  
+  const {
+    isFetching: isFetchingAccounts,
+    fetchedData: accounts,
+    error: accountsError
+  } = useGetHttp<AccountInfoResponse[]>('/accounts');
+
+  const accountButtons = accounts
+    ?.filter(acc => acc.active)
+    .filter(acc => !acc.hidden)
+    .map(acc => <Button key={acc.number} onClick={handleAccountSelected} value={acc.id}>{accountHeader(acc)}</Button>);
+
+  const [selectedAccount, setSelectedAccount] = useState<AccountInfoResponse>();
+
+  useEffect(() => {
+    if (accounts !== undefined && accounts.length > 0) {
+      setSelectedAccount(accounts[0])
+    }
+  }, [accounts, setSelectedAccount])
+
   return (
     <main className="mainContainer">
       <div className="gridItem span4Columns">
@@ -20,26 +57,20 @@ export default function Home() {
         <p>List of all transactions on your checking and savings bank accounts. Here you can import new transactions.</p>
       </div>
 
-      <div className="gridItem span2Columns">         
-          <Button>ING - Osobiste</Button>
-          <Button>ING - Wspólne</Button>
-          <Button>ING - Oszczędnościowe</Button>
-          <Button>mBank - Osobiste</Button>
-          <Button>Alior - Firmowe</Button>
-          <Button>Santander - Osobiste</Button>
-          <Button>PKO - Dziwne</Button>
-          <Button>Millenium - Oszczędnościowe</Button>
+      <div className="gridItem span2Columns">      
+        {accountButtons}   
       </div>
       <div className="gridItem span2Columns">
-        <TileHeader headline="ING - Osobiste">
-          Short summary about selected bank account
+        <TileHeader headline={accountHeader(selectedAccount)}>
+          Short summary about selected bank account.
         </TileHeader>
-        <p><span className={styles.bold}>Bank: </span><Link href="https://www.mbank.pl">mBank</Link></p>
-        <p><span className={styles.bold}>Account:</span> PL 123345451232342</p>
-        <p><span className={styles.bold}>Account name:</span> eKonto</p>
-        <p><span className={styles.bold}>Alias:</span> Osobiste</p>
-        <p><span className={styles.bold}>Opened at:</span> 05-12-2016</p>
-        <p><span className={styles.bold}>ID:</span>031b2574-f8c2-4b30-be2e-24f6d8b48ac0</p>
+        <p><span className={styles.bold}>Bank: </span><Link href={selectedAccount?.bankUrl === undefined ? '': selectedAccount?.bankUrl}>{selectedAccount?.bankName}</Link></p>
+        <p><span className={styles.bold}>Number: </span>{iban(selectedAccount?.number)}</p>
+        <p><span className={styles.bold}>Name: </span>{selectedAccount?.name}</p>
+        <p><span className={styles.bold}>Alias: </span>{selectedAccount?.alias}</p>
+        <p><span className={styles.bold}>Type: </span>{selectedAccount?.type}</p>
+        <p><span className={styles.bold}>Opened at: </span>05-12-2016</p>
+        <p><span className={styles.bold}>ID: </span>{selectedAccount?.id}</p>
       </div>
 
       <div className="gridItem span2Columns">

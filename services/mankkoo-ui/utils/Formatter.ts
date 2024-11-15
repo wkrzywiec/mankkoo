@@ -1,4 +1,4 @@
-export function currencyFormat(value: number | string | undefined): string {
+export function currencyFormat(value?: number | string): string {
   
   let number: number;
   
@@ -17,7 +17,12 @@ export function currencyFormat(value: number | string | undefined): string {
   }).format(number);
 }
 
-export function percentage(value: number | undefined): string {
+export function percentage(value?: number): string {
   const per = value === undefined ? 0 : value;
   return per.toLocaleString("pl-PL", {style: "percent", maximumFractionDigits: 2});
+}
+
+export function iban(value?: string): string {
+  const iban = value === undefined ? '' : value;
+  return iban.replace(/[^\dA-Z]/g, '').replace(/(.{4})/g, '$1 ').trim();
 }

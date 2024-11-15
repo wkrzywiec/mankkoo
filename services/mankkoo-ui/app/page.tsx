@@ -1,4 +1,3 @@
-/* eslint-disable prefer-const */
 "use client";
 
 import styles from "./page.module.css";
