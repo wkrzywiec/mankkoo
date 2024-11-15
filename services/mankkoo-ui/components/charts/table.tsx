@@ -71,9 +71,11 @@ export default function Table({
 }
 
 function addRowNumberColumn(data: string[][], boldLastRow: boolean, boldFirstRow: boolean): void {
+    if (data !== undefined && data.length === 0) {
+        return;
+    }
 
-    const rowNumberColumnIsNotPresent: boolean = (boldFirstRow && data !== undefined && data[0] !== undefined) ? data[1][0] != '01' : data[0][0] != '01';
-    console.log('rowNumberColumnIsNotPresent:', rowNumberColumnIsNotPresent, 'data:', data);
+    const rowNumberColumnIsNotPresent: boolean = boldFirstRow ? data[1][0] != '01' : data[0][0] != '01';
     
     if (rowNumberColumnIsNotPresent) {
         data.forEach((row, rowIndex) => {
