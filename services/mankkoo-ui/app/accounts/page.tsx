@@ -39,6 +39,18 @@ export default function Accounts() {
     return <Table input={{data: tableData, boldFirstRow: true}} style={{width: "90%"}}></Table>;
   }
 
+  function prepareBalanaceHistoryLineChart(transactions?: AccountTransactionResponse[]) {
+    if (transactions === undefined) return;
+
+    const dates: string[] = [];
+    const balances: number[] = [];
+    transactions.forEach(t =>  {
+      dates.push(t.date);
+      balances.push(t.balance);
+    });
+    return <LineChart x={dates} y={balances} seriesName="Account Balance" />;
+  }
+
   const handleAccountSelected = (event: React.SyntheticEvent) => {
     setSelectedAccount(accounts?.findLast(acc => acc.id === event.currentTarget.getAttribute('value')));
   }
@@ -72,6 +84,7 @@ export default function Accounts() {
   } = useGetHttp<AccountTransactionResponse[]>(`/accounts/${selectedAccount?.id}/operations`);
 
   const transactionsTable = prepareTransactionsTable(transactions);
+  const balanaceHistoryLineChart = prepareBalanaceHistoryLineChart(transactions);
 
   return (
     <main className="mainContainer">
@@ -106,7 +119,7 @@ export default function Accounts() {
         <TileHeader headline="Account History">
           Glance into account balance.
         </TileHeader>
-        <LineChart></LineChart>
+        {balanaceHistoryLineChart}
       </div>
     </main>
   );
