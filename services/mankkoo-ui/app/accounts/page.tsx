@@ -8,9 +8,9 @@ import TileHeader from "@/components/elements/TileHeader";
 
 import styles from './page.module.css'
 import { useGetHttp } from "@/hooks/useHttp";
-import { AccountInfoResponse } from "@/api/AccountsPageResponses";
+import { AccountInfoResponse, AccountTransactionResponse } from "@/api/AccountsPageResponses";
 import React, { useEffect, useState } from "react";
-import { iban } from "@/utils/Formatter";
+import { currencyFormat, iban } from "@/utils/Formatter";
 
 
 const LineChart = dynamic(() => import('@/components/charts/Line'), {
@@ -27,10 +27,23 @@ export default function Accounts() {
     return acc?.bankName + " - " + (acc?.alias !== undefined ? acc?.alias : acc?.name)
   }
 
+  function prepareAccountButton(acc: AccountInfoResponse) {
+    return <Button key={acc.number} onClick={handleAccountSelected} value={acc.id}>{accountHeader(acc)}</Button>;
+  }
+
+  function prepareTransactionsTable(transactions?: AccountTransactionResponse[]) {
+    if (transactions === undefined) return;
+
+    const tableData = transactions.map(t => [t.date, t.title, currencyFormat(t.operation), currencyFormat(t.balance)]);
+    tableData.splice(0, 0, ["Date", "Title", "Operation", "Balance"]);
+    return <Table input={{data: tableData, boldFirstRow: true}} style={{width: "90%"}}></Table>;
+  }
+
   const handleAccountSelected = (event: React.SyntheticEvent) => {
-    setSelectedAccount(accounts?.findLast(acc => acc.id === event.currentTarget.getAttribute('value')))
+    setSelectedAccount(accounts?.findLast(acc => acc.id === event.currentTarget.getAttribute('value')));
   }
   
+
   const {
     isFetching: isFetchingAccounts,
     fetchedData: accounts,
@@ -40,7 +53,7 @@ export default function Accounts() {
   const accountButtons = accounts
     ?.filter(acc => acc.active)
     .filter(acc => !acc.hidden)
-    .map(acc => <Button key={acc.number} onClick={handleAccountSelected} value={acc.id}>{accountHeader(acc)}</Button>);
+    .map(acc => prepareAccountButton(acc));
 
   const [selectedAccount, setSelectedAccount] = useState<AccountInfoResponse>();
 
@@ -48,7 +61,17 @@ export default function Accounts() {
     if (accounts !== undefined && accounts.length > 0) {
       setSelectedAccount(accounts[0])
     }
+
+    
   }, [accounts, setSelectedAccount])
+
+  const {
+    isFetching: isFetchingTransactions,
+    fetchedData: transactions,
+    error: transactionsError
+  } = useGetHttp<AccountTransactionResponse[]>(`/accounts/${selectedAccount?.id}/operations`);
+
+  const transactionsTable = prepareTransactionsTable(transactions);
 
   return (
     <main className="mainContainer">
@@ -77,7 +100,7 @@ export default function Accounts() {
         <TileHeader headline="Transactions">
           List of all transactions for specific account.
         </TileHeader>
-        <Table style={{width: "90%"}}></Table>
+        {transactionsTable}
       </div>
       <div className="gridItem span2Columns">
         <TileHeader headline="Account History">

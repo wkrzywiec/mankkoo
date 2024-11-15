@@ -22,6 +22,15 @@
     padding: 10px;
 }
 
+.boldedFirstRow {
+    font-weight: bold;
+    border-bottom: 5px solid black;
+}
+
+.boldedFirstRow td {
+    padding: 10px;
+}
+
 .dot {
     height: 25px;
     width: 25px;

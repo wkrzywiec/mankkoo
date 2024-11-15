@@ -10,3 +10,14 @@ export interface AccountInfoResponse {
     bankUrl: string;
     hidden: boolean;
 }
+
+export interface AccountTransactionResponse {
+    balance: number;
+    comment?: string;
+    currency: string;
+    date: string;
+    details?: string;
+    id: string;
+    operation: number;
+    title: string;
+}

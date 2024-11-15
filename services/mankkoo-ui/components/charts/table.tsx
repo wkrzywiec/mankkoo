@@ -9,6 +9,7 @@ const COLOR_CIRCLE_CELL_PATTERN = "circle_#"
 export interface TableData {
     data: string [][];
     currencyColumnIdx?: number;
+    boldFirstRow?: boolean;
     boldLastRow?: boolean;
     colorsColumnIdx?: number;
 }
@@ -37,12 +38,13 @@ export default function Table({
     preparedData = [...input.data]
 
     const boldLastRow = input?.boldLastRow !== undefined;
+    const boldFirstRow = input?.boldFirstRow !== undefined;
 
     addColorCircleColumn(preparedData, input?.colorsColumnIdx);
-    addRowNumberColumn(preparedData, boldLastRow);
+    addRowNumberColumn(preparedData, boldLastRow, boldFirstRow);
 
     const rows = preparedData.map((rowData, rowIndex) => 
-        <tr key={rowIndex} className={shouldBoldLastRow(preparedData, rowIndex, boldLastRow) ? styles.boldedRow : styles.row}>
+        <tr key={rowIndex} className={(defineRowClass(preparedData, rowIndex, boldLastRow, boldFirstRow))}>
             { rowData.map((cellData, cellIndex) => {
                 
                 if (shouldAddColorCircleToCell(cellData, preparedData, rowIndex, boldLastRow)) {
@@ -68,15 +70,17 @@ export default function Table({
     )
 }
 
-function addRowNumberColumn(data: string[][], shouldAddTotalRow: boolean): void {
-    const rowNumberColumnIsNotPresent: boolean = data !== undefined && data[0] !== undefined && data[0][0] != '01';
+function addRowNumberColumn(data: string[][], boldLastRow: boolean, boldFirstRow: boolean): void {
+
+    const rowNumberColumnIsNotPresent: boolean = (boldFirstRow && data !== undefined && data[0] !== undefined) ? data[1][0] != '01' : data[0][0] != '01';
+    console.log('rowNumberColumnIsNotPresent:', rowNumberColumnIsNotPresent, 'data:', data);
     
     if (rowNumberColumnIsNotPresent) {
         data.forEach((row, rowIndex) => {
-            if (rowIndex === data.length - 1 && shouldAddTotalRow) {
+            if ((rowIndex === data.length - 1 && boldLastRow) || (rowIndex === 0 && boldFirstRow)) {
                 row.splice(0, 0, '');
             } else {
-                row.splice(0, 0, rowNumberAsString(rowIndex + 1));
+                row.splice(0, 0, boldFirstRow ? rowNumberAsString(rowIndex) : rowNumberAsString(rowIndex + 1));
             }
         })
     }
@@ -99,8 +103,23 @@ function addColorCircleColumn(data: string[][], colorsColumnIdx: number | undefi
     }
 }
 
+function defineRowClass(data: string[][], rowIndex: number, boldLastRow: boolean, boldFirstRow: boolean) {
+    if (shouldBoldLastRow(data, rowIndex, boldLastRow)) {
+        return styles.boldedRow;
+    }
+    
+    if (shouldBoldFirstRow(data, rowIndex, boldFirstRow)) {
+        return styles.boldedFirstRow;
+    }
+    return styles.row;
+}
+
 function shouldBoldLastRow(data: string[][], rowIndex: number, boldLastRow: boolean): boolean {
     return boldLastRow && rowIndex + 1 == data.length;
+}
+
+function shouldBoldFirstRow(data: string[][], rowIndex: number, boldFirstRow: boolean): boolean {
+    return boldFirstRow && rowIndex === 0;
 }
 
 function shouldAddColorCircleToCell(cellData?: string, data: string[][], rowIndex: number, boldLastRow: boolean) {
