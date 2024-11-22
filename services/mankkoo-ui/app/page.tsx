@@ -20,6 +20,7 @@ import { PieChartData } from "@/components/charts/piechart";
 import { TableData } from "@/components/charts/table";
 import { useEffect, useState } from "react";
 import Loader from "@/components/elements/Loader";
+import TextLoader from "@/components/elements/TextLoader";
 
 
 const LineChart = dynamic(() => import('@/components/charts/Line'), {
