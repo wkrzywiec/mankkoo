@@ -128,7 +128,7 @@ export default function Accounts() {
         <p><span className={styles.bold}>Name: </span>{selectedAccount?.name}</p>
         <p><span className={styles.bold}>Alias: </span>{selectedAccount?.alias}</p>
         <p><span className={styles.bold}>Type: </span>{selectedAccount?.type}</p>
-        <p><span className={styles.bold}>Opened at: </span>05-12-2016</p>
+        <p><span className={styles.bold}>Opened at: </span>{selectedAccount?.openedAt}</p>
         <p><span className={styles.bold}>ID: </span>{selectedAccount?.id}</p>
       </div>
 

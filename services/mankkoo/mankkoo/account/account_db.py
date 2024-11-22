@@ -18,10 +18,16 @@ def load_all_accounts() -> list[Account]:
         metadata->>'active' AS active,
         metadata->>'bankName' AS bankName,
         metadata->>'bankUrl' AS bankUrl,
-        false as hidden
-    FROM streams
-    WHERE type = 'account'
-    AND (metadata ->> 'active')::boolean = true;
+        false as hidden,
+        (SELECT DATE(e.occured_at)
+            FROM events e
+            WHERE e.stream_id = s.id
+            AND e.version = 1
+            LIMIT 1) AS openedAt
+    FROM streams s
+    WHERE s.type = 'account'
+    AND (metadata ->> 'active')::boolean = true
+    ORDER BY bankName, name;
     """
 
     result = []
@@ -42,6 +48,7 @@ def load_all_accounts() -> list[Account]:
                 account.bankName = row[7]
                 account.bankUrl = row[8]
                 account.hidden = row[9]
+                account.openedAt = row[10]
 
                 result.append(account)
     return result
