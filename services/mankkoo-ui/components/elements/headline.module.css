@@ -21,5 +21,5 @@
   bottom: 0; /* Position the line at the bottom of the h3 */
   width: 100%; /* Make the line span the entire width */
   height: 2px; /* Thickness of the line */
-  background-color: var(--font-color);; /* Color of the line */
+  background-color: var(--font-color); /* Color of the line */
 }

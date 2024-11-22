@@ -19,6 +19,7 @@ import { useGetHttp } from '@/hooks/useHttp';
 import { PieChartData } from "@/components/charts/piechart";
 import { TableData } from "@/components/charts/table";
 import { useEffect, useState } from "react";
+import Loader from "@/components/elements/Loader";
 
 
 const LineChart = dynamic(() => import('@/components/charts/Line'), {
@@ -120,8 +121,12 @@ export default function Home() {
       <div className="gridItem span2Columns">
         <TileHeader headline="Financial Savings" subHeadline="Total wealth held in bank accounts and liquid assets (excluding real estate and retirement funds)." />
         <div className={styles.horizontalAlignment}>
-          <Table input={savingsDistributionTable}/>
-          <PieChart input={savingsDistributionPie} size={1.5}/>
+          {isFetchingSavingsDistribution ? 
+            <Loader /> : 
+            <>
+              <Table input={savingsDistributionTable}/>
+              <PieChart input={savingsDistributionPie} size={1.5}/>
+          </>}
         </div>
       </div>
 
@@ -150,7 +155,10 @@ export default function Home() {
 
       <div className="gridItem span2Columns">
         <TileHeader headline="Financial Savings" subHeadline="💸 Entire wealth located on bank accounts and easy to sell assets."/>
-        <LineChart x={totalHistory?.date} y={totalHistory?.total} seriesName="Savings History"/>
+        {isFetchingTotalHistory ? 
+            <Loader height={600}/> : 
+            <LineChart x={totalHistory?.date} y={totalHistory?.total} seriesName="Savings History"/>}
+        
       </div>
       <div className="gridItem span2Columns">
         <TileHeader headline="Real-estate Value" subHeadline="🏠 Historical value of all real-estates (including the ones for investments and not)."/>
