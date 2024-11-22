@@ -1,7 +1,11 @@
 "use client";
 
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+import axios from 'axios';
 
 import Table from "@/components/charts/Table";
 import TileHeader from "@/components/elements/TileHeader";
@@ -9,8 +13,8 @@ import TileHeader from "@/components/elements/TileHeader";
 import styles from './page.module.css'
 import { useGetHttp } from "@/hooks/useHttp";
 import { AccountInfoResponse, AccountTransactionResponse } from "@/api/AccountsPageResponses";
-import React, { useEffect, useState } from "react";
 import { currencyFormat, iban } from "@/utils/Formatter";
+import UploadFileButton from "@/components/elements/UploadFileButton";
 
 
 const LineChart = dynamic(() => import('@/components/charts/Line'), {
@@ -20,6 +24,9 @@ const LineChart = dynamic(() => import('@/components/charts/Line'), {
 const Button = dynamic(() => import('@/components/elements/Button'), {
   ssr: false, // Disable server-side rendering, more info: https://nextjs.org/docs/messages/react-hydration-error
 });
+
+const baseUrl = 'http://localhost:5000';
+const MySwal = withReactContent(Swal);
 
 export default function Accounts() {
 
@@ -86,6 +93,49 @@ export default function Accounts() {
   const transactionsTable = prepareTransactionsTable(transactions);
   const balanaceHistoryLineChart = prepareBalanaceHistoryLineChart(transactions);
 
+  const [file, setFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadedFileURL, setUploadedFileURL] = useState<string>('');
+
+  const handleTransactionsUpload = (e: ChangeEvent<HTMLInputElement>) => {
+
+    if (!e.target.files || !e.target.files[0]) {
+        MySwal.fire({
+            title: 'Warning!',
+            text: 'File was not selected',
+            icon: 'warning',
+            confirmButtonText: 'Ok'
+        })
+        return;
+    }
+
+    const data = new FormData()
+    data.set('operations', e.target.files[0])
+
+    axios.post(baseUrl + '/api/accounts/' + selectedAccount?.id + '/operations/import',
+        data,
+        { headers: {
+            'Content-Type': 'multipart/form-data',
+            'Content-Length': `${e.target.files[0].size}`,
+        }} )
+    .then(response => {
+        MySwal.fire({
+            title: 'Success!',
+            text: 'File uploaded correctly',
+            icon: 'success',
+            confirmButtonText: 'Cool'})
+    })
+    .catch(error => {
+        console.error(error);
+        MySwal.fire({
+            title: 'Error!',
+            text: 'There was a problem with file upload',
+            icon: 'error',
+            confirmButtonText: 'Ok'
+        })
+    });
+};
+
   return (
     <main className="mainContainer">
       <div className="gridItem span4Columns">
@@ -113,6 +163,7 @@ export default function Accounts() {
         <TileHeader headline="Transactions">
           List of all transactions for specific account.
         </TileHeader>
+        <UploadFileButton id="upload-transactions" handleUpload={handleTransactionsUpload} btnText="Import Transactions"/>
         {transactionsTable}
       </div>
       <div className="gridItem span2Columns">
