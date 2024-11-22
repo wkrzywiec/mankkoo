@@ -1,4 +1,4 @@
-import { ChangeEvent, ReactNode } from "react"
+import { ChangeEvent } from "react"
 import classes from "./button.module.css"
 
 export type HandleFileUploadCallback = (e: ChangeEvent<HTMLInputElement>) => (void);

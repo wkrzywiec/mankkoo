@@ -102,9 +102,7 @@ export default function Home() {
       </div>
 
       <div className="gridItem span2Columns">
-        <TileHeader headline="Total Net Worth">
-          Includes estimated real estate value, total retirement funds, and all financial assets (accounts and investments).
-        </TileHeader>
+        <TileHeader headline="Total Net Worth" subHeadline="Includes estimated real estate value, total retirement funds, and all financial assets (accounts and investments)." />
         <div className={styles.horizontalAlignment}>
           <PieChart />
           <Table boldLastRow={true} colorsColumnIdx={1}/>
@@ -112,9 +110,7 @@ export default function Home() {
       </div>
 
       <div className="gridItem span2Columns span2Rows">
-        <TileHeader headline="Financial Fortress">
-          Based on a book <Link href="https://finansowaforteca.pl/">Finansowa Forteca by Marcin Iwuć</Link>.
-        </TileHeader>
+        <TileHeader headline="Financial Fortress" subHeadline={<>Based on a book <Link href="https://finansowaforteca.pl/">Finansowa Forteca by Marcin Iwuć</Link>.</>} />
         <div className={styles.verticalAlignment}>
           <PieChart size={2}/>
           <Table boldLastRow={true} colorsColumnIdx={1}/>
@@ -122,9 +118,7 @@ export default function Home() {
       </div>
 
       <div className="gridItem span2Columns">
-        <TileHeader headline="Financial Savings">
-          Total wealth held in bank accounts and liquid assets (excluding real estate and retirement funds).
-        </TileHeader>
+        <TileHeader headline="Financial Savings" subHeadline="Total wealth held in bank accounts and liquid assets (excluding real estate and retirement funds)." />
         <div className={styles.horizontalAlignment}>
           <Table input={savingsDistributionTable}/>
           <PieChart input={savingsDistributionPie} size={1.5}/>
@@ -137,48 +131,38 @@ export default function Home() {
       </div>
 
       <div className="gridItem span4Columns">
-        <TileHeader headline="Total Net Worth">
-          Includes estimated real estate value, total retirement funds, and all financial assets (accounts and investments).
-        </TileHeader>
+        <TileHeader headline="Total Net Worth" subHeadline="Includes estimated real estate value, total retirement funds, and all financial assets (accounts and investments)."/>
         <LineChart />
       </div>
 
       <div className="gridItem span2Columns">
         <div className={styles.verticalAlignment}>
-          <SubHeadline>Total Net Worth Distribution per each month</SubHeadline>
+          <SubHeadline text="Total Net Worth Distribution per each month" />
           <BarChart />
         </div>
       </div>
       <div className="gridItem span2Columns">
         <div className={styles.verticalAlignment}>
-          <SubHeadline>Income per each month by comparing value from the previous year for the same month</SubHeadline>
+          <SubHeadline text="Income per each month by comparing value from the previous year for the same month" />
           <LineChart />
         </div>
       </div>
 
       <div className="gridItem span2Columns">
-        <TileHeader headline="Financial Savings">
-          💸 Entire wealth located on bank accounts and easy to sell assets.
-        </TileHeader>
+        <TileHeader headline="Financial Savings" subHeadline="💸 Entire wealth located on bank accounts and easy to sell assets."/>
         <LineChart x={totalHistory?.date} y={totalHistory?.total} seriesName="Savings History"/>
       </div>
       <div className="gridItem span2Columns">
-        <TileHeader headline="Real-estate Value">
-          🏠 Historical value of all real-estates (including the ones for investments and not).
-        </TileHeader>
+        <TileHeader headline="Real-estate Value" subHeadline="🏠 Historical value of all real-estates (including the ones for investments and not)."/>
         <LineChart />
       </div>
 
       <div className="gridItem span2Columns">
-        <TileHeader headline="Investments">
-          💸 Historical value of all investments divided by the asset type excluding real-estate.
-        </TileHeader>
+        <TileHeader headline="Investments" subHeadline="💸 Historical value of all investments divided by the asset type excluding real-estate."/>
         <LineChart />
       </div>
       <div className="gridItem span2Columns">
-        <TileHeader headline="Retirement">
-          👴Cumultive resources collected for a retirement.
-        </TileHeader>
+        <TileHeader headline="Retirement" subHeadline="👴Cumultive resources collected for a retirement."/>
         <LineChart />
       </div>
 

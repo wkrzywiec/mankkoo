@@ -1,10 +1,9 @@
 import classes from "./SubHeadline.module.css"
-import { ReactNode } from 'react';
 
-export default function SubHeadline({children}: {children: ReactNode}) {
+export default function SubHeadline({text}: {text: string}) {
     return (
         <p className={classes.tileText}>
-            {children}
+            {text}
         </p>
     )
 }

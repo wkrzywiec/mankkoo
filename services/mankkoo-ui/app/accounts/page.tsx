@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import Swal from 'sweetalert2';
@@ -118,7 +118,7 @@ export default function Accounts() {
             'Content-Type': 'multipart/form-data',
             'Content-Length': `${e.target.files[0].size}`,
         }} )
-    .then(response => {
+    .then(_ => {
         MySwal.fire({
             title: 'Success!',
             text: 'File uploaded correctly',
@@ -136,6 +136,8 @@ export default function Accounts() {
     });
 };
 
+  const uploadBtn = <UploadFileButton id="upload-transactions" handleUpload={handleTransactionsUpload} btnText="+Import Transactions"/>;
+
   return (
     <main className="mainContainer">
       <div className="gridItem span4Columns">
@@ -147,9 +149,7 @@ export default function Accounts() {
         {accountButtons}   
       </div>
       <div className="gridItem span2Columns">
-        <TileHeader headline={accountHeader(selectedAccount)}>
-          Short summary about selected bank account.
-        </TileHeader>
+        <TileHeader headline={accountHeader(selectedAccount)} subHeadline="Short summary about selected bank account." />
         <p><span className={styles.bold}>Bank: </span><Link href={selectedAccount?.bankUrl === undefined ? '': selectedAccount?.bankUrl}>{selectedAccount?.bankName}</Link></p>
         <p><span className={styles.bold}>Number: </span>{iban(selectedAccount?.number)}</p>
         <p><span className={styles.bold}>Name: </span>{selectedAccount?.name}</p>
@@ -160,16 +160,11 @@ export default function Accounts() {
       </div>
 
       <div className="gridItem span2Columns">
-        <TileHeader headline="Transactions">
-          List of all transactions for specific account.
-        </TileHeader>
-        <UploadFileButton id="upload-transactions" handleUpload={handleTransactionsUpload} btnText="Import Transactions"/>
+        <TileHeader headline="Transactions" subHeadline="List of all transactions for specific account." headlineElement={uploadBtn} />
         {transactionsTable}
       </div>
       <div className="gridItem span2Columns">
-        <TileHeader headline="Account History">
-          Glance into account balance.
-        </TileHeader>
+        <TileHeader headline="Account History" subHeadline="Glance into account balance." />
         {balanaceHistoryLineChart}
       </div>
     </main>
