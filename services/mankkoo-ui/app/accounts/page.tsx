@@ -11,7 +11,7 @@ import Table from "@/components/charts/Table";
 import TileHeader from "@/components/elements/TileHeader";
 
 import styles from './page.module.css'
-import { useGetHttp } from "@/hooks/useHttp";
+import { useGetHttp, useUploadFile } from "@/hooks/useHttp";
 import { AccountInfoResponse, AccountTransactionResponse } from "@/api/AccountsPageResponses";
 import { currencyFormat, iban } from "@/utils/Formatter";
 import UploadFileButton from "@/components/elements/UploadFileButton";
@@ -93,10 +93,6 @@ export default function Accounts() {
   const transactionsTable = prepareTransactionsTable(transactions);
   const balanaceHistoryLineChart = prepareBalanaceHistoryLineChart(transactions);
 
-  const [file, setFile] = useState<File | null>(null);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [uploadedFileURL, setUploadedFileURL] = useState<string>('');
-
   const handleTransactionsUpload = (e: ChangeEvent<HTMLInputElement>) => {
 
     if (!e.target.files || !e.target.files[0]) {
@@ -109,31 +105,7 @@ export default function Accounts() {
         return;
     }
 
-    const data = new FormData()
-    data.set('operations', e.target.files[0])
-
-    axios.post(baseUrl + '/api/accounts/' + selectedAccount?.id + '/operations/import',
-        data,
-        { headers: {
-            'Content-Type': 'multipart/form-data',
-            'Content-Length': `${e.target.files[0].size}`,
-        }} )
-    .then(_ => {
-        MySwal.fire({
-            title: 'Success!',
-            text: 'File uploaded correctly',
-            icon: 'success',
-            confirmButtonText: 'Cool'})
-    })
-    .catch(error => {
-        console.error(error);
-        MySwal.fire({
-            title: 'Error!',
-            text: 'There was a problem with file upload',
-            icon: 'error',
-            confirmButtonText: 'Ok'
-        })
-    });
+    useUploadFile('/accounts/' + selectedAccount?.id + '/operations/import', e.target.files[0]);
 };
 
   const uploadBtn = <UploadFileButton id="upload-transactions" handleUpload={handleTransactionsUpload} btnText="+Import Transactions"/>;

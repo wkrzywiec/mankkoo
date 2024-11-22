@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import withReactContent from 'sweetalert2-react-content';
+import Swal from 'sweetalert2';
+
 import { API_BASE } from '@/api/ApiUrl';
 
 export function useGetHttp<Type>(apiPath: string): {isFetching?: boolean, fetchedData?: Type, setFetchedData?: unknown, error?: string } {
@@ -35,5 +38,35 @@ export function useGetHttp<Type>(apiPath: string): {isFetching?: boolean, fetche
         setFetchedData,
         error
     }
+}
+
+const MySwal = withReactContent(Swal);
+
+export function useUploadFile(apiPath: string, file: File) {
+    const data = new FormData();
+    data.set('operations', file);
+
+    axios.post(API_BASE + apiPath,
+        data,
+        { headers: {
+            'Content-Type': 'multipart/form-data',
+            'Content-Length': `${file.size}`,
+        }} )
+    .then(_ => {
+        MySwal.fire({
+            title: 'Success!',
+            text: 'File uploaded correctly',
+            icon: 'success',
+            confirmButtonText: 'Cool'})
+    })
+    .catch(error => {
+        console.error(error);
+        MySwal.fire({
+            title: 'Error!',
+            text: 'There was a problem with file upload',
+            icon: 'error',
+            confirmButtonText: 'Ok'
+        })
+    });
 }
 
