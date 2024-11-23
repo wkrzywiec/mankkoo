@@ -5,7 +5,7 @@ import Swal from 'sweetalert2';
 
 import { API_BASE } from '@/api/ApiUrl';
 
-export function useGetHttp<Type>(apiPath: string): {isFetching?: boolean, fetchedData?: Type, setFetchedData?: unknown, error?: string } {
+export function useGetHttp<Type>(apiPath: string): {isFetching: boolean, fetchedData?: Type, setFetchedData?: unknown, error?: string } {
   
     const [isFetching, setIsFetching] = useState<boolean>(false);
     const [error, setError] = useState<string>();

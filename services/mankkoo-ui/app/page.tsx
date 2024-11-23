@@ -20,7 +20,6 @@ import { PieChartData } from "@/components/charts/piechart";
 import { TableData } from "@/components/charts/table";
 import { useEffect, useState } from "react";
 import Loader from "@/components/elements/Loader";
-import TextLoader from "@/components/elements/TextLoader";
 
 
 const LineChart = dynamic(() => import('@/components/charts/Line'), {
@@ -94,7 +93,7 @@ export default function Home() {
         <Indicator headline="Net Worth" text="no data" />
       </div>
       <div className="gridItem">
-        <Indicator headline="Savings" text={formattedSavings} />
+        <Indicator headline="Savings" text={formattedSavings} isFetching={isFetchingMainIndicators}/>
       </div>
       <div className="gridItem">
         <Indicator headline="Last Month Income" text="no data" textColor="#659B5E" />
