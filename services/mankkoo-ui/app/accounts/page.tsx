@@ -5,13 +5,12 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
-import axios from 'axios';
 
 import Table from "@/components/charts/Table";
 import TileHeader from "@/components/elements/TileHeader";
 
 import styles from './page.module.css'
-import { useGetHttp, useUploadFile } from "@/hooks/useHttp";
+import { useGetHttp, uploadFile } from "@/hooks/useHttp";
 import { AccountInfoResponse, AccountTransactionResponse } from "@/api/AccountsPageResponses";
 import { currencyFormat, iban } from "@/utils/Formatter";
 import UploadFileButton from "@/components/elements/UploadFileButton";
@@ -25,11 +24,13 @@ const Button = dynamic(() => import('@/components/elements/Button'), {
   ssr: false, // Disable server-side rendering, more info: https://nextjs.org/docs/messages/react-hydration-error
 });
 
-const baseUrl = 'http://localhost:5000';
 const MySwal = withReactContent(Swal);
+
+
 
 export default function Accounts() {
 
+  //Accounts list and details
   function accountHeader(acc?: AccountInfoResponse): string | undefined {
     if (acc === undefined) return "Bank - Account";
     return acc?.bankName + " - " + (acc?.alias !== undefined ? acc?.alias : acc?.name)
@@ -39,17 +40,51 @@ export default function Accounts() {
     return <Button key={acc.number} onClick={handleAccountSelected} value={acc.id}>{accountHeader(acc)}</Button>;
   }
 
+  const handleAccountSelected = (event: React.SyntheticEvent) => {
+    setSelectedAccount(accounts?.findLast(acc => acc.id === event.currentTarget.getAttribute('value')));
+  }
+
+  const {
+    isFetching: isFetchingAccounts,
+    fetchedData: accounts,
+    error: accountsError
+  } = useGetHttp<AccountInfoResponse[]>('/accounts');
+
+
+  const [selectedAccount, setSelectedAccount] = useState<AccountInfoResponse>();
+  
+  const {
+    isFetching: isFetchingTransactions,
+    fetchedData: transactions,
+    error: transactionsError
+  } = useGetHttp<AccountTransactionResponse[]>(`/accounts/${selectedAccount?.id}/operations`);
+
+  
+  const accountButtons = accounts
+    ?.filter(acc => acc.active)
+    .filter(acc => !acc.hidden)
+    .map(acc => prepareAccountButton(acc));
+
+  useEffect(() => {
+    if (accounts !== undefined && accounts.length > 0) {
+      setSelectedAccount(accounts[0])
+    }
+  }, [accounts, setSelectedAccount])
+
+
+
+  //Transactions table & pie chart
   function prepareTransactionsTable(transactions?: AccountTransactionResponse[]) {
     if (transactions === undefined) return;
-
+  
     const tableData = transactions.map(t => [t.date, t.title, currencyFormat(t.operation), currencyFormat(t.balance)]);
     tableData.splice(0, 0, ["Date", "Title", "Operation", "Balance"]);
     return <Table input={{data: tableData, boldFirstRow: true}} style={{width: "90%"}}></Table>;
   }
-
+  
   function prepareBalanaceHistoryLineChart(transactions?: AccountTransactionResponse[]) {
     if (transactions === undefined) return;
-
+  
     const dates: string[] = [];
     const balances: number[] = [];
     transactions.forEach(t =>  {
@@ -59,41 +94,12 @@ export default function Accounts() {
     return <LineChart x={dates} y={balances} seriesName="Account Balance" />;
   }
 
-  const handleAccountSelected = (event: React.SyntheticEvent) => {
-    setSelectedAccount(accounts?.findLast(acc => acc.id === event.currentTarget.getAttribute('value')));
-  }
-  
-
-  const {
-    isFetching: isFetchingAccounts,
-    fetchedData: accounts,
-    error: accountsError
-  } = useGetHttp<AccountInfoResponse[]>('/accounts');
-
-  const accountButtons = accounts
-    ?.filter(acc => acc.active)
-    .filter(acc => !acc.hidden)
-    .map(acc => prepareAccountButton(acc));
-
-  const [selectedAccount, setSelectedAccount] = useState<AccountInfoResponse>();
-
-  useEffect(() => {
-    if (accounts !== undefined && accounts.length > 0) {
-      setSelectedAccount(accounts[0])
-    }
-
-    
-  }, [accounts, setSelectedAccount])
-
-  const {
-    isFetching: isFetchingTransactions,
-    fetchedData: transactions,
-    error: transactionsError
-  } = useGetHttp<AccountTransactionResponse[]>(`/accounts/${selectedAccount?.id}/operations`);
-
   const transactionsTable = prepareTransactionsTable(transactions);
   const balanaceHistoryLineChart = prepareBalanaceHistoryLineChart(transactions);
 
+
+
+  // Upload transactions
   const handleTransactionsUpload = (e: ChangeEvent<HTMLInputElement>) => {
 
     if (!e.target.files || !e.target.files[0]) {
@@ -106,7 +112,7 @@ export default function Accounts() {
         return;
     }
 
-    useUploadFile('/accounts/' + selectedAccount?.id + '/operations/import', e.target.files[0]);
+    uploadFile('/accounts/' + selectedAccount?.id + '/operations/import', e.target.files[0]);
 };
 
   const uploadBtn = <UploadFileButton id="upload-transactions" handleUpload={handleTransactionsUpload} btnText="+Import Transactions"/>;

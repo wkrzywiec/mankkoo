@@ -42,7 +42,7 @@ export function useGetHttp<Type>(apiPath: string): {isFetching: boolean, fetched
 
 const MySwal = withReactContent(Swal);
 
-export function useUploadFile(apiPath: string, file: File) {
+export function uploadFile(apiPath: string, file: File) {
     const data = new FormData();
     data.set('operations', file);
 

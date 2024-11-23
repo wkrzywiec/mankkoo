@@ -9,6 +9,7 @@ export interface AccountInfoResponse {
     bankName: string;
     bankUrl: string;
     hidden: boolean;
+    openedAt: string;
 }
 
 export interface AccountTransactionResponse {

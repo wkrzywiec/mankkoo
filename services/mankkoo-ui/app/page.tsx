@@ -52,6 +52,7 @@ export default function Home() {
   } = useGetHttp<TotalHistory>('/main/total-history');
   
 
+  
   const [savingsDistributionTable, setSavingsDistributionTable] = useState<TableData>({ data: []})
   const [savingsDistributionPie, setSavingsDistributionPie] = useState<PieChartData>({ data: [], labels: [] });
 
