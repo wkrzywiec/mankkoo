@@ -39,41 +39,51 @@ export default function Home() {
   } = useGetHttp<MainIndicatorsResponse>('/main/indicators');
   const formattedSavings = currencyFormat(indicators?.savings);
 
-
-  const [savingsDistributionTable, setSavingsDistributionTable] = useState<TableData>({ data: []})
-  const savingsDistributionPie: PieChartData = { data: [], labels: [] };
   const {
     isFetching: isFetchingSavingsDistribution,
     fetchedData: savingsDistribution,
     error: savingsDistributionError
   } = useGetHttp<SavingsDistribution[]>('/main/savings-distribution');
   
-  savingsDistribution?.forEach(value => {
-    savingsDistributionPie.labels.push(value.type);
-    savingsDistributionPie.data.push(value.total);
-  });
-
-
   const {
     isFetching: isFetchingTotalHistory,
     fetchedData: totalHistory,
     error: totalHistoryError
   } = useGetHttp<TotalHistory>('/main/total-history');
   
+
+  const [savingsDistributionTable, setSavingsDistributionTable] = useState<TableData>({ data: []})
+  const [savingsDistributionPie, setSavingsDistributionPie] = useState<PieChartData>({ data: [], labels: [] });
+
   useEffect(() => {
-    
-    if (savingsDistribution !== undefined && savingsDistribution.length > 0 && !isFetchingSavingsDistribution ) {
-      const savingsTable: TableData = { data: [], currencyColumnIdx: 3, colorsColumnIdx: 1, boldLastRow: true };
+
+    function prepareDataForSavingsDistributionTable() {
+        const savingsTable: TableData = { data: [], currencyColumnIdx: 3, colorsColumnIdx: 1, boldLastRow: true };
+        
+        savingsDistribution?.forEach(value => {
+          savingsTable.data.push([value.type, value.total.toString(), percentage(value.percentage)]);
+        });
+  
+        savingsTable.data.push(['Total', indicators === undefined ? '0' : indicators.savings.toString(), '']);
+        setSavingsDistributionTable(savingsTable);
+    }
+
+    function prepareDataForSavingsDistributionPieChart() {
+      const tempPieData: PieChartData = { data: [], labels: [] };
       
       savingsDistribution?.forEach(value => {
-        savingsTable.data.push([value.type, value.total.toString(), percentage(value.percentage)]);
+        tempPieData.labels.push(value.type);
+        tempPieData.data.push(value.total);
+        setSavingsDistributionPie(tempPieData);
       });
+    }
 
-      savingsTable.data.push(['Total', indicators?.savings.toString(), '']);
-      setSavingsDistributionTable(savingsTable);
-    } 
-
-  }, [savingsDistribution, isFetchingSavingsDistribution, indicators])
+    if (savingsDistribution !== undefined && savingsDistribution.length > 0 && !isFetchingSavingsDistribution ) {
+      prepareDataForSavingsDistributionTable();
+      prepareDataForSavingsDistributionPieChart();
+    }
+    
+  }, [savingsDistribution, isFetchingSavingsDistribution, indicators, savingsDistributionPie])
   
 
 
@@ -106,7 +116,7 @@ export default function Home() {
         <TileHeader headline="Total Net Worth" subHeadline="Includes estimated real estate value, total retirement funds, and all financial assets (accounts and investments)." />
         <div className={styles.horizontalAlignment}>
           <PieChart />
-          <Table boldLastRow={true} colorsColumnIdx={1}/>
+          <Table />
         </div>
       </div>
 
@@ -114,7 +124,7 @@ export default function Home() {
         <TileHeader headline="Financial Fortress" subHeadline={<>Based on a book <Link href="https://finansowaforteca.pl/">Finansowa Forteca by Marcin Iwuć</Link>.</>} />
         <div className={styles.verticalAlignment}>
           <PieChart size={2}/>
-          <Table boldLastRow={true} colorsColumnIdx={1}/>
+          <Table />
         </div>
       </div>
 
@@ -173,7 +183,6 @@ export default function Home() {
         <TileHeader headline="Retirement" subHeadline="👴Cumultive resources collected for a retirement."/>
         <LineChart />
       </div>
-
     </main>
   );
 }

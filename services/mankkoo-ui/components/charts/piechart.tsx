@@ -17,7 +17,7 @@ export interface PieChartData {
 
 export default function PieChart({ 
         input={data: [30, 50, 20], labels: ['Red','Black','Blue']}, 
-        size=1 } : { data?: PieChartData, size?: number}) {
+        size=1 } : { input?: PieChartData, size?: number}) {
 
     const sizeInPx = (size * 200).toString() + "px"
     const pieData = {
