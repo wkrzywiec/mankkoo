@@ -53,13 +53,13 @@ export default function Home() {
   
 
   
-  const [savingsDistributionTable, setSavingsDistributionTable] = useState<TableData>({ data: []})
+  const [savingsDistributionTable, setSavingsDistributionTable] = useState<TableData>({ data: [], hasHeader: false, boldLastRow: false, currencyColumnIdx: -1, colorsColumnIdx: -1})
   const [savingsDistributionPie, setSavingsDistributionPie] = useState<PieChartData>({ data: [], labels: [] });
 
   useEffect(() => {
 
     function prepareDataForSavingsDistributionTable() {
-        const savingsTable: TableData = { data: [], currencyColumnIdx: 3, colorsColumnIdx: 2, boldLastRow: true };
+        const savingsTable: TableData = { data: [], hasHeader: false, boldLastRow: true, currencyColumnIdx: 3, colorsColumnIdx: 2};
         
         savingsDistribution?.forEach(value => {
           savingsTable.data.push([value.type, value.total.toString(), percentage(value.percentage)]);
