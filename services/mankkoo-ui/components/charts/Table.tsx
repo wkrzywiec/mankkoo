@@ -21,11 +21,11 @@ export default function Table({
     colorsColumnIdx=-1,
     style={}
 }: {
-    data: string [][];
-    hasHeader: boolean;
-    boldLastRow: boolean;
-    currencyColumnIdx: number;
-    colorsColumnIdx: number;
+    data?: string [][];
+    hasHeader?: boolean;
+    boldLastRow?: boolean;
+    currencyColumnIdx?: number;
+    colorsColumnIdx?: number;
     style?: React.CSSProperties;
     }) {
 
