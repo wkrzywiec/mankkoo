@@ -1,6 +1,5 @@
 import styles from "./Table.module.css";
 
-import { CSSProperties } from 'react';
 import { getColor } from "@/app/colors";
 import { currencyFormat } from "@/utils/Formatter";
 
@@ -8,26 +7,25 @@ const COLOR_CIRCLE_CELL_PATTERN = "circle_#"
 
 export interface TableData {
     data: string [][];
-    currencyColumnIdx: number;
-    boldFirstRow: boolean;
+    hasHeader: boolean;
     boldLastRow: boolean;
+    currencyColumnIdx: number;
     colorsColumnIdx: number;
 }
 
 export default function Table({
     data=[],
-    boldFirstRow=false,
+    hasHeader=false,
     boldLastRow=false,
     currencyColumnIdx=-1,
     colorsColumnIdx=-1,
-    style
+    ...props
 }: {
     data: string [][];
     currencyColumnIdx: number;
-    boldFirstRow: boolean;
+    hasHeader: boolean;
     boldLastRow: boolean;
     colorsColumnIdx: number;
-    style?: CSSProperties
     }) {
 
     let preparedData: string [][];
@@ -47,11 +45,11 @@ export default function Table({
         preparedData = [...data]
     }
 
-    addRowNumberColumn(preparedData, boldFirstRow, boldLastRow)
-    addColorCircleColumn(preparedData, colorsColumnIdx, boldFirstRow, boldLastRow)
+    addRowNumberColumn(preparedData, hasHeader, boldLastRow)
+    addColorCircleColumn(preparedData, colorsColumnIdx, hasHeader, boldLastRow)
 
     const rows = preparedData.map((rowData, rowIndex) => 
-        <tr key={rowIndex} className={(defineRowClass(preparedData, rowIndex, boldLastRow, boldFirstRow))}>
+        <tr key={rowIndex} className={(defineRowClass(preparedData, rowIndex, boldLastRow, hasHeader))}>
             { rowData.map((cellData, cellIndex) => {
                 
                 if (shouldAddColorCircleToCell(cellData, preparedData, rowIndex, boldLastRow)) {
@@ -69,7 +67,7 @@ export default function Table({
         </tr>
     )
     return (
-        <table style={style} className={styles.table}>
+        <table className={styles.table} {...props}>
             <tbody>
                 {rows}
             </tbody>
@@ -80,7 +78,6 @@ export default function Table({
 function addColorCircleColumn(data: string[][], colorsColumnIdx: number, skipFirstRow: boolean, skipLastRow: boolean): void {
     if (colorsColumnIdx === -1) return
     
-    // const colorCircleIsAlreadyPresent = data[0][colorsColumnIdx + 1].includes(COLOR_CIRCLE_CELL_PATTERN)
     const colorCircleIsAlreadyPresent = data[0].some(cell => cell.includes(COLOR_CIRCLE_CELL_PATTERN))
     
     if (!colorCircleIsAlreadyPresent) {
@@ -117,12 +114,12 @@ function rowNumberAsString(rowIndex: number): string {
 
 
 
-function defineRowClass(data: string[][], rowIndex: number, boldLastRow: boolean, boldFirstRow: boolean) {
+function defineRowClass(data: string[][], rowIndex: number, boldLastRow: boolean, hasHeader: boolean) {
     if (shouldBoldLastRow(data, rowIndex, boldLastRow)) {
         return styles.boldedRow;
     }
     
-    if (shouldBoldFirstRow(data, rowIndex, boldFirstRow)) {
+    if (shouldBoldFirstRow(data, rowIndex, hasHeader)) {
         return styles.boldedFirstRow;
     }
     return styles.row;
@@ -132,8 +129,8 @@ function shouldBoldLastRow(data: string[][], rowIndex: number, boldLastRow: bool
     return boldLastRow && rowIndex + 1 == data.length;
 }
 
-function shouldBoldFirstRow(data: string[][], rowIndex: number, boldFirstRow: boolean): boolean {
-    return boldFirstRow && rowIndex === 0;
+function shouldBoldFirstRow(data: string[][], rowIndex: number, hasHeader: boolean): boolean {
+    return hasHeader && rowIndex === 0;
 }
 
 function shouldAddColorCircleToCell(cellData?: string, data: string[][], rowIndex: number, boldLastRow: boolean) {
