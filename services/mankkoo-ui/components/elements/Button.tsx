@@ -1,5 +1,5 @@
 import { ReactNode } from "react"
-import classes from "./button.module.css"
+import classes from "./Button.module.css"
 
 export default function Button({children, ...props}: {children: ReactNode}) {
     return (

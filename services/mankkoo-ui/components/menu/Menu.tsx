@@ -1,4 +1,4 @@
-import classes from './menu.module.css'
+import classes from './Menu.module.css'
 import MenuItem from '@/components/menu/MenuItem'
 
 import { 

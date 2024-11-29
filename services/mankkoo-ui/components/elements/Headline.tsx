@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import classes from "./headline.module.css"
+import classes from "./Headline.module.css"
 
 export default function Headline({text, children, fontSize="1.5"}: {text: string, children?: ReactNode, fontSize?: string}) {
     const styles = {fontSize: fontSize + "rem"};

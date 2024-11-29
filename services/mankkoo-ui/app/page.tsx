@@ -16,8 +16,8 @@ import { MainIndicatorsResponse, SavingsDistribution, TotalHistory } from "@/api
 import { currencyFormat, percentage } from "@/utils/Formatter";
 
 import { useGetHttp } from '@/hooks/useHttp';
-import { PieChartData } from "@/components/charts/piechart";
-import { TableData } from "@/components/charts/table";
+import { PieChartData } from "@/components/charts/Piechart";
+import { TableData } from "@/components/charts/Table";
 import { useEffect, useState } from "react";
 import Loader from "@/components/elements/Loader";
 
