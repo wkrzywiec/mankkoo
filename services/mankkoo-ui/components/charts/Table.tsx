@@ -2,6 +2,7 @@ import styles from "./Table.module.css";
 
 import { getColor } from "@/app/colors";
 import { currencyFormat } from "@/utils/Formatter";
+import { CSSProperties } from "react";
 
 const COLOR_CIRCLE_CELL_PATTERN = "circle_#"
 
@@ -19,13 +20,14 @@ export default function Table({
     boldLastRow=false,
     currencyColumnIdx=-1,
     colorsColumnIdx=-1,
-    ...props
+    style
 }: {
     data: string [][];
     currencyColumnIdx: number;
     hasHeader: boolean;
     boldLastRow: boolean;
     colorsColumnIdx: number;
+    style?: CSSProperties;
     }) {
 
     let preparedData: string [][];
@@ -67,7 +69,7 @@ export default function Table({
         </tr>
     )
     return (
-        <table className={styles.table} {...props}>
+        <table className={styles.table} style={style}>
             <tbody>
                 {rows}
             </tbody>
