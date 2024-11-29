@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import classes from './menuItem.module.css'
+import classes from './MenuItem.module.css'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconDefinition } from '@fortawesome/fontawesome-common-types'
 

@@ -1,5 +1,5 @@
 import { ChangeEvent } from "react"
-import classes from "./button.module.css"
+import classes from "./Button.module.css"
 
 export type HandleFileUploadCallback = (e: ChangeEvent<HTMLInputElement>) => (void);
 
