@@ -42,7 +42,7 @@ export default function Accounts() {
   }
 
   const handleAccountSelected = (event: React.SyntheticEvent) => {
-    setSelectedAccount(accounts?.findLast(acc => acc.id === event.currentTarget.getAttribute('value')));
+    setSelectedAccount(accounts?.findLast(acc => acc.id === event.currentTarget.children[0].getAttribute('value')));
   }
 
   const {
