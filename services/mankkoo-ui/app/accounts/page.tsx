@@ -80,7 +80,7 @@ export default function Accounts() {
   
     const tableData = transactions.map(t => [t.date, t.title, currencyFormat(t.operation), currencyFormat(t.balance)]);
     tableData.splice(0, 0, ["Date", "Title", "Operation", "Balance"]);
-    return <Table input={{data: tableData, boldFirstRow: true}} style={{width: "90%"}}></Table>;
+    return <Table data={tableData} boldFirstRow={true} style={{width: "90%"}}></Table>;
   }
   
   function prepareBalanaceHistoryLineChart(transactions?: AccountTransactionResponse[]) {

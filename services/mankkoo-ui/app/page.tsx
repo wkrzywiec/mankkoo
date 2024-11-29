@@ -59,7 +59,7 @@ export default function Home() {
   useEffect(() => {
 
     function prepareDataForSavingsDistributionTable() {
-        const savingsTable: TableData = { data: [], currencyColumnIdx: 3, colorsColumnIdx: 1, boldLastRow: true };
+        const savingsTable: TableData = { data: [], currencyColumnIdx: 3, colorsColumnIdx: 2, boldLastRow: true };
         
         savingsDistribution?.forEach(value => {
           savingsTable.data.push([value.type, value.total.toString(), percentage(value.percentage)]);
@@ -135,7 +135,11 @@ export default function Home() {
           {isFetchingSavingsDistribution ? 
             <Loader /> : 
             <>
-              <Table input={savingsDistributionTable}/>
+              <Table data={savingsDistributionTable.data} 
+                boldLastRow={savingsDistributionTable.boldLastRow} 
+                currencyColumnIdx={savingsDistributionTable.currencyColumnIdx} 
+                colorsColumnIdx={savingsDistributionTable.colorsColumnIdx}
+              />
               <PieChart input={savingsDistributionPie} size={1.5}/>
           </>}
         </div>

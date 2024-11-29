@@ -8,22 +8,31 @@ const COLOR_CIRCLE_CELL_PATTERN = "circle_#"
 
 export interface TableData {
     data: string [][];
-    currencyColumnIdx?: number;
-    boldFirstRow?: boolean;
-    boldLastRow?: boolean;
-    colorsColumnIdx?: number;
+    currencyColumnIdx: number;
+    boldFirstRow: boolean;
+    boldLastRow: boolean;
+    colorsColumnIdx: number;
 }
 
 export default function Table({
-    input,
+    data=[],
+    boldFirstRow=false,
+    boldLastRow=false,
+    currencyColumnIdx=-1,
+    colorsColumnIdx=-1,
     style
-}: {input?: TableData,
+}: {
+    data: string [][];
+    currencyColumnIdx: number;
+    boldFirstRow: boolean;
+    boldLastRow: boolean;
+    colorsColumnIdx: number;
     style?: CSSProperties
     }) {
 
     let preparedData: string [][];
 
-    if (input === undefined) {
+    if (data.length === 0) {
         const data = [
             ["Checking accounts", "50 000 PLN", "85%"],
             ["Savings accounts", "5 000 PLN", "5%"],
@@ -31,17 +40,15 @@ export default function Table({
             ["Shares & ETFs", "10 000 PLN", "10%"],
             ["Total", "54 000.45 PLN", ""],
         ]
-        input = {data: data, boldLastRow: true}
+        preparedData = [...data]
+        boldLastRow = true
+        colorsColumnIdx = 2;
+    } else {
         preparedData = [...data]
     }
 
-    preparedData = [...input.data]
-
-    const boldLastRow = input?.boldLastRow !== undefined;
-    const boldFirstRow = input?.boldFirstRow !== undefined;
-
-    addColorCircleColumn(preparedData, input?.colorsColumnIdx);
-    addRowNumberColumn(preparedData, boldLastRow, boldFirstRow);
+    addRowNumberColumn(preparedData, boldFirstRow, boldLastRow)
+    addColorCircleColumn(preparedData, colorsColumnIdx, boldFirstRow, boldLastRow)
 
     const rows = preparedData.map((rowData, rowIndex) => 
         <tr key={rowIndex} className={(defineRowClass(preparedData, rowIndex, boldLastRow, boldFirstRow))}>
@@ -55,7 +62,7 @@ export default function Table({
                     return <td key={rowIndex + "_" + cellIndex}></td>
                 }
 
-                return <td key={rowIndex + "_" + cellIndex}>{cellIndex === input?.currencyColumnIdx ? currencyFormat(cellData) : cellData}</td>
+                return <td key={rowIndex + "_" + cellIndex}>{cellIndex === currencyColumnIdx ? currencyFormat(cellData) : cellData}</td>
             }
                 
             )}
@@ -70,40 +77,45 @@ export default function Table({
     )
 }
 
-function addRowNumberColumn(data: string[][], boldLastRow: boolean, boldFirstRow: boolean): void {
-    if (data !== undefined && data.length === 0) {
-        return;
+function addColorCircleColumn(data: string[][], colorsColumnIdx: number, skipFirstRow: boolean, skipLastRow: boolean): void {
+    if (colorsColumnIdx === -1) return
+    
+    // const colorCircleIsAlreadyPresent = data[0][colorsColumnIdx + 1].includes(COLOR_CIRCLE_CELL_PATTERN)
+    const colorCircleIsAlreadyPresent = data[0].some(cell => cell.includes(COLOR_CIRCLE_CELL_PATTERN))
+    
+    if (!colorCircleIsAlreadyPresent) {
+        data.forEach((row, rowIndex) => {
+            if ((skipLastRow && rowIndex === data.length - 1) || (skipFirstRow && rowIndex === 0)) {
+                row.splice(colorsColumnIdx, 0, '')
+            } else {
+                row.splice(colorsColumnIdx, 0, COLOR_CIRCLE_CELL_PATTERN + getColor(rowIndex))
+            }
+        })
     }
+}
 
-    const rowNumberColumnIsNotPresent: boolean = boldFirstRow ? data[1][0] != '01' : data[0][0] != '01';
+function addRowNumberColumn(data: string[][], skipFirstRow: boolean, skipLastRow: boolean): void {
+    if (data.length === 0) return
+
+    const rowNumberColumnIsNotPresent = skipFirstRow ? data[1][0] != '01' : data[0][0] != '01';
     
     if (rowNumberColumnIsNotPresent) {
         data.forEach((row, rowIndex) => {
-            if ((rowIndex === data.length - 1 && boldLastRow) || (rowIndex === 0 && boldFirstRow)) {
-                row.splice(0, 0, '');
+            if ((skipLastRow && rowIndex === data.length - 1) || (skipFirstRow && rowIndex === 0)) {
+                row.splice(0, 0, '')
             } else {
-                row.splice(0, 0, boldFirstRow ? rowNumberAsString(rowIndex) : rowNumberAsString(rowIndex + 1));
+                row.splice(0, 0, skipFirstRow ? rowNumberAsString(rowIndex) : rowNumberAsString(rowIndex + 1));
             }
         })
     }
 }
 
 function rowNumberAsString(rowIndex: number): string {
-    const rowIndexStr = rowIndex.toString();
-    return rowIndexStr.length === 1 ? '0' + rowIndexStr : rowIndexStr;
+    const rowIndexStr = rowIndex.toString()
+    return rowIndexStr.length === 1 ? '0' + rowIndexStr : rowIndexStr
 }
 
-function addColorCircleColumn(data: string[][], colorsColumnIdx: number | undefined): void {
-    const colorsColumnNeedsToBeAdded = colorsColumnIdx != undefined;
-    const dataWasProvided = data.length > 0;
-    const colorCircleIsAlreadyPresent = data !== undefined && data[0] !== undefined && data[0].some(cell => cell.includes(COLOR_CIRCLE_CELL_PATTERN));
-    
-    if (colorsColumnNeedsToBeAdded && dataWasProvided && !colorCircleIsAlreadyPresent) {
-        data.forEach((row, rowIndex) => {
-            row.splice(colorsColumnIdx, 0, COLOR_CIRCLE_CELL_PATTERN + getColor(rowIndex))
-        })
-    }
-}
+
 
 function defineRowClass(data: string[][], rowIndex: number, boldLastRow: boolean, boldFirstRow: boolean) {
     if (shouldBoldLastRow(data, rowIndex, boldLastRow)) {
