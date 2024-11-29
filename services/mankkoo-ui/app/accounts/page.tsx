@@ -14,6 +14,7 @@ import { useGetHttp, uploadFile } from "@/hooks/useHttp";
 import { AccountInfoResponse, AccountTransactionResponse } from "@/api/AccountsPageResponses";
 import { currencyFormat, iban } from "@/utils/Formatter";
 import UploadFileButton from "@/components/elements/UploadFileButton";
+import Loader from "@/components/elements/Loader";
 
 
 const LineChart = dynamic(() => import('@/components/charts/Line'), {
@@ -124,8 +125,13 @@ export default function Accounts() {
         <p>List of all transactions on your checking and savings bank accounts. Here you can import new transactions.</p>
       </div>
 
-      <div className="gridItem span2Columns">      
-        {accountButtons}   
+      <div className="gridItem span2Columns">
+        {isFetchingAccounts ? 
+          <Loader /> : 
+          <>
+            {accountButtons}
+          </>
+        }     
       </div>
       <div className="gridItem span2Columns">
         <TileHeader headline={accountHeader(selectedAccount)} subHeadline="Short summary about selected bank account." />
@@ -140,11 +146,21 @@ export default function Accounts() {
 
       <div className="gridItem span2Columns">
         <TileHeader headline="Transactions" subHeadline="List of all transactions for specific account." headlineElement={uploadBtn} />
-        {transactionsTable}
+        {isFetchingTransactions ? 
+          <Loader /> : 
+          <>
+            {transactionsTable}
+          </>
+        }   
       </div>
       <div className="gridItem span2Columns">
         <TileHeader headline="Account History" subHeadline="Glance into account balance." />
-        {balanaceHistoryLineChart}
+        {isFetchingTransactions ? 
+          <Loader /> : 
+          <>
+            {balanaceHistoryLineChart}
+          </>
+        }
       </div>
     </main>
   );
