@@ -57,7 +57,7 @@ export default function Accounts() {
     isFetching: isFetchingTransactions,
     fetchedData: transactions,
     error: transactionsError
-  } = useGetHttp<AccountTransactionResponse[]>(`/accounts/${selectedAccount?.id}/operations`);
+  } = useGetHttp<AccountTransactionResponse[]>(`/accounts/${selectedAccount?.id}/operations`, selectedAccount !== undefined);
 
   
   const accountButtons = accounts
