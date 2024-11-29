@@ -1,7 +1,7 @@
 "use client";
 
 import classes from "./Piechart.module.css"
-import { Chart as ChartJS, ArcElement, Tooltip} from 'chart.js'
+import { Chart as ChartJS, ArcElement, Tooltip, TooltipItem} from 'chart.js'
 import { Pie } from "react-chartjs-2";
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
@@ -47,8 +47,10 @@ export default function PieChart({
                         tooltip: {
                             callbacks: {
                               label: function(context) {
-                                const currentValue: number = context.raw,
-                                    total = context.chart._metasets[context.datasetIndex].total;
+                                console.log(context.chart)
+                                const chart = context.chart as unknown as TooltipItem<"pie">
+                                const currentValue: number = context.raw as number
+                                const total: number  = chart._metasets[context.datasetIndex].total
                       
                                 const percentage = (currentValue/total * 100).toFixed(1);
                       
