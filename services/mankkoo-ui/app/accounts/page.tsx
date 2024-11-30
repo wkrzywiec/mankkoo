@@ -32,7 +32,7 @@ const MySwal = withReactContent(Swal);
 export default function Accounts() {
 
   //Accounts list and details
-  function accountHeader(acc?: AccountInfoResponse): string | undefined {
+  function accountHeader(acc?: AccountInfoResponse): string {
     if (acc === undefined) return "Bank - Account";
     return acc?.bankName + " - " + (acc?.alias !== undefined ? acc?.alias : acc?.name)
   }
