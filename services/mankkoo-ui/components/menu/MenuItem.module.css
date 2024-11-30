@@ -1,0 +1,29 @@
+.menuItem {
+    margin: 5%;
+    text-align: center;
+    color: var(--main-bg-color);
+}
+
+.menuItem svg {
+    width: 10%;
+}
+
+/* Smaller screens - menu width is changing size to meet screen proportions*/
+@media (max-width: 1600px) {
+    .menuItem * {
+        font-size: 0.9em;
+    }
+
+    .menuItem p {
+        margin-top: 2px;
+    }
+}
+
+.menuItem a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.menuItem p {
+    margin-top: 5px;
+}

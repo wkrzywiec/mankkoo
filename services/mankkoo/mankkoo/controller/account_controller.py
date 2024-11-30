@@ -19,6 +19,7 @@ class Account(Schema):
     bankName = String()
     bankUrl = String()
     hidden = Boolean()
+    openedAt = String()
 
 
 class AccountOperationResult(Schema):

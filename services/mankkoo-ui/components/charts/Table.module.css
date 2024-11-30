@@ -1,0 +1,40 @@
+.table {
+    border-collapse: collapse;
+    font-weight: 300;
+    text-align: left;
+}
+
+.row {
+    border-bottom: 3px dotted black;
+}
+
+
+.row td {
+    padding: 10px;
+}
+
+.boldedRow {
+    font-weight: bold;
+    border-top: 5px solid black;
+}
+
+.boldedRow td {
+    padding: 10px;
+}
+
+.boldedFirstRow {
+    font-weight: bold;
+    border-bottom: 5px solid black;
+}
+
+.boldedFirstRow td {
+    padding: 10px;
+}
+
+.dot {
+    height: 25px;
+    width: 25px;
+    background-color: #bbb;
+    border-radius: 50%;
+    display: inline-block;
+}

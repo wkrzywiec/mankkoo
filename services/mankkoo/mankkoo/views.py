@@ -188,13 +188,18 @@ def __load_current_total_savings_distribution() -> list[dict]:
             metadata ->> 'accountType' as type
         FROM streams
         WHERE type = 'account'
+        AND metadata ->> 'accountType' != 'cash'
         AND (metadata ->> 'active')::boolean = true
     ),
 
     accounts_balance AS (
         SELECT
             SUM((data->>'balance')::numeric) AS total,
-            l.type as type
+            CASE
+                WHEN l.type = 'checking' THEN 'Checking Accounts'
+                WHEN l.type = 'savings' THEN 'Savings Accounts'
+            ELSE l.type
+            END AS type
         FROM
             events e
         JOIN
@@ -220,7 +225,7 @@ def __load_current_total_savings_distribution() -> list[dict]:
     retirement_balance AS (
         SELECT
             SUM((data->>'balance')::numeric) AS total,
-             'retirement' as type
+             'Retirement' as type
         FROM
             events e
         JOIN
@@ -242,8 +247,8 @@ def __load_current_total_savings_distribution() -> list[dict]:
 
     investment_balance AS (
         SELECT
-            (data->>'balance')::numeric AS total,
-            'investments' AS type
+            SUM((data->>'balance')::numeric) AS total,
+            'Investments' AS type
         FROM events e
         JOIN investment_latest_version l ON e.stream_id = l.id AND l.version = e.version
     ),
@@ -258,7 +263,7 @@ def __load_current_total_savings_distribution() -> list[dict]:
     stocks_balance AS (
         SELECT
             ROUND(SUM((data->>'balance')::numeric), 2) AS total,
-            'stocks' AS type
+            'Stocks & ETFs' AS type
         FROM
             events e
         JOIN
@@ -288,7 +293,8 @@ def __load_current_total_savings_distribution() -> list[dict]:
             (SELECT SUM(total) FROM all_buckets)
             , 4) as percentage
     FROM all_buckets
-    ORDER BY type='retirement', type='stocks', type='cash', type='savings', type='checking';
+    ORDER BY
+        array_position(ARRAY['Checking Accounts', 'Savings Accounts', 'Investments', 'Stocks & ETFs', 'Retirement'], type);
     """
 
     result = []

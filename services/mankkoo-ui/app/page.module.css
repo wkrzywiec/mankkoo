@@ -1,0 +1,15 @@
+.horizontalAlignment {
+  display: flex;
+  flex-direction: row;
+  gap: 10%;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.verticalAlignment {
+  display: flex;
+  flex-direction: column;
+  gap: 10%;
+  justify-content: space-around;
+  align-items: center;
+}

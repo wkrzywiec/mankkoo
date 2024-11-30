@@ -1,0 +1,90 @@
+:root {
+  --main-bg-color: #F8F7F2;
+  --secondary-bg-color: #463F3A;
+  --font-color: black;
+
+  --basic-1st-color: #ED6B53;
+  --basic-2nd-color: #6883BA;
+  --red-color: var(--basic-1st-color);
+  --blue-color: var(--basic-2nd-color);
+
+  --secondary-1st-color: #FFA630;
+  --secondary-2nd-color: #820B8A;
+  --orange-color: var(--secondary-1st-color);
+  --purple-color: var(--secondary-2nd-color);
+
+  --third-1st-color: #659B5E;
+  --third-2nd-color: #D81E5B;
+  --gree-color: var(--third-1st-color);
+  --magenta-color: var(--third-2nd-color);
+}
+
+body {
+  margin: 0px;
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  color: var(--font-color);
+}
+
+/* ================================= */
+/* PAGE CONTENT  */
+/* ================================= */
+.content {
+  background-color: var(--main-bg-color);
+  flex-grow: 1;
+  overflow-y: auto; /* This part is needed to add a scrollbar for main contnent but not for a menu */
+  padding-left: 3%;
+  padding-right: 3%;
+}
+
+.mainContainer {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  column-gap: 5px;
+  row-gap: 5px;
+  padding-bottom: 50px;
+}
+
+.gridItem {
+  margin: 5px;
+}
+
+.dummyGridItem {
+  background-color: coral;
+  height: 200px;
+  width: 200px;
+}
+
+.span2Columns {
+  grid-column: span 2;
+}
+
+.span3Columns {
+  grid-column: span 3;
+}
+
+.span4Columns {
+  grid-column: span 4;
+}
+
+.span2Rows {
+  grid-row-end: span 2;
+}
+
+.gridItem h1 {
+  font-size: 4rem;
+  font-weight: 700;
+  margin-bottom: 0%;
+}
+
+.gridItem h1 + p {
+  font-weight: 200;
+  margin-top: 0.2rem;
+}
+
+.gridItem h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 0%;
+}

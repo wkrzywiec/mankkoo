@@ -133,3 +133,6 @@ dmypy.json
 
 # Backup
 /backup/*.gz
+
+/services/ui
+.pnpm-store/**

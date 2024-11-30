@@ -91,27 +91,27 @@ def test_current_total_savings_distribution_view_is_updated():
         result = views.load_view(views.current_savings_distribution_key)
         return result == [
             {
-                "type": "investments",
-                "total": 100,
-                "percentage": 0.0995
-            },
-            {
-                "type": "checking",
+                "type": "Checking Accounts",
                 "total": 370.21999999999997,
                 "percentage": 0.3685
             },
             {
-                "type": "savings",
+                "type": "Savings Accounts",
                 "total": 145.78,
                 "percentage": 0.1451
             },
             {
-                "type": "stocks",
+                "type": "Investments",
+                "total": 100,
+                "percentage": 0.0995
+            },
+            {
+                "type": "Stocks & ETFs",
                 "total": 333.23,
                 "percentage": 0.3316
             },
             {
-                "type": "retirement",
+                "type": "Retirement",
                 "total": 55.55,
                 "percentage": 0.0553
             }
