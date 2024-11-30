@@ -15,6 +15,13 @@ export interface PieChartData {
     data: number[]
 }
 
+interface CustomTooltipItem extends TooltipItem<'pie'> {
+    _metasets : [{
+        total: number
+    }]
+  }
+  
+
 export default function PieChart({ 
         input={data: [30, 50, 20], labels: ['Red','Black','Blue']}, 
         size=1 } : { input?: PieChartData, size?: number}) {
@@ -48,8 +55,10 @@ export default function PieChart({
                             callbacks: {
                               label: function(context) {
                                 console.log(context.chart)
-                                const chart = context.chart as unknown as TooltipItem<"pie">
+                               
                                 const currentValue: number = context.raw as number
+
+                                const chart = context.chart as CustomTooltipItem
                                 const total: number  = chart._metasets[context.datasetIndex].total
                       
                                 const percentage = (currentValue/total * 100).toFixed(1);
