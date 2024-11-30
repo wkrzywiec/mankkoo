@@ -82,4 +82,5 @@ def test_total_history(test_client):
 
 
 def insert_view(name: str, content: dict | list):
+    db.execute("TRUNCATE views;") # not sure why this is needed since before each test db is cleaned up 
     db.execute(f"INSERT INTO views (name, content) VALUES ('{name}', '{json.dumps(content)}'::jsonb);")
