@@ -53,7 +53,7 @@ export default function Table({
         <tr key={rowIndex} className={(defineRowClass(preparedData, rowIndex, boldLastRow, hasHeader))}>
             { rowData.map((cellData, cellIndex) => {
                 
-                if (shouldAddColorCircleToCell(cellData, preparedData, rowIndex, boldLastRow)) {
+                if (shouldAddColorCircleToCell(preparedData, rowIndex, boldLastRow, cellData)) {
                     return <td key={rowIndex + "_" + cellIndex}><span className={styles.dot} style={{backgroundColor: cellData.replace(COLOR_CIRCLE_CELL_PATTERN, "")}}></span></td>
                 }
 
@@ -134,7 +134,7 @@ function shouldBoldFirstRow(data: string[][], rowIndex: number, hasHeader: boole
     return hasHeader && rowIndex === 0;
 }
 
-function shouldAddColorCircleToCell(cellData?: string, data: string[][], rowIndex: number, boldLastRow: boolean) {
+function shouldAddColorCircleToCell(data: string[][], rowIndex: number, boldLastRow: boolean, cellData?: string) {
     return cellData?.includes(COLOR_CIRCLE_CELL_PATTERN) && !shouldBoldLastRow(data, rowIndex, boldLastRow)
 }
 
