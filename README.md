@@ -20,19 +20,61 @@ A personal finance dashboard designed to simplify money management by delivering
 
 I have always wanted a quick yet insightful way to glance at my personal finances while avoiding spending too much time managing them.
 
-Additionally, I strive to work on projects that allow me to explore new technologies or approaches to building software. To address both of these goals, *Mankkoo* was created.
+Additionally, I strive to work on projects that allow me to explore new technologies or approaches to building software (e.g. event sourcing, CQRS). To address both of these goals, *Mankkoo* was created.
 
 With *Mankkoo*, I can effortlessly import transactions from all my bank accounts and investments into one centralized platform for analysis. This enables me to gain insights into their history and distribution. By having an overall view, I can effectively plan my future financial steps.
 
 Below are screenshots of the mockups. Real screenshots will be added soon.
 
 <p align="center">
-  <img src="./img/home.png" alt="Home page" width="200"/>
-  <img src="./img/history.png" alt="Financial History" width="200"/>
-  <img src="./img/accounts.png" alt="Bank Accounts page" width="200"/>
+  <img src="./img/home.png" alt="Home page" width="400"/>
+  <img src="./img/history.png" alt="Financial History" width="400"/>
+  <img src="./img/accounts.png" alt="Bank Accounts page" width="400"/>
 </p>
 
 ### Architecture
+
+Initially, *Mankkoo* was developed as a single-runtime Python application, where all data was stored in files. However, due to limitations and a desire to adopt more popular tools, the application was split into two services: a frontend and a backend, each implemented using different technologies. For the persistence layer, a PostgreSQL database was chosen.
+
+```mermaid
+graph TD
+    Frontend[Frontend Service] -->|HTTP API Calls| Backend[Backend Service]
+    Backend -->|Read/Write| Database[(PostgreSQL Database)]
+    Frontend <-->|Responses| Backend
+```
+
+A key feature of the backend service is its ability to import transaction files downloaded from bank websites. Each transaction is recorded as an event in an append-only event log, which serves as the source of truth for all operations performed on bank accounts and investments.
+
+Whenever a new batch of events is added to the event log, it triggers updates to multiple projections used to render charts and indicators. This functionality is powered by PostgreSQL’s built-in `pg_notify()` and `LISTEN` functions, enabling efficient real-time updates ([docs](https://www.postgresql.org/docs/current/sql-notify.html)).
+
+Here is a schematic diagram of the data structure:
+
+```mermaid
+erDiagram
+    STREAMS {
+        UUID id PK
+        TEXT type
+        BIGINT version
+        JSONB metadata
+    }
+    EVENTS {
+        UUID id PK
+        UUID stream_id FK
+        TEXT type
+        JSONB data
+        BIGINT version
+        TIMESTAMP occured_at
+        TIMESTAMP added_at
+    }
+    VIEWS {
+        TEXT name PK
+        JSONB content
+        TIMESTAMP updated_at
+    }
+
+    STREAMS ||--o{ EVENTS : has
+
+```
 
 ### Technologies
 
@@ -48,6 +90,13 @@ Below are screenshots of the mockups. Real screenshots will be added soon.
 > devcontainer
 > use taskFile
 
-## Running locally
+### Running locally
+
+## Usage
+
+enter website
+enter postgresql
+create backup
+restore backup
 
 
