@@ -85,7 +85,9 @@ erDiagram
 ## Roadmap
 
 - [ ] Prepare data for demo
-
+- [ ] Basic view for all streams and events
+- [ ] Creating and modifying streams on UI
+- [ ] Investments summary 
 
 See the [open issues](https://github.com/wkrzywiec/mankkoo/issues) for a full list of proposed features (and known issues).
 
