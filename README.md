@@ -26,7 +26,11 @@ With *Mankkoo*, I can effortlessly import transactions from all my bank accounts
 
 Below are screenshots of the mockups. Real screenshots will be added soon.
 
-![](./img/home.png) ![](./img/history.png) ![](./img/accounts.png)
+<p align="center">
+  <img src="./img/home.png" alt="Home page" width="200"/>
+  <img src="./img/history.png" alt="Financial History" width="200"/>
+  <img src="./img/accounts.png" alt="Bank Accounts page" width="200"/>
+</p>
 
 ### Architecture
 
