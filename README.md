@@ -93,13 +93,56 @@ See the [open issues](https://github.com/wkrzywiec/mankkoo/issues) for a full li
 
 ## Getting Started
 
+The best way to get started with this project is by using the defined DevContainers. These encapsulate all the necessary dependencies and include predefined tasks that are useful during development and usage.
+
 ### Prerequisites
+
+* Docker
+* VS Code (the IDE with the best support for DevContainers)
+
+If you prefer not to use the DevContainer configuration, make sure you have the following dependencies installed:
+
+* Pip
+* Python
+* Node.js
+* npm
+* Taskfile
+
+For more details on each dependency (including required versions), check the .devcontainer directory or the respective service directory.
+
 ### Installation
 
-> devcontainer
-> use taskFile
+The DevContainer automatically installs all the necessary libraries for both the backend and frontend services. However, if you prefer to install them manually, follow these steps:
+
+1. Navigate to the `services/mankkoo` directory and run:
+
+```bash
+pip install -r requirements.txt --ignore-installed
+```
+
+2. Then, go to the `services/mankkoo-ui` directory and run:
+
+```bash
+npm install
+```
 
 ### Running locally
+
+The easiest way to run database, backend and frontend service is to execute the following task from the `Taskfile.yaml`.
+
+To spinup a database and backend service:
+
+```bash
+task mankkoo:dev
+```
+
+In a separate terminal, start the UI by running:
+
+```bash
+task mankkoo:ui
+```
+
+If you prefer not to use the predefined commands in the `Taskfile.yaml`, you can check their definitions in the relevant files.
 
 ## Usage
 
