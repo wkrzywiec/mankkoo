@@ -146,9 +146,29 @@ If you prefer not to use the predefined commands in the `Taskfile.yaml`, you can
 
 ## Usage
 
-enter website
-enter postgresql
-create backup
-restore backup
+To access the website, open: http://localhost:3000/
+
+To access the pgAdmin website, open: http://localhost:5050/
+(Username: admin@admin.com, Password: admin)
+
+To list all available tasks defined in the `Taskfile.yaml`, run the following command:
+
+```bash
+task -l
+```
+
+### Backup
+
+To create a backup, run the following command:
+
+```bash
+task backup
+```
+
+This will generate a fresh database dump. To restore from the backup, check the name of the backup file, note it, and specify it in the `Taskfile.yaml` file under the `file` variable. Then, run the following command:
+
+```bash
+task restore
+```
 
 
