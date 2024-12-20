@@ -1,4 +1,4 @@
-name: Build
+name: GitHub Actions 'main' branch
 on:
   push:
     branches:
