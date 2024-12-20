@@ -78,9 +78,16 @@ erDiagram
 
 ### Technologies
 
+* **Frontend**: React 18, NextJS, TypeScript, ChartJS
+* **Backend**: Python 3.10, Flask, Pandas, Pytest, Poetry
+* **Database**: PostgreSQL 16
+
 ## Roadmap
 
-> taski, 
+- [ ] Prepare data for demo
+
+
+See the [open issues](https://github.com/wkrzywiec/mankkoo/issues) for a full list of proposed features (and known issues).
 
 ## Getting Started
 
