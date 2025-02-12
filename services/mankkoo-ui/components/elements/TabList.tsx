@@ -1,4 +1,4 @@
-
+import "./TabList.css"
 
 import { ReactElement, useState } from "react"
 import TabContent from "./TabContent";
