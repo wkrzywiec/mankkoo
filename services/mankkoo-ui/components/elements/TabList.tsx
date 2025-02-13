@@ -24,17 +24,17 @@ export default function TabList({children, activeTabIndex = 0}: {children: React
                 <ul className="tab-list" role="tablist" aria-orientation="horizontal">
                 {children.map((tab, index) => (
                     <li key={`tab-${index}`}>
-                    <button
-                        key={`tab-btn-${index}`}
-                        role="tab"
-                        id={`tab-${sanitizeForId(tab.props.label)}`}
-                        aria-controls={`panel-${sanitizeForId(tab.props.label)}`}
-                        aria-selected={activeTab === index}
-                        onClick={() => handleTabClick(index)}
-                        className={`tab-btn ${
-                            activeTab === index && "tab-btn--active"
-                        }`}
-                    >{tab.props.label}</button>
+                        <button
+                            key={`tab-btn-${index}`}
+                            role="tab"
+                            id={`tab-${sanitizeForId(tab.props.label)}`}
+                            aria-controls={`panel-${sanitizeForId(tab.props.label)}`}
+                            aria-selected={activeTab === index}
+                            onClick={() => handleTabClick(index)}
+                            className={`tab-btn ${
+                                activeTab === index && "tab-btn--active"
+                            }`}
+                        >{tab.props.label}</button>
                     </li>
                 ))}
                 </ul>

@@ -16,6 +16,7 @@ export interface TableData {
 export default function Table({
     data=[],
     hasHeader=false,
+    hasRowNumber=true,
     boldLastRow=false,
     currencyColumnIdx=-1,
     colorsColumnIdx=-1,
@@ -23,6 +24,7 @@ export default function Table({
 }: {
     data?: string [][];
     hasHeader?: boolean;
+    hasRowNumber?: boolean;
     boldLastRow?: boolean;
     currencyColumnIdx?: number;
     colorsColumnIdx?: number;
@@ -46,7 +48,7 @@ export default function Table({
         preparedData = [...data]
     }
 
-    addRowNumberColumn(preparedData, hasHeader, boldLastRow)
+    addRowNumberColumn(preparedData, hasRowNumber, hasHeader, boldLastRow)
     addColorCircleColumn(preparedData, colorsColumnIdx, hasHeader, boldLastRow)
 
     const rows = preparedData.map((rowData, rowIndex) => 
@@ -92,10 +94,11 @@ function addColorCircleColumn(data: string[][], colorsColumnIdx: number, skipFir
     }
 }
 
-function addRowNumberColumn(data: string[][], skipFirstRow: boolean, skipLastRow: boolean): void {
+function addRowNumberColumn(data: string[][], hasRowNumber: boolean, skipFirstRow: boolean, skipLastRow: boolean): void {
     if (data.length === 0) return
+    if (hasRowNumber === false) return
 
-    const rowNumberColumnIsNotPresent = skipFirstRow ? data[1][0] != '01' : data[0][0] != '01';
+    const rowNumberColumnIsNotPresent = skipFirstRow ? data[1][0] != '01' : data[0][0] != '01'
     
     if (rowNumberColumnIsNotPresent) {
         data.forEach((row, rowIndex) => {
