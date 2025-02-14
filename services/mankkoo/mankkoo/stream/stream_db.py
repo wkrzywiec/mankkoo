@@ -13,19 +13,21 @@ def load_streams(active: bool, type: str) -> list[Stream]:
     log.info(f"Loading stream... Params: active={active}, type={type}")
     conditions = []
 
-    # if active is not None:
-    #     conditions.append(f"metadata->>'active' = '{active}'")
+    if active is not None:
+        conditions.append(f"CAST (metadata->>'active' AS boolean) = {active}")
     
-    # if type is not None: 
-    #     conditions.append(f"type = '{type}'")
+    if type is not None: 
+        conditions.append(f"type = '{type}'")
 
-    # where_clause = ""
+    where_clause = ""
 
-    # if len(conditions) > 0:
-    #     where_clause = f"WHERE {conditions[0]}"
+    if len(conditions) > 0:
+        where_clause = f"WHERE {conditions[0]}"
     
-    #     if len(conditions) > 1:
-    #         and_cond = " AND ".join() 
+        if len(conditions) > 1:
+            conditions.pop(0)
+            and_cond = " AND ".join(conditions) 
+            where_clause = where_clause + " AND " + and_cond
         
     query = f"""
     SELECT
@@ -39,6 +41,7 @@ def load_streams(active: bool, type: str) -> list[Stream]:
         END AS name
     FROM
         streams
+    {where_clause}
     ;
     """
     

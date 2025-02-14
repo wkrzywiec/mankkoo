@@ -18,17 +18,18 @@ class StreamsQuery(Schema):
 @stream_endpoints.doc(summary='List of streams', description='Get list of streams')
 def streams(query_params):
     log.info(f"Fetching all streams. Query: {str(query_params)}...")
+    log.info(type(query_params))
 
     active: bool = None
-    type: str = None
-    if hasattr(query_params, "active"):
+    type_param: str = None
+    if "active" in query_params:
         active = query_params["active"]
     
-    if hasattr(query_params, "type"):
-        type = query_params["type"]
+    if "type" in query_params:
+        type_param = query_params["type"]
 
 
-    streams = database.load_streams(active, type)
+    streams = database.load_streams(active, type=type_param)
     return streams
 
 
