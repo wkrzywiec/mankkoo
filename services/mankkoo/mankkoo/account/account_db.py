@@ -1,9 +1,23 @@
+from apiflask import Schema
+from apiflask.fields import String, Boolean, Float, File
+
 import mankkoo.database as db
 
 from mankkoo.base_logger import log
-from mankkoo.controller.account_controller import Account, AccountOperation
 from mankkoo.account.models import Bank
 
+class Account(Schema):
+    id = String()
+    name = String()
+    number = String()
+    alias = String()
+    type = String()
+    importer = String()
+    active = Boolean()
+    bankName = String()
+    bankUrl = String()
+    hidden = Boolean()
+    openedAt = String()
 
 def load_all_accounts() -> list[Account]:
     log.info("Loading all accounts...")
@@ -102,6 +116,17 @@ def get_account_balance(account_id: str) -> float:
             else:
                 (balance, ) = result
     return float(balance)
+
+
+class AccountOperation(Schema):
+    id = String()
+    date = String()
+    title = String()
+    details = String()
+    operation = Float()
+    balance = Float()
+    currency = String()
+    comment = String()
 
 
 def load_operations_for_account(stream_id: str) -> list[AccountOperation]:
