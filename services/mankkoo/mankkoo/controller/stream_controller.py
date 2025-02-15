@@ -1,5 +1,5 @@
 from apiflask import APIBlueprint, Schema
-from apiflask.fields import String, Boolean, Integer
+from apiflask.fields import String, Boolean
 
 from mankkoo.stream import stream_db as database
 from mankkoo.stream.stream_db import Stream, StreamDetails

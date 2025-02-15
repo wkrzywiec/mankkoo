@@ -64,6 +64,8 @@ tasks:
     cmds:
       - echo "Running tests for mankkoo core..."
       - pytest -s -vv --cov=./mankkoo
+      # uncomment below step to run a single test file
+      # - pytest -s -vv --cov=./mankkoo tests/controller/stream_controller_test.py
 
   update:
     desc: Update dependencies for all services

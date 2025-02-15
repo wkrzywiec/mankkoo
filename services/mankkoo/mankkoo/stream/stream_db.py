@@ -22,12 +22,8 @@ def load_streams(active: bool, type: str) -> list[Stream]:
     where_clause = ""
 
     if len(conditions) > 0:
-        where_clause = f"WHERE {conditions[0]}"
-    
-        if len(conditions) > 1:
-            conditions.pop(0)
-            and_cond = " AND ".join(conditions) 
-            where_clause = where_clause + " AND " + and_cond
+        and_conditions = " AND ".join(conditions)
+        where_clause = f"WHERE {and_conditions}"
         
     query = f"""
     SELECT
