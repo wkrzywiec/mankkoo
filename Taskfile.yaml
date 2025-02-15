@@ -93,6 +93,13 @@ tasks:
       - echo "Starting mankkoo UI..."
       - npm run dev --turbo
 
+  ui:build:
+    desc: Build UI 
+    dir: services/mankkoo-ui
+    cmds:
+      - echo "Starting building UI..."
+      - npm run build
+
   test:
     desc: Run all tests
     cmds:
