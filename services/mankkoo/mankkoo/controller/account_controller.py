@@ -31,7 +31,7 @@ def accounts():
     description='Get a list of all operations for an account'
 )
 def operations_by_account_id(account_id):
-    log.info('Fetching all operations for an account...')
+    log.info(f'Fetching all operations for the {account_id} account...')
     result = database.load_operations_for_account(account_id)
     return result
 

@@ -1,4 +1,4 @@
-from apiflask import APIBlueprint, Schema
+from apiflask import APIBlueprint, Schema, abort
 from apiflask.fields import String, Boolean
 
 from mankkoo.stream import stream_db as database
@@ -18,7 +18,6 @@ class StreamsQuery(Schema):
 @stream_endpoints.doc(summary='List of streams', description='Get list of streams')
 def streams(query_params):
     log.info(f"Fetching all streams. Query: {str(query_params)}...")
-    log.info(type(query_params))
 
     active: bool = None
     type_param: str = None
@@ -41,4 +40,10 @@ def streams(query_params):
     description='Get detailed information about the Stream'
 )
 def stream_by_id(stream_id):
-    pass
+    log.info(f"Fetching details for the '{stream_id}' stream...")
+
+    stream = database.load_stream_by_id(stream_id)
+
+    if stream is None:
+        abort(404, message=f"Failed to load stream definition. There is no stream definition with an id '{stream_id}'")
+    return stream

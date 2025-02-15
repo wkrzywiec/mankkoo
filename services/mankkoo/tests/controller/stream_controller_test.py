@@ -126,3 +126,35 @@ def test_only_inactive_investment_streams_are_listed__if_type_qparam_equals_inve
     assert len(payload) == 1
 
     assert payload[0]['id'] == str(streams[2].id)
+
+
+def test_stream_is_loaded(test_client):
+    # GIVEN
+    stream = es.Stream(uuid.uuid4(), 'account', 0,
+                  {"active": True, "alias": "Bank account A", "bankName": "Bank A", "bankUrl": "https://www.bank-a.com", "accountNumber": "iban-1", "accountName": "Super Personal account", "accountType": "checking", "importer": "MANKKOO"})
+    es.create([stream])
+
+    # WHEN
+    response = test_client.get('/api/streams/' + str(stream.id))
+
+    # THEN
+    assert response.status_code == 200
+
+    payload = response.get_json()
+    assert payload['type'] == 'account'
+    assert payload['id'] == str(stream.id)
+
+
+def test_stream_is_not_loaded__if_invalid_id_provided(test_client):
+    # GIVEN
+    stream = es.Stream(uuid.uuid4(), 'account', 0,
+                  {"active": True, "alias": "Bank account A", "bankName": "Bank A", "bankUrl": "https://www.bank-a.com", "accountNumber": "iban-1", "accountName": "Super Personal account", "accountType": "checking", "importer": "MANKKOO"})
+    es.create([stream])
+
+    invalid_uuid = 'c722f508-49b0-4d89-955e-f85322dffcb8'
+
+    # WHEN
+    response = test_client.get('/api/streams/' + invalid_uuid)
+
+    # THEN
+    assert response.status_code == 404
