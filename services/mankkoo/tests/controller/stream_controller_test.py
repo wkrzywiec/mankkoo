@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta, timezone
 import uuid
 
 import mankkoo.event_store as es
@@ -158,3 +159,57 @@ def test_stream_is_not_loaded__if_invalid_id_provided(test_client):
 
     # THEN
     assert response.status_code == 404
+
+
+def test_events_are_loaded_for_stream(test_client):
+    # GIVEN
+    stream_type = 'account'
+    stream_id = uuid.uuid4()
+    occured_at = datetime.now(timezone.utc) - timedelta(days=10)
+
+    accountOpenedData = {
+        "balance": 0.00,
+        "number": "PL1234567890",
+        "isActive": True,
+        "openedAt": "2017-08-15 21:05:15.723336-07"
+    }
+
+    moneyDepositedData = {
+        "amount": 100.00,
+        "balance": 100.00
+    }
+
+    moneyWithdrawnData = {
+        "amount": 50.50,
+        "balance": 49.50
+    }
+
+    account_with_two_operations = [
+        es.Event(stream_type, stream_id, 'AccountOpened', accountOpenedData, occured_at),
+        es.Event(stream_type, stream_id, 'MoneyDeposited', moneyDepositedData, occured_at + timedelta(days=1), 2),
+        es.Event(stream_type, stream_id, 'MoneyWithdrawn', moneyWithdrawnData, occured_at + timedelta(days=2), 3)
+    ]
+
+    es.store(account_with_two_operations)
+    # stream_id = account_with_two_operations[0].stream_id
+
+    # WHEN
+    response = test_client.get(f'/api/streams/{stream_id}/events')
+
+    # THEN
+    assert response.status_code == 200
+
+    payload = response.get_json()
+    assert len(payload) == 3
+
+    assert payload[0]['type'] == 'MoneyWithdrawn'
+    assert payload[0]['version'] == 3
+    assert payload[0]['occuredAt'] == account_with_two_operations[2].occured_at.strftime('%Y-%m-%d')
+    assert payload[0]['addedAt'] == datetime.now().strftime('%Y-%m-%d')
+    assert payload[0]['data'] == moneyWithdrawnData
+
+    assert payload[1]['type'] == 'MoneyDeposited'
+    assert payload[1]['version'] == 2
+
+    assert payload[2]['type'] == 'AccountOpened'
+    assert payload[2]['version'] == 1

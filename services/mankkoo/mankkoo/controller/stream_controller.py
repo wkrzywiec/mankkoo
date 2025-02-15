@@ -2,7 +2,7 @@ from apiflask import APIBlueprint, Schema, abort
 from apiflask.fields import String, Boolean
 
 from mankkoo.stream import stream_db as database
-from mankkoo.stream.stream_db import Stream, StreamDetails
+from mankkoo.stream.stream_db import Event, Stream, StreamDetails
 from mankkoo.base_logger import log
 
 stream_endpoints = APIBlueprint('stream_endpoints', __name__, tag='Stream')
@@ -47,3 +47,16 @@ def stream_by_id(stream_id):
     if stream is None:
         abort(404, message=f"Failed to load stream definition. There is no stream definition with an id '{stream_id}'")
     return stream
+
+
+@stream_endpoints.route("/<stream_id>/events")
+@stream_endpoints.output(Event(many=True), status_code=200)
+@stream_endpoints.doc(
+    summary='Events for the Stream',
+    description='Get list of all events for the Stream'
+)
+def events_for_stream(stream_id):
+    log.info(f"Fetching events for the '{stream_id}' stream...")
+
+    events = database.load_events_for_stream(stream_id)
+    return events

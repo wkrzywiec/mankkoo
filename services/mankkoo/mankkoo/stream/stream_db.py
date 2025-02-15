@@ -1,5 +1,5 @@
 from apiflask import Schema
-from apiflask.fields import String, Integer, Mapping
+from apiflask.fields import String, Integer, Mapping, Date
 
 import mankkoo.database as db
 from mankkoo.base_logger import log
@@ -92,3 +92,44 @@ def load_stream_by_id(stream_id) -> StreamDetails:
         return stream
     except Exception:
         raise ValueError(f"Failed to load stream definition. Mapping internal error. Check the logs")
+
+
+
+class Event(Schema):
+    type = String()
+    version = Integer()
+    occuredAt = Date()
+    addedAt = Date()
+    data = Mapping()
+
+def load_events_for_stream(stream_id):
+    log.info(f"Loading events for the '{stream_id}' stream...")
+        
+    query = f"""
+    SELECT
+        type, version, occured_at, added_at, data
+    FROM
+        events
+    WHERE 
+        stream_id = '{stream_id}'
+    ORDER BY
+        version DESC
+    ;
+    """
+    
+    result = []
+    with db.get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(query)
+            rows = cur.fetchall()
+
+            for row in rows:
+                event = Event()
+                event.type = row[0]
+                event.version = row[1]
+                event.occuredAt = row[2]
+                event.addedAt = row[3]
+                event.data = row[4]
+                
+                result.append(event)
+    return result
