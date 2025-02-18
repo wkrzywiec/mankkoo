@@ -1,11 +1,68 @@
 "use client"
 
+import { useState } from "react";
+
 import Table from "@/components/charts/Table";
-import TabContent from "@/components/elements/TabContent";
 import TabList from "@/components/elements/TabList";
 import TileHeader from "@/components/elements/TileHeader";
+import { StreamResponse } from "@/api/streamsPageResponses";
+import { useGetHttp } from "@/hooks/useHttp";
 
-export default function Home() {
+
+export default function Streams() {
+
+  const streamsHeaders = [['Type', 'Name']]
+  // const [activeTab, setActiveTab] = useState<number>(0);
+  const [streamType, setStreamType] = useState<string | undefined>('account');
+  const [streamActive, setStreamActive] = useState<boolean>(true);
+
+  const {
+      isFetching: isFetchingStreams,
+      fetchedData: streams,
+      error: streamsError
+    } = useGetHttp<StreamResponse[]>(`/streams?active=${streamActive}&type=${streamType}`);
+
+  function handleTabChange(index: number) {
+
+    if (index === 0) {
+      setStreamActive(true)
+      setStreamType('account')
+
+    } else if (index === 1) {
+      setStreamActive(true)
+      setStreamType('investment')
+
+    } else if (index === 2) {
+      setStreamActive(true)
+      setStreamType('stocks')
+
+    } else if (index === 3) {
+      setStreamActive(true)
+      setStreamType('real-estate')
+
+    } else {
+      setStreamActive(false)
+      setStreamType(undefined)
+    }
+
+    const streamsData = streams?.map(stream => [stream.type, stream.name])
+    const streamTableData = [...streamsHeaders, ...streamsData ?? []]
+
+    return <div className="mainContainer">
+      <div className="gridItem span2Columns" style={{margin: "55px"}}>
+        <Table data={streamTableData} hasHeader={true} style={{ width: "90%" }} boldLastRow={false} currencyColumnIdx={-1} colorsColumnIdx={-1}/>
+      </div>
+      <div className="gridItem span2Columns">
+        <TileHeader headline="Account summary" subHeadline="Short summary about selected bank account." />
+        <Table data={[["Property", "Value"], ["alias", "mBank"], ["active", "true"], ["bankUrl", "https://www.mbank.pl"], ["bankName", "mBank"], ["importer", "PL_MBANK"], ["accountName", "eKonto"], ["accountType", "checking"], ["accountNumber", "PL11111111111111111111111"]]} hasHeader={true} hasRowNumber={false} style={{ width: "90%" }} boldLastRow={false} currencyColumnIdx={-1} colorsColumnIdx={-1}/>
+      </div>
+      <div className="gridItem span4Columns">
+        <TileHeader headline="Events" subHeadline="A list of all events for a given stream." />
+        <Table data={[["Event Type", "Occured At", "Data"], ["ETFBought", "2019-04-13", "{\"units\":44,\"balance\":999.99,\"currency\":\"PLN\",\"totalValue\":999.99,\"averagePrice\":20.31}"]]} hasHeader={true} style={{ width: "90%" }} boldLastRow={false} currencyColumnIdx={-1} colorsColumnIdx={-1}/>
+      </div>
+  </div>
+  }
+
   return (
     <main className="mainContainer">
       <div className="gridItem span4Columns">
@@ -14,43 +71,11 @@ export default function Home() {
       </div>
 
       <div className="gridItem span4Columns">
-        <TabList>
-          <TabContent label="Accounts">
-            <div className="mainContainer">
-              <div className="gridItem span2Columns" style={{margin: "55px"}}>
-                <Table data={[["Bank", "Account name"], ["ING", "Wspólne"], ["Millenium", "Osobiste"], ["mBank", "Inwestycyjne"]]} hasHeader={true} style={{ width: "90%" }} boldLastRow={false} currencyColumnIdx={-1} colorsColumnIdx={-1}/>
-              </div>
-              <div className="gridItem span2Columns">
-                <TileHeader headline="Account summary" subHeadline="Short summary about selected bank account." />
-                <Table data={[["Property", "Value"], ["alias", "mBank"], ["active", "true"], ["bankUrl", "https://www.mbank.pl"], ["bankName", "mBank"], ["importer", "PL_MBANK"], ["accountName", "eKonto"], ["accountType", "checking"], ["accountNumber", "PL11111111111111111111111"]]} hasHeader={true} hasRowNumber={false} style={{ width: "90%" }} boldLastRow={false} currencyColumnIdx={-1} colorsColumnIdx={-1}/>
-              </div>
-              <div className="gridItem span4Columns">
-                <TileHeader headline="Events" subHeadline="A list of all events for a given stream." />
-                <Table data={[["Event Type", "Occured At", "Data"], ["ETFBought", "2019-04-13", "{\"units\":44,\"balance\":999.99,\"currency\":\"PLN\",\"totalValue\":999.99,\"averagePrice\":20.31}"]]} hasHeader={true} style={{ width: "90%" }} boldLastRow={false} currencyColumnIdx={-1} colorsColumnIdx={-1}/>
-              </div>
-            </div>
-          </TabContent>
-          <TabContent label="Investments">
-            <div className="gridItem span2Columns">
-              <p>investments here</p>
-            </div>
-          </TabContent>
-          <TabContent label="Stocks">
-            <div className="gridItem span2Columns">
-              <p>stocks here</p>
-            </div>
-          </TabContent>
-          <TabContent label="Real Estate">
-            <div className="gridItem span2Columns">
-              <p>real estate here</p>
-            </div>
-          </TabContent>
-          <TabContent label="Inactive Streams">
-            <div className="gridItem span2Columns">
-              <p>inactive streams here</p>
-            </div>
-          </TabContent>
-        </TabList>
+        <TabList 
+          labels={['Accounts', 'Investments', 'Stocks', 'Real Estate', 'Inactive Streams']} 
+          tabContent={(index) => handleTabChange(index)}
+    
+        />
       </div>
     </main>
   );

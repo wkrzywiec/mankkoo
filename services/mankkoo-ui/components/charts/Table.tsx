@@ -97,6 +97,7 @@ function addColorCircleColumn(data: string[][], colorsColumnIdx: number, skipFir
 function addRowNumberColumn(data: string[][], hasRowNumber: boolean, skipFirstRow: boolean, skipLastRow: boolean): void {
     if (data.length === 0) return
     if (hasRowNumber === false) return
+    if (skipFirstRow && data.length === 1) return
 
     const rowNumberColumnIsNotPresent = skipFirstRow ? data[1][0] != '01' : data[0][0] != '01'
     
