@@ -27,11 +27,11 @@ def test_all_streams_are_listed__if_no_filters_are_provided__and_stream_names_ar
     assert len(payload) == 4
 
     account_stream = next(x for x in payload if x['id'] == str(streams[0].id))
-    assert account_stream['type'] == 'account'
+    assert account_stream['type'] == 'checking'
     assert account_stream['name'] == streams[0].metadata['bankName'] + ' - ' + streams[0].metadata['alias']
 
     investment_stream = next(x for x in payload if x['id'] == str(streams[1].id))
-    assert investment_stream['type'] == 'investment'
+    assert investment_stream['type'] == 'treasury_bonds'
     assert investment_stream['name'] == streams[1].metadata['investmentName']
 
     retirement_stream = next(x for x in payload if x['id'] == str(streams[2].id))
@@ -39,7 +39,7 @@ def test_all_streams_are_listed__if_no_filters_are_provided__and_stream_names_ar
     assert retirement_stream['name'] == streams[2].metadata['alias']
 
     etf_stream = next(x for x in payload if x['id'] == str(streams[3].id))
-    assert etf_stream['type'] == 'stocks'
+    assert etf_stream['type'] == 'ETF'
     assert etf_stream['name'] == streams[3].metadata['etfName']
 
 def test_only_active_streams_are_listed__if_active_qparam_equals_true(test_client):

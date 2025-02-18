@@ -27,7 +27,15 @@ def load_streams(active: bool, type: str) -> list[Stream]:
         
     query = f"""
     SELECT
-        id, type,
+        id, 
+        CASE 
+           WHEN type = 'account' THEN metadata->>'accountType'
+           WHEN type = 'investment' THEN metadata->>'category'
+           WHEN type = 'retirement' THEN metadata->>'accountType'
+           WHEN type = 'stocks' THEN metadata->>'type'
+           ELSE type
+        END AS type
+        ,
         CASE 
            WHEN type = 'account' THEN CONCAT(metadata->>'bankName', ' - ', metadata->>'alias')
            WHEN type = 'investment' THEN metadata->>'investmentName'
