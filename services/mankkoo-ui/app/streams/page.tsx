@@ -12,7 +12,6 @@ import { useGetHttp } from "@/hooks/useHttp";
 export default function Streams() {
 
   const streamsHeaders = [['Type', 'Name']]
-  // const [activeTab, setActiveTab] = useState<number>(0);
   const [streamType, setStreamType] = useState<string | undefined>('account');
   const [streamActive, setStreamActive] = useState<boolean>(true);
 
