@@ -38,7 +38,7 @@ export default function Accounts() {
   }
 
   function prepareAccountButton(acc: AccountInfoResponse) {
-    return <Button key={acc.number} onClick={handleAccountSelected} value={acc.id}>{accountHeader(acc)}</Button>;
+    return <Button key={acc.number} onClick={handleAccountSelected} value={acc.id}>{accountHeader(acc)}</Button>
   }
 
   const handleAccountSelected = (event: React.SyntheticEvent) => {

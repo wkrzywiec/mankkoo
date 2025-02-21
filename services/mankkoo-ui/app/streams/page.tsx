@@ -1,7 +1,10 @@
 "use client"
 
+import styles from "./page.module.css";
+
 import { useState } from "react";
 
+import Button from "@/components/elements/Button";
 import Table from "@/components/charts/Table";
 import TabList from "@/components/elements/TabList";
 import TileHeader from "@/components/elements/TileHeader";
@@ -31,7 +34,7 @@ export default function Streams() {
     fetchedData: events
   } = useGetHttp<EventResponse[]>(`/streams/${streamId}/events`, !!streamId);
 
-  function handleTabChange(index: number) {
+  const handleTabChange = (index: number) => {
 
     if (index === 0) {
       setStreamActive(true)
@@ -65,16 +68,24 @@ export default function Streams() {
     
 
     return <div className="mainContainer">
-      <div className="gridItem span2Columns" style={{margin: "55px"}}>
+      <div className="gridItem span2Columns">
+        <TileHeader headline={`List of ${streamType ? streamType : "other"} streams`} subHeadline="Select a stream get more information about it." />
         <Table data={streamTableData} rowIds={streamRowIds} hasHeader={true} style={{ width: "90%" }} boldLastRow={false} currencyColumnIdx={-1} colorsColumnIdx={-1} onRowClick={handleStreamSelected}/>
       </div>
-      <div className="gridItem span2Columns">
+      <div className="gridItem span2Columns ">
         <TileHeader headline="Stream summary" subHeadline="Short summary about selected stream." />
         <Table data={streamDetailsTableData} hasHeader={true} hasRowNumber={false} style={{ width: "90%" }} boldLastRow={false} currencyColumnIdx={-1} colorsColumnIdx={-1}/>
       </div>
       <div className="gridItem span4Columns">
-        <TileHeader headline="Events" subHeadline="A list of all events for a given stream." />
-        <Table data={eventTableData} hasHeader={true} style={{ width: "90%" }} boldLastRow={false} currencyColumnIdx={-1} colorsColumnIdx={-1}/>
+        <div>
+          <TileHeader headline="Events" subHeadline="A list of all events for a given stream." />
+        </div>
+        <div className={styles.itemsBottomRight}>
+          <Button key={'123'} onClick={()=>{}} value={'123123'}>Add event</Button>
+        </div>
+        <div>
+          <Table data={eventTableData} hasHeader={true} style={{ width: "100%" }} boldLastRow={false} currencyColumnIdx={-1} colorsColumnIdx={-1}/>
+        </div>
       </div>
   </div>
   }
@@ -85,13 +96,16 @@ export default function Streams() {
 
   return (
     <main className="mainContainer">
-      <div className="gridItem span4Columns">
+      <div className="gridItem span3Columns">
         <h1>Streams</h1>
         <p>A record of all bank accounts and investments, including detailed transactions for each.</p>
       </div>
+      <div className={`gridItem ${styles.itemsBottomRight}`}>
+          <Button key={'123'} onClick={()=>{}} value={'123123'}>Add stream</Button>
+      </div>
 
       <div className="gridItem span4Columns">
-        <TabList 
+        <TabList
           labels={['Accounts', 'Investments', 'Stocks', 'Real Estate', 'Inactive Streams']} 
           tabContent={(index) => handleTabChange(index)}
         />

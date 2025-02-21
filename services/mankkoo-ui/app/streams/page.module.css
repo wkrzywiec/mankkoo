@@ -1,3 +1,10 @@
+.itemsBottomRight {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: flex-end;
+}
+
 .tabs {
     display: flex;
     border-bottom: 2px solid #ccc;
