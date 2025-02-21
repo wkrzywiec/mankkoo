@@ -3,6 +3,18 @@ import uuid
 
 import mankkoo.event_store as es
 
+def test_stream_is_created__if_type_is_provided(test_client):
+    pass
+
+def test_stream_is_created__if_type_and_metadata_are_provided(test_client):
+    pass
+
+def test_stream_is_not_created__if_type_is_not_provided(test_client):
+    pass
+
+def test_stream_is_not_created__if_invalid_type_is_provided(test_client):
+    pass
+
 def test_all_streams_are_listed__if_no_filters_are_provided__and_stream_names_are_correctly_set(test_client):
     # GIVEN
     streams = [

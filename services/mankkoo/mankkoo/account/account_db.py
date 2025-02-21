@@ -1,5 +1,5 @@
 from apiflask import Schema
-from apiflask.fields import String, Boolean, Float, File
+from apiflask.fields import String, Boolean, Float
 
 import mankkoo.database as db
 
