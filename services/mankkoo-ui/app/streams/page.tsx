@@ -81,7 +81,7 @@ export default function Streams() {
           <TileHeader headline="Events" subHeadline="A list of all events for a given stream." />
         </div>
         <div className={styles.itemsBottomRight}>
-          <Button key={'123'} onClick={()=>{}} value={'123123'}>Add event</Button>
+          <Button key={'123'} onClick={()=>{ console.log('buttonClicked')}} value={'123123'}>Add event</Button>
         </div>
         <div>
           <Table data={eventTableData} hasHeader={true} style={{ width: "100%" }} boldLastRow={false} currencyColumnIdx={-1} colorsColumnIdx={-1}/>
@@ -101,7 +101,7 @@ export default function Streams() {
         <p>A record of all bank accounts and investments, including detailed transactions for each.</p>
       </div>
       <div className={`gridItem ${styles.itemsBottomRight}`}>
-          <Button key={'123'} onClick={()=>{}} value={'123123'}>Add stream</Button>
+          <Button key={'123'} onClick={()=>{ console.log('buttonClicked')}} value={'123123'}>Add stream</Button>
       </div>
 
       <div className="gridItem span4Columns">

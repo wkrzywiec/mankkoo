@@ -17,7 +17,7 @@ export interface TableData {
 
 export default function Table({
     data=[],
-    onRowClick=()=>{},
+    onRowClick=()=>{ console.debug('click')},
     rowIds=[],
     hasHeader=false,
     hasRowNumber=true,
