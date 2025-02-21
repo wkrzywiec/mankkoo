@@ -5,7 +5,7 @@ import { useState } from "react";
 import Table from "@/components/charts/Table";
 import TabList from "@/components/elements/TabList";
 import TileHeader from "@/components/elements/TileHeader";
-import { StreamDetailsResponse, StreamResponse } from "@/api/streamsPageResponses";
+import { EventResponse, StreamDetailsResponse, StreamResponse } from "@/api/streamsPageResponses";
 import { useGetHttp } from "@/hooks/useHttp";
 
 
@@ -13,6 +13,7 @@ export default function Streams() {
 
   const streamsHeaders = [['Type', 'Name']]
   const streamsDetailsHeaders = [['Property', 'Value']]
+  const eventsHeaders = [['Event Type', 'Occured At', 'Data']]
 
   const [streamType, setStreamType] = useState<string | undefined>('account');
   const [streamActive, setStreamActive] = useState<boolean>(true);
@@ -25,6 +26,10 @@ export default function Streams() {
   const {
     fetchedData: streamDetails
   } = useGetHttp<StreamDetailsResponse>(`/streams/${streamId}`, !!streamId);
+
+  const {
+    fetchedData: events
+  } = useGetHttp<EventResponse[]>(`/streams/${streamId}/events`, !!streamId);
 
   function handleTabChange(index: number) {
 
@@ -54,6 +59,9 @@ export default function Streams() {
     const streamRowIds = streams?.map(stream => stream.id)
 
     const streamDetailsTableData = streamDetails ? [...streamsDetailsHeaders, ...Object.entries(streamDetails.metadata)] : streamsDetailsHeaders
+
+    const eventsTableData = events?.map(event => [event.type, event.occuredAt, JSON.stringify(event.data)])
+    const eventTableData = events ? [...eventsHeaders, ...eventsTableData ? eventsTableData : [[]]] : eventsHeaders
     
 
     return <div className="mainContainer">
@@ -66,7 +74,7 @@ export default function Streams() {
       </div>
       <div className="gridItem span4Columns">
         <TileHeader headline="Events" subHeadline="A list of all events for a given stream." />
-        <Table data={[["Event Type", "Occured At", "Data"], ["ETFBought", "2019-04-13", "{\"units\":44,\"balance\":999.99,\"currency\":\"PLN\",\"totalValue\":999.99,\"averagePrice\":20.31}"]]} hasHeader={true} style={{ width: "90%" }} boldLastRow={false} currencyColumnIdx={-1} colorsColumnIdx={-1}/>
+        <Table data={eventTableData} hasHeader={true} style={{ width: "90%" }} boldLastRow={false} currencyColumnIdx={-1} colorsColumnIdx={-1}/>
       </div>
   </div>
   }

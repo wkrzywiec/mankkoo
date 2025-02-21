@@ -10,3 +10,9 @@ export interface StreamDetailsResponse {
     version: number;
     metadata: { [key: string]: string}
 }
+
+export interface EventResponse {
+    type: string;
+    occuredAt: string;
+    data: { [key: string]: string}
+}
