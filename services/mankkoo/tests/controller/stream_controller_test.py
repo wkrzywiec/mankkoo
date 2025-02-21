@@ -1,19 +1,101 @@
-from datetime import datetime, timedelta, timezone
+import json
 import uuid
+
+from datetime import datetime, timedelta, timezone
 
 import mankkoo.event_store as es
 
 def test_stream_is_created__if_type_is_provided(test_client):
-    pass
+    # GIVEN
+    mimetype = 'application/json'
+    headers = {
+        'Content-Type': mimetype,
+        'Accept': mimetype
+    }
+
+    data = {
+        'type': 'account'
+    }
+
+    # WHEN
+    response = test_client.post('/api/streams', data=json.dumps(data), headers=headers)
+
+    # THEN
+    assert response.status_code == 201
+
+    payload = response.get_json()
+    assert payload['id'] is not None
+
 
 def test_stream_is_created__if_type_and_metadata_are_provided(test_client):
-    pass
+    # GIVEN
+    mimetype = 'application/json'
+    headers = {
+        'Content-Type': mimetype,
+        'Accept': mimetype
+    }
+
+    data = {
+        'type': 'investment',
+        'metadata': {
+            'text': 'something',
+            'number': 123,
+            'bool': True
+        }
+    }
+
+    # WHEN
+    response = test_client.post('/api/streams', data=json.dumps(data), headers=headers)
+
+    # THEN
+    assert response.status_code == 201
+
+    payload = response.get_json()
+    stream_id = payload['id']
+
+    stream = es.get_stream_by_id(stream_id)
+    assert stream.id == uuid.UUID(stream_id)
+    assert stream.type == 'investment'
+    assert stream.metadata == data['metadata']
+
 
 def test_stream_is_not_created__if_type_is_not_provided(test_client):
-    pass
+    # GIVEN
+    mimetype = 'application/json'
+    headers = {
+        'Content-Type': mimetype,
+        'Accept': mimetype
+    }
+
+    data = {
+        'metadata': {
+            'text': 'something'
+        }
+    }
+
+    # WHEN
+    response = test_client.post('/api/streams', data=json.dumps(data), headers=headers)
+
+    # THEN
+    assert response.status_code == 400
 
 def test_stream_is_not_created__if_invalid_type_is_provided(test_client):
-    pass
+    # GIVEN
+    mimetype = 'application/json'
+    headers = {
+        'Content-Type': mimetype,
+        'Accept': mimetype
+    }
+
+    data = {
+        'type': 'invalid'
+    }
+
+    # WHEN
+    response = test_client.post('/api/streams', data=json.dumps(data), headers=headers)
+
+    # THEN
+    assert response.status_code == 400
 
 def test_all_streams_are_listed__if_no_filters_are_provided__and_stream_names_are_correctly_set(test_client):
     # GIVEN
