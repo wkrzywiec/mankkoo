@@ -25,7 +25,7 @@ export default function TabList({labels, tabContent}: {labels: string[], tabCont
         const renderTabcontent = async () => {
           setLoading(true);
           try {
-              setContent(tabContent(activeTab));
+            setContent(tabContent(activeTab));
           } finally {
             setLoading(false);
           }

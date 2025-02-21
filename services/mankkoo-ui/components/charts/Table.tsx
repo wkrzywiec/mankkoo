@@ -5,6 +5,8 @@ import { currencyFormat } from "@/utils/Formatter";
 
 const COLOR_CIRCLE_CELL_PATTERN = "circle_#"
 
+//remove it? 
+//add headers props
 export interface TableData {
     data: string [][];
     hasHeader: boolean;
@@ -15,6 +17,8 @@ export interface TableData {
 
 export default function Table({
     data=[],
+    onRowClick=()=>{},
+    rowIds=[],
     hasHeader=false,
     hasRowNumber=true,
     boldLastRow=false,
@@ -23,6 +27,8 @@ export default function Table({
     style={}
 }: {
     data?: string [][];
+    onRowClick?: (id:string) => void,
+    rowIds?: string[];
     hasHeader?: boolean;
     hasRowNumber?: boolean;
     boldLastRow?: boolean;
@@ -52,7 +58,7 @@ export default function Table({
     addColorCircleColumn(preparedData, colorsColumnIdx, hasHeader, boldLastRow)
 
     const rows = preparedData.map((rowData, rowIndex) => 
-        <tr key={rowIndex} className={(defineRowClass(preparedData, rowIndex, boldLastRow, hasHeader))}>
+        <tr key={rowIndex} className={(defineRowClass(preparedData, rowIndex, boldLastRow, hasHeader))} onClick={() => onRowClick(rowIds[rowIndex-1])}>
             { rowData.map((cellData, cellIndex) => {
                 
                 if (shouldAddColorCircleToCell(preparedData, rowIndex, boldLastRow, cellData)) {
@@ -63,7 +69,7 @@ export default function Table({
                     return <td key={rowIndex + "_" + cellIndex}></td>
                 }
 
-                return <td key={rowIndex + "_" + cellIndex}>{cellIndex === currencyColumnIdx ? currencyFormat(cellData) : cellData}</td>
+                return <td key={rowIndex + "_" + cellIndex}>{cellIndex === currencyColumnIdx ? currencyFormat(cellData) : String(cellData)}</td>
             }
                 
             )}
@@ -139,10 +145,16 @@ function shouldBoldFirstRow(data: string[][], rowIndex: number, hasHeader: boole
 }
 
 function shouldAddColorCircleToCell(data: string[][], rowIndex: number, boldLastRow: boolean, cellData?: string) {
-    return cellData?.includes(COLOR_CIRCLE_CELL_PATTERN) && !shouldBoldLastRow(data, rowIndex, boldLastRow)
+    if (typeof cellData !== "string") {
+        cellData = String(cellData ?? "")
+    }
+    return cellData.includes(COLOR_CIRCLE_CELL_PATTERN) && !shouldBoldLastRow(data, rowIndex, boldLastRow)
 }
 
 function shouldSkipAddColorCircleToCellAndLeaveItEmpty(cellData: string, data: string[][], rowIndex: number, boldLastRow: boolean) {
-    return cellData?.includes(COLOR_CIRCLE_CELL_PATTERN) && shouldBoldLastRow(data, rowIndex, boldLastRow)
+    if (typeof cellData !== "string") {
+        cellData = String(cellData ?? "")
+    }
+    return cellData.includes(COLOR_CIRCLE_CELL_PATTERN) && shouldBoldLastRow(data, rowIndex, boldLastRow)
 }
 

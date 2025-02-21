@@ -5,7 +5,7 @@ import Swal from 'sweetalert2';
 
 import { API_BASE } from '@/api/ApiUrl';
 
-export function useGetHttp<Type>(apiPath: string, enabled=true): {isFetching: boolean, fetchedData?: Type, setFetchedData?: unknown, error?: string } {
+export function useGetHttp<Type>(apiPath: string, enabled: boolean=true): {isFetching: boolean, fetchedData?: Type, setFetchedData?: unknown, error?: string } {
   
     const [isFetching, setIsFetching] = useState<boolean>(false);
     const [error, setError] = useState<string>();
@@ -13,20 +13,20 @@ export function useGetHttp<Type>(apiPath: string, enabled=true): {isFetching: bo
 
     useEffect(() => {
         async function fetchData() {
-        setIsFetching(true);
-        try {
-            const response = await axios.get<Type>(API_BASE + apiPath);
-            setFetchedData(response.data);
-        } catch (error) {
-            let errorMessage = 'Failed to fetch data from ';
-            
-            if (error instanceof Error) {
-                errorMessage = error.message
-            } 
-            setError(errorMessage);
-        }
+            setIsFetching(true);
+            try {
+                const response = await axios.get<Type>(API_BASE + apiPath);
+                setFetchedData(response.data);
+            } catch (error) {
+                let errorMessage = 'Failed to fetch data from ';
+                
+                if (error instanceof Error) {
+                    errorMessage = error.message
+                } 
+                setError(errorMessage);
+            }
 
-        setIsFetching(false);
+            setIsFetching(false);
         }
 
         if (enabled) fetchData();
