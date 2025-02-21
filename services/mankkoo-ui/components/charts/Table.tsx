@@ -5,8 +5,8 @@ import { currencyFormat } from "@/utils/Formatter";
 
 const COLOR_CIRCLE_CELL_PATTERN = "circle_#"
 
-//remove it? 
-//add headers props
+//todo remove it? 
+//todo add headers props
 export interface TableData {
     data: string [][];
     hasHeader: boolean;
