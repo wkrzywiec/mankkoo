@@ -1,12 +1,12 @@
 import uuid
 
 from apiflask import APIBlueprint, Schema, abort
-from apiflask.fields import String, Boolean, Mapping
+from apiflask.fields import String, Boolean, Integer, Mapping
 
 import mankkoo.event_store as es
 
 from mankkoo.stream import stream_db as database
-from mankkoo.stream.stream_db import Event, Stream, StreamDetails
+from mankkoo.stream.stream_db import Event, Stream
 from mankkoo.base_logger import log
 
 stream_endpoints = APIBlueprint('stream_endpoints', __name__, tag='Stream')
@@ -65,7 +65,11 @@ def streams(query_params):
     streams = database.load_streams(active, type=type_param)
     return streams
 
-
+class StreamDetails(Schema):
+    id = String()
+    type = String()
+    version = Integer()
+    metadata = Mapping()
 
 @stream_endpoints.route("/<stream_id>")
 @stream_endpoints.output(StreamDetails, status_code=200)
@@ -76,11 +80,17 @@ def streams(query_params):
 def stream_by_id(stream_id):
     log.info(f"Fetching details for the '{stream_id}' stream...")
 
-    stream = database.load_stream_by_id(stream_id)
+    stream = es.get_stream_by_id(stream_id)
 
     if stream is None:
         abort(404, message=f"Failed to load stream definition. There is no stream definition with an id '{stream_id}'")
-    return stream
+    
+    response = StreamDetails()
+    response.id = str(stream.id)
+    response.type = stream.type
+    response.version = stream.version
+    response.metadata = stream.metadata
+    return response
 
 
 # update metadata

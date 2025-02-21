@@ -65,44 +65,6 @@ def load_streams(active: bool, type: str) -> list[Stream]:
     return result
 
 
-
-class StreamDetails(Schema):
-    id = String()
-    type = String()
-    version = Integer()
-    metadata = Mapping()
-
-def load_stream_by_id(stream_id) -> StreamDetails:
-    log.info(f"Loading stream '{stream_id}'...")
-    query = f"""
-    SELECT
-        id, type, version, metadata
-    FROM streams
-    WHERE id = '{stream_id}'
-    ;
-    """
-
-    with db.get_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute(query)
-            result = cur.fetchone()
-            if result is None:
-                return None
-
-    try:
-        stream = Stream()
-        stream.id = result[0]
-        stream.type = result[1]
-        stream.version = result[2]
-        stream.metadata = result[3]
-        
-        log.info(f"Found stream by id {stream_id}")
-        return stream
-    except Exception:
-        raise ValueError(f"Failed to load stream definition. Mapping internal error. Check the logs")
-
-
-
 class Event(Schema):
     type = String()
     version = Integer()
