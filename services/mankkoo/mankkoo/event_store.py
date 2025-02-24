@@ -88,7 +88,7 @@ def load(stream_id: UUID) -> list[Event]:
 
     with db.get_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute(f"SELECT id, stream_id, type, data, version, occured_at from events WHERE stream_id = '{str(stream_id)}' ORDER BY version")
+            cur.execute(f"SELECT id, stream_id, type, data, version, occured_at FROM events WHERE stream_id = '{str(stream_id)}' ORDER BY version")
             rows = cur.fetchall()
 
             for row in rows:
@@ -97,6 +97,16 @@ def load(stream_id: UUID) -> list[Event]:
                 )
 
     return result
+
+
+def load_latest_event_id(stream_id: str) -> Event:
+    log.info(f"Loading latest event from a stream {stream_id}...")
+    with db.get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(f"SELECT e.id, e.stream_id, e.type AS event_type, e.data, e.version, e.occured_at, s.type AS stream_type FROM events e JOIN streams s ON e.stream_id=s.id WHERE e.stream_id = '{str(stream_id)}' ORDER BY version DESC LIMIT 1")
+            row = cur.fetchone()
+
+    return Event(event_id=uuid.UUID(row[0]), stream_id=uuid.UUID(row[1]), event_type=row[2], data=row[3], version=row[4], occured_at=row[5], stream_type=row[6])
 
 
 def get_stream_by_id(stream_id: str) -> Stream | None:

@@ -1,7 +1,7 @@
 import uuid
 
 from apiflask import APIBlueprint, Schema, abort
-from apiflask.fields import String, Boolean, Integer, Mapping
+from apiflask.fields import String, Boolean, Integer, Date, Mapping
 
 import mankkoo.event_store as es
 
@@ -12,7 +12,7 @@ from mankkoo.base_logger import log
 stream_endpoints = APIBlueprint('stream_endpoints', __name__, tag='Stream')
 
 class StreamCreate(Schema):
-    type = String()
+    type = String(required=True)
     metadata = Mapping()
 
 class StreamCreateResult(Schema):
@@ -92,14 +92,44 @@ def stream_by_id(stream_id):
     response.metadata = stream.metadata
     return response
 
+class AddEvent(Schema):
+    type = String(required=True)
+    data = Mapping(required=True)
+    occuredAt = Date(required=True)
+    version = Integer(required=True)
 
-# update metadata
-# update tags
+class AddEventResult(Schema):
+    id = String()
+    version = Integer()
+
+@stream_endpoints.route("/<stream_id>/events", methods=['POST'])
+@stream_endpoints.input(AddEvent, location='json')
+@stream_endpoints.output(AddEventResult, status_code=201)
+@stream_endpoints.doc(summary='Add event', description='Add event to the stream')
+def add_event(stream_id, body: AddEvent):
+    log.info(f"Received request to add an event to the '{stream_id}' stream. Body: {body}...")
+
+    stream = es.get_stream_by_id(stream_id)
+    if stream is None:
+        abort(404, message=f"Failed to add an event. There is no stream with the id: '{stream_id}'")
+
+    event = es.Event(stream.type, stream.id, body['type'], body['data'], body['occuredAt'], body['version'])
+    es.store([event])
+
+    stored_event = es.load_latest_event_id(stream_id)
+    
+    result = AddEventResult()
+    result.id = stored_event.id
+    result.version = stored_event.version
+    return result
+
+# todo update metadata
+# todo update tags
 
 @stream_endpoints.route("/<stream_id>/events")
 @stream_endpoints.output(Event(many=True), status_code=200)
 @stream_endpoints.doc(
-    summary='Events for the Stream',
+    summary='Events in the stream',
     description='Get list of all events for the Stream'
 )
 def events_for_stream(stream_id):
