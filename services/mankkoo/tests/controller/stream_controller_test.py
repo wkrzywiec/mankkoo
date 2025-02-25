@@ -77,7 +77,7 @@ def test_stream_is_not_created__if_type_is_not_provided(test_client):
     response = test_client.post('/api/streams', data=json.dumps(data), headers=headers)
 
     # THEN
-    assert response.status_code == 400
+    assert response.status_code == 422
 
 def test_stream_is_not_created__if_invalid_type_is_provided(test_client):
     # GIVEN
@@ -254,6 +254,52 @@ def test_stream_is_not_loaded__if_invalid_id_provided(test_client):
     # THEN
     assert response.status_code == 404
 
+def test_events_are_added_to_stream(test_client):
+    stream = es.Stream(uuid.uuid4(), 'account', 0,
+                  {"active": True, "alias": "Bank account A", "bankName": "Bank A", "bankUrl": "https://www.bank-a.com", "accountNumber": "iban-1", "accountName": "Super Personal account", "accountType": "checking", "importer": "MANKKOO"})
+    es.create([stream])
+
+    data = {
+        "type": "AccountOpened",
+        "data": {
+            "stringType": "abc",
+            "boolType": True,
+            "numericType": 123
+        },
+        "occuredAt": "2019-08-24",
+        "version": 1
+    }
+
+    # WHEN
+    response = test_client.post(f'/api/streams/{stream.id}/events', data=json.dumps(data), headers=__headers())
+
+    # THEN
+    assert response.status_code == 201
+
+    payload = response.get_json()
+    assert payload['id'] is not None
+    assert payload['version'] == 1
+
+
+def test_events_are_not_added_to_stream__if_invalid_stream_id_was_provided(test_client):
+    stream = es.Stream(uuid.uuid4(), 'account', 0,
+                  {"active": True, "alias": "Bank account A", "bankName": "Bank A", "bankUrl": "https://www.bank-a.com", "accountNumber": "iban-1", "accountName": "Super Personal account", "accountType": "checking", "importer": "MANKKOO"})
+    es.create([stream])
+
+    invalid_uuid = 'c722f508-49b0-4d89-955e-f85322dffcb8'
+
+    data = {
+        "type": "AccountOpened",
+        "data": {},
+        "occuredAt": "2019-08-24",
+        "version": 1
+    }
+
+    # WHEN
+    response = test_client.post(f'/api/streams/{invalid_uuid}/events', data=json.dumps(data), headers=__headers())
+
+    # THEN
+    assert response.status_code == 404
 
 def test_events_are_loaded_for_stream(test_client):
     # GIVEN
@@ -307,3 +353,10 @@ def test_events_are_loaded_for_stream(test_client):
 
     assert payload[2]['type'] == 'AccountOpened'
     assert payload[2]['version'] == 1
+
+def __headers():
+    mimetype = 'application/json'
+    return {
+        'Content-Type': mimetype,
+        'Accept': mimetype
+    }
