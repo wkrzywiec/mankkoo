@@ -13,18 +13,18 @@ stream_endpoints = APIBlueprint('stream_endpoints', __name__, tag='Stream')
 
 
 
-class StreamCreate(Schema):
+class CreateStream(Schema):
     type = String(required=True)
     metadata = Mapping()
 
-class StreamCreateResult(Schema):
+class CreateStreamResult(Schema):
     id = String()
 
 @stream_endpoints.route("", methods=['POST'])
-@stream_endpoints.input(StreamCreate, location='json')
-@stream_endpoints.output(StreamCreateResult, status_code=201)
+@stream_endpoints.input(CreateStream, location='json')
+@stream_endpoints.output(CreateStreamResult, status_code=201)
 @stream_endpoints.doc(summary='Create a new stream', description='Create a new stream')
-def create_stream(body: StreamCreate):
+def create_stream(body: CreateStream):
     log.info(f"Received request to create a new stream. Body: {body}...")
     
     allowed_types = ['account', 'investment', 'real-estate', 'retirement', 'stocks']
@@ -39,7 +39,7 @@ def create_stream(body: StreamCreate):
     stream = es.Stream(uuid.uuid4(), body["type"], 0, metadata)
     es.create([stream])
     
-    result = StreamCreateResult()
+    result = CreateStreamResult()
     result.id = stream.id
     return result
 
@@ -68,14 +68,14 @@ def streams(query_params):
     streams = database.load_streams(active, type=type_param)
     return streams
 
-class StreamDetails(Schema):
+class StreamsQueryResult(Schema):
     id = String()
     type = String()
     version = Integer()
     metadata = Mapping()
 
 @stream_endpoints.route("/<stream_id>")
-@stream_endpoints.output(StreamDetails, status_code=200)
+@stream_endpoints.output(StreamsQueryResult, status_code=200)
 @stream_endpoints.doc(
     summary='Stream by id',
     description='Get detailed information about the Stream'
@@ -88,7 +88,7 @@ def stream_by_id(stream_id):
     if stream is None:
         abort(404, message=f"Failed to load stream definition. There is no stream definition with an id '{stream_id}'")
     
-    response = StreamDetails()
+    response = StreamsQueryResult()
     response.id = str(stream.id)
     response.type = stream.type
     response.version = stream.version
