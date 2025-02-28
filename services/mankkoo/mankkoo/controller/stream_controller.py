@@ -11,6 +11,8 @@ from mankkoo.base_logger import log
 
 stream_endpoints = APIBlueprint('stream_endpoints', __name__, tag='Stream')
 
+
+
 class StreamCreate(Schema):
     type = String(required=True)
     metadata = Mapping()
@@ -40,6 +42,7 @@ def create_stream(body: StreamCreate):
     result = StreamCreateResult()
     result.id = stream.id
     return result
+
 
 
 class StreamsQuery(Schema):
@@ -92,6 +95,8 @@ def stream_by_id(stream_id):
     response.metadata = stream.metadata
     return response
 
+
+
 class AddEvent(Schema):
     type = String(required=True)
     data = Mapping(required=True)
@@ -123,8 +128,7 @@ def add_event(stream_id, body: AddEvent):
     result.version = stored_event.version
     return result
 
-# todo update metadata
-# todo update tags
+
 
 @stream_endpoints.route("/<stream_id>/events")
 @stream_endpoints.output(Event(many=True), status_code=200)
@@ -137,3 +141,35 @@ def events_for_stream(stream_id):
 
     events = database.load_events_for_stream(stream_id)
     return events
+
+
+
+class UpdateStream(Schema):
+    metadata = Mapping()
+
+class UpdateStreamResult(Schema):
+    message = Mapping()
+
+@stream_endpoints.route("/<stream_id>", methods=['PATCH'])
+@stream_endpoints.input(UpdateStream, location='json')
+@stream_endpoints.output(UpdateStreamResult, status_code=200)
+@stream_endpoints.doc(summary='Update stream', description='Modify stream information')
+def update_stream(stream_id, body: UpdateStream):
+    log.info(f"Received request to update the '{stream_id}' stream. Body: {body}...")
+
+    if body is None:
+        abort(400, message=f"Failed to modify a stream. Body was not provided")
+
+    if body['metadata'] is None:
+        abort(400, message=f"Failed to modify a stream. Body must contain the 'metadata' field")
+
+    stream = es.get_stream_by_id(stream_id)
+    if stream is None:
+        abort(404, message=f"Failed to modify a stream. There is no stream with the id: '{stream_id}'")
+
+    metadata = body['metadata']
+    log.info(type(metadata))
+    es.update_stream_metadata(stream.id, metadata)
+    
+    response = UpdateStreamResult()
+    response.metadata = 'Metadata was updated'

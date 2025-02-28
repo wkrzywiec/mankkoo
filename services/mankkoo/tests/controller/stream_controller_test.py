@@ -7,18 +7,12 @@ import mankkoo.event_store as es
 
 def test_stream_is_created__if_type_is_provided(test_client):
     # GIVEN
-    mimetype = 'application/json'
-    headers = {
-        'Content-Type': mimetype,
-        'Accept': mimetype
-    }
-
     data = {
         'type': 'account'
     }
 
     # WHEN
-    response = test_client.post('/api/streams', data=json.dumps(data), headers=headers)
+    response = test_client.post('/api/streams', data=json.dumps(data), headers=__headers())
 
     # THEN
     assert response.status_code == 201
@@ -29,12 +23,6 @@ def test_stream_is_created__if_type_is_provided(test_client):
 
 def test_stream_is_created__if_type_and_metadata_are_provided(test_client):
     # GIVEN
-    mimetype = 'application/json'
-    headers = {
-        'Content-Type': mimetype,
-        'Accept': mimetype
-    }
-
     data = {
         'type': 'investment',
         'metadata': {
@@ -45,7 +33,7 @@ def test_stream_is_created__if_type_and_metadata_are_provided(test_client):
     }
 
     # WHEN
-    response = test_client.post('/api/streams', data=json.dumps(data), headers=headers)
+    response = test_client.post('/api/streams', data=json.dumps(data), headers=__headers())
 
     # THEN
     assert response.status_code == 201
@@ -61,12 +49,6 @@ def test_stream_is_created__if_type_and_metadata_are_provided(test_client):
 
 def test_stream_is_not_created__if_type_is_not_provided(test_client):
     # GIVEN
-    mimetype = 'application/json'
-    headers = {
-        'Content-Type': mimetype,
-        'Accept': mimetype
-    }
-
     data = {
         'metadata': {
             'text': 'something'
@@ -74,25 +56,19 @@ def test_stream_is_not_created__if_type_is_not_provided(test_client):
     }
 
     # WHEN
-    response = test_client.post('/api/streams', data=json.dumps(data), headers=headers)
+    response = test_client.post('/api/streams', data=json.dumps(data), headers=__headers())
 
     # THEN
     assert response.status_code == 422
 
 def test_stream_is_not_created__if_invalid_type_is_provided(test_client):
     # GIVEN
-    mimetype = 'application/json'
-    headers = {
-        'Content-Type': mimetype,
-        'Accept': mimetype
-    }
-
     data = {
         'type': 'invalid'
     }
 
     # WHEN
-    response = test_client.post('/api/streams', data=json.dumps(data), headers=headers)
+    response = test_client.post('/api/streams', data=json.dumps(data), headers=__headers())
 
     # THEN
     assert response.status_code == 400
@@ -353,6 +329,28 @@ def test_events_are_loaded_for_stream(test_client):
 
     assert payload[2]['type'] == 'AccountOpened'
     assert payload[2]['version'] == 1
+
+
+def test_stream_metadata_are_updated(test_client):
+    # GIVEN
+    stream = es.Stream(uuid.uuid4(), 'account', 0,
+                  {"active": True, "alias": "Bank account A", "bankName": "Bank A", "bankUrl": "https://www.bank-a.com", "accountNumber": "iban-1", "accountName": "Super Personal account", "accountType": "checking", "importer": "MANKKOO"})
+    es.create([stream])
+
+    metadata = {
+        "strField": "abc",
+        "boolField": True,
+        "numericField": 123
+    }
+
+    # WHEN
+    response = test_client.patch(f'/api/streams/{stream.id}', data=json.dumps({'metadata': metadata}), headers=__headers())
+
+    # THEN
+    assert response.status_code == 200
+    stored_stream = es.get_stream_by_id(stream.id)
+    assert stored_stream.metadata == metadata
+
 
 def __headers():
     mimetype = 'application/json'
