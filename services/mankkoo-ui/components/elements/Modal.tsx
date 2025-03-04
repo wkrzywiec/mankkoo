@@ -16,8 +16,8 @@ export default function Modal(
             {children}
         </div>
         <div className="buttons-content">
-            <Button onClick={onSubmit} value="">Submit</Button>
-            <Button onClick={onClose} value="">Close</Button>
+            <Button onClick={onSubmit}>Submit</Button>
+            <Button onClick={onClose}>Close</Button>
         </div>
       </div>
     </div>

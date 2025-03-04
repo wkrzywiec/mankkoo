@@ -24,6 +24,7 @@ export default function Streams() {
 
   const [streamType, setStreamType] = useState<string | undefined>('account');
   const [streamActive, setStreamActive] = useState<boolean>(true);
+  
   const [streamId, setStreamId] = useState<string>();
 
   const {
@@ -86,7 +87,7 @@ export default function Streams() {
           <TileHeader headline="Events" subHeadline="A list of all events for a given stream." />
         </div>
         <div className={styles.itemsBottomRight}>
-          <Button key={'123'} onClick={()=>{ console.log('buttonClicked')}} value={'123123'}>Add event</Button>
+          <Button onClick={() => setisAddEventModalOpen(true)}>Add event</Button>
         </div>
         <div>
           <Table data={eventTableData} hasHeader={true} style={{ width: "100%" }} boldLastRow={false} currencyColumnIdx={-1} colorsColumnIdx={-1}/>
@@ -131,8 +132,21 @@ export default function Streams() {
       metadata: Object.fromEntries(addStreamRows.map(row => [row.property, row.value]))
     }
     postJson('streams', body, 'New stream was created', 'Failed to create a new strem')
-  };
+  }
 
+
+  // ADD NEW EVENT
+  // =======================
+  const [isAddEventModalOpen, setisAddEventModalOpen] = useState(false)
+
+  const handleAddNewEvent = (e: SyntheticEvent<Element, Event>) => {
+    console.log('add event')
+    // const body = {
+    //   type: selectedAddStreamType,
+    //   metadata: Object.fromEntries(addStreamRows.map(row => [row.property, row.value]))
+    // }
+    // postJson('streams', body, 'New stream was created', 'Failed to create a new strem')
+  }
 
   return (
     <main className="mainContainer">
@@ -141,7 +155,7 @@ export default function Streams() {
         <p>A record of all bank accounts and investments, including detailed transactions for each.</p>
       </div>
       <div className={`gridItem ${styles.itemsBottomRight}`}>
-          <Button key={'123'} onClick={() => setisAddStreamModalOpen(true)} value={'123123'}>Add stream</Button>
+          <Button onClick={() => setisAddStreamModalOpen(true)}>Add stream</Button>
       </div>
 
       <div className="gridItem span4Columns">
@@ -161,6 +175,19 @@ export default function Streams() {
         Stream type: <Dropdown options={Object.keys(createStreamOptions)} onChange={handleStreamTypeChangeForCreation} value={selectedAddStreamType} placeholder="Select an option" />
         <EditableTable key={selectedAddStreamType} rows={addStreamRows} setRows={setAddStreamRows}/>
       </Modal>
+
+      <Modal 
+        isOpen={isAddEventModalOpen}
+        header="Add Event"
+        subHeader={`Add new event to the '${streamDetails?.name}' stream. First select an event type that you would like to add and then fill all mandatory fields.`}
+        onSubmit={(e) => handleAddNewEvent(e)} 
+        onClose={() => setisAddEventModalOpen(false)} 
+      >
+        <p>Stream id: <b>{streamDetails?.id}</b></p>
+        <p>Stream name: <b>{streamDetails?.name}</b></p>
+        <p>Stream type: <b>{streamDetails?.type}</b></p>
+      </Modal>
+
     </main>
   );
 }

@@ -56,7 +56,7 @@ export default function EditableTable(
           ))}
         </tbody>
       </table>
-      <Button onClick={addRow} value="">Add Row</Button>
+      <Button onClick={addRow}>Add Row</Button>
     </div>
   );
 }

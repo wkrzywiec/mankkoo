@@ -7,6 +7,7 @@ export interface StreamResponse {
 export interface StreamDetailsResponse {
     id: string;
     type: string;
+    name: string;
     version: number;
     metadata: { [key: string]: string}
 }

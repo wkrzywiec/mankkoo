@@ -64,6 +64,43 @@ def load_streams(active: bool, type: str) -> list[Stream]:
                 result.append(stream)
     return result
 
+class StreamsQueryResult(Schema):
+    id = String()
+    type = String()
+    name = String()
+    version = Integer()
+    metadata = Mapping()
+
+def load_stream_by_id(stream_id: str) -> StreamsQueryResult | None:
+    log.info(f"Loading stream by id '{stream_id}'...")
+    with db.get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(f"""
+                SELECT id, type, 
+                CASE 
+                    WHEN type = 'account' THEN CONCAT(metadata->>'bankName', ' - ', metadata->>'alias')
+                    WHEN type = 'investment' THEN metadata->>'investmentName'
+                    WHEN type = 'retirement' THEN metadata->>'alias'
+                    WHEN type = 'stocks' AND metadata->>'type' = 'ETF' THEN metadata->>'etfName'
+                    ELSE 'Unknown'
+                END AS name,
+                version, 
+                metadata 
+                FROM streams WHERE id = '{stream_id}';
+                        """)
+            result = cur.fetchone()
+            if result is None:
+                return None
+            else:
+                (id, type, name, version, metadata, ) = result
+                stream = Stream()
+                stream.id = id
+                stream.type = type
+                stream.name = name
+                stream.version = version
+                stream.metadata = metadata
+                return stream
+
 
 class Event(Schema):
     type = String()

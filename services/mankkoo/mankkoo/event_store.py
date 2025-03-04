@@ -126,7 +126,7 @@ def get_stream_by_metadata(key: str, value) -> Stream | None:
     log.info(f"Loading stream by its matadata property key '{key}' and value '{value}'...")
     with db.get_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute(f"SELECT id, type, version, metadata from streams WHERE metadata ->> '{key}' = '{value}'")
+            cur.execute(f"SELECT id, type, version, metadata FROM streams WHERE metadata ->> '{key}' = '{value}'")
             result = cur.fetchone()
             if result is None:
                 return None
