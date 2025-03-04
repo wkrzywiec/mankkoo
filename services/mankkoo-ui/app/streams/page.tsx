@@ -3,7 +3,7 @@
 import styles from "./page.module.css";
 import 'react-dropdown/style.css';
 
-import { SyntheticEvent, useState } from "react";
+import { SyntheticEvent, useRef, useState } from "react";
 import Dropdown, { Option } from 'react-dropdown';
 
 import { EventResponse, StreamDetailsResponse, StreamResponse } from "@/api/streamsPageResponses";
@@ -14,6 +14,7 @@ import Table from "@/components/charts/Table";
 import TabList from "@/components/elements/TabList";
 import TileHeader from "@/components/elements/TileHeader";
 import { postJson, useGetHttp } from "@/hooks/useHttp";
+import Input from "@/components/elements/Input";
 
 
 export default function Streams() {
@@ -55,6 +56,10 @@ export default function Streams() {
       setStreamType('stocks')
 
     } else if (index === 3) {
+      setStreamActive(true)
+      setStreamType('retirement')
+
+    } else if (index === 4) {
       setStreamActive(true)
       setStreamType('real-estate')
 
@@ -100,8 +105,7 @@ export default function Streams() {
   // ADD NEW STREAM
   // =======================
   const [isAddStreamModalOpen, setisAddStreamModalOpen] = useState(false)
-
-  const [selectedAddStreamType, setSelectedAddStreamType] = useState<string>("account");
+  const [selectedAddStreamType, setSelectedAddStreamType] = useState<string>("account")
 
   const createStreamOptions: Record<string, string[]> = {
     "account": ["alias", "active", "bankUrl", "bankName", "importer", "accountName", "accountType", "accountNumber"],
@@ -109,21 +113,19 @@ export default function Streams() {
     "stocks": ["type", "active", "broker", "etfUrl", "etfName"],
     "retirement": ["alias", "active", "bankUrl", "bankName", "importer", "accountName", "accountType", "accountNumber"],
     "real-estate": [ "" ]
-  };
-
-  const [addStreamRows, setAddStreamRows] = useState(
-    initStreamTableData(selectedAddStreamType)
-  );
-
-  const handleStreamTypeChangeForCreation = (option: Option) => {
-    setSelectedAddStreamType(option.value)
-    setAddStreamRows(initStreamTableData(option.value))
   }
+
+  const [addStreamRows, setAddStreamRows] = useState(initStreamTableData(selectedAddStreamType))
 
   function initStreamTableData(streamType: string): Row[] {
     return createStreamOptions[streamType].map((prop, index) => (
       {id: index, property: prop, value: ""}
     ))
+  }
+
+  const handleStreamTypeChangeForCreation = (option: Option) => {
+    setSelectedAddStreamType(option.value)
+    setAddStreamRows(initStreamTableData(option.value))
   }
 
   const handleAddNewStream = (e: SyntheticEvent<Element, Event>) => {
@@ -138,9 +140,55 @@ export default function Streams() {
   // ADD NEW EVENT
   // =======================
   const [isAddEventModalOpen, setisAddEventModalOpen] = useState(false)
+  const [selectedAddEventType, setSelectedAddEventType] = useState<string>("MoneyDeposited")
+  const [occuredAt, setOccuredAt] = useState<string>("04-03-2025")
+
+  const addEventOptions: Record<string,  Record<string, string[]>> = {
+    "account": {
+      "MoneyWithdrawn": ["amount", "currency", "title"],
+      "MoneyDeposited": ["amount", "currency", "title"],
+    },
+    "investment": {
+      "TreasuryBondsBought": ["balance", "totalValue", "currency", "units", "pricePerUnit"],
+      "TreasuryBondsMatured": ["balance", "totalValue", "currency", "units", "pricePerUnit"],
+      "TermDepositOpened": ["balance", "amount", "currency"],
+      "TermDepositFinished": ["balance", "amount", "currency"],
+      "InvestmentFundBought": ["balance", "totalValue", "currency"],
+      "InvestmentFundSold": ["balance", "totalValue", "currency"],
+    },
+    "stocks": {
+      "ETFBought": ["averagePrice" ,"balance", "currency", "totalValue", "units"],
+      "ETFSold": ["averagePrice" ,"balance", "comment", "currency", "totalValue", "units"],
+      "ETFPriced": ["averagePrice" ,"balance", "currency", "totalValue", "units"],
+    },
+    "retirement": {
+      "MoneyWithdrawn": ["amount", "currency", "title"],
+      "MoneyDeposited": ["amount", "currency", "title"],
+    },
+    "real-estate": {}
+  }
+
+  const [addEventRows, setAddEventRows] = useState(initEventTableData(selectedAddStreamType, selectedAddEventType))
+
+  function initEventTableData(streamType: string, eventType: string): Row[] {
+    return addEventOptions[streamType][eventType]?.map((prop, index) => (
+      {id: index, property: prop, value: ""}
+    ))
+  }
+
+  const handleEventTypeChangeForAddition = (option: Option) => {
+    setSelectedAddEventType(option.value)
+    setAddEventRows(initEventTableData(streamDetails ? streamDetails.type : "", option.value))
+  }
+
+  const handleDateChange = (e: SyntheticEvent<Element, Event>) => {
+    console.log(e)
+    // setOccuredAt(e.value)
+  }
 
   const handleAddNewEvent = (e: SyntheticEvent<Element, Event>) => {
     console.log('add event')
+    
     // const body = {
     //   type: selectedAddStreamType,
     //   metadata: Object.fromEntries(addStreamRows.map(row => [row.property, row.value]))
@@ -160,7 +208,7 @@ export default function Streams() {
 
       <div className="gridItem span4Columns">
         <TabList
-          labels={['Accounts', 'Investments', 'Stocks', 'Real Estate', 'Inactive Streams']} 
+          labels={['Accounts', 'Investments', 'Stocks', 'Retirement', 'Real Estate', 'Inactive Streams']} 
           tabContent={(index) => handleTabChange(index)}
         />
       </div>
@@ -172,8 +220,8 @@ export default function Streams() {
         onSubmit={(e) => handleAddNewStream(e)} 
         onClose={() => setisAddStreamModalOpen(false)} 
       >
-        Stream type: <Dropdown options={Object.keys(createStreamOptions)} onChange={handleStreamTypeChangeForCreation} value={selectedAddStreamType} placeholder="Select an option" />
-        <EditableTable key={selectedAddStreamType} rows={addStreamRows} setRows={setAddStreamRows}/>
+        <p>Stream type: <Dropdown options={Object.keys(createStreamOptions)} onChange={handleStreamTypeChangeForCreation} value={selectedAddStreamType} placeholder="Select an option" /></p>
+        <p><EditableTable rows={addStreamRows} setRows={setAddStreamRows}/></p>
       </Modal>
 
       <Modal 
@@ -186,6 +234,9 @@ export default function Streams() {
         <p>Stream id: <b>{streamDetails?.id}</b></p>
         <p>Stream name: <b>{streamDetails?.name}</b></p>
         <p>Stream type: <b>{streamDetails?.type}</b></p>
+        <p>Occured at: <Input value={occuredAt} onChange={handleDateChange}/></p>
+        <p>Event type:  <Dropdown options={streamDetails ? Object.keys( addEventOptions[streamDetails.type]) : []} onChange={handleEventTypeChangeForAddition} value={selectedAddEventType} placeholder="Select an option" /></p>
+        <p><EditableTable rows={addEventRows} setRows={setAddEventRows}/></p>
       </Modal>
 
     </main>
