@@ -59,4 +59,4 @@ export default function EditableTable(
       <Button onClick={addRow} value="">Add Row</Button>
     </div>
   );
-};
+}
