@@ -14,7 +14,10 @@ def load_streams(active: bool, type: str) -> list[Stream]:
     conditions = []
 
     if active is not None:
-        conditions.append(f"CAST (metadata->>'active' AS boolean) = {active}")
+        if active:
+            conditions.append(f"(CAST (metadata->>'active' AS boolean) = {active} OR NOT (metadata ? 'active'))")
+        else:
+            conditions.append(f"CAST (metadata->>'active' AS boolean) = {active}")
     
     if type is not None: 
         conditions.append(f"type = '{type}'")
