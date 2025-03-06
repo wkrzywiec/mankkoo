@@ -3,7 +3,7 @@
 import styles from "./page.module.css";
 import 'react-dropdown/style.css';
 
-import { SyntheticEvent, useRef, useState } from "react";
+import { ChangeEvent, SyntheticEvent, useRef, useState } from "react";
 import Dropdown, { Option } from 'react-dropdown';
 
 import { EventResponse, StreamDetailsResponse, StreamResponse } from "@/api/streamsPageResponses";
@@ -104,7 +104,7 @@ export default function Streams() {
 
   // ADD NEW STREAM
   // =======================
-  const [isAddStreamModalOpen, setisAddStreamModalOpen] = useState(false)
+  const [isAddStreamModalOpen, setAddStreamModalOpen] = useState(false)
   const [selectedAddStreamType, setSelectedAddStreamType] = useState<string>("account")
 
   const createStreamOptions: Record<string, string[]> = {
@@ -128,7 +128,7 @@ export default function Streams() {
     setAddStreamRows(initStreamTableData(option.value))
   }
 
-  const handleAddNewStream = (e: SyntheticEvent<Element, Event>) => {
+  const addNewStream = (e: SyntheticEvent<Element, Event>) => {
     const body = {
       type: selectedAddStreamType,
       metadata: Object.fromEntries(addStreamRows.map(row => [row.property, row.value]))
@@ -141,7 +141,6 @@ export default function Streams() {
   // =======================
   const [isAddEventModalOpen, setisAddEventModalOpen] = useState(false)
   const [selectedAddEventType, setSelectedAddEventType] = useState<string>("MoneyDeposited")
-  const [occuredAt, setOccuredAt] = useState<string>("04-03-2025")
 
   const addEventOptions: Record<string,  Record<string, string[]>> = {
     "account": {
@@ -181,19 +180,16 @@ export default function Streams() {
     setAddEventRows(initEventTableData(streamDetails ? streamDetails.type : "", option.value))
   }
 
-  const handleDateChange = (e: SyntheticEvent<Element, Event>) => {
-    console.log(e)
-    // setOccuredAt(e.value)
-  }
+  const [eventDate, setEventDate] = useState<string>()
 
-  const handleAddNewEvent = (e: SyntheticEvent<Element, Event>) => {
-    console.log('add event')
-    
-    // const body = {
-    //   type: selectedAddStreamType,
-    //   metadata: Object.fromEntries(addStreamRows.map(row => [row.property, row.value]))
-    // }
-    // postJson('streams', body, 'New stream was created', 'Failed to create a new strem')
+  const addNewEvent = (e: SyntheticEvent<Element, Event>) => {
+    const body = {
+      type: selectedAddEventType,
+      occuredAt: eventDate,
+      version: (streamDetails ? streamDetails.version : 0) + 1,
+      data: Object.fromEntries(addEventRows.map(row => [row.property, row.value]))
+    }
+    postJson(`streams/${streamDetails?.id}/events`, body, 'New stream was created', 'Failed to create a new strem')
   }
 
   return (
@@ -203,7 +199,7 @@ export default function Streams() {
         <p>A record of all bank accounts and investments, including detailed transactions for each.</p>
       </div>
       <div className={`gridItem ${styles.itemsBottomRight}`}>
-          <Button onClick={() => setisAddStreamModalOpen(true)}>Add stream</Button>
+          <Button onClick={() => setAddStreamModalOpen(true)}>Add stream</Button>
       </div>
 
       <div className="gridItem span4Columns">
@@ -217,8 +213,8 @@ export default function Streams() {
         isOpen={isAddStreamModalOpen}
         header="Add Stream"
         subHeader="Create a new stream. First select a type of a stream and then fill all mandatory fields."
-        onSubmit={(e) => handleAddNewStream(e)} 
-        onClose={() => setisAddStreamModalOpen(false)} 
+        onSubmit={(e) => addNewStream(e)} 
+        onClose={() => setAddStreamModalOpen(false)} 
       >
         <p>Stream type: <Dropdown options={Object.keys(createStreamOptions)} onChange={handleStreamTypeChangeForCreation} value={selectedAddStreamType} placeholder="Select an option" /></p>
         <p><EditableTable rows={addStreamRows} setRows={setAddStreamRows}/></p>
@@ -228,13 +224,13 @@ export default function Streams() {
         isOpen={isAddEventModalOpen}
         header="Add Event"
         subHeader={`Add new event to the '${streamDetails?.name}' stream. First select an event type that you would like to add and then fill all mandatory fields.`}
-        onSubmit={(e) => handleAddNewEvent(e)} 
+        onSubmit={(e) => addNewEvent(e)} 
         onClose={() => setisAddEventModalOpen(false)} 
       >
         <p>Stream id: <b>{streamDetails?.id}</b></p>
         <p>Stream name: <b>{streamDetails?.name}</b></p>
         <p>Stream type: <b>{streamDetails?.type}</b></p>
-        <p>Occured at: <Input value={occuredAt} onChange={handleDateChange}/></p>
+        <p>Occured at: <Input type="date" value={eventDate} placeholder="dd-mm-yyyy" onChange={(e) => setEventDate(e.target.value)}/></p>
         <p>Event type:  <Dropdown options={streamDetails ? Object.keys( addEventOptions[streamDetails.type]) : []} onChange={handleEventTypeChangeForAddition} value={selectedAddEventType} placeholder="Select an option" /></p>
         <p><EditableTable rows={addEventRows} setRows={setAddEventRows}/></p>
       </Modal>
