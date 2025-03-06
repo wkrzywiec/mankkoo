@@ -17,6 +17,7 @@ import TabList from "@/components/elements/TabList";
 import TileHeader from "@/components/elements/TileHeader";
 import { postJson, useGetHttp } from "@/hooks/useHttp";
 import Input from "@/components/elements/Input";
+import { addEventRequiredProps, createStreamRequiredProps } from "./config";
 
 
 export default function Streams() {
@@ -111,18 +112,10 @@ export default function Streams() {
   const [isAddStreamModalOpen, setAddStreamModalOpen] = useState(false)
   const [selectedAddStreamType, setSelectedAddStreamType] = useState<string>("account")
 
-  const createStreamOptions: Record<string, string[]> = {
-    "account": ["alias", "active", "bankUrl", "bankName", "importer", "accountName", "accountType", "accountNumber"],
-    "investment": ["active", "bankName", "category", "investmentName"],
-    "stocks": ["type", "active", "broker", "etfUrl", "etfName"],
-    "retirement": ["alias", "active", "bankUrl", "bankName", "importer", "accountName", "accountType", "accountNumber"],
-    "real-estate": [ "" ]
-  }
-
   const [addStreamRows, setAddStreamRows] = useState(initStreamTableData(selectedAddStreamType))
 
   function initStreamTableData(streamType: string): Row[] {
-    return createStreamOptions[streamType].map((prop, index) => (
+    return createStreamRequiredProps[streamType].map((prop, index) => (
       {id: index, property: prop, value: ""}
     ))
   }
@@ -159,35 +152,10 @@ export default function Streams() {
 
   const [selectedAddEventType, setSelectedAddEventType] = useState<string>("")
 
-  const addEventOptions: Record<string,  Record<string, string[]>> = {
-    "account": {
-      "MoneyWithdrawn": ["amount", "currency", "title"],
-      "MoneyDeposited": ["amount", "currency", "title"],
-    },
-    "investment": {
-      "TreasuryBondsBought": ["balance", "totalValue", "currency", "units", "pricePerUnit"],
-      "TreasuryBondsMatured": ["balance", "totalValue", "currency", "units", "pricePerUnit"],
-      "TermDepositOpened": ["balance", "amount", "currency"],
-      "TermDepositFinished": ["balance", "amount", "currency"],
-      "InvestmentFundBought": ["balance", "totalValue", "currency"],
-      "InvestmentFundSold": ["balance", "totalValue", "currency"],
-    },
-    "stocks": {
-      "ETFBought": ["averagePrice" ,"balance", "currency", "totalValue", "units"],
-      "ETFSold": ["averagePrice" ,"balance", "comment", "currency", "totalValue", "units"],
-      "ETFPriced": ["averagePrice" ,"balance", "currency", "totalValue", "units"],
-    },
-    "retirement": {
-      "MoneyWithdrawn": ["amount", "currency", "title"],
-      "MoneyDeposited": ["amount", "currency", "title"],
-    },
-    "real-estate": {}
-  }
-
   const [addEventRows, setAddEventRows] = useState(initEventTableData(selectedAddStreamType, selectedAddEventType))
 
   function initEventTableData(streamType: string, eventType: string): Row[] {
-    return addEventOptions[streamType][eventType]?.map((prop, index) => (
+    return addEventRequiredProps[streamType][eventType]?.map((prop, index) => (
       {id: index, property: prop, value: ""}
     ))
   }
@@ -233,7 +201,7 @@ export default function Streams() {
         onSubmit={(e) => addNewStream(e)} 
         onClose={() => setAddStreamModalOpen(false)} 
       >
-        <p>Stream type:</p> <Dropdown options={Object.keys(createStreamOptions)} onChange={handleStreamTypeChangeForCreation} value={selectedAddStreamType} placeholder="Select an option" />
+        <p>Stream type:</p> <Dropdown options={Object.keys(createStreamRequiredProps)} onChange={handleStreamTypeChangeForCreation} value={selectedAddStreamType} placeholder="Select an option" />
         <EditableTable rows={addStreamRows} setRows={setAddStreamRows}/>
       </Modal>
 
@@ -248,7 +216,7 @@ export default function Streams() {
         <p>Stream name: <b>{streamDetails?.name}</b></p>
         <p>Stream type: <b>{streamDetails?.type}</b></p>
         <p>Occured at:</p> <Input type="date" value={eventDate} placeholder="dd-mm-yyyy" onChange={(e) => setEventDate(e.target.value)}/>
-        <p>Event type:</p> <Dropdown options={streamDetails ? Object.keys(addEventOptions[streamDetails.type]) : []} onChange={handleEventTypeChangeForAddition} value={selectedAddEventType} placeholder="Select an option" />
+        <p>Event type:</p> <Dropdown options={streamDetails ? Object.keys(addEventRequiredProps[streamDetails.type]) : []} onChange={handleEventTypeChangeForAddition} value={selectedAddEventType} placeholder="Select an option" />
         <p>Event data:</p> <EditableTable rows={addEventRows} setRows={setAddEventRows}/>
       </Modal>
 
