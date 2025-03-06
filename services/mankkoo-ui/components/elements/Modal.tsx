@@ -12,7 +12,7 @@ export default function Modal(
     <div className="modal-overlay">
       <div className="modal-content">
         <TileHeader headline={header} subHeadline={subHeader} />
-        <div >
+        <div>
             {children}
         </div>
         <div className="buttons-content">

@@ -180,7 +180,7 @@ export default function Streams() {
     setAddEventRows(initEventTableData(streamDetails ? streamDetails.type : "", option.value))
   }
 
-  const [eventDate, setEventDate] = useState<string>()
+  const [eventDate, setEventDate] = useState<string>('')
 
   const addNewEvent = (e: SyntheticEvent<Element, Event>) => {
     const body = {
@@ -216,8 +216,8 @@ export default function Streams() {
         onSubmit={(e) => addNewStream(e)} 
         onClose={() => setAddStreamModalOpen(false)} 
       >
-        <p>Stream type: <Dropdown options={Object.keys(createStreamOptions)} onChange={handleStreamTypeChangeForCreation} value={selectedAddStreamType} placeholder="Select an option" /></p>
-        <p><EditableTable rows={addStreamRows} setRows={setAddStreamRows}/></p>
+        <p>Stream type:</p> <Dropdown options={Object.keys(createStreamOptions)} onChange={handleStreamTypeChangeForCreation} value={selectedAddStreamType} placeholder="Select an option" />
+        <EditableTable rows={addStreamRows} setRows={setAddStreamRows}/>
       </Modal>
 
       <Modal 
@@ -230,9 +230,9 @@ export default function Streams() {
         <p>Stream id: <b>{streamDetails?.id}</b></p>
         <p>Stream name: <b>{streamDetails?.name}</b></p>
         <p>Stream type: <b>{streamDetails?.type}</b></p>
-        <p>Occured at: <Input type="date" value={eventDate} placeholder="dd-mm-yyyy" onChange={(e) => setEventDate(e.target.value)}/></p>
-        <p>Event type:  <Dropdown options={streamDetails ? Object.keys( addEventOptions[streamDetails.type]) : []} onChange={handleEventTypeChangeForAddition} value={selectedAddEventType} placeholder="Select an option" /></p>
-        <p><EditableTable rows={addEventRows} setRows={setAddEventRows}/></p>
+        <p>Occured at:</p> <Input type="date" value={eventDate} placeholder="dd-mm-yyyy" onChange={(e) => setEventDate(e.target.value)}/>
+        <p>Event type:</p> <Dropdown options={streamDetails ? Object.keys( addEventOptions[streamDetails.type]) : []} onChange={handleEventTypeChangeForAddition} value={selectedAddEventType} placeholder="Select an option" />
+        <EditableTable rows={addEventRows} setRows={setAddEventRows}/>
       </Modal>
 
     </main>

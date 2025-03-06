@@ -67,7 +67,7 @@ export function postJson(apiPath: string, body: {[key: string]: any}, successMsg
             icon: 'error',
             confirmButtonText: 'Ok'
         })
-    });
+    })
 }
 
 export function uploadFile(apiPath: string, file: File) {
