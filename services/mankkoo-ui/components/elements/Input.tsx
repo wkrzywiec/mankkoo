@@ -1,5 +1,5 @@
 
-import { ChangeEvent, RefObject, SyntheticEvent } from "react";
+import { ChangeEvent } from "react";
 import "./Input.css";
 
 export default function Input({
