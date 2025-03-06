@@ -10,7 +10,7 @@ export default function Input({
 } : {
     value?: string,
     type: string,
-    placeholder: string,
+    placeholder?: string,
     onChange: (e: ChangeEvent<HTMLInputElement>) => void
 }) { 
     return <input className="input-data" type={type} placeholder={placeholder} value={value} onChange={onChange}></input>

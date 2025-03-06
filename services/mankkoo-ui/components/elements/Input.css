@@ -1,6 +1,7 @@
 .input-data {
-    width: 100%;
-    border: none;
+    width: 90%;
+    border: 1px solid black; 
     outline: none;
-    padding: 5px;
+    padding: 8px;
+    font: inherit;
 }

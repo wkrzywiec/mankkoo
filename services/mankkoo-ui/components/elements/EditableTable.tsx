@@ -2,6 +2,7 @@ import { Dispatch, SetStateAction } from "react";
 
 import "./EditableTable.css";
 import Button from "./Button";
+import Input from "./Input";
 
 export interface Row {
   id: number;
@@ -39,14 +40,14 @@ export default function EditableTable(
           {rows.map((row) => (
             <tr key={row.id}>
               <td>
-                <input
+                <Input
                   type="text"
                   value={row.property}
                   onChange={(e) => handleChange(row.id, "property", e.target.value)}
                 />
               </td>
               <td>
-                <input
+                <Input
                   type="text"
                   value={row.value}
                   onChange={(e) => handleChange(row.id, "value", e.target.value)}

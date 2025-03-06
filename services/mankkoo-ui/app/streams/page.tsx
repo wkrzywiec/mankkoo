@@ -232,7 +232,7 @@ export default function Streams() {
         <p>Stream type: <b>{streamDetails?.type}</b></p>
         <p>Occured at:</p> <Input type="date" value={eventDate} placeholder="dd-mm-yyyy" onChange={(e) => setEventDate(e.target.value)}/>
         <p>Event type:</p> <Dropdown options={streamDetails ? Object.keys( addEventOptions[streamDetails.type]) : []} onChange={handleEventTypeChangeForAddition} value={selectedAddEventType} placeholder="Select an option" />
-        <EditableTable rows={addEventRows} setRows={setAddEventRows}/>
+        <p>Event data:</p> <EditableTable rows={addEventRows} setRows={setAddEventRows}/>
       </Modal>
 
     </main>

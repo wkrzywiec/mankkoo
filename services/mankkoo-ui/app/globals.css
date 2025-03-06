@@ -88,3 +88,8 @@ body {
   font-weight: 800;
   margin-bottom: 0%;
 }
+
+.Dropdown-control {
+  width: 92%;
+  border: 10px solid black; 
+}

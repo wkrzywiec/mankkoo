@@ -10,28 +10,19 @@
 }
   
 .editable-table th, .editable-table td {
-    border: 1px solid #ccc;
+    border: none;
     padding: 10px;
     text-align: left;
 }
-  
-.editable-table input {
-    width: 100%;
-    border: none;
-    outline: none;
-    padding: 5px;
+
+.editable-table th {
+    border-bottom: 3px solid black;
 }
-  
-.add-row-btn {
-    margin-top: 10px;
-    padding: 8px 12px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    cursor: pointer;
-    border-radius: 5px;
+
+.editable-table td {
+    border-bottom: 2px dotted black;
 }
-  
-.add-row-btn:hover {
-    background-color: #0056b3;
+
+.editable-table + div {
+    padding-top: 15px;
 }
