@@ -3,8 +3,10 @@
 import styles from "./page.module.css";
 import 'react-dropdown/style.css';
 
-import { ChangeEvent, SyntheticEvent, useRef, useState } from "react";
+import { SyntheticEvent, useState } from "react";
 import Dropdown, { Option } from 'react-dropdown';
+import Swal from 'sweetalert2';
+import withReactContent from "sweetalert2-react-content";
 
 import { EventResponse, StreamDetailsResponse, StreamResponse } from "@/api/streamsPageResponses";
 import Button from "@/components/elements/Button";
@@ -18,6 +20,8 @@ import Input from "@/components/elements/Input";
 
 
 export default function Streams() {
+
+  const MySwal = withReactContent(Swal);
 
   const streamsHeaders = [['Type', 'Name']]
   const streamsDetailsHeaders = [['Property', 'Value']]
@@ -41,7 +45,7 @@ export default function Streams() {
   } = useGetHttp<EventResponse[]>(`/streams/${streamId}/events`, !!streamId);
 
 
-  const handleTabChange = (index: number) => {
+  const changeTab = (index: number) => {
 
     if (index === 0) {
       setStreamActive(true)
@@ -92,7 +96,7 @@ export default function Streams() {
           <TileHeader headline="Events" subHeadline="A list of all events for a given stream." />
         </div>
         <div className={styles.itemsBottomRight}>
-          <Button onClick={() => setisAddEventModalOpen(true)}>Add event</Button>
+          <Button onClick={openAddEventModal}>Add event</Button>
         </div>
         <div>
           <Table data={eventTableData} hasHeader={true} style={{ width: "100%" }} boldLastRow={false} currencyColumnIdx={-1} colorsColumnIdx={-1}/>
@@ -139,8 +143,21 @@ export default function Streams() {
 
   // ADD NEW EVENT
   // =======================
-  const [isAddEventModalOpen, setisAddEventModalOpen] = useState(false)
-  const [selectedAddEventType, setSelectedAddEventType] = useState<string>("MoneyDeposited")
+  const [isAddEventModalOpen, setAddEventModalOpen] = useState(false)
+  const openAddEventModal = () => {
+    if (streamDetails === undefined) {
+      MySwal.fire({
+        title: 'Stream was not selected',
+        text: 'Selected a stream from a list and then click the "Add Event" button.',
+        icon: 'warning',
+        confirmButtonText: 'Ok'})
+    } else {
+      setAddEventModalOpen(true)
+    }
+  }
+
+
+  const [selectedAddEventType, setSelectedAddEventType] = useState<string>("")
 
   const addEventOptions: Record<string,  Record<string, string[]>> = {
     "account": {
@@ -205,7 +222,7 @@ export default function Streams() {
       <div className="gridItem span4Columns">
         <TabList
           labels={['Accounts', 'Investments', 'Stocks', 'Retirement', 'Real Estate', 'Inactive Streams']} 
-          tabContent={(index) => handleTabChange(index)}
+          tabContent={(index) => changeTab(index)}
         />
       </div>
 
@@ -225,13 +242,13 @@ export default function Streams() {
         header="Add Event"
         subHeader={`Add new event to the '${streamDetails?.name}' stream. First select an event type that you would like to add and then fill all mandatory fields.`}
         onSubmit={(e) => addNewEvent(e)} 
-        onClose={() => setisAddEventModalOpen(false)} 
+        onClose={() => setAddEventModalOpen(false)} 
       >
         <p>Stream id: <b>{streamDetails?.id}</b></p>
         <p>Stream name: <b>{streamDetails?.name}</b></p>
         <p>Stream type: <b>{streamDetails?.type}</b></p>
         <p>Occured at:</p> <Input type="date" value={eventDate} placeholder="dd-mm-yyyy" onChange={(e) => setEventDate(e.target.value)}/>
-        <p>Event type:</p> <Dropdown options={streamDetails ? Object.keys( addEventOptions[streamDetails.type]) : []} onChange={handleEventTypeChangeForAddition} value={selectedAddEventType} placeholder="Select an option" />
+        <p>Event type:</p> <Dropdown options={streamDetails ? Object.keys(addEventOptions[streamDetails.type]) : []} onChange={handleEventTypeChangeForAddition} value={selectedAddEventType} placeholder="Select an option" />
         <p>Event data:</p> <EditableTable rows={addEventRows} setRows={setAddEventRows}/>
       </Modal>
 
