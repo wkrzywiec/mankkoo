@@ -4,4 +4,5 @@
     outline: none;
     padding: 8px;
     font: inherit;
+    background-color: var(--main-bg-color);
 }
