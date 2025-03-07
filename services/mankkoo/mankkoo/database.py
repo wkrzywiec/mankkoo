@@ -1,9 +1,7 @@
 import os
-import pandas as pd
 import psycopg2
 
 from mankkoo.base_logger import log
-from mankkoo.account import account_db
 
 log.basicConfig(level=log.DEBUG)
 
@@ -128,7 +126,6 @@ def init_db():
 
 
 def execute(sql: str):
-    log.info(f"Executing sql: {sql}")
     with get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(sql)

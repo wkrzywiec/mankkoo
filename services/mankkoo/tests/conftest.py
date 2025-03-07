@@ -1,8 +1,9 @@
+import psycopg2
 import pytest
 import os
 import uuid
 
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, time, timezone, timedelta
 from testcontainers.postgres import PostgresContainer
 
 import mankkoo.database as db
@@ -42,10 +43,21 @@ def setup(request):
 
 @pytest.fixture(scope="function", autouse=True)
 def setup_data():
-    print("Cleaning database...")
-    db.execute(
-        "TRUNCATE events, streams, views;"
-    )
+    max_retries = 3 
+    for attempt in range(max_retries):
+        try:
+            print("Cleaning database...")
+            db.execute(
+                "TRUNCATE events, streams, views;"
+            )
+            break
+        except psycopg2.errors.DeadlockDetected:
+            if attempt < max_retries - 1:
+                print(f"Deadlock detected. Retrying in 5 seconds... (Attempt {attempt + 1}/{max_retries})")
+                time.sleep(5)
+            else:
+                print("Max retries reached. Failing test.")
+                raise
 
 
 @pytest.fixture

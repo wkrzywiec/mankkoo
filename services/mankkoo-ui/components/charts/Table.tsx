@@ -15,14 +15,20 @@ export interface TableData {
 
 export default function Table({
     data=[],
+    onRowClick=()=>{ console.debug('click')},
+    rowIds=[],
     hasHeader=false,
+    hasRowNumber=true,
     boldLastRow=false,
     currencyColumnIdx=-1,
     colorsColumnIdx=-1,
     style={}
 }: {
     data?: string [][];
+    onRowClick?: (id:string) => void,
+    rowIds?: string[];
     hasHeader?: boolean;
+    hasRowNumber?: boolean;
     boldLastRow?: boolean;
     currencyColumnIdx?: number;
     colorsColumnIdx?: number;
@@ -46,11 +52,11 @@ export default function Table({
         preparedData = [...data]
     }
 
-    addRowNumberColumn(preparedData, hasHeader, boldLastRow)
+    addRowNumberColumn(preparedData, hasRowNumber, hasHeader, boldLastRow)
     addColorCircleColumn(preparedData, colorsColumnIdx, hasHeader, boldLastRow)
 
     const rows = preparedData.map((rowData, rowIndex) => 
-        <tr key={rowIndex} className={(defineRowClass(preparedData, rowIndex, boldLastRow, hasHeader))}>
+        <tr key={rowIndex} className={(defineRowClass(preparedData, rowIndex, boldLastRow, hasHeader))} onClick={() => onRowClick(rowIds[rowIndex-1])}>
             { rowData.map((cellData, cellIndex) => {
                 
                 if (shouldAddColorCircleToCell(preparedData, rowIndex, boldLastRow, cellData)) {
@@ -61,7 +67,7 @@ export default function Table({
                     return <td key={rowIndex + "_" + cellIndex}></td>
                 }
 
-                return <td key={rowIndex + "_" + cellIndex}>{cellIndex === currencyColumnIdx ? currencyFormat(cellData) : cellData}</td>
+                return <td key={rowIndex + "_" + cellIndex}>{cellIndex === currencyColumnIdx ? currencyFormat(cellData) : String(cellData)}</td>
             }
                 
             )}
@@ -92,10 +98,12 @@ function addColorCircleColumn(data: string[][], colorsColumnIdx: number, skipFir
     }
 }
 
-function addRowNumberColumn(data: string[][], skipFirstRow: boolean, skipLastRow: boolean): void {
+function addRowNumberColumn(data: string[][], hasRowNumber: boolean, skipFirstRow: boolean, skipLastRow: boolean): void {
     if (data.length === 0) return
+    if (hasRowNumber === false) return
+    if (skipFirstRow && data.length === 1) return
 
-    const rowNumberColumnIsNotPresent = skipFirstRow ? data[1][0] != '01' : data[0][0] != '01';
+    const rowNumberColumnIsNotPresent = skipFirstRow ? data[1][0] != '01' : data[0][0] != '01'
     
     if (rowNumberColumnIsNotPresent) {
         data.forEach((row, rowIndex) => {
@@ -135,10 +143,16 @@ function shouldBoldFirstRow(data: string[][], rowIndex: number, hasHeader: boole
 }
 
 function shouldAddColorCircleToCell(data: string[][], rowIndex: number, boldLastRow: boolean, cellData?: string) {
-    return cellData?.includes(COLOR_CIRCLE_CELL_PATTERN) && !shouldBoldLastRow(data, rowIndex, boldLastRow)
+    if (typeof cellData !== "string") {
+        cellData = String(cellData ?? "")
+    }
+    return cellData.includes(COLOR_CIRCLE_CELL_PATTERN) && !shouldBoldLastRow(data, rowIndex, boldLastRow)
 }
 
 function shouldSkipAddColorCircleToCellAndLeaveItEmpty(cellData: string, data: string[][], rowIndex: number, boldLastRow: boolean) {
-    return cellData?.includes(COLOR_CIRCLE_CELL_PATTERN) && shouldBoldLastRow(data, rowIndex, boldLastRow)
+    if (typeof cellData !== "string") {
+        cellData = String(cellData ?? "")
+    }
+    return cellData.includes(COLOR_CIRCLE_CELL_PATTERN) && shouldBoldLastRow(data, rowIndex, boldLastRow)
 }
 

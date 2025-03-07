@@ -1,0 +1,8 @@
+.inputData {
+    width: 90%;
+    border: 1px solid black; 
+    outline: none;
+    padding: 8px;
+    font: inherit;
+    background-color: var(--main-bg-color);
+}

@@ -35,20 +35,17 @@ export default function Home() {
   const {
     isFetching: isFetchingMainIndicators,
     fetchedData: indicators,
-    error: indicatorsError
   } = useGetHttp<MainIndicatorsResponse>('/main/indicators');
   const formattedSavings = currencyFormat(indicators?.savings);
 
   const {
     isFetching: isFetchingSavingsDistribution,
     fetchedData: savingsDistribution,
-    error: savingsDistributionError
   } = useGetHttp<SavingsDistribution[]>('/main/savings-distribution');
   
   const {
     isFetching: isFetchingTotalHistory,
     fetchedData: totalHistory,
-    error: totalHistoryError
   } = useGetHttp<TotalHistory>('/main/total-history');
   
 

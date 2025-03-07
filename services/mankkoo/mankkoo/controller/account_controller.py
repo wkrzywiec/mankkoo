@@ -1,25 +1,13 @@
 import traceback
 from apiflask import APIBlueprint, Schema
 from apiflask.fields import String, Boolean, Float, File
+
 from mankkoo.base_logger import log
 from mankkoo.account import account_db as database
+from mankkoo.account.account_db import Account, AccountOperation
 from mankkoo.account import account
 
 account_endpoints = APIBlueprint('account_endpoints', __name__, tag='Account')
-
-
-class Account(Schema):
-    id = String()
-    name = String()
-    number = String()
-    alias = String()
-    type = String()
-    importer = String()
-    active = Boolean()
-    bankName = String()
-    bankUrl = String()
-    hidden = Boolean()
-    openedAt = String()
 
 
 class AccountOperationResult(Schema):
@@ -33,19 +21,7 @@ class AccountOperationResult(Schema):
 def accounts():
     log.info('Fetching account info...')
     accounts = database.load_all_accounts()
-
     return accounts
-
-
-class AccountOperation(Schema):
-    id = String()
-    date = String()
-    title = String()
-    details = String()
-    operation = Float()
-    balance = Float()
-    currency = String()
-    comment = String()
 
 
 @account_endpoints.route("/<account_id>/operations")
@@ -55,7 +31,7 @@ class AccountOperation(Schema):
     description='Get a list of all operations for an account'
 )
 def operations_by_account_id(account_id):
-    log.info('Fetching all operations for an account...')
+    log.info(f'Fetching all operations for the {account_id} account...')
     result = database.load_operations_for_account(account_id)
     return result
 

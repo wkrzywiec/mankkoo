@@ -64,6 +64,8 @@ tasks:
     cmds:
       - echo "Running tests for mankkoo core..."
       - pytest -s -vv --cov=./mankkoo
+      # uncomment below step to run a single test file
+      # - pytest -s -vv --cov=./mankkoo tests/controller/stream_controller_test.py
 
   update:
     desc: Update dependencies for all services
@@ -90,6 +92,13 @@ tasks:
     cmds:
       - echo "Starting mankkoo UI..."
       - npm run dev --turbo
+
+  ui:build:
+    desc: Build UI 
+    dir: services/mankkoo-ui
+    cmds:
+      - echo "Starting building UI..."
+      - npm run build
 
   test:
     desc: Run all tests

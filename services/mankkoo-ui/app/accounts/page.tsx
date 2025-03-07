@@ -38,11 +38,11 @@ export default function Accounts() {
   }
 
   function prepareAccountButton(acc: AccountInfoResponse) {
-    return <Button key={acc.number} onClick={handleAccountSelected} value={acc.id}>{accountHeader(acc)}</Button>;
+    return <Button onClick={handleAccountSelected} id={acc.id}>{accountHeader(acc)}</Button>
   }
 
   const handleAccountSelected = (event: React.SyntheticEvent) => {
-    setSelectedAccount(accounts?.findLast(acc => acc.id === event.currentTarget.children[0].getAttribute('value')));
+    setSelectedAccount(accounts?.findLast(acc => acc.id === event.currentTarget.children[0].getAttribute('id')));
   }
 
   const {

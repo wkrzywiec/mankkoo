@@ -4,7 +4,7 @@ import uuid
 import mankkoo.event_store as es
 
 
-def test_load_all_accounts(test_client):
+def test_all_accounts_are_loaded(test_client):
     # GIVEN
     streams = [
         es.Stream(uuid.uuid4(), 'account', 0,
@@ -23,8 +23,6 @@ def test_load_all_accounts(test_client):
     assert response.status_code == 200
 
     payload = response.get_json()
-    print(type(payload))
-    print(type(payload[0]))
     assert len(payload) == 2
 
     first_account = next(x for x in payload if x['id'] == str(streams[0].id))
@@ -38,7 +36,7 @@ def test_load_all_accounts(test_client):
     assert first_account['importer'] == streams[0].metadata['importer']
 
 
-def test_load_all_operations(test_client, account_with_two_operations):
+def test_all_account_operations_are_laoded__if_valid_account_id_is_provided(test_client, account_with_two_operations):
     # GIVEN
     stream_type = 'account'
     stream_id = uuid.uuid4()
