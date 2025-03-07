@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction } from "react";
 
-import "./EditableTable.css";
+import classes from '@/components/elements/EditableTable.module.css'
+
 import Button from "./Button";
 import Input from "./Input";
 
@@ -28,8 +29,8 @@ export default function EditableTable(
   };
 
   return (
-    <div className="table-container">
-      <table className="editable-table">
+    <div className={classes.tableContainer}>
+      <table className={classes.editableTable}>
         <thead>
           <tr>
             <th>Value</th>

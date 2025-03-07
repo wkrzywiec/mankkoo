@@ -1,5 +1,5 @@
 /* Modal background overlay */
-.modal-overlay {
+.modalOverlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -12,7 +12,7 @@
 }
   
 /* Modal box */
-.modal-content {
+.modalContent {
     background: var(--main-bg-color);
     padding: 20px;
     border-radius: 1px;
@@ -22,11 +22,11 @@
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
 }
 
-.modal-content h2 {
+.modalContent h2 {
     border-bottom: 2px solid black;
 }
 
-.buttons-content {
+.buttonsContent {
     padding-top: 20px;
 }
   

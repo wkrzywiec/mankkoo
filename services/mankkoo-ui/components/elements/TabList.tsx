@@ -1,6 +1,7 @@
-import "./TabList.css"
-
 import { ReactNode, useEffect, useState } from "react"
+
+import classes from '@/components/elements/TabList.module.css'
+
 import Loader from "./Loader";
 
 const sanitizeForId = (label: string) => {
@@ -36,9 +37,9 @@ export default function TabList({labels, tabContent}: {labels: string[], tabCont
     
     
     return (
-        <div className="tabs">
-            <nav className="tab-list-wrapper">
-                <ul className="tab-list" role="tablist" aria-orientation="horizontal">
+        <div className={classes.tabs}>
+            <nav className={classes.tabListWrapper}>
+                <ul className={classes.tabList} role="tablist" aria-orientation="horizontal">
                 {labels.map((label, index) => (
                     <li key={`tab-${index}`}>
                         <button
@@ -48,8 +49,8 @@ export default function TabList({labels, tabContent}: {labels: string[], tabCont
                             aria-controls={`panel-${sanitizeForId(label)}`}
                             aria-selected={activeTab === index}
                             onClick={() => handleTabClick(index)}
-                            className={`tab-btn ${
-                                activeTab === index && "tab-btn--active"
+                            className={`${classes.tabBtn} ${
+                                activeTab === index && classes.tabBtnActive
                             }`}
                         >{label}</button>
                     </li>
@@ -57,7 +58,7 @@ export default function TabList({labels, tabContent}: {labels: string[], tabCont
                 </ul>
             </nav>
             <div
-                className="tab-panel"
+                className={classes.tabPanel}
                 role="tabpanel"
                 aria-labelledby={`tab-${sanitizeForId(labels[activeTab])}`}
                 id={`panel-${sanitizeForId(labels[activeTab])}`}

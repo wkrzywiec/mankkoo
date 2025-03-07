@@ -1,28 +1,28 @@
-.table-container {
+.tableContainer {
     text-align: left;
     margin-top: 20px;
   }
   
-.editable-table {
+.editableTable {
     margin: auto;
     width: 100%;
     border-collapse: collapse;
 }
   
-.editable-table th, .editable-table td {
+.editableTable th, .editableTable td {
     border: none;
     padding: 10px;
     text-align: left;
 }
 
-.editable-table th {
+.editableTable th {
     border-bottom: 3px solid black;
 }
 
-.editable-table td {
+.editableTable td {
     border-bottom: 2px dotted black;
 }
 
-.editable-table + div {
+.editableTable + div {
     padding-top: 15px;
 }
