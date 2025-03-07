@@ -139,7 +139,7 @@ def test_udpate_streams_filled_metadata():
     # then
     with db.get_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT metadata from streams WHERE id = '" + str(stream_id) + "'")
+            cur.execute(f"SELECT metadata from streams WHERE id = '{str(stream_id)}'")
             (stored_metadata, ) = cur.fetchone()
 
     assert stored_metadata == new_metadata
