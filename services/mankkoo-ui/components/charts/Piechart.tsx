@@ -53,8 +53,7 @@ export default function PieChart({
                         },
                         tooltip: {
                             callbacks: {
-                              label: function(context) {
-                                console.log(context.chart)
+                              label: function(context) {                                
                                
                                 const currentValue = context.raw as number
 

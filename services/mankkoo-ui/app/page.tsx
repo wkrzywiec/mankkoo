@@ -72,8 +72,8 @@ export default function Home() {
       savingsDistribution?.forEach(value => {
         tempPieData.labels.push(value.type);
         tempPieData.data.push(value.total);
-        setSavingsDistributionPie(tempPieData);
       });
+      setSavingsDistributionPie(tempPieData);
     }
 
     if (savingsDistribution !== undefined && savingsDistribution.length > 0 && !isFetchingSavingsDistribution ) {
@@ -81,7 +81,7 @@ export default function Home() {
       prepareDataForSavingsDistributionPieChart();
     }
     
-  }, [savingsDistribution, isFetchingSavingsDistribution, indicators, savingsDistributionPie])
+  }, [savingsDistribution, isFetchingSavingsDistribution, indicators])
   
 
 
