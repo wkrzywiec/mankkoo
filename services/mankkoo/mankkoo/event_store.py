@@ -44,7 +44,7 @@ class Event:
         self.occured_at = occured_at
 
     def __str__(self):
-        return f"Event(id={self.id}, stream_type={self.stream_type}, stream_id={self.stream_id}, event_type={self.event_type}, data={self.data}, occured_at={self.occured_at}, version={self.version})"
+        return 'Event(id={self.id}, stream_type={self.stream_type}, stream_id={self.stream_id}, event_type={self.event_type}, data={self.data}, occured_at={self.occured_at}, version={self.version})'
 
     def __eq__(self, other):
         if not isinstance(other, Event):
@@ -57,13 +57,13 @@ class Event:
 
 
 def create(streams: list[Stream]):
-    log.info(f"Storing {len(streams)} stream(s)...")
+    log.info('Storing {len(streams)} stream(s)...')
     with db.get_connection() as conn:
         with conn.cursor() as cur:
             for stream in streams:
                 log.info(f"Inserting stream: {stream}...")
                 cur.execute(
-                    "INSERT INTO streams (id, type, version, metadata) VALUES (%s, %s, %s, %s)",
+                    'INSERT INTO streams (id, type, version, metadata) VALUES (%s, %s, %s, %s)',
                     (str(stream.id), stream.type, stream.version, json.dumps(stream.metadata)))
             conn.commit()
 
@@ -83,12 +83,12 @@ def store(events: list[Event]):
 
 
 def load(stream_id: UUID) -> list[Event]:
-    log.info(f"Loading events for a stream {stream_id}...")
+    log.info('Loading events for a stream {stream_id}...')
     result = []
 
     with db.get_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute(f"SELECT id, stream_id, type, data, version, occured_at FROM events WHERE stream_id = '{str(stream_id)}' ORDER BY version")
+            cur.execute("SELECT id, stream_id, type, data, version, occured_at FROM events WHERE stream_id = '{str(stream_id)}' ORDER BY version")
             rows = cur.fetchall()
 
             for row in rows:
@@ -100,7 +100,7 @@ def load(stream_id: UUID) -> list[Event]:
 
 
 def load_latest_event_id(stream_id: str) -> Event:
-    log.info(f"Loading latest event from a stream {stream_id}...")
+    log.info('Loading latest event from a stream {stream_id}...')
     with db.get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(f"SELECT e.id, e.stream_id, e.type AS event_type, e.data, e.version, e.occured_at, s.type AS stream_type FROM events e JOIN streams s ON e.stream_id=s.id WHERE e.stream_id = '{str(stream_id)}' ORDER BY version DESC LIMIT 1")
@@ -110,7 +110,7 @@ def load_latest_event_id(stream_id: str) -> Event:
 
 
 def get_stream_by_id(stream_id: str) -> Stream | None:
-    log.info(f"Loading stream by id '{stream_id}'...")
+    log.info('Loading stream by id "{stream_id}"...')
     with db.get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(f"SELECT id, type, version, metadata from streams WHERE id = '{stream_id}'")
@@ -123,10 +123,10 @@ def get_stream_by_id(stream_id: str) -> Stream | None:
 
 
 def get_stream_by_metadata(key: str, value) -> Stream | None:
-    log.info(f"Loading stream by its matadata property key '{key}' and value '{value}'...")
+    log.info("Loading stream by its matadata property key '{key}' and value '{value}'...")
     with db.get_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute(f"SELECT id, type, version, metadata FROM streams WHERE metadata ->> '{key}' = '{value}'")
+            cur.execute("SELECT id, type, version, metadata FROM streams WHERE metadata ->> '{key}' = '{value}'")
             result = cur.fetchone()
             if result is None:
                 return None
@@ -136,16 +136,16 @@ def get_stream_by_metadata(key: str, value) -> Stream | None:
 
 
 def get_stream_metadata(stream_id: UUID) -> dict:
-    log.info(f"Loading stream's '{stream_id}' metadata...")
+    log.info("Loading stream's '{stream_id}' metadata...")
     with db.get_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT metadata from streams WHERE id = '" + str(stream_id) + "'")
+            cur.execute(f"SELECT metadata from streams WHERE id = '{str(stream_id)}'")
             (metadata, ) = cur.fetchone()
     return metadata
 
 
 def update_stream_metadata(stream_id: UUID, metadata: dict):
-    log.info(f"Updating stream '{stream_id}' with metdata '{metadata}'...")
+    log.info("Updating stream '{stream_id}' with metdata '{metadata}'...")
     with db.get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(

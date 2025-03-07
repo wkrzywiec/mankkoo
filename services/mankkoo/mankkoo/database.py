@@ -126,7 +126,6 @@ def init_db():
 
 
 def execute(sql: str):
-    # log.info(f"Executing sql: {sql}")
     with get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(sql)

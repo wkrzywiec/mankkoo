@@ -12,13 +12,14 @@ from mankkoo.base_logger import log
 stream_endpoints = APIBlueprint('stream_endpoints', __name__, tag='Stream')
 
 
-
 class CreateStream(Schema):
     type = String(required=True)
     metadata = Mapping()
 
+
 class CreateStreamResult(Schema):
     id = String()
+
 
 @stream_endpoints.route("", methods=['POST'])
 @stream_endpoints.input(CreateStream, location='json')
@@ -26,28 +27,28 @@ class CreateStreamResult(Schema):
 @stream_endpoints.doc(summary='Create a new stream', description='Create a new stream')
 def create_stream(body: CreateStream):
     log.info(f"Received request to create a new stream. Body: {body}...")
-    
+
     allowed_types = ['account', 'investment', 'real-estate', 'retirement', 'stocks']
 
     if body is None or "type" not in body:
-        abort(400, message=f"Failed to create a new stream. Invalid request body was provided. The 'type' of a new stream must be provided.")
+        abort(400, message="Failed to create a new stream. Invalid request body was provided. The 'type' of a new stream must be provided.")
 
     if body["type"] not in allowed_types:
-        abort(400, message=f"Failed to create a new stream. Invalid request body was provided. The 'type' must have one of values: {allowed_types}, but '{body['type']}' was provided.")
+        abort(400, message="Failed to create a new stream. Invalid request body was provided. The 'type' must have one of values: {allowed_types}, but '{body['type']}' was provided.")
 
     metadata = body["metadata"] if "metadata" in body else dict()
     stream = es.Stream(uuid.uuid4(), body["type"], 0, metadata)
     es.create([stream])
-    
+
     result = CreateStreamResult()
     result.id = stream.id
     return result
 
 
-
 class StreamsQuery(Schema):
     active = Boolean()
     type = String()
+
 
 @stream_endpoints.route("", methods=['GET'])
 @stream_endpoints.input(StreamsQuery, location='query')
@@ -60,10 +61,9 @@ def streams(query_params):
     type_param: str = None
     if "active" in query_params:
         active = query_params["active"]
-    
+
     if "type" in query_params:
         type_param = query_params["type"]
-
 
     streams = database.load_streams(active, type=type_param)
     return streams
@@ -82,9 +82,8 @@ def stream_by_id(stream_id):
 
     if stream is None:
         abort(404, message=f"Failed to load stream definition. There is no stream definition with an id '{stream_id}'")
-    
-    return stream
 
+    return stream
 
 
 class AddEvent(Schema):
@@ -93,9 +92,11 @@ class AddEvent(Schema):
     occuredAt = Date(required=True)
     version = Integer(required=True)
 
+
 class AddEventResult(Schema):
     id = String()
     version = Integer()
+
 
 @stream_endpoints.route("/<stream_id>/events", methods=['POST'])
 @stream_endpoints.input(AddEvent, location='json')
@@ -112,12 +113,11 @@ def add_event(stream_id, body: AddEvent):
     es.store([event])
 
     stored_event = es.load_latest_event_id(stream_id)
-    
+
     result = AddEventResult()
     result.id = stored_event.id
     result.version = stored_event.version
     return result
-
 
 
 @stream_endpoints.route("/<stream_id>/events")
@@ -133,12 +133,13 @@ def events_for_stream(stream_id):
     return events
 
 
-
 class UpdateStream(Schema):
     metadata = Mapping()
 
+
 class UpdateStreamResult(Schema):
     message = Mapping()
+
 
 @stream_endpoints.route("/<stream_id>", methods=['PATCH'])
 @stream_endpoints.input(UpdateStream, location='json')
@@ -148,18 +149,18 @@ def update_stream(stream_id, body: UpdateStream):
     log.info(f"Received request to update the '{stream_id}' stream. Body: {body}...")
 
     if body is None:
-        abort(400, message=f"Failed to modify a stream. Body was not provided")
+        abort(400, message='Failed to modify a stream. Body was not provided')
 
     if body['metadata'] is None:
-        abort(400, message=f"Failed to modify a stream. Body must contain the 'metadata' field")
+        abort(400, message="Failed to modify a stream. Body must contain the 'metadata' field")
 
     stream = es.get_stream_by_id(stream_id)
     if stream is None:
-        abort(404, message=f"Failed to modify a stream. There is no stream with the id: '{stream_id}'")
+        abort(404, message="Failed to modify a stream. There is no stream with the id: '{stream_id}'")
 
     metadata = body['metadata']
     log.info(type(metadata))
     es.update_stream_metadata(stream.id, metadata)
-    
+
     response = UpdateStreamResult()
     response.metadata = 'Metadata was updated'
