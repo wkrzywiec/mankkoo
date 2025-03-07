@@ -7,8 +7,6 @@ import { API_BASE } from '@/api/ApiUrl';
 
 const MySwal = withReactContent(Swal);
 
-//todo introduce api path as array
-//todo introduce query paramas as map
 export function useGetHttp<Type>(apiPath: string, enabled: boolean=true): {isFetching: boolean, fetchedData?: Type, setFetchedData?: unknown, error?: string } {
   
     const [isFetching, setIsFetching] = useState<boolean>(false);

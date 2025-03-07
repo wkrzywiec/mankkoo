@@ -35,7 +35,7 @@ export default function Streams() {
 
   const {
       fetchedData: streams
-    } = useGetHttp<StreamResponse[]>(streamType ? `/streams?active=${streamActive}&type=${streamType}` : `/streams?active=${streamActive}`);
+    } = useGetHttp<StreamResponse[]>(`/streams?active=${streamActive}${streamType ? `&type=${streamType}` : ''}`);
 
   const {
     fetchedData: streamDetails
