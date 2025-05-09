@@ -22,7 +22,7 @@
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	"forwardPorts": [5000, 3000, 5432, 5050],
 	"runArgs": [
-        "--network=host",  //allows to access internet
+        "--network=host",  //allows to access internet in order to install python libs
 		// "--add-host=host.docker.internal:host-gateway",
 		"--name", "mankkoo_devcontainer"
     ],
@@ -57,6 +57,7 @@
 				"ms-toolsai.jupyter",
 				"ms-python.flake8",
 				"ms-python.mypy-type-checker",
+				"ms-azuretools.vscode-docker",
 				"ecmel.vscode-html-css",
 				"dbaeumer.vscode-eslint",
 				"formulahendry.code-runner",
