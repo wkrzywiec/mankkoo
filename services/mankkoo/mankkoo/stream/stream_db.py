@@ -76,6 +76,7 @@ class StreamsQueryResult(Schema):
     name = String()
     version = Integer()
     metadata = Mapping()
+    labels = Mapping()
 
 
 def load_stream_by_id(stream_id: str) -> StreamsQueryResult | None:
@@ -92,20 +93,22 @@ def load_stream_by_id(stream_id: str) -> StreamsQueryResult | None:
                     ELSE 'Unknown'
                 END AS name,
                 version,
-                metadata
+                metadata,
+                labels
                 FROM streams WHERE id = '{stream_id}';
                         """)
             result = cur.fetchone()
             if result is None:
                 return None
             else:
-                (id, type, name, version, metadata, ) = result
-                stream = Stream()
+                (id, type, name, version, metadata, labels) = result
+                stream = StreamsQueryResult()
                 stream.id = id
                 stream.type = type
                 stream.name = name
                 stream.version = version
                 stream.metadata = metadata
+                stream.labels = labels
                 return stream
 
 

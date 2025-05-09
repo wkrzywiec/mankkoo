@@ -202,7 +202,8 @@ def test_only_inactive_investment_streams_are_listed__if_type_qparam_equals_inve
 def test_stream_is_loaded(test_client):
     # GIVEN
     stream = es.Stream(uuid.uuid4(), 'account', 0,
-                  {"active": True, "alias": "Bank account A", "bankName": "Bank A", "bankUrl": "https://www.bank-a.com", "accountNumber": "iban-1", "accountName": "Super Personal account", "accountType": "checking", "importer": "MANKKOO"})
+                  {"active": True, "alias": "Bank account A", "bankName": "Bank A", "bankUrl": "https://www.bank-a.com", "accountNumber": "iban-1", "accountName": "Super Personal account", "accountType": "checking", "importer": "MANKKOO"},
+                  {"wallet": "Risky Investments"})
     es.create([stream])
 
     # WHEN
@@ -277,6 +278,7 @@ def test_events_are_not_added_to_stream__if_invalid_stream_id_was_provided(test_
     # THEN
     assert response.status_code == 404
 
+
 def test_events_are_loaded_for_stream(test_client):
     # GIVEN
     stream_type = 'account'
@@ -307,7 +309,6 @@ def test_events_are_loaded_for_stream(test_client):
     ]
 
     es.store(account_with_two_operations)
-    # stream_id = account_with_two_operations[0].stream_id
 
     # WHEN
     response = test_client.get(f'/api/streams/{stream_id}/events')
@@ -334,7 +335,7 @@ def test_events_are_loaded_for_stream(test_client):
 def test_stream_metadata_are_updated(test_client):
     # GIVEN
     stream = es.Stream(uuid.uuid4(), 'account', 0,
-                  {"active": True, "alias": "Bank account A", "bankName": "Bank A", "bankUrl": "https://www.bank-a.com", "accountNumber": "iban-1", "accountName": "Super Personal account", "accountType": "checking", "importer": "MANKKOO"})
+                {"active": True, "alias": "Bank account A", "bankName": "Bank A", "bankUrl": "https://www.bank-a.com", "accountNumber": "iban-1", "accountName": "Super Personal account", "accountType": "checking", "importer": "MANKKOO"})
     es.create([stream])
 
     metadata = {

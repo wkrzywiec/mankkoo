@@ -20,7 +20,8 @@ def init_db():
             id              UUID                      NOT NULL    PRIMARY KEY,
             type            TEXT                      NOT NULL,
             version         BIGINT                    NOT NULL,
-            metadata        JSONB
+            metadata        JSONB,
+            labels          JSONB
         );
 
         CREATE TABLE IF NOT EXISTS events
