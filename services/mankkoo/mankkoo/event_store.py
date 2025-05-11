@@ -12,11 +12,12 @@ log.basicConfig(level=log.DEBUG)
 
 
 class Stream:
-    def __init__(self, id: UUID, type: str, version: int, metadata: dict):
+    def __init__(self, id: UUID, type: str, version: int, metadata: dict, labels: dict = {}):
         self.id = id
         self.type = type
         self.version = version
         self.metadata = metadata
+        self.labels = labels
 
     def __str__(self):
         return f"Stream(id={self.id}, type={self.type}, version={self.version}, metadata={self.metadata})"
