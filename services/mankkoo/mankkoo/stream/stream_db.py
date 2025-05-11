@@ -9,6 +9,7 @@ class Stream(Schema):
     id = String()
     type = String()
     name = String()
+    wallet = String()
 
 
 def load_streams(active: bool, type: str) -> list[Stream]:
@@ -48,6 +49,8 @@ def load_streams(active: bool, type: str) -> list[Stream]:
            WHEN type = 'stocks' AND metadata->>'type' = 'ETF' THEN metadata->>'etfName'
            ELSE 'Unknown'
         END AS name
+        ,
+        labels->>'wallet' AS wallet
     FROM
         streams
     {where_clause}
@@ -65,6 +68,7 @@ def load_streams(active: bool, type: str) -> list[Stream]:
                 stream.id = row[0]
                 stream.type = row[1]
                 stream.name = row[2]
+                stream.wallet = row[3]
 
                 result.append(stream)
     return result
