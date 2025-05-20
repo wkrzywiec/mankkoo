@@ -6,9 +6,9 @@ import dynamic from 'next/dynamic';
 import Link from "next/link";
 
 import BarChart from "@/components/charts/Bar";
-import Indicator from "@/components/elements/Indicator"
+import Indicator from "@/components/elements/Indicator";
 import PieChart from "@/components/charts/Piechart";
-import TileHeader from "@/components/elements/TileHeader"
+import TileHeader from "@/components/elements/TileHeader";
 import SubHeadline from "@/components/elements/SubHeadline";
 
 import { MainIndicatorsResponse, SavingsDistribution, TotalHistory } from "@/api/MainPageResponses";
