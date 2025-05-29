@@ -10,6 +10,8 @@ main_indicators_key = 'main-indicators'
 current_savings_distribution_key = 'current-savings-distribution'
 total_history_per_day_key = 'total-history-per-day'
 
+investment_indicators_key = 'investment-indicators'
+
 
 def load_view(view_name):
     log.info(f"Loading '{view_name}' view...")
@@ -38,6 +40,7 @@ def update_views(oldest_occured_event_date: date):
     __main_indicators()
     __current_total_savings_distribution()
     __total_history_per_day(oldest_occured_event_date)
+    __investment_indicators()
 
 
 def __main_indicators() -> None:
@@ -389,6 +392,77 @@ def __load_total_history_per_day(oldest_occured_event_date: date) -> dict[str, l
                 result["date"].append(row[0].strftime('%Y-%m-%d'))
                 result["total"].append(row[1])
     return result
+
+
+def __investment_indicators() -> None:
+    log.info(f"Updating '{investment_indicators_key}' view...")
+    log.info("Loading current total savings value...")
+    query = """
+    WITH
+    
+    investment_latest_version AS (
+        SELECT
+            id,
+            version, metadata ->> 'investmentName' as name,
+            metadata ->> 'category' as type
+        FROM
+            streams
+        WHERE
+            type = 'investment'
+        AND
+            (metadata ->> 'active')::boolean = true
+    ),
+
+    investment_balance AS (
+        SELECT
+            (data->>'balance')::numeric AS total,
+            l.type
+        FROM events e
+        JOIN investment_latest_version l ON e.stream_id = l.id AND l.version = e.version
+    ),
+
+
+    stocks_latest_version AS (
+        SELECT id, version
+        FROM streams
+        WHERE type = 'stocks'
+    ),
+
+    stocks_balance AS (
+        SELECT
+            ROUND(SUM((data->>'balance')::numeric), 2) AS total,
+            'stocks' AS type
+        FROM
+            events e
+        JOIN
+            stocks_latest_version l ON e.stream_id = l.id AND l.version = e.version
+    ),
+
+    all_buckets AS (
+        SELECT *
+        FROM investment_balance
+            UNION
+        SELECT *
+        FROM stocks_balance
+    )
+
+    SELECT SUM(total)
+    FROM all_buckets;
+    """
+
+    with db.get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(query)
+            (result, ) = cur.fetchone()
+
+    view_content = {
+        'totalInvestments': 0 if result is None else result,
+        'lastYearTotalResultsValue': 0,
+        'lastYearTotalResultsPercentage': 0,
+        'resultsVsInflation': 0
+    }
+    __store_view(investment_indicators_key, view_content)
+    log.info(f"The '{investment_indicators_key}' view was updated")
 
 
 class JSONEncoder(json.JSONEncoder):
