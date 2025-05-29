@@ -4,10 +4,14 @@ import styles from "./page.module.css";
 
 import dynamic from 'next/dynamic';
 
+import { InvetsmentsIndicatorsResponse } from "@/api/InvestmentsPageResponses";
+
 import Indicator from "@/components/elements/Indicator"
 import TileHeader from "@/components/elements/TileHeader";
 import PieChart from "@/components/charts/Piechart";
 import TabList from "@/components/elements/TabList";
+import { currencyFormat } from "@/utils/Formatter";
+import { useGetHttp } from "@/hooks/useHttp";
 
 const LineChart = dynamic(() => import('@/components/charts/Line'), {
   ssr: false, // Disable server-side rendering, more info: https://nextjs.org/docs/messages/react-hydration-error
@@ -18,6 +22,12 @@ const Table = dynamic(() => import('@/components/charts/Table'), {
 });
 
 export default function Investments() {
+
+  const {
+    isFetching: isFetchingInvIndicators,
+    fetchedData: indicators,
+  } = useGetHttp<InvetsmentsIndicatorsResponse>('/investments/indicators');
+  const formattedTotalInvestments = currencyFormat(indicators?.totalInvestments);
 
   const changeTab = (index: number) => {
     
@@ -55,7 +65,7 @@ export default function Investments() {
       </div>
 
       <div className="gridItem">
-        <Indicator headline="Total Investments" text="no data" />
+        <Indicator headline="Total Investments" text={formattedTotalInvestments} isFetching={isFetchingInvIndicators} />
       </div>
       <div className="gridItem">
         <Indicator headline="Total Results (last year)" text="no data"/>
