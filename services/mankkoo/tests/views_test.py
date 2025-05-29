@@ -158,6 +158,52 @@ def test_total_history_per_day_is_updated():
     __wait_for_condition(condition_func=a_total_history_per_day_view_is_updated, timeout=10, interval=1)
 
 
+def test_investment_types_distribution_view_is_updated():
+    # GIVEN
+    app.start_listener_thread()
+    # Prepare events: active/inactive investments and stocks
+    active_investment_events = dt.investment_events([
+        {"date": "01-01-2021", "operation": 100}
+    ], category="bonds", active=True)
+    inactive_investment_events = dt.investment_events([
+        {"date": "01-01-2021", "operation": 200}
+    ], category="crypto", active=False)
+    active_stock_events = dt.stock_events([
+        {"date": "01-01-2021", "operation": 300}
+    ], type="ETF", active=True)
+    inactive_stock_events = dt.stock_events([
+        {"date": "01-01-2021", "operation": 400}
+    ], type="stock", active=False)
+
+    es.create([
+        active_investment_events['stream'],
+        inactive_investment_events['stream'],
+        active_stock_events['stream'],
+        inactive_stock_events['stream']
+    ])
+    es.store(
+        active_investment_events['events'] +
+        inactive_investment_events['events'] +
+        active_stock_events['events'] +
+        inactive_stock_events['events']
+    )
+
+    # WHEN
+    def a_investment_types_distribution_view_is_updated():
+        result = views.load_view(views.investment_types_distribution_key)
+        # Only active streams should be included: 100 (bonds) + 300 (ETF) = 400
+        # bonds: 100/400 = 0.25, ETF: 300/400 = 0.75
+        expected = [
+            {"type": "ETF", "total": 300, "percentage": 0.75},
+            {"type": "bonds", "total": 100, "percentage": 0.25}
+        ]
+        # Order by total desc
+        return result == expected
+
+    # THEN
+    __wait_for_condition(condition_func=a_investment_types_distribution_view_is_updated, timeout=10, interval=1)
+
+
 def __store_events():
     es.create([
         checking_events['stream'],

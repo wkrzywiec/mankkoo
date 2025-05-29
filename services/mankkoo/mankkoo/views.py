@@ -467,6 +467,13 @@ def __investment_indicators() -> None:
     log.info(f"The '{investment_indicators_key}' view was updated")
 
 
+def __investment_types_distribution():
+    log.info(f"Updating '{investment_types_distribution_key}' view...")
+    view_content = __load_investment_types_distribution()
+    __store_view(investment_types_distribution_key, view_content)
+    log.info(f"The '{investment_types_distribution_key}' view was updated")
+
+
 def __load_investment_types_distribution() -> list[dict]:
     log.info("Loading investment types distribution by type...")
     query = """
@@ -523,13 +530,6 @@ def __load_investment_types_distribution() -> list[dict]:
                     "percentage": row[2]
                 })
     return result
-
-
-def __investment_types_distribution():
-    log.info(f"Updating '{investment_types_distribution_key}' view...")
-    view_content = __load_investment_types_distribution()
-    __store_view(investment_types_distribution_key, view_content)
-    log.info(f"The '{investment_types_distribution_key}' view was updated")
 
 
 class JSONEncoder(json.JSONEncoder):

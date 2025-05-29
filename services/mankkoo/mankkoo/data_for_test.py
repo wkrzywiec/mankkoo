@@ -60,11 +60,11 @@ def account_operation_event(stream_id: uuid.UUID, operation: float, balance: flo
         version=version)
 
 
-def stock_events(operations: list[dict]) -> dict:
+def stock_events(operations: list[dict], type='ETF', active=True) -> dict:
     events = []
     balance = 0
     version = 0
-    stock_stream = es.Stream(uuid.uuid4(), 'stocks', 0, {"type": "ETF", "broker": "Bank 1"})
+    stock_stream = es.Stream(uuid.uuid4(), 'stocks', 0, {"type": type, "broker": "Bank 1", "active": active})
 
     for operation in operations:
         balance += operation['operation']
@@ -88,11 +88,11 @@ def stock_events(operations: list[dict]) -> dict:
     return {"stream": stock_stream, "events": events}
 
 
-def investment_events(operations: list[dict]) -> dict:
+def investment_events(operations: list[dict], category='treasury_bonds', active=True) -> dict:
     events = []
     balance = 0
     version = 0
-    inv_stream = es.Stream(uuid.uuid4(), 'investment', 0, {"investmentName": "10-years Treasury Bonds", "category": "treasury_bonds", "active": True})
+    inv_stream = es.Stream(uuid.uuid4(), 'investment', 0, {"investmentName": "10-years Treasury Bonds", "category": category, "active": active})
 
     for operation in operations:
         balance += operation['operation']
