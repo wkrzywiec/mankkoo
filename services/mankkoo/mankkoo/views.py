@@ -49,9 +49,9 @@ def __main_indicators() -> None:
 
     view_content = {
         'savings': current_total_savings,
-        'debt': None,
-        'lastMonthProfit': 0,
-        'investments': None
+        'netWorth': None,
+        'lastMonthIncome': 0,
+        'lastMonthSpending': None
     }
     __store_view(main_indicators_key, view_content)
     log.info(f"The '{main_indicators_key}' view was updated")
