@@ -11,6 +11,7 @@ current_savings_distribution_key = 'current-savings-distribution'
 total_history_per_day_key = 'total-history-per-day'
 
 investment_indicators_key = 'investment-indicators'
+investment_types_distribution_key = 'investment-types-distribution'
 
 
 def load_view(view_name):
@@ -41,6 +42,7 @@ def update_views(oldest_occured_event_date: date):
     __current_total_savings_distribution()
     __total_history_per_day(oldest_occured_event_date)
     __investment_indicators()
+    __investment_types_distribution()
 
 
 def __main_indicators() -> None:
@@ -463,6 +465,71 @@ def __investment_indicators() -> None:
     }
     __store_view(investment_indicators_key, view_content)
     log.info(f"The '{investment_indicators_key}' view was updated")
+
+
+def __load_investment_types_distribution() -> list[dict]:
+    log.info("Loading investment types distribution by type...")
+    query = """
+    WITH investment_streams AS (
+        SELECT id, version, metadata ->> 'category' AS type
+        FROM streams
+        WHERE type = 'investment'
+          AND (metadata ->> 'active')::boolean = true
+    ),
+    investment_balance AS (
+        SELECT
+            SUM((e.data->>'balance')::numeric) AS total,
+            s.type
+        FROM events e
+        JOIN investment_streams s ON e.stream_id = s.id AND e.version = s.version
+        GROUP BY s.type
+    ),
+    stocks_streams AS (
+        SELECT id, version, metadata ->> 'type' AS type
+        FROM streams
+        WHERE type = 'stocks'
+          AND (metadata ->> 'active')::boolean = true
+    ),
+    stocks_balance AS (
+        SELECT
+            SUM((e.data->>'balance')::numeric) AS total,
+            s.type
+        FROM events e
+        JOIN stocks_streams s ON e.stream_id = s.id AND e.version = s.version
+        GROUP BY s.type
+    ),
+    all_types AS (
+        SELECT * FROM investment_balance
+        UNION ALL
+        SELECT * FROM stocks_balance
+    )
+    SELECT
+        type,
+        total,
+        ROUND(total / NULLIF((SELECT SUM(total) FROM all_types), 0), 4) AS percentage
+    FROM all_types
+    ORDER BY total DESC;
+    """
+
+    result = []
+    with db.get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(query)
+            rows = cur.fetchall()
+            for row in rows:
+                result.append({
+                    "type": row[0],
+                    "total": row[1],
+                    "percentage": row[2]
+                })
+    return result
+
+
+def __investment_types_distribution():
+    log.info(f"Updating '{investment_types_distribution_key}' view...")
+    view_content = __load_investment_types_distribution()
+    __store_view(investment_types_distribution_key, view_content)
+    log.info(f"The '{investment_types_distribution_key}' view was updated")
 
 
 class JSONEncoder(json.JSONEncoder):

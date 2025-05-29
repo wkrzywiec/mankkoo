@@ -2,14 +2,16 @@
 
 import styles from "./page.module.css";
 import dynamic from "next/dynamic";
-import { useCallback } from "react";
-import { InvetsmentsIndicatorsResponse } from "@/api/InvestmentsPageResponses";
+import { useCallback, useEffect, useState } from "react";
+import { InvetsmentsIndicatorsResponse, InvestmentTypesDistributionResponse } from "@/api/InvestmentsPageResponses";
 import Indicator from "@/components/elements/Indicator";
 import TileHeader from "@/components/elements/TileHeader";
-import PieChart from "@/components/charts/Piechart";
+import PieChart, { PieChartData } from "@/components/charts/Piechart";
 import TabList from "@/components/elements/TabList";
-import { currencyFormat } from "@/utils/Formatter";
+import { currencyFormat, percentage } from "@/utils/Formatter";
 import { useGetHttp } from "@/hooks/useHttp";
+import { TableData } from "@/components/charts/Table";
+import Loader from "@/components/elements/Loader";
 
 const LineChart = dynamic(() => import("@/components/charts/Line"), { ssr: false });
 const Table = dynamic(() => import("@/components/charts/Table"), { ssr: false });
@@ -20,7 +22,45 @@ export default function Investments() {
     fetchedData: indicators,
   } = useGetHttp<InvetsmentsIndicatorsResponse>("/investments/indicators");
 
+  const {
+    isFetching: isFetchingInvTypeDistribution,
+    fetchedData: invTypeDistribution,
+  } = useGetHttp<InvestmentTypesDistributionResponse>('/admin/views/investment-types-distribution');
+
   const formattedTotalInvestments = currencyFormat(indicators?.totalInvestments);
+
+    const [invTypeDistributionTable, setSavingsDistributionTable] = useState<TableData>({ data: [], hasHeader: false, boldLastRow: false, currencyColumnIdx: -1, colorsColumnIdx: -1})
+    const [invTypeDistributionPie, setSavingsDistributionPie] = useState<PieChartData>({ data: [], labels: [] });
+  
+    useEffect(() => {
+  
+      function prepareDataForSavingsDistributionTable() {
+          const savingsTable: TableData = { data: [], hasHeader: false, boldLastRow: true, currencyColumnIdx: 3, colorsColumnIdx: 2};
+          
+          invTypeDistribution?.data.forEach(value => {
+            savingsTable.data.push([value.type, value.total.toString(), percentage(value.percentage)]);
+          });
+    
+          savingsTable.data.push(['Total', indicators === undefined ? '0' : indicators.totalInvestments.toString(), '']);
+          setSavingsDistributionTable(savingsTable);
+      }
+  
+      function prepareDataForSavingsDistributionPieChart() {
+        const tempPieData: PieChartData = { data: [], labels: [] };
+        
+        invTypeDistribution?.data.forEach(value => {
+          tempPieData.labels.push(value.type);
+          tempPieData.data.push(value.total);
+        });
+        setSavingsDistributionPie(tempPieData);
+      }
+  
+      if (invTypeDistribution !== undefined && invTypeDistribution?.data.length > 0 && !isFetchingInvTypeDistribution ) {
+        prepareDataForSavingsDistributionTable();
+        prepareDataForSavingsDistributionPieChart();
+      }
+      
+    }, [invTypeDistribution, isFetchingInvTypeDistribution, indicators])
 
   // Tab content renderer
   const renderTabContent = useCallback((index: number) => {
@@ -77,8 +117,16 @@ export default function Investments() {
       <div className="gridItem span2Columns">
         <TileHeader headline="Diversification" subHeadline="The diversification of a portfolio across all investment types." />
         <div className={styles.horizontalAlignment}>
-          <PieChart />
-          <Table />
+        {isFetchingInvTypeDistribution ? 
+            <Loader /> : 
+            <>
+              <PieChart input={invTypeDistributionPie} />
+              <Table data={invTypeDistributionTable.data} 
+                boldLastRow={invTypeDistributionTable.boldLastRow} 
+                currencyColumnIdx={invTypeDistributionTable.currencyColumnIdx} 
+                colorsColumnIdx={invTypeDistributionTable.colorsColumnIdx}
+              />
+          </>}
         </div>
       </div>
       <div className="gridItem span2Columns">
