@@ -10,11 +10,12 @@ def test_all_views_are_returned(test_client):
 
     payload = response.get_json()
     assert 'views' in payload
-    assert len(payload['views']) == 4
+    assert len(payload['views']) == 5
     assert views.main_indicators_key in payload['views']
     assert views.current_savings_distribution_key in payload['views']
     assert views.total_history_per_day_key in payload['views']
     assert views.investment_indicators_key in payload['views']
+    assert views.investment_types_distribution_key in payload['views']
 
 
 def test_specific_view_is_loaded(test_client):

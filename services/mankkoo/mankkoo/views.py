@@ -401,7 +401,6 @@ def __investment_indicators() -> None:
     log.info("Loading current total savings value...")
     query = """
     WITH
-    
     investment_latest_version AS (
         SELECT
             id,
@@ -414,7 +413,6 @@ def __investment_indicators() -> None:
         AND
             (metadata ->> 'active')::boolean = true
     ),
-
     investment_balance AS (
         SELECT
             (data->>'balance')::numeric AS total,
@@ -422,14 +420,12 @@ def __investment_indicators() -> None:
         FROM events e
         JOIN investment_latest_version l ON e.stream_id = l.id AND l.version = e.version
     ),
-
-
     stocks_latest_version AS (
         SELECT id, version
         FROM streams
         WHERE type = 'stocks'
+        AND (metadata ->> 'active')::boolean = true
     ),
-
     stocks_balance AS (
         SELECT
             ROUND(SUM((data->>'balance')::numeric), 2) AS total,
@@ -439,7 +435,6 @@ def __investment_indicators() -> None:
         JOIN
             stocks_latest_version l ON e.stream_id = l.id AND l.version = e.version
     ),
-
     all_buckets AS (
         SELECT *
         FROM investment_balance
@@ -447,7 +442,6 @@ def __investment_indicators() -> None:
         SELECT *
         FROM stocks_balance
     )
-
     SELECT SUM(total)
     FROM all_buckets;
     """
