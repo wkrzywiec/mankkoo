@@ -526,6 +526,86 @@ def __load_investment_types_distribution() -> list[dict]:
     return result
 
 
+def __load_investment_wallets_distribution() -> list[dict]:
+    log.info("Loading investment distribution by wallet (including savings accounts, merged by wallet)...")
+    query = """
+    WITH investment_streams AS (
+        SELECT id, version, labels ->> 'wallet' AS wallet
+        FROM streams
+        WHERE type = 'investment'
+          AND (metadata ->> 'active')::boolean = true
+    ),
+    investment_balance AS (
+        SELECT
+            SUM((e.data->>'balance')::numeric) AS total,
+            s.wallet
+        FROM events e
+        JOIN investment_streams s ON e.stream_id = s.id AND e.version = s.version
+        GROUP BY s.wallet
+    ),
+    stocks_streams AS (
+        SELECT id, version, labels ->> 'wallet' AS wallet
+        FROM streams
+        WHERE type = 'stocks'
+          AND (metadata ->> 'active')::boolean = true
+    ),
+    stocks_balance AS (
+        SELECT
+            SUM((e.data->>'balance')::numeric) AS total,
+            s.wallet
+        FROM events e
+        JOIN stocks_streams s ON e.stream_id = s.id AND e.version = s.version
+        GROUP BY s.wallet
+    ),
+    savings_streams AS (
+        SELECT id, version, labels ->> 'wallet' AS wallet
+        FROM streams
+        WHERE type = 'account'
+          AND (metadata ->> 'accountType') = 'savings'
+          AND (metadata ->> 'active')::boolean = true
+    ),
+    savings_balance AS (
+        SELECT
+            SUM((e.data->>'balance')::numeric) AS total,
+            s.wallet
+        FROM events e
+        JOIN savings_streams s ON e.stream_id = s.id AND e.version = s.version
+        GROUP BY s.wallet
+    ),
+    all_wallets_raw AS (
+        SELECT wallet, total FROM investment_balance
+        UNION ALL
+        SELECT wallet, total FROM stocks_balance
+        UNION ALL
+        SELECT wallet, total FROM savings_balance
+    ),
+    all_wallets AS (
+        SELECT wallet, SUM(total) AS total
+        FROM all_wallets_raw
+        GROUP BY wallet
+    )
+    SELECT
+        wallet,
+        total,
+        ROUND(total / NULLIF((SELECT SUM(total) FROM all_wallets), 0), 4) AS percentage
+    FROM all_wallets
+    ORDER BY total DESC;
+    """
+
+    result = []
+    with db.get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(query)
+            rows = cur.fetchall()
+            for row in rows:
+                result.append({
+                    "wallet": row[0],
+                    "total": row[1],
+                    "percentage": row[2]
+                })
+    return result
+
+
 class JSONEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, Decimal):
