@@ -5,6 +5,7 @@ from datetime import datetime, timedelta, timezone
 
 import mankkoo.event_store as es
 
+
 def test_stream_is_created__if_type_is_provided(test_client):
     # GIVEN
     data = {
@@ -61,6 +62,7 @@ def test_stream_is_not_created__if_type_is_not_provided(test_client):
     # THEN
     assert response.status_code == 422
 
+
 def test_stream_is_not_created__if_invalid_type_is_provided(test_client):
     # GIVEN
     data = {
@@ -72,6 +74,7 @@ def test_stream_is_not_created__if_invalid_type_is_provided(test_client):
 
     # THEN
     assert response.status_code == 400
+
 
 def test_all_streams_are_listed__if_no_filters_are_provided__and_stream_names_are_correctly_set(test_client):
     # GIVEN
@@ -112,6 +115,7 @@ def test_all_streams_are_listed__if_no_filters_are_provided__and_stream_names_ar
     assert etf_stream['type'] == 'ETF'
     assert etf_stream['name'] == streams[3].metadata['etfName']
 
+
 def test_only_active_streams_are_listed__if_active_qparam_equals_true(test_client):
     # GIVEN
     streams = [
@@ -132,6 +136,7 @@ def test_only_active_streams_are_listed__if_active_qparam_equals_true(test_clien
     assert len(payload) == 1
 
     assert payload[0]['id'] == str(streams[0].id)
+
 
 def test_only_inactive_streams_are_listed__if_active_qparam_equals_false(test_client):
     # GIVEN
@@ -154,6 +159,7 @@ def test_only_inactive_streams_are_listed__if_active_qparam_equals_false(test_cl
 
     assert payload[0]['id'] == str(streams[1].id)
 
+
 def test_only_accounts_streams_are_listed__if_type_qparam_equals_account(test_client):
     # GIVEN
     streams = [
@@ -174,6 +180,7 @@ def test_only_accounts_streams_are_listed__if_type_qparam_equals_account(test_cl
     assert len(payload) == 1
 
     assert payload[0]['id'] == str(streams[0].id)
+
 
 def test_only_inactive_investment_streams_are_listed__if_type_qparam_equals_investment_and_active_qparam_is_false(test_client):
     # GIVEN
@@ -230,6 +237,7 @@ def test_stream_is_not_loaded__if_invalid_id_provided(test_client):
 
     # THEN
     assert response.status_code == 404
+
 
 def test_events_are_added_to_stream(test_client):
     stream = es.Stream(uuid.uuid4(), 'account', 0,

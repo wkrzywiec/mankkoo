@@ -10,8 +10,10 @@ import mankkoo.config as app_profile
 import mankkoo.database as db
 import mankkoo.views as views
 
+from mankkoo.controller.admin_controller import admin_endpoints
 from mankkoo.controller.main_controller import main_endpoints
 from mankkoo.controller.account_controller import account_endpoints
+from mankkoo.controller.investment_controller import investment_endpoints
 from mankkoo.controller.stream_controller import stream_endpoints
 from mankkoo.base_logger import log
 from mankkoo.config import ProdConfig, DevConfig
@@ -48,8 +50,10 @@ def create_app(app_config=None):
         }
     }
 
+    app.register_blueprint(admin_endpoints, url_prefix='/api/admin')
     app.register_blueprint(main_endpoints, url_prefix='/api/main')
     app.register_blueprint(account_endpoints, url_prefix='/api/accounts')
+    app.register_blueprint(investment_endpoints, url_prefix='/api/investments')
     app.register_blueprint(stream_endpoints, url_prefix='/api/streams')
 
     db.init_db()

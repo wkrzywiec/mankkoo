@@ -1,6 +1,5 @@
 from apiflask import APIBlueprint, Schema
 from apiflask.fields import String, Float, List
-import mankkoo.database as db
 import mankkoo.views as views
 
 main_endpoints = APIBlueprint('main_endpoints', __name__, tag='Main Page')
@@ -8,9 +7,9 @@ main_endpoints = APIBlueprint('main_endpoints', __name__, tag='Main Page')
 
 class MainIndicators(Schema):
     savings = Float()
-    debt = Float()
-    lastMonthProfit = Float()
-    investments = Float()
+    netWorth = Float()
+    lastMonthIncome = Float()
+    lastMonthSpending = Float()
 
 
 @main_endpoints.route("/indicators")

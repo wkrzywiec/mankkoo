@@ -1,8 +1,8 @@
 export interface MainIndicatorsResponse {
     savings: number;
-    debt: number;
+    netWorth: number;
     lastMonthProfit: number;
-    investments: number;
+    lastMonthSpending: number;
 }
 
 export interface SavingsDistribution {
