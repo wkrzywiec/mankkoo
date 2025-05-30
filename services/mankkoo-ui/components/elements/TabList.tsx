@@ -4,7 +4,8 @@ import classes from '@/components/elements/TabList.module.css'
 
 import Loader from "./Loader";
 
-const sanitizeForId = (label: string) => {
+const sanitizeForId = (label: string | undefined | null) => {
+    if (!label || typeof label !== 'string') return 'tab-unknown';
     return label
       .toLowerCase()
       .replace(/[^\w\s]|(\s+)/g, (_match: string, group1: string) =>

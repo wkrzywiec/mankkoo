@@ -4,7 +4,7 @@ import mankkoo.event_store as es
 
 
 def test_investment_wallets_endpoint__returns_wallet_list(test_client):
-    # GIVEN: Create streams with different wallet labels
+    # GIVEN
     wallets = ["Wallet A", "Wallet B", "Wallet C"]
     streams = []
     for wallet_label in wallets:

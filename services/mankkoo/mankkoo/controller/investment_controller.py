@@ -25,7 +25,6 @@ def investment_indicators():
 class WalletsResponse(Schema):
     wallets = List(String())
 
-
 @investment_endpoints.route("/wallets")
 @investment_endpoints.output(WalletsResponse, status_code=200)
 @investment_endpoints.doc(summary='Available Wallets',

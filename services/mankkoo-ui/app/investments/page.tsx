@@ -3,7 +3,7 @@
 import styles from "./page.module.css";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useState } from "react";
-import { InvetsmentsIndicatorsResponse, InvestmentTypesDistributionResponse, WalletsDistributionResponse } from "@/api/InvestmentsPageResponses";
+import { InvetsmentsIndicatorsResponse, InvestmentTypesDistributionResponse, WalletsDistributionResponse, WalletsResponse } from "@/api/InvestmentsPageResponses";
 import Indicator from "@/components/elements/Indicator";
 import TileHeader from "@/components/elements/TileHeader";
 import PieChart, { PieChartData } from "@/components/charts/Piechart";
@@ -100,6 +100,10 @@ export default function Investments() {
     
   }, [walletsDistribution, isFetchingWalletsDistribution, indicators])
 
+  const {
+      fetchedData: wallets
+  } = useGetHttp<WalletsResponse>(`/investments/wallets`);
+
   // Tab content renderer
   const renderTabContent = useCallback((index: number) => {
     // You can switch on index to render different content per tab
@@ -194,7 +198,7 @@ export default function Investments() {
 
       <div className="gridItem span4Columns">
         <TabList
-          labels={["Accounts", "Investments", "Stocks", "Retirement", "Real Estate", "Inactive Streams"]}
+          labels={wallets?.wallets ?? []}
           tabContent={renderTabContent}
         />
       </div>

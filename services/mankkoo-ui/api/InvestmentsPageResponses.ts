@@ -26,3 +26,7 @@ export interface WalletsDistributionResponse {
     data: WalletDistributionItem[];
     viewName: string;
 }
+
+export interface WalletsResponse {
+    wallets: string[];
+}
