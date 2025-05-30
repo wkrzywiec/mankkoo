@@ -12,6 +12,7 @@ total_history_per_day_key = 'total-history-per-day'
 
 investment_indicators_key = 'investment-indicators'
 investment_types_distribution_key = 'investment-types-distribution'
+investment_wallets_distribution_key = 'investment-wallets-distribution'
 
 
 def load_view(view_name):
@@ -43,6 +44,7 @@ def update_views(oldest_occured_event_date: date):
     __total_history_per_day(oldest_occured_event_date)
     __investment_indicators()
     __investment_types_distribution()
+    __investment_wallets_distribution()
 
 
 def __main_indicators() -> None:
@@ -555,6 +557,13 @@ def __load_investment_types_distribution() -> list[dict]:
                     "percentage": row[2]
                 })
     return result
+
+
+def __investment_wallets_distribution():
+    log.info(f"Updating '{investment_wallets_distribution_key}' view...")
+    view_content = __load_investment_wallets_distribution()
+    __store_view(investment_wallets_distribution_key, view_content)
+    log.info(f"The '{investment_wallets_distribution_key}' view was updated")
 
 
 def __load_investment_wallets_distribution() -> list[dict]:

@@ -15,3 +15,14 @@ export interface InvestmentTypesDistributionResponse {
     data: InvestmentTypeDistributionItem[];
     viewName: string;
 }
+
+export interface WalletDistributionItem {
+    percentage: number;
+    total: number;
+    wallet: string;
+}
+
+export interface WalletsDistributionResponse {
+    data: WalletDistributionItem[];
+    viewName: string;
+}

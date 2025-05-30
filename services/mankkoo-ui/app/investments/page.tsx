@@ -3,7 +3,7 @@
 import styles from "./page.module.css";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useState } from "react";
-import { InvetsmentsIndicatorsResponse, InvestmentTypesDistributionResponse } from "@/api/InvestmentsPageResponses";
+import { InvetsmentsIndicatorsResponse, InvestmentTypesDistributionResponse, WalletsDistributionResponse } from "@/api/InvestmentsPageResponses";
 import Indicator from "@/components/elements/Indicator";
 import TileHeader from "@/components/elements/TileHeader";
 import PieChart, { PieChartData } from "@/components/charts/Piechart";
@@ -29,38 +29,76 @@ export default function Investments() {
 
   const formattedTotalInvestments = currencyFormat(indicators?.totalInvestments);
 
-    const [invTypeDistributionTable, setSavingsDistributionTable] = useState<TableData>({ data: [], hasHeader: false, boldLastRow: false, currencyColumnIdx: -1, colorsColumnIdx: -1})
-    const [invTypeDistributionPie, setSavingsDistributionPie] = useState<PieChartData>({ data: [], labels: [] });
+  const [invTypeDistributionTable, setSavingsDistributionTable] = useState<TableData>({ data: [], hasHeader: false, boldLastRow: false, currencyColumnIdx: -1, colorsColumnIdx: -1})
+  const [invTypeDistributionPie, setSavingsDistributionPie] = useState<PieChartData>({ data: [], labels: [] });
   
-    useEffect(() => {
-  
-      function prepareDataForSavingsDistributionTable() {
-          const savingsTable: TableData = { data: [], hasHeader: false, boldLastRow: true, currencyColumnIdx: 3, colorsColumnIdx: 2};
-          
-          invTypeDistribution?.data.forEach(value => {
-            savingsTable.data.push([value.type, value.total.toString(), percentage(value.percentage)]);
-          });
-    
-          savingsTable.data.push(['Total', indicators === undefined ? '0' : indicators.totalInvestments.toString(), '']);
-          setSavingsDistributionTable(savingsTable);
-      }
-  
-      function prepareDataForSavingsDistributionPieChart() {
-        const tempPieData: PieChartData = { data: [], labels: [] };
+  useEffect(() => {
+
+    function prepareDataForSavingsDistributionTable() {
+        const savingsTable: TableData = { data: [], hasHeader: false, boldLastRow: true, currencyColumnIdx: 3, colorsColumnIdx: 2};
         
         invTypeDistribution?.data.forEach(value => {
-          tempPieData.labels.push(value.type);
-          tempPieData.data.push(value.total);
+          savingsTable.data.push([value.type, value.total.toString(), percentage(value.percentage)]);
         });
-        setSavingsDistributionPie(tempPieData);
-      }
   
-      if (invTypeDistribution !== undefined && invTypeDistribution?.data.length > 0 && !isFetchingInvTypeDistribution ) {
-        prepareDataForSavingsDistributionTable();
-        prepareDataForSavingsDistributionPieChart();
-      }
+        savingsTable.data.push(['Total', indicators === undefined ? '0' : indicators.totalInvestments.toString(), '']);
+        setSavingsDistributionTable(savingsTable);
+    }
+
+    function prepareDataForSavingsDistributionPieChart() {
+      const tempPieData: PieChartData = { data: [], labels: [] };
       
-    }, [invTypeDistribution, isFetchingInvTypeDistribution, indicators])
+      invTypeDistribution?.data.forEach(value => {
+        tempPieData.labels.push(value.type);
+        tempPieData.data.push(value.total);
+      });
+      setSavingsDistributionPie(tempPieData);
+    }
+
+    if (invTypeDistribution !== undefined && invTypeDistribution?.data.length > 0 && !isFetchingInvTypeDistribution ) {
+      prepareDataForSavingsDistributionTable();
+      prepareDataForSavingsDistributionPieChart();
+    }
+    
+  }, [invTypeDistribution, isFetchingInvTypeDistribution, indicators])
+
+  const {
+    isFetching: isFetchingWalletsDistribution,
+    fetchedData: walletsDistribution,
+  } = useGetHttp<WalletsDistributionResponse>('/admin/views/investment-wallets-distribution');
+  
+  const [walletsDistributionTable, setWalletsDistributionTable] = useState<TableData>({ data: [], hasHeader: false, boldLastRow: false, currencyColumnIdx: -1, colorsColumnIdx: -1})
+  const [walletsDistributionPie, setWalletsDistributionPie] = useState<PieChartData>({ data: [], labels: [] });
+  
+  useEffect(() => {
+
+    function prepareDataForWalletsDistributionTable() {
+        const walletsTable: TableData = { data: [], hasHeader: false, boldLastRow: true, currencyColumnIdx: 3, colorsColumnIdx: 2};
+        
+        walletsDistribution?.data.forEach(value => {
+          walletsTable.data.push([value.wallet, value.total.toString(), percentage(value.percentage)]);
+        });
+  
+        walletsTable.data.push(['Total', indicators === undefined ? '0' : indicators.totalInvestments.toString(), '']);
+        setWalletsDistributionTable(walletsTable);
+    }
+
+    function prepareDataForWalletsDistributionPieChart() {
+      const tempPieData: PieChartData = { data: [], labels: [] };
+      
+      walletsDistribution?.data.forEach(value => {
+        tempPieData.labels.push(value.wallet);
+        tempPieData.data.push(value.total);
+      });
+      setWalletsDistributionPie(tempPieData);
+    }
+
+    if (walletsDistribution !== undefined && walletsDistribution?.data.length > 0 && !isFetchingWalletsDistribution ) {
+      prepareDataForWalletsDistributionTable();
+      prepareDataForWalletsDistributionPieChart();
+    }
+    
+  }, [walletsDistribution, isFetchingWalletsDistribution, indicators])
 
   // Tab content renderer
   const renderTabContent = useCallback((index: number) => {
@@ -132,8 +170,16 @@ export default function Investments() {
       <div className="gridItem span2Columns">
         <TileHeader headline="Wallets" subHeadline="Displays the distribution of funds across investment wallets." />
         <div className={styles.horizontalAlignment}>
-          <PieChart />
-          <Table />
+          {isFetchingWalletsDistribution ? 
+            <Loader /> : 
+            <>
+              <PieChart input={walletsDistributionPie} />
+              <Table data={walletsDistributionTable.data} 
+                boldLastRow={walletsDistributionTable.boldLastRow} 
+                currencyColumnIdx={walletsDistributionTable.currencyColumnIdx} 
+                colorsColumnIdx={walletsDistributionTable.colorsColumnIdx}
+              />
+            </>}
         </div>
       </div>
 
