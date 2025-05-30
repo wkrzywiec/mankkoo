@@ -519,7 +519,7 @@ def __load_investment_types_distribution() -> list[dict]:
             rows = cur.fetchall()
             for row in rows:
                 result.append({
-                    "type": row[0],
+                    "type": row[0].replace("_", " ").title(),
                     "total": row[1],
                     "percentage": row[2]
                 })
