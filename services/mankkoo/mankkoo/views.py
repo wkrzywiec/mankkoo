@@ -435,12 +435,26 @@ def __investment_indicators() -> None:
         JOIN
             stocks_latest_version l ON e.stream_id = l.id AND l.version = e.version
     ),
+    savings_latest_version AS (
+        SELECT id, version
+        FROM streams
+        WHERE type = 'account'
+          AND (metadata ->> 'accountType') = 'savings'
+          AND (metadata ->> 'active')::boolean = true
+    ),
+    savings_balance AS (
+        SELECT
+            SUM((data->>'balance')::numeric) AS total,
+            'savings' AS type
+        FROM events e
+        JOIN savings_latest_version l ON e.stream_id = l.id AND l.version = e.version
+    ),
     all_buckets AS (
-        SELECT *
-        FROM investment_balance
+        SELECT * FROM investment_balance
             UNION
-        SELECT *
-        FROM stocks_balance
+        SELECT * FROM stocks_balance
+            UNION
+        SELECT * FROM savings_balance
     )
     SELECT SUM(total)
     FROM all_buckets;
@@ -469,7 +483,7 @@ def __investment_types_distribution():
 
 
 def __load_investment_types_distribution() -> list[dict]:
-    log.info("Loading investment types distribution by type...")
+    log.info("Loading investment types distribution by type (including savings accounts)...")
     query = """
     WITH investment_streams AS (
         SELECT id, version, metadata ->> 'category' AS type
@@ -499,10 +513,27 @@ def __load_investment_types_distribution() -> list[dict]:
         JOIN stocks_streams s ON e.stream_id = s.id AND e.version = s.version
         GROUP BY s.type
     ),
+    savings_streams AS (
+        SELECT id, version, 'Savings Accounts' AS type
+        FROM streams
+        WHERE type = 'account'
+          AND (metadata ->> 'accountType') = 'savings'
+          AND (metadata ->> 'active')::boolean = true
+    ),
+    savings_balance AS (
+        SELECT
+            SUM((e.data->>'balance')::numeric) AS total,
+            s.type
+        FROM events e
+        JOIN savings_streams s ON e.stream_id = s.id AND e.version = s.version
+        GROUP BY s.type
+    ),
     all_types AS (
         SELECT * FROM investment_balance
         UNION ALL
         SELECT * FROM stocks_balance
+        UNION ALL
+        SELECT * FROM savings_balance
     )
     SELECT
         type,
@@ -519,7 +550,7 @@ def __load_investment_types_distribution() -> list[dict]:
             rows = cur.fetchall()
             for row in rows:
                 result.append({
-                    "type": row[0].replace("_", " ").title(),
+                    "type": row[0].replace("_", " ").title() if row[0] != 'Savings Accounts' else row[0],
                     "total": row[1],
                     "percentage": row[2]
                 })
