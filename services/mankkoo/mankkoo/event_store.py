@@ -64,8 +64,8 @@ def create(streams: list[Stream]):
             for stream in streams:
                 log.info(f"Inserting stream: {stream}...")
                 cur.execute(
-                    'INSERT INTO streams (id, type, version, metadata) VALUES (%s, %s, %s, %s)',
-                    (str(stream.id), stream.type, stream.version, json.dumps(stream.metadata)))
+                    'INSERT INTO streams (id, type, version, metadata, labels) VALUES (%s, %s, %s, %s, %s)',
+                    (str(stream.id), stream.type, stream.version, json.dumps(stream.metadata), json.dumps(stream.labels)))
             conn.commit()
 
 
