@@ -71,10 +71,10 @@ def test_main_indicators_view_is_updated():
     def a_main_indicators_view_is_updated():
         result = views.load_view(views.main_indicators_key)
         return result == {
-            "debt": None,
+            "lastMonthIncome": None,
+            "lastMonthSpending": None,
+            "netWorth": None,
             "savings": 1004.78,
-            "investments": None,
-            "lastMonthProfit": 0
         }
 
     # THEN

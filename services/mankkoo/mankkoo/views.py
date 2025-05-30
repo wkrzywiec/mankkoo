@@ -52,7 +52,7 @@ def __main_indicators() -> None:
     view_content = {
         'savings': current_total_savings,
         'netWorth': None,
-        'lastMonthIncome': 0,
+        'lastMonthIncome': None,
         'lastMonthSpending': None
     }
     __store_view(main_indicators_key, view_content)
