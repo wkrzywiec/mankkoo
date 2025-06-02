@@ -1,5 +1,6 @@
 from apiflask import APIBlueprint, Schema
-from apiflask.fields import Float, List, String
+from apiflask.fields import Float, List, String, Boolean
+
 from mankkoo.investment import investment_db
 
 import mankkoo.views as views
@@ -25,6 +26,7 @@ def investment_indicators():
 class WalletsResponse(Schema):
     wallets = List(String())
 
+
 @investment_endpoints.route("/wallets")
 @investment_endpoints.output(WalletsResponse, status_code=200)
 @investment_endpoints.doc(summary='Available Wallets',
@@ -32,3 +34,32 @@ class WalletsResponse(Schema):
 def get_wallets():
     wallets = investment_db.load_wallets()
     return {"wallets": wallets}
+
+
+class InvestmentsQuery(Schema):
+    active = Boolean(required=False, description="Filter by active/inactive investments. 'true' or 'false'.")
+    wallet = String(required=False, description="Filter by wallet label.")
+
+
+class InvestmentStreamResponse(Schema):
+    id = String()
+    name = String()
+    investmentType = String()
+    subtype = String()
+    balance = Float()
+
+
+@investment_endpoints.route("/")
+@investment_endpoints.input(InvestmentsQuery, location='query')
+@investment_endpoints.output(InvestmentStreamResponse(many=True), status_code=200)
+@investment_endpoints.doc(
+    summary='All Investments',
+    description=(
+        'Fetch all investments (streams of type investment, stocks, or account with accountType=savings). '
+        'Supports filtering by active/inactive and wallet.'
+    )
+)
+def get_all_investments(query_data):
+    active = query_data.get('active')
+    wallet = query_data.get('wallet')
+    return investment_db.load_all_investments(active=active, wallet=wallet)
