@@ -20,7 +20,7 @@ def load_wallets() -> list[str]:
     return result
 
 
-def load_investments(active: bool = None, wallet: str = None) -> list[dict]:
+def load_investments(active: bool, wallet: str) -> list[dict]:
     conditions = []
     # Only allow investment, stocks, or account (savings)
     conditions.append("(s.type IN ('investment', 'stocks') OR (s.type = 'account' AND s.metadata->>'accountType' = 'savings'))")
@@ -58,7 +58,7 @@ def load_investments(active: bool = None, wallet: str = None) -> list[dict]:
         END AS investment_type,
         CASE
             WHEN s.type = 'investment' THEN s.metadata->>'category'
-            WHEN s.type = 'stocks' THEN s.metadata->>'broker'
+            WHEN s.type = 'stocks' THEN s.metadata->>'type'
             WHEN s.type = 'account' THEN s.metadata->>'accountType'
             ELSE NULL
         END AS subtype,

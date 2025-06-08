@@ -2,7 +2,7 @@
 
 import styles from "./page.module.css";
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useState } from "react";
+import { ReactNode, useCallback, useEffect, useState } from "react";
 import { InvetsmentsIndicatorsResponse, InvestmentTypesDistributionResponse, WalletsDistributionResponse, WalletsResponse } from "@/api/InvestmentsPageResponses";
 import Indicator from "@/components/elements/Indicator";
 import TileHeader from "@/components/elements/TileHeader";
@@ -104,13 +104,19 @@ export default function Investments() {
       fetchedData: wallets
   } = useGetHttp<WalletsResponse>(`/investments/wallets`);
 
+
+  function changeTab(index: number): ReactNode {
+    const walletName = wallets?.wallets[index] ?? "Unknown Wallet";
+    return renderTabContent(walletName);
+  }
+
   // Tab content renderer
-  const renderTabContent = useCallback((index: number) => {
+  const renderTabContent = useCallback((walletName: string) => {
     // You can switch on index to render different content per tab
     return (
       <div className="mainContainer">
         <div className="gridItem span2Columns span2Rows">
-          <TileHeader headline="Investments" subHeadline="List of active investments in a wallet." />
+          <TileHeader headline="Investments" subHeadline={`List of active investments in the '${walletName}' wallet.`} />
           <Table hasHeader style={{ width: "90%" }} boldLastRow={false} currencyColumnIdx={-1} colorsColumnIdx={-1} />
         </div>
         <div className="gridItem span2Columns">
@@ -199,7 +205,7 @@ export default function Investments() {
       <div className="gridItem span4Columns">
         <TabList
           labels={wallets?.wallets ?? []}
-          tabContent={renderTabContent}
+          tabContent={(index) => changeTab(index)}
         />
       </div>
     </main>
