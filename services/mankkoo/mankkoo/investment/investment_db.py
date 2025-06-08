@@ -20,43 +20,50 @@ def load_wallets() -> list[str]:
     return result
 
 
-def load_all_investments(active: str = None, wallet: str = None) -> list[dict]:
+def load_all_investments(active: bool, wallet: str = None) -> list[dict]:
     query = """
-    SELECT id,
+    WITH latest_events AS (
+        SELECT DISTINCT ON (e.stream_id) e.stream_id, e.data, e.version
+        FROM events e
+        ORDER BY e.stream_id, e.version DESC
+    )
+    SELECT s.id,
         CASE
-            WHEN type = 'investment' THEN metadata->>'investmentName'
-            WHEN type = 'stocks' THEN metadata->>'etfName'
-            WHEN type = 'account' THEN metadata->>'accountName'
+            WHEN s.type = 'investment' THEN s.metadata->>'investmentName'
+            WHEN s.type = 'stocks' THEN s.metadata->>'etfName'
+            WHEN s.type = 'account' THEN s.metadata->>'accountName'
             ELSE NULL
         END AS name,
         CASE
-            WHEN type = 'investment' THEN 'investment'
-            WHEN type = 'stocks' THEN 'stocks'
-            WHEN type = 'account' THEN 'account'
-            ELSE type
+            WHEN s.type = 'investment' THEN 'investment'
+            WHEN s.type = 'stocks' THEN 'stocks'
+            WHEN s.type = 'account' THEN 'account'
+            ELSE s.type
         END AS investment_type,
         CASE
-            WHEN type = 'investment' THEN metadata->>'category'
-            WHEN type = 'stocks' THEN metadata->>'broker'
-            WHEN type = 'account' THEN metadata->>'accountType'
+            WHEN s.type = 'investment' THEN s.metadata->>'category'
+            WHEN s.type = 'stocks' THEN s.metadata->>'broker'
+            WHEN s.type = 'account' THEN s.metadata->>'accountType'
             ELSE NULL
         END AS subtype,
-        COALESCE((metadata->>'balance')::numeric, 0) AS balance
-    FROM streams
+        COALESCE((le.data->>'balance')::numeric, 0) AS balance
+    FROM streams s
+    LEFT JOIN latest_events le ON le.stream_id = s.id AND le.version = s.version
     WHERE (
-        type IN ('investment', 'stocks')
-        OR (type = 'account' AND metadata->>'accountType' = 'savings')
+        s.type IN ('investment', 'stocks')
+        OR (s.type = 'account' AND s.metadata->>'accountType' = 'savings')
     )
     """
     params = []
     if active is not None:
-        if active.lower() == 'true':
-            query += " AND (endDate IS NULL OR endDate > CURRENT_DATE)"
-        elif active.lower() == 'false':
-            query += " AND (endDate IS NOT NULL AND endDate <= CURRENT_DATE)"
+        if active:
+            query += f" AND (CAST (metadata->>'active' AS boolean) = {active} OR NOT (metadata ? 'active'))"
+        else:
+            query += f" AND CAST (metadata->>'active' AS boolean) = {active}"
     if wallet:
-        query += " AND labels->>'wallet' = %s"
+        query += " AND s.labels->>'wallet' = %s"
         params.append(wallet)
+
     query += " ORDER BY balance DESC;"
     result = []
     with db.get_connection() as conn:
