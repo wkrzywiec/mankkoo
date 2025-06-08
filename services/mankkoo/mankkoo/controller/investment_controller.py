@@ -49,7 +49,7 @@ class InvestmentStreamResponse(Schema):
     balance = Float()
 
 
-@investment_endpoints.route("/")
+@investment_endpoints.route("")
 @investment_endpoints.input(InvestmentsQuery, location='query')
 @investment_endpoints.output(InvestmentStreamResponse(many=True), status_code=200)
 @investment_endpoints.doc(
