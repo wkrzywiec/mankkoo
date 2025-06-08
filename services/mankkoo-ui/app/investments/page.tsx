@@ -2,7 +2,7 @@
 
 import styles from "./page.module.css";
 import dynamic from "next/dynamic";
-import { ReactNode, useCallback, useEffect, useState } from "react";
+import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { InvetsmentsIndicatorsResponse, InvestmentTypesDistributionResponse, WalletsDistributionResponse, WalletsResponse, InvestmentStreamResponse } from "@/api/InvestmentsPageResponses";
 import Indicator from "@/components/elements/Indicator";
 import TileHeader from "@/components/elements/TileHeader";
@@ -104,44 +104,39 @@ export default function Investments() {
       fetchedData: wallets
   } = useGetHttp<WalletsResponse>(`/investments/wallets`);
 
-  // State for selected wallet/tab
+
+  // Handle selected wallet
   const [selectedWalletIdx, setSelectedWalletIdx] = useState(0);
   const selectedWallet = wallets?.wallets[selectedWalletIdx] ?? "";
-  const [investments, setInvestments] = useState<InvestmentStreamResponse[]>([]);
-  const [isFetchingInvestments, setIsFetchingInvestments] = useState(false);
 
-  // Fetch investments for selected wallet
-  useEffect(() => {
-    if (!selectedWallet) {
-      setInvestments([]);
-      return;
-    }
-    setIsFetchingInvestments(true);
-    fetch(`http://localhost:5000/api/investments/?active=true&wallet=${encodeURIComponent(selectedWallet)}`)
-      .then(res => res.json())
-      .then(data => setInvestments(data))
-      .catch(() => setInvestments([]))
-      .finally(() => setIsFetchingInvestments(false));
-  }, [selectedWallet]);
+  const {
+      fetchedData: investmentsInWallet,
+      isFetching: isFetchingInvestmentsInWallet,
+  } = useGetHttp<InvestmentStreamResponse[]>(`/investments?wallet=${selectedWallet}&active=true`, !!selectedWallet);
 
-  // Table data for investments
-  const investmentsTableData: TableData = {
+  const investmentsTableData = useMemo<TableData>(() => ({
     hasHeader: true,
     boldLastRow: false,
     colorsColumnIdx: -1,
     data: [
       ["Name", "Type", "Balance", "Subtype"],
-      ...investments.map(inv => [inv.name, inv.investmentType, currencyFormat(inv.balance), inv.subtype])
-    ]
-  };
+      ...(investmentsInWallet ?? []).map(inv => [inv.name, inv.investmentType, currencyFormat(inv.balance), inv.subtype])
+    ],
+    currencyColumnIdx: -1
+  }), [investmentsInWallet]);
 
-  // Tab content renderer
+  function changeTab(index: number): ReactNode {
+    setSelectedWalletIdx(index);
+    const walletName = wallets?.wallets[index] ?? "Unknown Wallet";
+    return renderTabContent(walletName);
+  }
+
   const renderTabContent = useCallback((walletName: string) => {
     return (
       <div className="mainContainer">
         <div className="gridItem span2Columns span2Rows">
           <TileHeader headline="Investments" subHeadline={`List of active investments in the '${walletName}' wallet.`} />
-          {isFetchingInvestments ? <Loader /> :
+          {isFetchingInvestmentsInWallet ? <Loader /> :
             <Table data={investmentsTableData.data}
               hasHeader={investmentsTableData.hasHeader}
               boldLastRow={investmentsTableData.boldLastRow}
@@ -167,14 +162,7 @@ export default function Investments() {
         </div>
       </div>
     );
-  }, [investmentsTableData, isFetchingInvestments]);
-
-  // Tab change handler
-  function changeTab(index: number): ReactNode {
-    setSelectedWalletIdx(index);
-    const walletName = wallets?.wallets[index] ?? "Unknown Wallet";
-    return renderTabContent(walletName);
-  }
+  }, [investmentsTableData, isFetchingInvestmentsInWallet]);
 
   return (
     <main className="mainContainer">
