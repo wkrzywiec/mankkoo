@@ -20,8 +20,24 @@ def load_wallets() -> list[str]:
     return result
 
 
-def load_all_investments(active: bool, wallet: str = None) -> list[dict]:
-    query = """
+def load_investments(active: bool = None, wallet: str = None) -> list[dict]:
+    conditions = []
+    # Only allow investment, stocks, or account (savings)
+    conditions.append("(s.type IN ('investment', 'stocks') OR (s.type = 'account' AND s.metadata->>'accountType' = 'savings'))")
+
+    if active is not None:
+        if active:
+            conditions.append(f"(CAST (s.metadata->>'active' AS boolean) = {active} OR NOT (s.metadata ? 'active'))")
+        else:
+            conditions.append(f"CAST (s.metadata->>'active' AS boolean) = {active}")
+    if wallet:
+        conditions.append(f"s.labels->>'wallet' = '{wallet}'")
+
+    where_clause = ''
+    if conditions:
+        where_clause = 'WHERE ' + ' AND '.join(conditions)
+
+    query = f"""
     WITH latest_events AS (
         SELECT DISTINCT ON (e.stream_id) e.stream_id, e.data, e.version
         FROM events e
@@ -49,26 +65,14 @@ def load_all_investments(active: bool, wallet: str = None) -> list[dict]:
         COALESCE((le.data->>'balance')::numeric, 0) AS balance
     FROM streams s
     LEFT JOIN latest_events le ON le.stream_id = s.id AND le.version = s.version
-    WHERE (
-        s.type IN ('investment', 'stocks')
-        OR (s.type = 'account' AND s.metadata->>'accountType' = 'savings')
-    )
+    {where_clause}
+    ORDER BY balance DESC;
     """
-    params = []
-    if active is not None:
-        if active:
-            query += f" AND (CAST (metadata->>'active' AS boolean) = {active} OR NOT (metadata ? 'active'))"
-        else:
-            query += f" AND CAST (metadata->>'active' AS boolean) = {active}"
-    if wallet:
-        query += " AND s.labels->>'wallet' = %s"
-        params.append(wallet)
 
-    query += " ORDER BY balance DESC;"
     result = []
     with db.get_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute(query, params)
+            cur.execute(query)
             for row in cur.fetchall():
                 result.append({
                     'id': str(row[0]),

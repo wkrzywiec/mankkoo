@@ -62,4 +62,4 @@ class InvestmentStreamResponse(Schema):
 def get_all_investments(query_data):
     active = query_data.get('active')
     wallet = query_data.get('wallet')
-    return investment_db.load_all_investments(active=active, wallet=wallet)
+    return investment_db.load_investments(active=active, wallet=wallet)
