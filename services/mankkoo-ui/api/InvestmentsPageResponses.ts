@@ -30,3 +30,11 @@ export interface WalletsDistributionResponse {
 export interface WalletsResponse {
     wallets: string[];
 }
+
+export interface InvestmentStreamResponse {
+    id: string;
+    name: string;
+    investmentType: string;
+    subtype: string;
+    balance: number;
+}

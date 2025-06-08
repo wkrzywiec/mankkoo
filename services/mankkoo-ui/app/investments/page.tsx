@@ -3,7 +3,7 @@
 import styles from "./page.module.css";
 import dynamic from "next/dynamic";
 import { ReactNode, useCallback, useEffect, useState } from "react";
-import { InvetsmentsIndicatorsResponse, InvestmentTypesDistributionResponse, WalletsDistributionResponse, WalletsResponse } from "@/api/InvestmentsPageResponses";
+import { InvetsmentsIndicatorsResponse, InvestmentTypesDistributionResponse, WalletsDistributionResponse, WalletsResponse, InvestmentStreamResponse } from "@/api/InvestmentsPageResponses";
 import Indicator from "@/components/elements/Indicator";
 import TileHeader from "@/components/elements/TileHeader";
 import PieChart, { PieChartData } from "@/components/charts/Piechart";
@@ -104,20 +104,51 @@ export default function Investments() {
       fetchedData: wallets
   } = useGetHttp<WalletsResponse>(`/investments/wallets`);
 
+  // State for selected wallet/tab
+  const [selectedWalletIdx, setSelectedWalletIdx] = useState(0);
+  const selectedWallet = wallets?.wallets[selectedWalletIdx] ?? "";
+  const [investments, setInvestments] = useState<InvestmentStreamResponse[]>([]);
+  const [isFetchingInvestments, setIsFetchingInvestments] = useState(false);
 
-  function changeTab(index: number): ReactNode {
-    const walletName = wallets?.wallets[index] ?? "Unknown Wallet";
-    return renderTabContent(walletName);
-  }
+  // Fetch investments for selected wallet
+  useEffect(() => {
+    if (!selectedWallet) {
+      setInvestments([]);
+      return;
+    }
+    setIsFetchingInvestments(true);
+    fetch(`http://localhost:5000/api/investments/?active=true&wallet=${encodeURIComponent(selectedWallet)}`)
+      .then(res => res.json())
+      .then(data => setInvestments(data))
+      .catch(() => setInvestments([]))
+      .finally(() => setIsFetchingInvestments(false));
+  }, [selectedWallet]);
+
+  // Table data for investments
+  const investmentsTableData: TableData = {
+    hasHeader: true,
+    boldLastRow: false,
+    colorsColumnIdx: -1,
+    data: [
+      ["Name", "Type", "Balance", "Subtype"],
+      ...investments.map(inv => [inv.name, inv.investmentType, currencyFormat(inv.balance), inv.subtype])
+    ]
+  };
 
   // Tab content renderer
   const renderTabContent = useCallback((walletName: string) => {
-    // You can switch on index to render different content per tab
     return (
       <div className="mainContainer">
         <div className="gridItem span2Columns span2Rows">
           <TileHeader headline="Investments" subHeadline={`List of active investments in the '${walletName}' wallet.`} />
-          <Table hasHeader style={{ width: "90%" }} boldLastRow={false} currencyColumnIdx={-1} colorsColumnIdx={-1} />
+          {isFetchingInvestments ? <Loader /> :
+            <Table data={investmentsTableData.data}
+              hasHeader={investmentsTableData.hasHeader}
+              boldLastRow={investmentsTableData.boldLastRow}
+              currencyColumnIdx={investmentsTableData.currencyColumnIdx}
+              colorsColumnIdx={investmentsTableData.colorsColumnIdx}
+            />
+          }
         </div>
         <div className="gridItem span2Columns">
           <TileHeader headline="Diversification" subHeadline="Wallet composition by asset type" />
@@ -136,7 +167,14 @@ export default function Investments() {
         </div>
       </div>
     );
-  }, []);
+  }, [investmentsTableData, isFetchingInvestments]);
+
+  // Tab change handler
+  function changeTab(index: number): ReactNode {
+    setSelectedWalletIdx(index);
+    const walletName = wallets?.wallets[index] ?? "Unknown Wallet";
+    return renderTabContent(walletName);
+  }
 
   return (
     <main className="mainContainer">
@@ -205,7 +243,7 @@ export default function Investments() {
       <div className="gridItem span4Columns">
         <TabList
           labels={wallets?.wallets ?? []}
-          tabContent={(index) => changeTab(index)}
+          tabContent={(_idx) => changeTab(_idx)}
         />
       </div>
     </main>
