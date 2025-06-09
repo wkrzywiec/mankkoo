@@ -1,5 +1,6 @@
 import mankkoo.database as db
 from mankkoo.base_logger import log
+import re
 
 
 def load_wallets() -> list[str]:
@@ -114,7 +115,7 @@ def load_investment_transactions(investment_id: str) -> list[dict]:
             for row in cur.fetchall():
                 result.append({
                     'occuredAt': row[0],
-                    'eventType': row[1],
+                    'eventType': __camel_to_words(row[1]) if row[1] else None,
                     'unitsCount': float(row[2]) if row[2] is not None else None,
                     'pricePerUnit': float(row[3]) if row[3] is not None else None,
                     'totalValue': float(row[4]) if row[4] is not None else None,
@@ -122,3 +123,7 @@ def load_investment_transactions(investment_id: str) -> list[dict]:
                     'comment': row[6] if row[6] is not None else None,
                 })
     return result
+
+
+def __camel_to_words(name):
+    return re.sub(r'(?<!^)(?=[A-Z])', ' ', name)
