@@ -27,6 +27,18 @@ export interface WalletsDistributionResponse {
     viewName: string;
 }
 
+export interface InvestmentTypesDistributionPerWalletItem {
+    percentage: number;
+    total: number;
+    wallet: string;
+    type: string;
+}
+
+export interface InvestmentTypesDistributionPerWalletsResponse {
+    data: InvestmentTypesDistributionPerWalletItem[];
+    viewName: string;
+}
+
 export interface WalletsResponse {
     wallets: string[];
 }

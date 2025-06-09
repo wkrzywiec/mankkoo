@@ -49,7 +49,8 @@ def load_all_views():
                 views.total_history_per_day_key,
                 views.investment_indicators_key,
                 views.investment_types_distribution_key,
-                views.investment_wallets_distribution_key
+                views.investment_wallets_distribution_key,
+                views.investment_types_distribution_per_wallet_key
             ]
         }
     except Exception as e:

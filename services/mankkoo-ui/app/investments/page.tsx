@@ -3,7 +3,7 @@
 import styles from "./page.module.css";
 import dynamic from "next/dynamic";
 import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
-import { InvetsmentsIndicatorsResponse, InvestmentTypesDistributionResponse, WalletsDistributionResponse, WalletsResponse, InvestmentStreamResponse } from "@/api/InvestmentsPageResponses";
+import { InvetsmentsIndicatorsResponse, InvestmentTypesDistributionResponse, WalletsDistributionResponse, WalletsResponse, InvestmentStreamResponse, InvestmentTypesDistributionPerWalletsResponse, InvestmentTypesDistributionPerWalletItem } from "@/api/InvestmentsPageResponses";
 import Indicator from "@/components/elements/Indicator";
 import TileHeader from "@/components/elements/TileHeader";
 import PieChart, { PieChartData } from "@/components/charts/Piechart";
@@ -125,6 +125,36 @@ export default function Investments() {
     currencyColumnIdx: -1
   }), [investmentsInWallet]);
 
+  
+  const {
+    fetchedData: investmentTypeDistributionPerWallet,
+  } = useGetHttp<InvestmentTypesDistributionPerWalletsResponse>('/admin/views/investment-types-distribution-per-wallet');
+
+  const invTypeDistPerWalletPie = useMemo<PieChartData>(() => {
+    if (!investmentTypeDistributionPerWallet?.data?.length || !selectedWallet) return { data: [], labels: [] };
+    const filtered = investmentTypeDistributionPerWallet.data.filter((item: InvestmentTypesDistributionPerWalletItem) => item.wallet === selectedWallet);
+    return {
+      labels: filtered.map((item) => item.type),
+      data: filtered.map((item) => item.total)
+    };
+  }, [investmentTypeDistributionPerWallet, selectedWallet]);
+
+  // Table for investment type distribution per selected wallet
+  const invTypeDistPerWalletTable = useMemo<TableData>(() => {
+    if (!investmentTypeDistributionPerWallet?.data?.length || !selectedWallet) return { data: [], hasHeader: true, boldLastRow: false, currencyColumnIdx: -1, colorsColumnIdx: -1 };
+    const filtered = investmentTypeDistributionPerWallet.data.filter((item: InvestmentTypesDistributionPerWalletItem) => item.wallet === selectedWallet);
+    return {
+      hasHeader: true,
+      boldLastRow: false,
+      currencyColumnIdx: -1,
+      colorsColumnIdx: -1,
+      data: [
+        ["Type", "Total", "Percentage"],
+        ...filtered.map((item) => [item.type, currencyFormat(item.total), percentage(item.percentage)])
+      ]
+    };
+  }, [investmentTypeDistributionPerWallet, selectedWallet]);
+
   function changeTab(index: number): ReactNode {
     setSelectedWalletIdx(index);
     const walletName = wallets?.wallets[index] ?? "Unknown Wallet";
@@ -148,8 +178,13 @@ export default function Investments() {
         <div className="gridItem span2Columns">
           <TileHeader headline="Diversification" subHeadline="Wallet composition by asset type" />
           <div className={styles.horizontalAlignment}>
-            <PieChart />
-            <Table />
+            <PieChart input={invTypeDistPerWalletPie} />
+            <Table data={invTypeDistPerWalletTable.data}
+              hasHeader={invTypeDistPerWalletTable.hasHeader}
+              boldLastRow={invTypeDistPerWalletTable.boldLastRow}
+              currencyColumnIdx={invTypeDistPerWalletTable.currencyColumnIdx}
+              colorsColumnIdx={invTypeDistPerWalletTable.colorsColumnIdx}
+            />
           </div>
         </div>
         <div className="gridItem span2Columns">
@@ -162,7 +197,7 @@ export default function Investments() {
         </div>
       </div>
     );
-  }, [investmentsTableData, isFetchingInvestmentsInWallet]);
+  }, [investmentsTableData, isFetchingInvestmentsInWallet, invTypeDistPerWalletPie, invTypeDistPerWalletTable]);
 
   return (
     <main className="mainContainer">

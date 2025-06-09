@@ -13,6 +13,7 @@ total_history_per_day_key = 'total-history-per-day'
 investment_indicators_key = 'investment-indicators'
 investment_types_distribution_key = 'investment-types-distribution'
 investment_wallets_distribution_key = 'investment-wallets-distribution'
+investment_types_distribution_per_wallet_key = 'investment-types-distribution-per-wallet'
 
 
 def load_view(view_name):
@@ -45,6 +46,7 @@ def update_views(oldest_occured_event_date: date):
     __investment_indicators()
     __investment_types_distribution()
     __investment_wallets_distribution()
+    __investment_types_distribution_per_wallet()
 
 
 def __main_indicators() -> None:
@@ -642,6 +644,94 @@ def __load_investment_wallets_distribution() -> list[dict]:
                     "wallet": row[0],
                     "total": row[1],
                     "percentage": row[2]
+                })
+    return result
+
+
+def __investment_types_distribution_per_wallet():
+    log.info("Updating 'investment-types-distribution-per-wallet' view...")
+    view_content = __load_investment_types_distribution_per_wallet()
+    __store_view('investment-types-distribution-per-wallet', view_content)
+    log.info("The 'investment-types-distribution-per-wallet' view was updated")
+
+
+def __load_investment_types_distribution_per_wallet() -> list[dict]:
+    log.info("Loading investment type distribution per wallet (including savings accounts)...")
+    query = """
+    WITH investment_streams AS (
+        SELECT id, version, labels ->> 'wallet' AS wallet, metadata ->> 'category' AS type
+        FROM streams
+        WHERE type = 'investment' AND (metadata ->> 'active')::boolean = true
+    ),
+    investment_balance AS (
+        SELECT
+            SUM((e.data->>'balance')::numeric) AS total,
+            s.wallet,
+            s.type
+        FROM events e
+        JOIN investment_streams s ON e.stream_id = s.id AND e.version = s.version
+        GROUP BY s.wallet, s.type
+    ),
+    stocks_streams AS (
+        SELECT id, version, labels ->> 'wallet' AS wallet, metadata ->> 'type' AS type
+        FROM streams
+        WHERE type = 'stocks' AND (metadata ->> 'active')::boolean = true
+    ),
+    stocks_balance AS (
+        SELECT
+            SUM((e.data->>'balance')::numeric) AS total,
+            s.wallet,
+            s.type
+        FROM events e
+        JOIN stocks_streams s ON e.stream_id = s.id AND e.version = s.version
+        GROUP BY s.wallet, s.type
+    ),
+    savings_streams AS (
+        SELECT id, version, labels ->> 'wallet' AS wallet, 'Savings Accounts' AS type
+        FROM streams
+        WHERE type = 'account' AND (metadata ->> 'accountType') = 'savings' AND (metadata ->> 'active')::boolean = true
+    ),
+    savings_balance AS (
+        SELECT
+            SUM((e.data->>'balance')::numeric) AS total,
+            s.wallet,
+            s.type
+        FROM events e
+        JOIN savings_streams s ON e.stream_id = s.id AND e.version = s.version
+        GROUP BY s.wallet, s.type
+    ),
+    all_types AS (
+        SELECT * FROM investment_balance
+        UNION ALL
+        SELECT * FROM stocks_balance
+        UNION ALL
+        SELECT * FROM savings_balance
+    ),
+    wallet_totals AS (
+        SELECT wallet, SUM(total) AS wallet_total
+        FROM all_types
+        GROUP BY wallet
+    )
+    SELECT
+        a.wallet,
+        a.type,
+        a.total,
+        ROUND(a.total / NULLIF(w.wallet_total, 0), 4) AS percentage
+    FROM all_types a
+    JOIN wallet_totals w ON a.wallet = w.wallet
+    ORDER BY a.wallet, a.total DESC;
+    """
+    result = []
+    with db.get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(query)
+            rows = cur.fetchall()
+            for row in rows:
+                result.append({
+                    "wallet": row[0],
+                    "type": row[1].replace("_", " ").title() if row[1] != 'Savings Accounts' else row[1],
+                    "total": row[2],
+                    "percentage": row[3]
                 })
     return result
 
