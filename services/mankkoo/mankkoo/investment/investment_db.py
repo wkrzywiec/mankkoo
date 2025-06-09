@@ -82,3 +82,43 @@ def load_investments(active: bool, wallet: str) -> list[dict]:
                     'balance': float(row[4]) if row[4] is not None else 0.0
                 })
     return result
+
+
+def load_investment_transactions(investment_id: str) -> list[dict]:
+    query = f"""
+        SELECT
+            occured_at::date AS occured_at,
+            e.type AS event_type,
+            (e.data->>'units')::numeric AS units_count,
+            CASE
+                WHEN s.type = 'investment' THEN (e.data->>'pricePerUnit')::numeric
+                WHEN s.type = 'account' THEN (e.data->>'amount')::numeric
+                ELSE (e.data->>'averagePrice')::numeric
+            END AS price_per_unit,
+            CASE
+                WHEN s.type = 'account' THEN (e.data->>'amount')::numeric
+                ELSE (e.data->>'totalValue')::numeric
+            END AS total_value,
+            (e.data->>'balance')::numeric AS balance,
+            (e.data->>'comment')::numeric AS comment
+        FROM events e
+        JOIN streams s ON e.stream_id = s.id
+        WHERE e.stream_id = '{investment_id}'
+        ORDER BY e.version DESC;
+    """
+
+    result = []
+    with db.get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(query)
+            for row in cur.fetchall():
+                result.append({
+                    'occuredAt': row[0],
+                    'eventType': row[1],
+                    'unitsCount': float(row[2]) if row[2] is not None else None,
+                    'pricePerUnit': float(row[3]) if row[3] is not None else None,
+                    'totalValue': float(row[4]) if row[4] is not None else None,
+                    'balance': float(row[5]) if row[5] is not None else None,
+                    'comment': row[6] if row[6] is not None else None,
+                })
+    return result

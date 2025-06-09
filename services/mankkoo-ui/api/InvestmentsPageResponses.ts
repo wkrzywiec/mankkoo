@@ -50,3 +50,12 @@ export interface InvestmentStreamResponse {
     subtype: string;
     balance: number;
 }
+
+export interface InvestmentTransaction {
+    occuredAt: string;
+    eventType: string;
+    unitsCount: number | null;
+    pricePerUnit: number | null;
+    totalValue: number | null;
+    balance: number | null;
+}

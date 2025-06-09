@@ -63,3 +63,23 @@ def get_all_investments(query_data):
     active = query_data.get('active')
     wallet = query_data.get('wallet')
     return investment_db.load_investments(active=active, wallet=wallet)
+
+
+class InvestmentTransaction(Schema):
+    occuredAt = String()
+    eventType = String()
+    unitsCount = Float(allow_none=True)
+    pricePerUnit = Float(allow_none=True)
+    totalValue = Float(allow_none=True)
+    balance = Float(allow_none=True)
+
+
+@investment_endpoints.route("/transactions/<string:investment_id>")
+@investment_endpoints.output(InvestmentTransaction(many=True), status_code=200)
+@investment_endpoints.doc(
+    summary='Investment Transactions',
+    description='List all transactions for a given investment UUID, ordered by version desc.'
+)
+def get_investment_transactions(investment_id):
+    transactions = investment_db.load_investment_transactions(investment_id)
+    return transactions
