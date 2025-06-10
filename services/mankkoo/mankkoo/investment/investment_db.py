@@ -126,4 +126,10 @@ def load_investment_transactions(investment_id: str) -> list[dict]:
 
 
 def __camel_to_words(name):
+    # If there are multiple consecutive capitals, only split before the last capital
+    # e.g. ETFBought -> ETF Bought, USDDeposit -> USD Deposit
+    match = re.match(r'([A-Z]+)([A-Z][a-z].*)', name)
+    if match:
+        return f"{match.group(1)} {match.group(2)}"
+    # Otherwise, split before each capital except the first
     return re.sub(r'(?<!^)(?=[A-Z])', ' ', name)
