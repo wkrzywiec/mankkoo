@@ -3,7 +3,7 @@
 import styles from "./page.module.css";
 import dynamic from "next/dynamic";
 import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
-import { InvetsmentsIndicatorsResponse, InvestmentTypesDistributionResponse, WalletsDistributionResponse, WalletsResponse, InvestmentStreamResponse, InvestmentTypesDistributionPerWalletsResponse, InvestmentTypesDistributionPerWalletItem } from "@/api/InvestmentsPageResponses";
+import { InvetsmentsIndicatorsResponse, InvestmentTypesDistributionResponse, WalletsDistributionResponse, WalletsResponse, InvestmentStreamResponse, InvestmentTypesDistributionPerWalletsResponse, InvestmentTypesDistributionPerWalletItem, InvestmentTransaction } from "@/api/InvestmentsPageResponses";
 import Indicator from "@/components/elements/Indicator";
 import TileHeader from "@/components/elements/TileHeader";
 import PieChart, { PieChartData } from "@/components/charts/Piechart";
@@ -161,6 +161,29 @@ export default function Investments() {
     };
   }, [investmentTypeDistributionPerWallet, selectedWallet]);
 
+  // Fetch transactions for selected investment
+  const {
+    fetchedData: investmentTransactions,
+    isFetching: isFetchingInvestmentTransactions
+  } = useGetHttp<InvestmentTransaction[]>(
+    selectedInvestmentId ? `/investments/transactions/${selectedInvestmentId}` : undefined,
+    !!selectedInvestmentId
+  );
+
+  // Move useMemo for transactionsTableData here to always use the latest investmentTransactions
+  const transactionsTableData = useMemo(() => ([
+    ["Date", "Event Type", "Units", "Price/Unit", "Total Value", "Balance", "Comment"],
+    ...((investmentTransactions ?? []).map(t => [
+      t.occuredAt,
+      t.eventType,
+      t.unitsCount?.toString() ?? '',
+      t.pricePerUnit?.toString() ?? '',
+      t.totalValue?.toString() ?? '',
+      t.balance?.toString() ?? '',
+      t.comment ?? ''
+    ]))
+  ]), [investmentTransactions]);
+
   function changeTab(index: number): ReactNode {
     setSelectedWalletIdx(index);
     const walletName = wallets?.wallets[index] ?? "Unknown Wallet";
@@ -168,7 +191,6 @@ export default function Investments() {
   }
 
   const renderTabContent = useCallback((walletName: string) => {
-    const selectedInvestmentIdx = selectedInvestmentId ? investmentsRowIds.indexOf(selectedInvestmentId) : undefined;
     return (
       <div className="mainContainer">
         <div className="gridItem span2Columns span2Rows">
@@ -179,7 +201,7 @@ export default function Investments() {
               boldLastRow={investmentsTableData.boldLastRow}
               currencyColumnIdx={investmentsTableData.currencyColumnIdx}
               colorsColumnIdx={investmentsTableData.colorsColumnIdx}
-              rowIds={['', ...investmentsRowIds]}
+              rowIds={investmentsRowIds}
               onRowClick={setSelectedInvestmentId}
             />
           }
@@ -205,11 +227,18 @@ export default function Investments() {
             headline="Transactions" 
             subHeadline={`Log of all transactions for the selected investment${selectedInvestmentId ? `: ${investmentsInWallet?.find(inv => inv.id === selectedInvestmentId)?.name ?? ''}` : ''}.`} 
           />
-          <Table hasHeader style={{ width: "90%" }} boldLastRow={false} currencyColumnIdx={-1} colorsColumnIdx={-1} />
+          <Table 
+            hasHeader 
+            style={{ width: "90%" }} 
+            boldLastRow={false} 
+            currencyColumnIdx={-1} 
+            colorsColumnIdx={-1}
+            data={transactionsTableData}
+          />
         </div>
       </div>
     );
-  }, [investmentsTableData, isFetchingInvestmentsInWallet, invTypeDistPerWalletPie, invTypeDistPerWalletTable, investmentsRowIds, selectedInvestmentId]);
+  }, [investmentsTableData, isFetchingInvestmentsInWallet, invTypeDistPerWalletPie, invTypeDistPerWalletTable, investmentsRowIds, selectedInvestmentId, investmentsInWallet, transactionsTableData]);
 
   return (
     <main className="mainContainer">

@@ -101,7 +101,7 @@ def load_investment_transactions(investment_id: str) -> list[dict]:
                 ELSE (e.data->>'totalValue')::numeric
             END AS total_value,
             (e.data->>'balance')::numeric AS balance,
-            (e.data->>'comment')::numeric AS comment
+            e.data->>'comment' AS comment
         FROM events e
         JOIN streams s ON e.stream_id = s.id
         WHERE e.stream_id = '{investment_id}'

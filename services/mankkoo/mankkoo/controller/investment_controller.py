@@ -72,6 +72,7 @@ class InvestmentTransaction(Schema):
     pricePerUnit = Float(allow_none=True)
     totalValue = Float(allow_none=True)
     balance = Float(allow_none=True)
+    comment = String(allow_none=True)
 
 
 @investment_endpoints.route("/transactions/<string:investment_id>")
