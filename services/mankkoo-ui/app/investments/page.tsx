@@ -125,7 +125,13 @@ export default function Investments() {
     currencyColumnIdx: -1
   }), [investmentsInWallet]);
 
-  
+  // Track selected investment
+  const [selectedInvestmentId, setSelectedInvestmentId] = useState<string | undefined>(undefined);
+  const investmentsRowIds = useMemo(() => (investmentsInWallet ?? []).map(inv => inv.id), [investmentsInWallet]);
+
+  // Find selected investment index for highlighting
+  const selectedInvestmentIdx = selectedInvestmentId ? investmentsRowIds.indexOf(selectedInvestmentId) : undefined;
+
   const {
     fetchedData: investmentTypeDistributionPerWallet,
   } = useGetHttp<InvestmentTypesDistributionPerWalletsResponse>('/admin/views/investment-types-distribution-per-wallet');
@@ -162,6 +168,7 @@ export default function Investments() {
   }
 
   const renderTabContent = useCallback((walletName: string) => {
+    const selectedInvestmentIdx = selectedInvestmentId ? investmentsRowIds.indexOf(selectedInvestmentId) : undefined;
     return (
       <div className="mainContainer">
         <div className="gridItem span2Columns span2Rows">
@@ -172,6 +179,8 @@ export default function Investments() {
               boldLastRow={investmentsTableData.boldLastRow}
               currencyColumnIdx={investmentsTableData.currencyColumnIdx}
               colorsColumnIdx={investmentsTableData.colorsColumnIdx}
+              rowIds={['', ...investmentsRowIds]}
+              onRowClick={setSelectedInvestmentId}
             />
           }
         </div>
@@ -192,12 +201,15 @@ export default function Investments() {
           <LineChart />
         </div>
         <div className="gridItem span4Columns">
-          <TileHeader headline="Transactions" subHeadline="Log of all transactions for the selected investment." />
+          <TileHeader 
+            headline="Transactions" 
+            subHeadline={`Log of all transactions for the selected investment${selectedInvestmentId ? `: ${investmentsInWallet?.find(inv => inv.id === selectedInvestmentId)?.name ?? ''}` : ''}.`} 
+          />
           <Table hasHeader style={{ width: "90%" }} boldLastRow={false} currencyColumnIdx={-1} colorsColumnIdx={-1} />
         </div>
       </div>
     );
-  }, [investmentsTableData, isFetchingInvestmentsInWallet, invTypeDistPerWalletPie, invTypeDistPerWalletTable]);
+  }, [investmentsTableData, isFetchingInvestmentsInWallet, invTypeDistPerWalletPie, invTypeDistPerWalletTable, investmentsRowIds, selectedInvestmentId]);
 
   return (
     <main className="mainContainer">
