@@ -58,4 +58,5 @@ export interface InvestmentTransaction {
     pricePerUnit: number | null;
     totalValue: number | null;
     balance: number | null;
+    comment?: string | null;
 }

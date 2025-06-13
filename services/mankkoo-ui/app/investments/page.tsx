@@ -3,29 +3,39 @@
 import styles from "./page.module.css";
 import dynamic from "next/dynamic";
 import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
-import { InvetsmentsIndicatorsResponse, InvestmentTypesDistributionResponse, WalletsDistributionResponse, WalletsResponse, InvestmentStreamResponse, InvestmentTypesDistributionPerWalletsResponse, InvestmentTypesDistributionPerWalletItem, InvestmentTransaction } from "@/api/InvestmentsPageResponses";
 import Indicator from "@/components/elements/Indicator";
 import TileHeader from "@/components/elements/TileHeader";
 import PieChart, { PieChartData } from "@/components/charts/Piechart";
 import TabList from "@/components/elements/TabList";
 import { currencyFormat, percentage } from "@/utils/Formatter";
-import { useGetHttp } from "@/hooks/useHttp";
+import { useInvestmentsData } from "./useInvestmentsData";
 import { TableData } from "@/components/charts/Table";
 import Loader from "@/components/elements/Loader";
+import { useWallets } from "./useWallets";
 
 const LineChart = dynamic(() => import("@/components/charts/Line"), { ssr: false });
 const Table = dynamic(() => import("@/components/charts/Table"), { ssr: false });
 
 export default function Investments() {
-  const {
-    isFetching: isFetchingInvIndicators,
-    fetchedData: indicators,
-  } = useGetHttp<InvetsmentsIndicatorsResponse>("/investments/indicators");
+  const [selectedWalletIdx, setSelectedWalletIdx] = useState(0);
+  const [selectedInvestmentId, setSelectedInvestmentId] = useState<string | undefined>(undefined);
+
+  const { wallets } = useWallets();
+  const selectedWallet = wallets?.wallets[selectedWalletIdx] ?? "";
 
   const {
-    isFetching: isFetchingInvTypeDistribution,
-    fetchedData: invTypeDistribution,
-  } = useGetHttp<InvestmentTypesDistributionResponse>('/admin/views/investment-types-distribution');
+    isFetchingInvIndicators,
+    indicators,
+    isFetchingInvTypeDistribution,
+    invTypeDistribution,
+    isFetchingWalletsDistribution,
+    walletsDistribution,
+    investmentsInWallet,
+    isFetchingInvestmentsInWallet,
+    investmentTypeDistributionPerWallet,
+    investmentTransactions,
+    isFetchingInvestmentTransactions
+  } = useInvestmentsData(selectedWallet, selectedInvestmentId);
 
   const formattedTotalInvestments = currencyFormat(indicators?.totalInvestments);
 
@@ -62,11 +72,6 @@ export default function Investments() {
     
   }, [invTypeDistribution, isFetchingInvTypeDistribution, indicators])
 
-  const {
-    isFetching: isFetchingWalletsDistribution,
-    fetchedData: walletsDistribution,
-  } = useGetHttp<WalletsDistributionResponse>('/admin/views/investment-wallets-distribution');
-  
   const [walletsDistributionTable, setWalletsDistributionTable] = useState<TableData>({ data: [], hasHeader: false, boldLastRow: false, currencyColumnIdx: -1, colorsColumnIdx: -1})
   const [walletsDistributionPie, setWalletsDistributionPie] = useState<PieChartData>({ data: [], labels: [] });
   
@@ -100,20 +105,7 @@ export default function Investments() {
     
   }, [walletsDistribution, isFetchingWalletsDistribution, indicators])
 
-  const {
-      fetchedData: wallets
-  } = useGetHttp<WalletsResponse>(`/investments/wallets`);
-
-
   // Handle selected wallet
-  const [selectedWalletIdx, setSelectedWalletIdx] = useState(0);
-  const selectedWallet = wallets?.wallets[selectedWalletIdx] ?? "";
-
-  const {
-      fetchedData: investmentsInWallet,
-      isFetching: isFetchingInvestmentsInWallet,
-  } = useGetHttp<InvestmentStreamResponse[]>(`/investments?wallet=${selectedWallet}&active=true`, !!selectedWallet);
-
   const investmentsTableData = useMemo<TableData>(() => ({
     hasHeader: true,
     boldLastRow: false,
@@ -126,15 +118,7 @@ export default function Investments() {
   }), [investmentsInWallet]);
 
   // Track selected investment
-  const [selectedInvestmentId, setSelectedInvestmentId] = useState<string | undefined>(undefined);
   const investmentsRowIds = useMemo(() => (investmentsInWallet ?? []).map(inv => inv.id), [investmentsInWallet]);
-
-  // Find selected investment index for highlighting
-  const selectedInvestmentIdx = selectedInvestmentId ? investmentsRowIds.indexOf(selectedInvestmentId) : undefined;
-
-  const {
-    fetchedData: investmentTypeDistributionPerWallet,
-  } = useGetHttp<InvestmentTypesDistributionPerWalletsResponse>('/admin/views/investment-types-distribution-per-wallet');
 
   const invTypeDistPerWalletPie = useMemo<PieChartData>(() => {
     if (!investmentTypeDistributionPerWallet?.data?.length || !selectedWallet) return { data: [], labels: [] };
@@ -160,15 +144,6 @@ export default function Investments() {
       ]
     };
   }, [investmentTypeDistributionPerWallet, selectedWallet]);
-
-  // Fetch transactions for selected investment
-  const {
-    fetchedData: investmentTransactions,
-    isFetching: isFetchingInvestmentTransactions
-  } = useGetHttp<InvestmentTransaction[]>(
-    selectedInvestmentId ? `/investments/transactions/${selectedInvestmentId}` : undefined,
-    !!selectedInvestmentId
-  );
 
   // Move useMemo for transactionsTableData here to always use the latest investmentTransactions
   const transactionsTableData = useMemo(() => ([
@@ -227,18 +202,20 @@ export default function Investments() {
             headline="Transactions" 
             subHeadline={`Log of all transactions for the selected investment${selectedInvestmentId ? `: ${investmentsInWallet?.find(inv => inv.id === selectedInvestmentId)?.name ?? ''}` : ''}.`} 
           />
-          <Table 
-            hasHeader 
-            style={{ width: "90%" }} 
-            boldLastRow={false} 
-            currencyColumnIdx={-1} 
-            colorsColumnIdx={-1}
-            data={transactionsTableData}
-          />
+          {isFetchingInvestmentTransactions ? <Loader /> :
+            <Table 
+              hasHeader 
+              style={{ width: "90%" }} 
+              boldLastRow={false} 
+              currencyColumnIdx={-1} 
+              colorsColumnIdx={-1}
+              data={transactionsTableData}
+            />
+          }
         </div>
       </div>
     );
-  }, [investmentsTableData, isFetchingInvestmentsInWallet, invTypeDistPerWalletPie, invTypeDistPerWalletTable, investmentsRowIds, selectedInvestmentId, investmentsInWallet, transactionsTableData]);
+  }, [investmentsTableData, isFetchingInvestmentsInWallet, invTypeDistPerWalletPie, invTypeDistPerWalletTable, investmentsRowIds, selectedInvestmentId, investmentsInWallet, transactionsTableData, isFetchingInvestmentTransactions]);
 
   return (
     <main className="mainContainer">
