@@ -12,6 +12,7 @@ import { useInvestmentsData } from "./useInvestmentsData";
 import { TableData } from "@/components/charts/Table";
 import Loader from "@/components/elements/Loader";
 import { useWallets } from "./useWallets";
+import DiversificationSection from "./DiversificationSection";
 
 const LineChart = dynamic(() => import("@/components/charts/Line"), { ssr: false });
 const Table = dynamic(() => import("@/components/charts/Table"), { ssr: false });
@@ -182,16 +183,13 @@ export default function Investments() {
           }
         </div>
         <div className="gridItem span2Columns">
-          <TileHeader headline="Diversification" subHeadline="Wallet composition by asset type" />
-          <div className={styles.horizontalAlignment}>
-            <PieChart input={invTypeDistPerWalletPie} />
-            <Table data={invTypeDistPerWalletTable.data}
-              hasHeader={invTypeDistPerWalletTable.hasHeader}
-              boldLastRow={invTypeDistPerWalletTable.boldLastRow}
-              currencyColumnIdx={invTypeDistPerWalletTable.currencyColumnIdx}
-              colorsColumnIdx={invTypeDistPerWalletTable.colorsColumnIdx}
-            />
-          </div>
+          <DiversificationSection
+            headline="Diversification"
+            subHeadline="Wallet composition by asset type"
+            pieData={invTypeDistPerWalletPie}
+            tableData={invTypeDistPerWalletTable}
+            isLoading={isFetchingInvestmentsInWallet}
+          />
         </div>
         <div className="gridItem span2Columns">
           <TileHeader headline="History" subHeadline="History of wallet's results." />
@@ -257,19 +255,13 @@ export default function Investments() {
         </div>
       </div>
       <div className="gridItem span2Columns">
-        <TileHeader headline="Wallets" subHeadline="Displays the distribution of funds across investment wallets." />
-        <div className={styles.horizontalAlignment}>
-          {isFetchingWalletsDistribution ? 
-            <Loader /> : 
-            <>
-              <PieChart input={walletsDistributionPie} />
-              <Table data={walletsDistributionTable.data} 
-                boldLastRow={walletsDistributionTable.boldLastRow} 
-                currencyColumnIdx={walletsDistributionTable.currencyColumnIdx} 
-                colorsColumnIdx={walletsDistributionTable.colorsColumnIdx}
-              />
-            </>}
-        </div>
+        <DiversificationSection
+            headline="Wallets"
+            subHeadline="Displays the distribution of funds across investment wallets."
+            pieData={walletsDistributionPie}
+            tableData={walletsDistributionTable}
+            isLoading={isFetchingWalletsDistribution}
+          />
       </div>
 
       <div className="gridItem span4Columns">
