@@ -13,6 +13,7 @@ import { TableData } from "@/components/charts/Table";
 import Loader from "@/components/elements/Loader";
 import { useWallets } from "./useWallets";
 import DiversificationSection from "./DiversificationSection";
+import { InvestmentTypesDistributionPerWalletItem } from "@/api/InvestmentsPageResponses";
 
 const LineChart = dynamic(() => import("@/components/charts/Line"), { ssr: false });
 const Table = dynamic(() => import("@/components/charts/Table"), { ssr: false });
@@ -106,7 +107,6 @@ export default function Investments() {
     
   }, [walletsDistribution, isFetchingWalletsDistribution, indicators])
 
-  // Handle selected wallet
   const investmentsTableData = useMemo<TableData>(() => ({
     hasHeader: true,
     boldLastRow: false,
@@ -118,7 +118,6 @@ export default function Investments() {
     currencyColumnIdx: -1
   }), [investmentsInWallet]);
 
-  // Track selected investment
   const investmentsRowIds = useMemo(() => (investmentsInWallet ?? []).map(inv => inv.id), [investmentsInWallet]);
 
   const invTypeDistPerWalletPie = useMemo<PieChartData>(() => {
@@ -130,7 +129,6 @@ export default function Investments() {
     };
   }, [investmentTypeDistributionPerWallet, selectedWallet]);
 
-  // Table for investment type distribution per selected wallet
   const invTypeDistPerWalletTable = useMemo<TableData>(() => {
     if (!investmentTypeDistributionPerWallet?.data?.length || !selectedWallet) return { data: [], hasHeader: true, boldLastRow: false, currencyColumnIdx: -1, colorsColumnIdx: -1 };
     const filtered = investmentTypeDistributionPerWallet.data.filter((item: InvestmentTypesDistributionPerWalletItem) => item.wallet === selectedWallet);
@@ -146,7 +144,6 @@ export default function Investments() {
     };
   }, [investmentTypeDistributionPerWallet, selectedWallet]);
 
-  // Move useMemo for transactionsTableData here to always use the latest investmentTransactions
   const transactionsTableData = useMemo(() => ([
     ["Date", "Event Type", "Units", "Price/Unit", "Total Value", "Balance", "Comment"],
     ...((investmentTransactions ?? []).map(t => [
