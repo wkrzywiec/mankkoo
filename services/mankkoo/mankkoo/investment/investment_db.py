@@ -1,6 +1,7 @@
+import re
+
 import mankkoo.database as db
 from mankkoo.base_logger import log
-import re
 
 
 def load_wallets() -> list[str]:
@@ -24,19 +25,23 @@ def load_wallets() -> list[str]:
 def load_investments(active: bool, wallet: str) -> list[dict]:
     conditions = []
     # Only allow investment, stocks, or account (savings)
-    conditions.append("(s.type IN ('investment', 'stocks') OR (s.type = 'account' AND s.metadata->>'accountType' = 'savings'))")
+    conditions.append(
+        "(s.type IN ('investment', 'stocks') OR (s.type = 'account' AND s.metadata->>'accountType' = 'savings'))"
+    )
 
     if active is not None:
         if active:
-            conditions.append(f"(CAST (s.metadata->>'active' AS boolean) = {active} OR NOT (s.metadata ? 'active'))")
+            conditions.append(
+                f"(CAST (s.metadata->>'active' AS boolean) = {active} OR NOT (s.metadata ? 'active'))"
+            )
         else:
             conditions.append(f"CAST (s.metadata->>'active' AS boolean) = {active}")
     if wallet:
         conditions.append(f"s.labels->>'wallet' = '{wallet}'")
 
-    where_clause = ''
+    where_clause = ""
     if conditions:
-        where_clause = 'WHERE ' + ' AND '.join(conditions)
+        where_clause = "WHERE " + " AND ".join(conditions)
 
     query = f"""
     WITH latest_events AS (
@@ -75,13 +80,15 @@ def load_investments(active: bool, wallet: str) -> list[dict]:
         with conn.cursor() as cur:
             cur.execute(query)
             for row in cur.fetchall():
-                result.append({
-                    'id': str(row[0]),
-                    'name': row[1],
-                    'investmentType': row[2],
-                    'subtype': row[3],
-                    'balance': float(row[4]) if row[4] is not None else 0.0
-                })
+                result.append(
+                    {
+                        "id": str(row[0]),
+                        "name": row[1],
+                        "investmentType": row[2],
+                        "subtype": row[3],
+                        "balance": float(row[4]) if row[4] is not None else 0.0,
+                    }
+                )
     return result
 
 
@@ -113,23 +120,25 @@ def load_investment_transactions(investment_id: str) -> list[dict]:
         with conn.cursor() as cur:
             cur.execute(query)
             for row in cur.fetchall():
-                result.append({
-                    'occuredAt': row[0],
-                    'eventType': __camel_to_words(row[1]) if row[1] else None,
-                    'unitsCount': float(row[2]) if row[2] is not None else None,
-                    'pricePerUnit': float(row[3]) if row[3] is not None else None,
-                    'totalValue': float(row[4]) if row[4] is not None else None,
-                    'balance': float(row[5]) if row[5] is not None else None,
-                    'comment': row[6] if row[6] is not None else None,
-                })
+                result.append(
+                    {
+                        "occuredAt": row[0],
+                        "eventType": __camel_to_words(row[1]) if row[1] else None,
+                        "unitsCount": float(row[2]) if row[2] is not None else None,
+                        "pricePerUnit": float(row[3]) if row[3] is not None else None,
+                        "totalValue": float(row[4]) if row[4] is not None else None,
+                        "balance": float(row[5]) if row[5] is not None else None,
+                        "comment": row[6] if row[6] is not None else None,
+                    }
+                )
     return result
 
 
 def __camel_to_words(name):
     # If there are multiple consecutive capitals, only split before the last capital
     # e.g. ETFBought -> ETF Bought, USDDeposit -> USD Deposit
-    match = re.match(r'([A-Z]+)([A-Z][a-z].*)', name)
+    match = re.match(r"([A-Z]+)([A-Z][a-z].*)", name)
     if match:
         return f"{match.group(1)} {match.group(2)}"
     # Otherwise, split before each capital except the first
-    return re.sub(r'(?<!^)(?=[A-Z])', ' ', name)
+    return re.sub(r"(?<!^)(?=[A-Z])", " ", name)

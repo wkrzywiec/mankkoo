@@ -37,7 +37,8 @@ def test_get_investments_no_query_params(test_client):
     assert response.status_code == 200
     payload = response.get_json()
     ids = [item["id"] for item in payload]
-    # Should include all active and inactive investments, stocks, and savings accounts
+    # Should include all active and inactive investments, stocks, and savings
+    # accounts
     for s in streams.values():
         assert str(s.id) in ids
 
@@ -133,4 +134,3 @@ def _create_investment_test_streams():
         "savings": savings_stream,
         "savings_inactive": savings_stream_inactive,
     }
-

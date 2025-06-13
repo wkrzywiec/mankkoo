@@ -1,11 +1,11 @@
-import pytest
-import mankkoo.util.data_formatter as formatter
 import datetime
 
+import pytest
 
-@pytest.mark.parametrize(
-    "date_string",
-    ['02-01-2021', '2021-01-02'])
+import mankkoo.util.data_formatter as formatter
+
+
+@pytest.mark.parametrize("date_string", ["02-01-2021", "2021-01-02"])
 def test_format_date(date_string):
 
     # WHEN

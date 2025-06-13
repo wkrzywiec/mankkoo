@@ -1,20 +1,55 @@
 import os
+
 import psycopg2
 
 from mankkoo.base_logger import log
 
 log.basicConfig(level=log.DEBUG)
 
-account_columns = ['Account', 'Date', 'Title', 'Details', 'Category', 'Comment', 'Operation', 'Currency', 'Balance']
-invest_columns = ['Active', 'Category', 'Bank', 'Investment', 'Start Date', 'End Date', 'Start Amount', 'End amount', 'Currency', 'Details', 'Comment']
-stock_columns = ['Broker', 'Date', 'Title', 'Operation', 'Total Value', 'Units', 'Currency', 'Details', 'Url', 'Comment']
-total_columns = ['Date', 'Total']
-total_monthly_columns = ['Date', 'Income', 'Spending', 'Profit']
+account_columns = [
+    "Account",
+    "Date",
+    "Title",
+    "Details",
+    "Category",
+    "Comment",
+    "Operation",
+    "Currency",
+    "Balance",
+]
+invest_columns = [
+    "Active",
+    "Category",
+    "Bank",
+    "Investment",
+    "Start Date",
+    "End Date",
+    "Start Amount",
+    "End amount",
+    "Currency",
+    "Details",
+    "Comment",
+]
+stock_columns = [
+    "Broker",
+    "Date",
+    "Title",
+    "Operation",
+    "Total Value",
+    "Units",
+    "Currency",
+    "Details",
+    "Url",
+    "Comment",
+]
+total_columns = ["Date", "Total"]
+total_monthly_columns = ["Date", "Income", "Spending", "Profit"]
 
 
 def init_db():
     log.info("Initializing database with tables and functions...")
-    execute("""
+    execute(
+        """
         CREATE TABLE IF NOT EXISTS streams
         (
             id              UUID                      NOT NULL    PRIMARY KEY,
@@ -121,7 +156,8 @@ def init_db():
 
         CREATE OR REPLACE TRIGGER capture_event_added_trigger AFTER INSERT ON events
         FOR EACH STATEMENT EXECUTE FUNCTION notification_trigger();
-        """)
+        """
+    )
 
     log.info("Database initialized")
 
@@ -139,13 +175,11 @@ def get_connection():
     database = os.getenv("DB_NAME", "postgres")
     username = os.getenv("DB_USERNAME", "postgres")
     password = os.getenv("DB_PASSWORD", "postgres")
-    log.info(f'Getting connection to db: postgresql://{host}:{port}/{database}?user={username}&password={password}...')
+    log.info(
+        f"Getting connection to db: postgresql://{host}:{port}/{database}?user={username}&password={password}..."
+    )
 
     conn = psycopg2.connect(
-        host=host,
-        port=port,
-        database=database,
-        user=username,
-        password=password
+        host=host, port=port, database=database, user=username, password=password
     )
     return conn

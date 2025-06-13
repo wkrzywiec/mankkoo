@@ -1,13 +1,14 @@
-import os
-import numpy as np
-import pandas as pd
 import base64
-import mankkoo.account.models as models
-import mankkoo.database as db
+import os
 import pathlib
 
+import numpy as np
+import pandas as pd
 
-data_path = str(pathlib.Path(__file__).parent.absolute()) + '/data/'
+import mankkoo.account.models as models
+import mankkoo.database as db
+
+data_path = str(pathlib.Path(__file__).parent.absolute()) + "/data/"
 
 
 class Mbank(models.Importer):
@@ -19,12 +20,12 @@ class Mbank(models.Importer):
         return pd.read_csv(file_path, sep=";", skiprows=skip_lines["skiprows"])
 
     def load_file_by_contents(self, contents: bytes) -> pd.DataFrame:
-        raise Exception('Loading file by its content is not supported!')
-        content_type, content_string = contents.split(',')
+        raise Exception("Loading file by its content is not supported!")
+        content_type, content_string = contents.split(",")
         decoded = base64.b64decode(content_string)
 
-        temp_file_path = data_path + 'temp_mbank.csv'
-        temp_file = open(temp_file_path, 'w', encoding="utf-8")
+        temp_file_path = data_path + "temp_mbank.csv"
+        temp_file = open(temp_file_path, "w", encoding="utf-8")
 
         decoded_str = decoded.decode("utf-8")
         lines = decoded_str.split("\n")
@@ -36,7 +37,7 @@ class Mbank(models.Importer):
         temp_file.write(cleaned_decoded_content)
         temp_file.close()
 
-        result = self.load_file_by_filename('temp_mbank.csv')
+        result = self.load_file_by_filename("temp_mbank.csv")
         os.remove(temp_file_path)
 
         return result
@@ -46,40 +47,35 @@ class Mbank(models.Importer):
         skipfooter = 0
         lines = 0
         for row in open(file_path):
-            if '#Data operacji' in row:
+            if "#Data operacji" in row:
                 skiprows = lines
-            if '#Saldo' in row:
+            if "#Saldo" in row:
                 skipfooter = lines
             lines += 1
-        return {
-            "skiprows": skiprows,
-            "skipfooter": lines - skipfooter
-        }
+        return {"skiprows": skiprows, "skipfooter": lines - skipfooter}
 
     def format_file(self, df: pd.DataFrame, account_id: str):
 
-        df = df[['#Data operacji', '#Kategoria']]
+        df = df[["#Data operacji", "#Kategoria"]]
         df = df.loc[:, ~df.columns.duplicated()]
 
-        df = df.rename(columns={
-            '#Data operacji': 'Title',
-            '#Kategoria': 'Operation'})
-        df['Operation'] = df['Operation'].str.replace(r'PLN', '')
-        df['Date'] = df.index
+        df = df.rename(columns={"#Data operacji": "Title", "#Kategoria": "Operation"})
+        df["Operation"] = df["Operation"].str.replace(r"PLN", "")
+        df["Date"] = df.index
 
-        df['Date'] = pd.to_datetime(df.Date)
-        df['Date'] = df['Date'].dt.date
-        df['Account'] = account_id
-        df['Account'] = df['Account'].astype('string')
-        df['Currency'] = 'PLN'
-        df['Details'] = np.NaN
-        df['Balance'] = np.NaN
+        df["Date"] = pd.to_datetime(df.Date)
+        df["Date"] = df["Date"].dt.date
+        df["Account"] = account_id
+        df["Account"] = df["Account"].astype("string")
+        df["Currency"] = "PLN"
+        df["Details"] = np.NaN
+        df["Balance"] = np.NaN
 
-        df['Operation'] = df['Operation'].str.replace(',', '.')
-        df['Operation'] = df['Operation'].str.replace(' ', '')
-        df['Operation'] = pd.to_numeric(df['Operation'])
+        df["Operation"] = df["Operation"].str.replace(",", ".")
+        df["Operation"] = df["Operation"].str.replace(" ", "")
+        df["Operation"] = pd.to_numeric(df["Operation"])
 
-        result = self.__add_missing_columns(df, ['Category', 'Comment'])
+        result = self.__add_missing_columns(df, ["Category", "Comment"])
         result = result.sort_values(by="Date")
         result.reset_index(drop=True, inplace=True)
         result = result[db.account_columns]

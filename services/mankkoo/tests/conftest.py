@@ -1,11 +1,10 @@
+import os
+import time
+import uuid
+from datetime import datetime, timedelta, timezone
+
 import psycopg2
 import pytest
-import os
-import uuid
-import time
-
-from datetime import datetime, timezone, timedelta
-
 from testcontainers.postgres import PostgresContainer
 
 import mankkoo.database as db
@@ -22,7 +21,7 @@ def setup(request):
     os.environ["FLASK_ENV"] = "test"
 
     if initPostgresContainer:
-        print('Starting PostgreSQL testcontainer...')
+        print("Starting PostgreSQL testcontainer...")
         postgres.start()
 
         def remove_container():
@@ -36,10 +35,10 @@ def setup(request):
         os.environ["DB_PASSWORD"] = postgres.password
         os.environ["DB_NAME"] = postgres.dbname
 
-        print(f'Testcontainers postgres connection: {postgres.get_connection_url()}')
+        print(f"Testcontainers postgres connection: {postgres.get_connection_url()}")
     else:
         print("Using local PostgreSQL instance for tests...")
-        os.environ["DB_NAME"] = 'test'
+        os.environ["DB_NAME"] = "test"
     db.init_db()
 
 
@@ -49,13 +48,13 @@ def setup_data():
     for attempt in range(max_retries):
         try:
             print("Cleaning database...")
-            db.execute(
-                "TRUNCATE events, streams, views;"
-            )
+            db.execute("TRUNCATE events, streams, views;")
             break
         except psycopg2.errors.DeadlockDetected:
             if attempt < max_retries - 1:
-                print(f"Deadlock detected. Retrying in 5 seconds... (Attempt {attempt + 1}/{max_retries})")
+                print(
+                    f"Deadlock detected. Retrying in 5 seconds... (Attempt {attempt + 1}/{max_retries})"
+                )
                 time.sleep(5)
             else:
                 raise
@@ -75,7 +74,7 @@ def app():
 @pytest.fixture
 def account_with_two_operations():
 
-    stream_type = 'account'
+    stream_type = "account"
     stream_id = uuid.uuid4()
     occured_at = datetime.now(timezone.utc) - timedelta(days=10)
 
@@ -83,23 +82,33 @@ def account_with_two_operations():
         "balance": 0.00,
         "number": "PL1234567890",
         "isActive": True,
-        "openedAt": "2017-08-15 21:05:15.723336-07"
+        "openedAt": "2017-08-15 21:05:15.723336-07",
     }
 
-    moneyDepositedData = {
-        "amount": 100.00,
-        "balance": 100.00
-    }
+    moneyDepositedData = {"amount": 100.00, "balance": 100.00}
 
-    moneyWithdrawnData = {
-        "amount": 50.50,
-        "balance": 49.50
-    }
+    moneyWithdrawnData = {"amount": 50.50, "balance": 49.50}
 
-    initEvent = es.Event(stream_type, stream_id, 'AccountOpened', accountOpenedData, occured_at)
+    initEvent = es.Event(
+        stream_type, stream_id, "AccountOpened", accountOpenedData, occured_at
+    )
 
     return [
         initEvent,
-        es.Event(stream_type, stream_id, 'MoneyDeposited', moneyDepositedData, occured_at + timedelta(days=1), 2),
-        es.Event(stream_type, stream_id, 'MoneyWithdrawn', moneyWithdrawnData, occured_at + timedelta(days=2), 3)
+        es.Event(
+            stream_type,
+            stream_id,
+            "MoneyDeposited",
+            moneyDepositedData,
+            occured_at + timedelta(days=1),
+            2,
+        ),
+        es.Event(
+            stream_type,
+            stream_id,
+            "MoneyWithdrawn",
+            moneyWithdrawnData,
+            occured_at + timedelta(days=2),
+            3,
+        ),
     ]

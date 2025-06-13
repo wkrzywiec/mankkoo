@@ -14,14 +14,16 @@ def map_date(date: str) -> datetime.date:
     Returns:
         (date): date object
     """
-    pattern = ''
+    pattern = ""
 
     if __match(date, r"\d{1,2}-\d{1,2}-\d{4}"):
         pattern = "%d-%m-%Y"
     elif __match(date, r"\d{4}-\d{1,2}-\d{1,2}"):
         pattern = "%Y-%m-%d"
     else:
-        raise ValueError("Unsupported date format. Currently only 02-01-2021 and 2021-01-02 are supported")
+        raise ValueError(
+            "Unsupported date format. Currently only 02-01-2021 and 2021-01-02 are supported"
+        )
 
     return datetime.datetime.strptime(date, pattern).date()
 
