@@ -1,19 +1,20 @@
+import json
 from datetime import date
 from decimal import Decimal
-import json
 
 import mankkoo.database as db
-
 from mankkoo.base_logger import log
 
-main_indicators_key = 'main-indicators'
-current_savings_distribution_key = 'current-savings-distribution'
-total_history_per_day_key = 'total-history-per-day'
+main_indicators_key = "main-indicators"
+current_savings_distribution_key = "current-savings-distribution"
+total_history_per_day_key = "total-history-per-day"
 
-investment_indicators_key = 'investment-indicators'
-investment_types_distribution_key = 'investment-types-distribution'
-investment_wallets_distribution_key = 'investment-wallets-distribution'
-investment_types_distribution_per_wallet_key = 'investment-types-distribution-per-wallet'
+investment_indicators_key = "investment-indicators"
+investment_types_distribution_key = "investment-types-distribution"
+investment_wallets_distribution_key = "investment-wallets-distribution"
+investment_types_distribution_per_wallet_key = (
+    "investment-types-distribution-per-wallet"
+)
 
 
 def load_view(view_name):
@@ -33,13 +34,13 @@ def load_view(view_name):
             if result is None:
                 return None
             else:
-                (view, ) = result
+                (view,) = result
 
     return view
 
 
 def update_views(oldest_occured_event_date: date):
-    log.info(f'Updating views... (input: {oldest_occured_event_date})')
+    log.info(f"Updating views... (input: {oldest_occured_event_date})")
     __main_indicators()
     __current_total_savings_distribution()
     __total_history_per_day(oldest_occured_event_date)
@@ -54,10 +55,10 @@ def __main_indicators() -> None:
     current_total_savings = __load_current_total_savings()
 
     view_content = {
-        'savings': current_total_savings,
-        'netWorth': None,
-        'lastMonthIncome': None,
-        'lastMonthSpending': None
+        "savings": current_total_savings,
+        "netWorth": None,
+        "lastMonthIncome": None,
+        "lastMonthSpending": None,
     }
     __store_view(main_indicators_key, view_content)
     log.info(f"The '{main_indicators_key}' view was updated")
@@ -173,7 +174,7 @@ def __load_current_total_savings() -> float:
     with db.get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(query)
-            (result, ) = cur.fetchone()
+            (result,) = cur.fetchone()
     return 0 if result is None else result
 
 
@@ -313,11 +314,7 @@ def __load_current_total_savings_distribution() -> list[dict]:
             rows = cur.fetchall()
 
             for row in rows:
-                savings = {
-                    "type": row[0],
-                    "total": row[1],
-                    "percentage": row[2]
-                }
+                savings = {"type": row[0], "total": row[1], "percentage": row[2]}
                 result.append(savings)
     return result
 
@@ -385,17 +382,14 @@ def __load_total_history_per_day(oldest_occured_event_date: date) -> dict[str, l
         occured_at DESC;
     """
 
-    result = {
-        "date": [],
-        "total": []
-    }
+    result = {"date": [], "total": []}
     with db.get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(query)
             rows = cur.fetchall()
 
             for row in rows:
-                result["date"].append(row[0].strftime('%Y-%m-%d'))
+                result["date"].append(row[0].strftime("%Y-%m-%d"))
                 result["total"].append(row[1])
     return result
 
@@ -467,13 +461,13 @@ def __investment_indicators() -> None:
     with db.get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(query)
-            (result, ) = cur.fetchone()
+            (result,) = cur.fetchone()
 
     view_content = {
-        'totalInvestments': 0 if result is None else result,
-        'lastYearTotalResultsValue': 0,
-        'lastYearTotalResultsPercentage': 0,
-        'resultsVsInflation': 0
+        "totalInvestments": 0 if result is None else result,
+        "lastYearTotalResultsValue": 0,
+        "lastYearTotalResultsPercentage": 0,
+        "resultsVsInflation": 0,
     }
     __store_view(investment_indicators_key, view_content)
     log.info(f"The '{investment_indicators_key}' view was updated")
@@ -487,7 +481,9 @@ def __investment_types_distribution():
 
 
 def __load_investment_types_distribution() -> list[dict]:
-    log.info("Loading investment types distribution by type (including savings accounts)...")
+    log.info(
+        "Loading investment types distribution by type (including savings accounts)..."
+    )
     query = """
     WITH investment_streams AS (
         SELECT id, version, metadata ->> 'category' AS type
@@ -553,11 +549,17 @@ def __load_investment_types_distribution() -> list[dict]:
             cur.execute(query)
             rows = cur.fetchall()
             for row in rows:
-                result.append({
-                    "type": row[0].replace("_", " ").title() if row[0] != 'Savings Accounts' else row[0],
-                    "total": row[1],
-                    "percentage": row[2]
-                })
+                result.append(
+                    {
+                        "type": (
+                            row[0].replace("_", " ").title()
+                            if row[0] != "Savings Accounts"
+                            else row[0]
+                        ),
+                        "total": row[1],
+                        "percentage": row[2],
+                    }
+                )
     return result
 
 
@@ -569,7 +571,9 @@ def __investment_wallets_distribution():
 
 
 def __load_investment_wallets_distribution() -> list[dict]:
-    log.info("Loading investment distribution by wallet (including savings accounts, merged by wallet)...")
+    log.info(
+        "Loading investment distribution by wallet (including savings accounts, merged by wallet)..."
+    )
     query = """
     WITH investment_streams AS (
         SELECT id, version, labels ->> 'wallet' AS wallet
@@ -640,23 +644,21 @@ def __load_investment_wallets_distribution() -> list[dict]:
             cur.execute(query)
             rows = cur.fetchall()
             for row in rows:
-                result.append({
-                    "wallet": row[0],
-                    "total": row[1],
-                    "percentage": row[2]
-                })
+                result.append({"wallet": row[0], "total": row[1], "percentage": row[2]})
     return result
 
 
 def __investment_types_distribution_per_wallet():
     log.info("Updating 'investment-types-distribution-per-wallet' view...")
     view_content = __load_investment_types_distribution_per_wallet()
-    __store_view('investment-types-distribution-per-wallet', view_content)
+    __store_view("investment-types-distribution-per-wallet", view_content)
     log.info("The 'investment-types-distribution-per-wallet' view was updated")
 
 
 def __load_investment_types_distribution_per_wallet() -> list[dict]:
-    log.info("Loading investment type distribution per wallet (including savings accounts)...")
+    log.info(
+        "Loading investment type distribution per wallet (including savings accounts)..."
+    )
     query = """
     WITH investment_streams AS (
         SELECT id, version, labels ->> 'wallet' AS wallet, metadata ->> 'category' AS type
@@ -727,12 +729,18 @@ def __load_investment_types_distribution_per_wallet() -> list[dict]:
             cur.execute(query)
             rows = cur.fetchall()
             for row in rows:
-                result.append({
-                    "wallet": row[0],
-                    "type": row[1].replace("_", " ").title() if row[1] != 'Savings Accounts' else row[1],
-                    "total": row[2],
-                    "percentage": row[3]
-                })
+                result.append(
+                    {
+                        "wallet": row[0],
+                        "type": (
+                            row[1].replace("_", " ").title()
+                            if row[1] != "Savings Accounts"
+                            else row[1]
+                        ),
+                        "total": row[2],
+                        "percentage": row[3],
+                    }
+                )
     return result
 
 

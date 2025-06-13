@@ -1,5 +1,5 @@
 from apiflask import Schema
-from apiflask.fields import String, Integer, Mapping, Date
+from apiflask.fields import Date, Integer, Mapping, String
 
 import mankkoo.database as db
 from mankkoo.base_logger import log
@@ -18,7 +18,9 @@ def load_streams(active: bool, type: str) -> list[Stream]:
 
     if active is not None:
         if active:
-            conditions.append(f"(CAST (metadata->>'active' AS boolean) = {active} OR NOT (metadata ? 'active'))")
+            conditions.append(
+                f"(CAST (metadata->>'active' AS boolean) = {active} OR NOT (metadata ? 'active'))"
+            )
         else:
             conditions.append(f"CAST (metadata->>'active' AS boolean) = {active}")
 
@@ -87,7 +89,8 @@ def load_stream_by_id(stream_id: str) -> StreamsQueryResult | None:
     log.info(f"Loading stream by id '{stream_id}'...")
     with db.get_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute(f"""
+            cur.execute(
+                f"""
                 SELECT id, type,
                 CASE
                     WHEN type = 'account' THEN CONCAT(metadata->>'bankName', ' - ', metadata->>'alias')
@@ -100,7 +103,8 @@ def load_stream_by_id(stream_id: str) -> StreamsQueryResult | None:
                 metadata,
                 labels
                 FROM streams WHERE id = '{stream_id}';
-                        """)
+                        """
+            )
             result = cur.fetchone()
             if result is None:
                 return None

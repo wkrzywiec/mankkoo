@@ -86,12 +86,15 @@ tasks:
       - echo "Generate requirements.txt file..."
       - poetry export --without-hashes --format=requirements.txt > requirements.txt
 
-  mankkoo:flake8:
-    desc: Update dependencies for mankkoo core
+  mankkoo:lint:
+    desc: Run linter
     dir: services/mankkoo
     cmds:
-      - echo "Updating dependencies for mankkoo core..."
-      - flake8 mankkoo --max-line-length=160
+      - echo "Linting mankkoo core..."
+      - autoflake --in-place --remove-all-unused-imports --remove-unused-variables --ignore-init-module-imports -r .
+      - isort .
+      - autopep8 --in-place --aggressive --recursive .
+      - black .
 
   ui:dev:
     desc: Run mankkoo UI in a dev mode

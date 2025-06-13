@@ -1,10 +1,9 @@
 from apiflask import Schema
-from apiflask.fields import String, Boolean, Float
+from apiflask.fields import Boolean, Float, String
 
 import mankkoo.database as db
-
-from mankkoo.base_logger import log
 from mankkoo.account.models import Bank
+from mankkoo.base_logger import log
 
 
 class Account(Schema):
@@ -84,16 +83,20 @@ def get_bank_type(account_id: str) -> Bank:
             cur.execute(query)
             result = cur.fetchone()
             if result is None:
-                raise ValueError(f"Failed to load bank definition. There is no bank account definition with an id '{account_id}'")
+                raise ValueError(
+                    f"Failed to load bank definition. There is no bank account definition with an id '{account_id}'"
+                )
             else:
-                (importer, ) = result
+                (importer,) = result
 
     try:
         bank = Bank[importer]
         log.info(f"Found bank by account_id ({account_id}): {bank}")
         return bank
     except Exception:
-        raise ValueError(f"Failed to load importer for bank. Importer with a code: '{importer}' is not known")
+        raise ValueError(
+            f"Failed to load importer for bank. Importer with a code: '{importer}' is not known"
+        )
 
 
 def get_account_balance(account_id: str) -> float:
@@ -116,7 +119,7 @@ def get_account_balance(account_id: str) -> float:
             if result is None:
                 return 0
             else:
-                (balance, ) = result
+                (balance,) = result
     return float(balance)
 
 

@@ -1,11 +1,11 @@
-from enum import Enum
 from abc import ABC, abstractmethod
+from enum import Enum
+
 import pandas as pd
 
 
 class Importer(ABC):
-    """Parent class for every bank account importer, which takes care for transforming bank specific format into Mankkoo's
-    """
+    """Parent class for every bank account importer, which takes care for transforming bank specific format into Mankkoo's"""
 
     @abstractmethod
     def load_file_by_filename(self, file_name: str) -> pd.DataFrame:
@@ -51,11 +51,12 @@ class FileType(Enum):
     Args:
         Enum ([type]): name
     """
-    ACCOUNT = 'account'
-    INVESTMENT = 'investment'
-    STOCK = 'stock'
-    TOTAL = 'total'
-    BANK = 'bank'
+
+    ACCOUNT = "account"
+    INVESTMENT = "investment"
+    STOCK = "stock"
+    TOTAL = "total"
+    BANK = "bank"
 
 
 class Bank(Enum):
@@ -64,10 +65,11 @@ class Bank(Enum):
     Args:
         Enum (str): country code (ISO-3166) and name of a bank
     """
-    MANKKOO = 'MANKKOO'
-    PL_MBANK = 'PL_MBANK'
-    PL_MILLENIUM = 'PL_MILLENIUM'
-    PL_ING = 'PL_ING'
+
+    MANKKOO = "MANKKOO"
+    PL_MBANK = "PL_MBANK"
+    PL_MILLENIUM = "PL_MILLENIUM"
+    PL_ING = "PL_ING"
 
 
 class Account(Enum):
@@ -76,7 +78,8 @@ class Account(Enum):
     Args:
         Enum (str): string name of a type
     """
-    CHECKING = 'checking'
-    SAVINGS = 'savings'
-    RETIREMENT = 'retirement'
-    CASH = 'cash'
+
+    CHECKING = "checking"
+    SAVINGS = "savings"
+    RETIREMENT = "retirement"
+    CASH = "cash"
