@@ -13,8 +13,7 @@ def any_stream(stream_type='account', account_type="checking", active=True, wall
         "active": active, "alias": "Bank account A", "bankName": "Bank A",
         "bankUrl": "https://www.bank-a.com", "accountNumber": "iban-1",
         "accountName": "Super Personal account", "accountType": account_type, "importer": "PL_MILLENIUM"
-    },
-    {"wallet": wallet})
+    }, {"wallet": wallet})
 
 
 def an_account_with_operations(operations: list[dict], type="checking", active=True, wallet='Default') -> dict:
@@ -93,7 +92,12 @@ def investment_events(operations: list[dict], category='treasury_bonds', active=
     events = []
     balance = 0
     version = 0
-    inv_stream = es.Stream(uuid.uuid4(), 'investment', 0, {"investmentName": "10-years Treasury Bonds", "category": category, "active": active}, {"wallet": wallet})
+    inv_stream = es.Stream(
+        uuid.uuid4(),
+        'investment',
+        0,
+        {"investmentName": "10-years Treasury Bonds", "category": category, "active": active},
+        {"wallet": wallet})
 
     for operation in operations:
         balance += operation['operation']
@@ -124,7 +128,13 @@ def retirment_events(operations: list[dict]) -> dict:
     version = 1
     for operation in operations:
         version += 1
-        event = account_operation_event(account_stream.id, operation['operation'], balance, version, datetime.strptime(operation['date'], '%d-%m-%Y'), stream_type=account_stream.type)
+        event = account_operation_event(
+            account_stream.id,
+            operation['operation'],
+            balance,
+            version,
+            datetime.strptime(operation['date'], '%d-%m-%Y'),
+            stream_type=account_stream.type)
         balance = event.data['balance']
         events.append(event)
 

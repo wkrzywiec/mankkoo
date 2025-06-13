@@ -45,7 +45,10 @@ class Event:
         self.occured_at = occured_at
 
     def __str__(self):
-        return f'Event(id={self.id}, stream_type={self.stream_type}, stream_id={self.stream_id}, event_type={self.event_type}, data={self.data}, occured_at={self.occured_at}, version={self.version})'
+        return f"""
+        Event(id={self.id}, stream_type={self.stream_type}, stream_id={self.stream_id},
+        event_type={self.event_type}, data={self.data}, occured_at={self.occured_at}, version={self.version})
+        """
 
     def __eq__(self, other):
         if not isinstance(other, Event):

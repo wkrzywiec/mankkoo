@@ -6,6 +6,7 @@ import mankkoo.database as db
 from mankkoo.base_logger import log
 from mankkoo.account.models import Bank
 
+
 class Account(Schema):
     id = String()
     name = String()
@@ -18,6 +19,7 @@ class Account(Schema):
     bankUrl = String()
     hidden = Boolean()
     openedAt = String()
+
 
 def load_all_accounts() -> list[Account]:
     log.info("Loading all accounts...")
