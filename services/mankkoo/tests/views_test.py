@@ -71,10 +71,10 @@ def test_main_indicators_view_is_updated():
     def a_main_indicators_view_is_updated():
         result = views.load_view(views.main_indicators_key)
         return result == {
-            "debt": None,
+            "lastMonthIncome": None,
+            "lastMonthSpending": None,
+            "netWorth": None,
             "savings": 1004.78,
-            "investments": None,
-            "lastMonthProfit": 0
         }
 
     # THEN
@@ -156,6 +156,170 @@ def test_total_history_per_day_is_updated():
 
     # THEN
     __wait_for_condition(condition_func=a_total_history_per_day_view_is_updated, timeout=10, interval=1)
+
+
+def test_investment_types_distribution_view_is_updated():
+    # GIVEN
+    app.start_listener_thread()
+    # Prepare events: active/inactive investments and stocks
+    active_investment_events = dt.investment_events([
+        {"date": "01-01-2021", "operation": 100}
+    ], category="treasury_bonds", active=True)
+    inactive_investment_events = dt.investment_events([
+        {"date": "01-01-2021", "operation": 200}
+    ], category="crypto", active=False)
+    active_stock_events = dt.stock_events([
+        {"date": "01-01-2021", "operation": 300}
+    ], type="ETF", active=True)
+    inactive_stock_events = dt.stock_events([
+        {"date": "01-01-2021", "operation": 400}
+    ], type="stock", active=False)
+
+    es.create([
+        active_investment_events['stream'],
+        inactive_investment_events['stream'],
+        active_stock_events['stream'],
+        inactive_stock_events['stream']
+    ])
+    es.store(
+        active_investment_events['events'] +
+        inactive_investment_events['events'] +
+        active_stock_events['events'] +
+        inactive_stock_events['events']
+    )
+
+    # WHEN
+    def a_investment_types_distribution_view_is_updated():
+        result = views.load_view(views.investment_types_distribution_key)
+        # Only active streams should be included: 100 (bonds) + 300 (ETF) = 400
+        # bonds: 100/400 = 0.25, ETF: 300/400 = 0.75
+        expected = [
+            {"type": "Etf", "total": 300, "percentage": 0.75},
+            {"type": "Treasury Bonds", "total": 100, "percentage": 0.25}
+        ]
+        # Order by total desc
+        return result == expected
+
+    # THEN
+    __wait_for_condition(condition_func=a_investment_types_distribution_view_is_updated, timeout=10, interval=1)
+
+
+def test_investment_wallets_distribution_view_is_updated():
+    # GIVEN
+    app.start_listener_thread()
+    # Prepare events: active/inactive investments, stocks, and savings, with wallets
+    active_investment_events = dt.investment_events([
+        {"date": "01-01-2021", "operation": 100}
+    ], category="treasury_bonds", active=True, wallet="Cat")
+    inactive_investment_events = dt.investment_events([
+        {"date": "01-01-2021", "operation": 200}
+    ], category="crypto", active=False, wallet="Cat")
+    active_stock_events = dt.stock_events([
+        {"date": "01-01-2021", "operation": 300}
+    ], type="ETF", active=True, wallet="Cat")
+    inactive_stock_events = dt.stock_events([
+        {"date": "01-01-2021", "operation": 400}
+    ], type="stock", active=False, wallet="Puppy")
+    active_savings_events = dt.an_account_with_operations([
+        {"date": "01-01-2021", "operation": 500}
+    ], type="savings", active=True, wallet="Puppy")
+    inactive_savings_events = dt.an_account_with_operations([
+        {"date": "01-01-2021", "operation": 600}
+    ], type="savings", active=False, wallet="Cat")
+
+    es.create([
+        active_investment_events['stream'],
+        inactive_investment_events['stream'],
+        active_stock_events['stream'],
+        inactive_stock_events['stream'],
+        active_savings_events['stream'],
+        inactive_savings_events['stream']
+    ])
+    es.store(
+        active_investment_events['events'] +
+        inactive_investment_events['events'] +
+        active_stock_events['events'] +
+        inactive_stock_events['events'] +
+        active_savings_events['events'] +
+        inactive_savings_events['events']
+    )
+
+    # WHEN
+    def a_investment_wallets_distribution_view_is_updated():
+        result = views.load_view(views.investment_wallets_distribution_key)
+        # Only active streams should be included: Cat: 100 (investment) + 300 (stock) = 400, Puppy: 500 (savings)
+        # Total = 900
+        # Cat: 400/900 = 0.9948, Puppy: 500/900 = 0.0052
+        expected = [
+            {"wallet": "Puppy", "total": 500, "percentage": round(500/900, 4)},
+            {"wallet": "Cat", "total": 400, "percentage": round(400/900, 4)}
+        ]
+        # Order by total desc
+        return result == expected
+
+    # THEN
+    __wait_for_condition(condition_func=a_investment_wallets_distribution_view_is_updated, timeout=10, interval=1)
+
+
+def test_investment_types_distribution_per_wallet_view_is_updated():
+    # GIVEN
+    app.start_listener_thread()
+    # Prepare events: active/inactive investments, stocks, and savings, with wallets
+    active_investment_events = dt.investment_events([
+        {"date": "01-01-2021", "operation": 100}
+    ], category="treasury_bonds", active=True, wallet="Cat")
+    inactive_investment_events = dt.investment_events([
+        {"date": "01-01-2021", "operation": 200}
+    ], category="crypto", active=False, wallet="Cat")
+    active_stock_events = dt.stock_events([
+        {"date": "01-01-2021", "operation": 300}
+    ], type="ETF", active=True, wallet="Cat")
+    inactive_stock_events = dt.stock_events([
+        {"date": "01-01-2021", "operation": 400}
+    ], type="stock", active=False, wallet="Puppy")
+    active_savings_events = dt.an_account_with_operations([
+        {"date": "01-01-2021", "operation": 500}
+    ], type="savings", active=True, wallet="Puppy")
+    inactive_savings_events = dt.an_account_with_operations([
+        {"date": "01-01-2021", "operation": 600}
+    ], type="savings", active=False, wallet="Cat")
+
+    es.create([
+        active_investment_events['stream'],
+        inactive_investment_events['stream'],
+        active_stock_events['stream'],
+        inactive_stock_events['stream'],
+        active_savings_events['stream'],
+        inactive_savings_events['stream']
+    ])
+    es.store(
+        active_investment_events['events'] +
+        inactive_investment_events['events'] +
+        active_stock_events['events'] +
+        inactive_stock_events['events'] +
+        active_savings_events['events'] +
+        inactive_savings_events['events']
+    )
+
+    # WHEN
+    def a_investment_types_distribution_per_wallet_view_is_updated():
+        result = views.load_view(views.investment_types_distribution_per_wallet_key)
+        # Only active streams should be included:
+        # Cat: 100 (treasury_bonds) + 300 (ETF)
+        # Puppy: 500 (savings)
+        # For Cat: total = 400, Puppy: total = 500
+        # Cat: treasury_bonds: 100/400 = 0.25, ETF: 300/400 = 0.75
+        # Puppy: savings: 500/500 = 1.0
+        expected = [
+            {"wallet": "Cat", "type": "Etf", "total": 300, "percentage": 0.75},
+            {"wallet": "Cat", "type": "Treasury Bonds", "total": 100, "percentage": 0.25},
+            {"wallet": "Puppy", "type": "Savings Accounts", "total": 500, "percentage": 1.0}
+        ]
+        # Order by wallet, then total desc
+        return result == expected
+
+    # THEN
+    __wait_for_condition(condition_func=a_investment_types_distribution_per_wallet_view_is_updated, timeout=10, interval=1)
 
 
 def __store_events():

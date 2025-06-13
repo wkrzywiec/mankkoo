@@ -45,7 +45,10 @@ class Event:
         self.occured_at = occured_at
 
     def __str__(self):
-        return f'Event(id={self.id}, stream_type={self.stream_type}, stream_id={self.stream_id}, event_type={self.event_type}, data={self.data}, occured_at={self.occured_at}, version={self.version})'
+        return f"""
+        Event(id={self.id}, stream_type={self.stream_type}, stream_id={self.stream_id},
+        event_type={self.event_type}, data={self.data}, occured_at={self.occured_at}, version={self.version})
+        """
 
     def __eq__(self, other):
         if not isinstance(other, Event):
@@ -64,8 +67,8 @@ def create(streams: list[Stream]):
             for stream in streams:
                 log.info(f"Inserting stream: {stream}...")
                 cur.execute(
-                    'INSERT INTO streams (id, type, version, metadata) VALUES (%s, %s, %s, %s)',
-                    (str(stream.id), stream.type, stream.version, json.dumps(stream.metadata)))
+                    'INSERT INTO streams (id, type, version, metadata, labels) VALUES (%s, %s, %s, %s, %s)',
+                    (str(stream.id), stream.type, stream.version, json.dumps(stream.metadata), json.dumps(stream.labels)))
             conn.commit()
 
 

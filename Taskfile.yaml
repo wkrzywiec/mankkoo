@@ -86,6 +86,13 @@ tasks:
       - echo "Generate requirements.txt file..."
       - poetry export --without-hashes --format=requirements.txt > requirements.txt
 
+  mankkoo:flake8:
+    desc: Update dependencies for mankkoo core
+    dir: services/mankkoo
+    cmds:
+      - echo "Updating dependencies for mankkoo core..."
+      - flake8 mankkoo --max-line-length=160
+
   ui:dev:
     desc: Run mankkoo UI in a dev mode
     dir: services/mankkoo-ui

@@ -4,20 +4,20 @@ import uuid
 import mankkoo.event_store as es
 
 
-def any_account_stream(account_type="checking"):
-    return any_stream(account_type=account_type)
+def any_account_stream(account_type="checking", active=True, wallet='Default'):
+    return any_stream(account_type=account_type, active=active, wallet=wallet)
 
 
-def any_stream(stream_type='account', account_type="checking"):
+def any_stream(stream_type='account', account_type="checking", active=True, wallet='Default'):
     return es.Stream(uuid.uuid4(), stream_type, 0, {
-        "active": True, "alias": "Bank account A", "bankName": "Bank A",
+        "active": active, "alias": "Bank account A", "bankName": "Bank A",
         "bankUrl": "https://www.bank-a.com", "accountNumber": "iban-1",
         "accountName": "Super Personal account", "accountType": account_type, "importer": "PL_MILLENIUM"
-    })
+    }, {"wallet": wallet})
 
 
-def an_account_with_operations(operations: list[dict], type="checking") -> dict:
-    account_stream = any_account_stream(account_type=type)
+def an_account_with_operations(operations: list[dict], type="checking", active=True, wallet='Default') -> dict:
+    account_stream = any_account_stream(account_type=type, active=active, wallet=wallet)
     first_operation_date = datetime.strptime(operations[0]['date'], '%d-%m-%Y')
     events = [account_opened_event(account_stream.id, occured_at=first_operation_date - timedelta(days=1))]
     balance = 0
@@ -60,11 +60,11 @@ def account_operation_event(stream_id: uuid.UUID, operation: float, balance: flo
         version=version)
 
 
-def stock_events(operations: list[dict]) -> dict:
+def stock_events(operations: list[dict], type='ETF', active=True, wallet='Default') -> dict:
     events = []
     balance = 0
     version = 0
-    stock_stream = es.Stream(uuid.uuid4(), 'stocks', 0, {"type": "ETF", "broker": "Bank 1"})
+    stock_stream = es.Stream(uuid.uuid4(), 'stocks', 0, {"type": type, "broker": "Bank 1", "active": active}, {"wallet": wallet})
 
     for operation in operations:
         balance += operation['operation']
@@ -88,11 +88,16 @@ def stock_events(operations: list[dict]) -> dict:
     return {"stream": stock_stream, "events": events}
 
 
-def investment_events(operations: list[dict]) -> dict:
+def investment_events(operations: list[dict], category='treasury_bonds', active=True, wallet='Default') -> dict:
     events = []
     balance = 0
     version = 0
-    inv_stream = es.Stream(uuid.uuid4(), 'investment', 0, {"investmentName": "10-years Treasury Bonds", "category": "treasury_bonds", "active": True})
+    inv_stream = es.Stream(
+        uuid.uuid4(),
+        'investment',
+        0,
+        {"investmentName": "10-years Treasury Bonds", "category": category, "active": active},
+        {"wallet": wallet})
 
     for operation in operations:
         balance += operation['operation']
@@ -123,7 +128,13 @@ def retirment_events(operations: list[dict]) -> dict:
     version = 1
     for operation in operations:
         version += 1
-        event = account_operation_event(account_stream.id, operation['operation'], balance, version, datetime.strptime(operation['date'], '%d-%m-%Y'), stream_type=account_stream.type)
+        event = account_operation_event(
+            account_stream.id,
+            operation['operation'],
+            balance,
+            version,
+            datetime.strptime(operation['date'], '%d-%m-%Y'),
+            stream_type=account_stream.type)
         balance = event.data['balance']
         events.append(event)
 

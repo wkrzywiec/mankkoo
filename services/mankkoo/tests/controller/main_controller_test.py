@@ -7,10 +7,10 @@ import mankkoo.database as db
 def test_main_indicators(test_client):
     # GIVEN
     view = {
-        "debt": None,
+        "lastMonthIncome": None,
+        "lastMonthSpending": None,
+        "netWorth": None,
         "savings": 1235.78,
-        "investments": None,
-        "lastMonthProfit": -4567.89
     }
     insert_view(views.main_indicators_key, view)
 

@@ -1,6 +1,6 @@
 import traceback
 from apiflask import APIBlueprint, Schema
-from apiflask.fields import String, Boolean, Float, File
+from apiflask.fields import String, File
 
 from mankkoo.base_logger import log
 from mankkoo.account import account_db as database
