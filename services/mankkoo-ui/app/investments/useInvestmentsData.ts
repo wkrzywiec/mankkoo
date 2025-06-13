@@ -34,7 +34,7 @@ export function useInvestmentsData(selectedWallet: string, selectedInvestmentId:
     fetchedData: investmentTransactions,
     isFetching: isFetchingInvestmentTransactions
   } = useGetHttp<InvestmentTransaction[]>(
-    selectedInvestmentId ? `/investments/transactions/${selectedInvestmentId}` : undefined,
+    `/investments/transactions/${selectedInvestmentId ?? ""}`,
     !!selectedInvestmentId
   );
 
