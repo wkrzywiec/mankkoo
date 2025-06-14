@@ -72,8 +72,8 @@ def __load_current_total_savings() -> float:
         SELECT
             id,
             version,
-            metadata ->> 'accountName' as name,
-            metadata ->> 'accountType' as type
+            name,
+            subtype
         FROM streams
         WHERE type = 'account'
         AND active = true
@@ -95,8 +95,8 @@ def __load_current_total_savings() -> float:
         SELECT
             id,
             version,
-            metadata ->> 'accountName' as name,
-            metadata ->> 'accountType' as type
+            name,
+            subtype
         FROM
             streams
         WHERE
@@ -118,8 +118,8 @@ def __load_current_total_savings() -> float:
     investment_latest_version AS (
         SELECT
             id,
-            version, metadata ->> 'investmentName' as name,
-            metadata ->> 'category' as type
+            version, name,
+            subtype
         FROM
             streams
         WHERE
@@ -194,11 +194,11 @@ def __load_current_total_savings_distribution() -> list[dict]:
         SELECT
             id,
             version,
-            metadata ->> 'accountName' as name,
-            metadata ->> 'accountType' as type
+            name,
+            subtype
         FROM streams
         WHERE type = 'account'
-        AND metadata ->> 'accountType' != 'cash'
+        AND subtype != 'cash'
         AND active = true
     ),
 
@@ -222,8 +222,8 @@ def __load_current_total_savings_distribution() -> list[dict]:
         SELECT
             id,
             version,
-            metadata ->> 'accountName' as name,
-            metadata ->> 'accountType' as type
+            name,
+            subtype
         FROM
             streams
         WHERE
@@ -245,8 +245,8 @@ def __load_current_total_savings_distribution() -> list[dict]:
     investment_latest_version AS (
         SELECT
             id,
-            version, metadata ->> 'investmentName' as name,
-            metadata ->> 'category' as type
+            version, name,
+            subtype
         FROM
             streams
         WHERE
@@ -402,8 +402,8 @@ def __investment_indicators() -> None:
     investment_latest_version AS (
         SELECT
             id,
-            version, metadata ->> 'investmentName' as name,
-            metadata ->> 'category' as type
+            version, name,
+            subtype
         FROM
             streams
         WHERE
@@ -437,7 +437,7 @@ def __investment_indicators() -> None:
         SELECT id, version
         FROM streams
         WHERE type = 'account'
-          AND (metadata ->> 'accountType') = 'savings'
+          AND (subtype) = 'savings'
           AND active = true
     ),
     savings_balance AS (
@@ -486,7 +486,7 @@ def __load_investment_types_distribution() -> list[dict]:
     )
     query = """
     WITH investment_streams AS (
-        SELECT id, version, metadata ->> 'category' AS type
+        SELECT id, version, subtype
         FROM streams
         WHERE type = 'investment'
           AND active = true
@@ -500,7 +500,7 @@ def __load_investment_types_distribution() -> list[dict]:
         GROUP BY s.type
     ),
     stocks_streams AS (
-        SELECT id, version, metadata ->> 'type' AS type
+        SELECT id, version, subtype
         FROM streams
         WHERE type = 'stocks'
           AND active = true
@@ -517,7 +517,7 @@ def __load_investment_types_distribution() -> list[dict]:
         SELECT id, version, 'Savings Accounts' AS type
         FROM streams
         WHERE type = 'account'
-          AND (metadata ->> 'accountType') = 'savings'
+          AND (subtype) = 'savings'
           AND active = true
     ),
     savings_balance AS (
@@ -607,7 +607,7 @@ def __load_investment_wallets_distribution() -> list[dict]:
         SELECT id, version, labels ->> 'wallet' AS wallet
         FROM streams
         WHERE type = 'account'
-          AND (metadata ->> 'accountType') = 'savings'
+          AND (subtype) = 'savings'
           AND active = true
     ),
     savings_balance AS (
@@ -661,7 +661,7 @@ def __load_investment_types_distribution_per_wallet() -> list[dict]:
     )
     query = """
     WITH investment_streams AS (
-        SELECT id, version, labels ->> 'wallet' AS wallet, metadata ->> 'category' AS type
+        SELECT id, version, labels ->> 'wallet' AS wallet, subtype
         FROM streams
         WHERE type = 'investment' AND active = true
     ),
@@ -675,7 +675,7 @@ def __load_investment_types_distribution_per_wallet() -> list[dict]:
         GROUP BY s.wallet, s.type
     ),
     stocks_streams AS (
-        SELECT id, version, labels ->> 'wallet' AS wallet, metadata ->> 'type' AS type
+        SELECT id, version, labels ->> 'wallet' AS wallet, subtype
         FROM streams
         WHERE type = 'stocks' AND active = true
     ),
@@ -691,7 +691,7 @@ def __load_investment_types_distribution_per_wallet() -> list[dict]:
     savings_streams AS (
         SELECT id, version, labels ->> 'wallet' AS wallet, 'Savings Accounts' AS type
         FROM streams
-        WHERE type = 'account' AND (metadata ->> 'accountType') = 'savings' AND active = true
+        WHERE type = 'account' AND (subtype) = 'savings' AND active = true
     ),
     savings_balance AS (
         SELECT

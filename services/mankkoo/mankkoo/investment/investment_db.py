@@ -32,7 +32,7 @@ def load_investments(active: bool, wallet: str) -> list[dict]:
     if active is not None:
         if active:
             conditions.append(
-                f"(CAST (s.metadata->>'active' AS boolean) = {active} OR NOT (s.metadata ? 'active'))"
+                f"(active = {active})"
             )
         else:
             conditions.append(f"CAST (s.metadata->>'active' AS boolean) = {active}")
