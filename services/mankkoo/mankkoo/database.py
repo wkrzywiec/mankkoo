@@ -54,6 +54,10 @@ def init_db():
         (
             id              UUID                      NOT NULL    PRIMARY KEY,
             type            TEXT                      NOT NULL,
+            subtype         TEXT                      NOT NULL,
+            bank            TEXT,
+            name            TEXT                      NOT NULL,
+            active          BOOLEAN                   NOT NULL    default true,
             version         BIGINT                    NOT NULL,
             metadata        JSONB,
             labels          JSONB
