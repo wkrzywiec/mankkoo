@@ -76,7 +76,7 @@ def __load_current_total_savings() -> float:
             metadata ->> 'accountType' as type
         FROM streams
         WHERE type = 'account'
-        AND (metadata ->> 'active')::boolean = true
+        AND active = true
     ),
 
     accounts_balance AS (
@@ -102,7 +102,7 @@ def __load_current_total_savings() -> float:
         WHERE
             type = 'retirement'
         AND
-            (metadata ->> 'active')::boolean = true
+            active = true
     ),
 
     retirement_balance AS (
@@ -125,7 +125,7 @@ def __load_current_total_savings() -> float:
         WHERE
             type = 'investment'
         AND
-            (metadata ->> 'active')::boolean = true
+            active = true
     ),
 
     investment_balance AS (
@@ -199,7 +199,7 @@ def __load_current_total_savings_distribution() -> list[dict]:
         FROM streams
         WHERE type = 'account'
         AND metadata ->> 'accountType' != 'cash'
-        AND (metadata ->> 'active')::boolean = true
+        AND active = true
     ),
 
     accounts_balance AS (
@@ -229,7 +229,7 @@ def __load_current_total_savings_distribution() -> list[dict]:
         WHERE
             type = 'retirement'
         AND
-            (metadata ->> 'active')::boolean = true
+            active = true
     ),
 
     retirement_balance AS (
@@ -252,7 +252,7 @@ def __load_current_total_savings_distribution() -> list[dict]:
         WHERE
             type = 'investment'
         AND
-            (metadata ->> 'active')::boolean = true
+            active = true
     ),
 
     investment_balance AS (
@@ -409,7 +409,7 @@ def __investment_indicators() -> None:
         WHERE
             type = 'investment'
         AND
-            (metadata ->> 'active')::boolean = true
+            active = true
     ),
     investment_balance AS (
         SELECT
@@ -422,7 +422,7 @@ def __investment_indicators() -> None:
         SELECT id, version
         FROM streams
         WHERE type = 'stocks'
-        AND (metadata ->> 'active')::boolean = true
+        AND active = true
     ),
     stocks_balance AS (
         SELECT
@@ -438,7 +438,7 @@ def __investment_indicators() -> None:
         FROM streams
         WHERE type = 'account'
           AND (metadata ->> 'accountType') = 'savings'
-          AND (metadata ->> 'active')::boolean = true
+          AND active = true
     ),
     savings_balance AS (
         SELECT
@@ -489,7 +489,7 @@ def __load_investment_types_distribution() -> list[dict]:
         SELECT id, version, metadata ->> 'category' AS type
         FROM streams
         WHERE type = 'investment'
-          AND (metadata ->> 'active')::boolean = true
+          AND active = true
     ),
     investment_balance AS (
         SELECT
@@ -503,7 +503,7 @@ def __load_investment_types_distribution() -> list[dict]:
         SELECT id, version, metadata ->> 'type' AS type
         FROM streams
         WHERE type = 'stocks'
-          AND (metadata ->> 'active')::boolean = true
+          AND active = true
     ),
     stocks_balance AS (
         SELECT
@@ -518,7 +518,7 @@ def __load_investment_types_distribution() -> list[dict]:
         FROM streams
         WHERE type = 'account'
           AND (metadata ->> 'accountType') = 'savings'
-          AND (metadata ->> 'active')::boolean = true
+          AND active = true
     ),
     savings_balance AS (
         SELECT
@@ -579,7 +579,7 @@ def __load_investment_wallets_distribution() -> list[dict]:
         SELECT id, version, labels ->> 'wallet' AS wallet
         FROM streams
         WHERE type = 'investment'
-          AND (metadata ->> 'active')::boolean = true
+          AND active = true
     ),
     investment_balance AS (
         SELECT
@@ -593,7 +593,7 @@ def __load_investment_wallets_distribution() -> list[dict]:
         SELECT id, version, labels ->> 'wallet' AS wallet
         FROM streams
         WHERE type = 'stocks'
-          AND (metadata ->> 'active')::boolean = true
+          AND active = true
     ),
     stocks_balance AS (
         SELECT
@@ -608,7 +608,7 @@ def __load_investment_wallets_distribution() -> list[dict]:
         FROM streams
         WHERE type = 'account'
           AND (metadata ->> 'accountType') = 'savings'
-          AND (metadata ->> 'active')::boolean = true
+          AND active = true
     ),
     savings_balance AS (
         SELECT
@@ -663,7 +663,7 @@ def __load_investment_types_distribution_per_wallet() -> list[dict]:
     WITH investment_streams AS (
         SELECT id, version, labels ->> 'wallet' AS wallet, metadata ->> 'category' AS type
         FROM streams
-        WHERE type = 'investment' AND (metadata ->> 'active')::boolean = true
+        WHERE type = 'investment' AND active = true
     ),
     investment_balance AS (
         SELECT
@@ -677,7 +677,7 @@ def __load_investment_types_distribution_per_wallet() -> list[dict]:
     stocks_streams AS (
         SELECT id, version, labels ->> 'wallet' AS wallet, metadata ->> 'type' AS type
         FROM streams
-        WHERE type = 'stocks' AND (metadata ->> 'active')::boolean = true
+        WHERE type = 'stocks' AND active = true
     ),
     stocks_balance AS (
         SELECT
@@ -691,7 +691,7 @@ def __load_investment_types_distribution_per_wallet() -> list[dict]:
     savings_streams AS (
         SELECT id, version, labels ->> 'wallet' AS wallet, 'Savings Accounts' AS type
         FROM streams
-        WHERE type = 'account' AND (metadata ->> 'accountType') = 'savings' AND (metadata ->> 'active')::boolean = true
+        WHERE type = 'account' AND (metadata ->> 'accountType') = 'savings' AND active = true
     ),
     savings_balance AS (
         SELECT

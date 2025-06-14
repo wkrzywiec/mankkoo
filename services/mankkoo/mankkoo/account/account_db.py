@@ -41,7 +41,7 @@ def load_all_accounts() -> list[Account]:
             LIMIT 1) AS openedAt
     FROM streams s
     WHERE s.type = 'account'
-    AND (metadata ->> 'active')::boolean = true
+    AND active = true
     ORDER BY bankName, name;
     """
 
