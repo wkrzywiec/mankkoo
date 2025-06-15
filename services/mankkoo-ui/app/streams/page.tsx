@@ -17,14 +17,14 @@ import TabList from "@/components/elements/TabList";
 import TileHeader from "@/components/elements/TileHeader";
 import { postJson, useGetHttp } from "@/hooks/useHttp";
 import Input from "@/components/elements/Input";
-import { addEventRequiredProps, createStreamRequiredProps } from "./config";
+import { addEventRequiredProps, createStreamPossibleSubtypes, createStreamRequiredMetadata } from "./config";
 
 
 export default function Streams() {
 
   const MySwal = withReactContent(Swal);
 
-  const streamsHeaders = [['Type', 'Name', 'Wallet']]
+  const streamsHeaders = [['Subtype', 'Bank', 'Name', 'Wallet']]
   const streamsDetailsHeaders = [['Property', 'Value']]
   const eventsHeaders = [['Event Type', 'Occured At', 'Data']]
 
@@ -73,7 +73,7 @@ export default function Streams() {
       setStreamType(undefined)
     }
 
-    const streamsData = streams?.map(stream => [stream.type, stream.name, stream.wallet])
+    const streamsData = streams?.map(stream => [stream.subtype, stream.bank, stream.name, stream.wallet])
     const streamTableData = [...streamsHeaders, ...streamsData ?? []]
     const streamRowIds = streams?.map(stream => stream.id)
 
@@ -111,23 +111,37 @@ export default function Streams() {
   // =======================
   const [isAddStreamModalOpen, setAddStreamModalOpen] = useState(false)
   const [selectedAddStreamType, setSelectedAddStreamType] = useState<string>("account")
-  const [addStreamProps, setAddStreamProps] = useState(initStreamProps(selectedAddStreamType))
+  const [addStreamSubtype, setAddStreamSubtype] = useState(initStreamSubtype(selectedAddStreamType))
+  const [selectedAddStreamSubType, setSelectedAddStreamSubType] = useState<string>("")
+  const [providedAddStreamName, setProvidedAddStreamName] = useState<string>("")
+  const [providedAddStreamBank, setProvidedAddStreamBank] = useState<string>("")
+  const [addStreamMetadata, setAddStreamMetadata] = useState(initStreamMetadata(selectedAddStreamType))
 
-  function initStreamProps(streamType: string): Row[] {
-    return createStreamRequiredProps[streamType].map((prop, index) => (
+  function initStreamSubtype(streamType: string): Row[] {
+    return createStreamPossibleSubtypes[streamType].map((prop, index) => (
+      {id: index, property: prop, value: ""}
+    ))
+  }
+
+  function initStreamMetadata(streamType: string): Row[] {
+    return createStreamRequiredMetadata[streamType].map((prop, index) => (
       {id: index, property: prop, value: ""}
     ))
   }
 
   const changeStreamTypeToBeCreated = (option: Option) => {
     setSelectedAddStreamType(option.value)
-    setAddStreamProps(initStreamProps(option.value))
+    setAddStreamSubtype(initStreamSubtype(option.value))
+    setAddStreamMetadata(initStreamMetadata(option.value))
   }
 
   const addNewStream = (e: SyntheticEvent<Element, Event>) => {
     const body = {
       type: selectedAddStreamType,
-      metadata: Object.fromEntries(addStreamProps.map(row => [row.property, row.value]))
+      subtype: selectedAddStreamSubType,
+      name: providedAddStreamName,
+      bank: providedAddStreamBank,
+      metadata: Object.fromEntries(addStreamMetadata.map(row => [row.property, row.value]))
     }
     postJson('streams', body, 'New stream was created', 'Failed to create a new strem')
   }
@@ -198,8 +212,23 @@ export default function Streams() {
         onSubmit={(e) => addNewStream(e)} 
         onClose={() => setAddStreamModalOpen(false)} 
       >
-        <p>Stream type:</p> <Dropdown options={Object.keys(createStreamRequiredProps)} onChange={changeStreamTypeToBeCreated} value={selectedAddStreamType} placeholder="Select an option" />
-        <EditableTable rows={addStreamProps} setRows={setAddStreamProps}/>
+        <p>Stream type:</p> 
+        <Dropdown options={Object.keys(createStreamRequiredMetadata)} onChange={changeStreamTypeToBeCreated} value={selectedAddStreamType} placeholder="Select an option" />
+        <p>Stream subtype:</p> 
+        <Dropdown options={createStreamPossibleSubtypes[selectedAddStreamType]} onChange={o => setSelectedAddStreamSubType(o.value)} value={selectedAddStreamSubType} placeholder="Select an option" />
+        <p>Stream name:</p> 
+        <Input
+          type="text"
+          value={providedAddStreamName}
+          onChange={(e) => setProvidedAddStreamName(e.target.value)}
+        />
+        <p>Stream bank:</p> 
+        <Input
+          type="text"
+          value={providedAddStreamBank}
+          onChange={(e) => setProvidedAddStreamBank(e.target.value)}
+        />
+        <EditableTable rows={addStreamMetadata} setRows={setAddStreamMetadata}/>
       </Modal>
 
       <Modal 

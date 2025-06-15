@@ -5,24 +5,30 @@ import mankkoo.event_store as es
 
 
 def any_account_stream(account_type="checking", active=True, wallet="Default"):
-    return any_stream(account_type=account_type, active=active, wallet=wallet)
+    return any_stream(stream_subtype=account_type, active=active, wallet=wallet)
 
 
 def any_stream(
-    stream_type="account", account_type="checking", active=True, wallet="Default"
+    stream_type="account",
+    stream_subtype="checking",
+    stream_name=f"Stream Name {str(uuid.uuid4())}",
+    bank=f"Bank {str(uuid.uuid4())}",
+    active=True,
+    wallet="Default",
 ):
     return es.Stream(
         uuid.uuid4(),
         stream_type,
+        stream_subtype,
+        stream_name,
+        bank,
+        active,
         0,
         {
-            "active": active,
             "alias": "Bank account A",
             "bankName": "Bank A",
             "bankUrl": "https://www.bank-a.com",
             "accountNumber": "iban-1",
-            "accountName": "Super Personal account",
-            "accountType": account_type,
             "importer": "PL_MILLENIUM",
         },
         {"wallet": wallet},
@@ -107,8 +113,12 @@ def stock_events(
     stock_stream = es.Stream(
         uuid.uuid4(),
         "stocks",
+        type,
+        "Stock Stream Name",
+        "Bank 1",
+        active,
         0,
-        {"type": type, "broker": "Bank 1", "active": active},
+        {"details": "Some details about the stock"},
         {"wallet": wallet},
     )
 
@@ -143,11 +153,13 @@ def investment_events(
     inv_stream = es.Stream(
         uuid.uuid4(),
         "investment",
+        category,
+        "10-years Treasury Bonds",
+        "Bank 1",
+        active,
         0,
         {
-            "investmentName": "10-years Treasury Bonds",
-            "category": category,
-            "active": active,
+            "details": "Some details about the investment"
         },
         {"wallet": wallet},
     )

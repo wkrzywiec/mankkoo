@@ -54,6 +54,10 @@ def init_db():
         (
             id              UUID                      NOT NULL    PRIMARY KEY,
             type            TEXT                      NOT NULL,
+            subtype         TEXT                      NOT NULL,
+            bank            TEXT,
+            name            TEXT                      NOT NULL,
+            active          BOOLEAN                   NOT NULL    default true,
             version         BIGINT                    NOT NULL,
             metadata        JSONB,
             labels          JSONB
@@ -109,9 +113,9 @@ def init_db():
                     stream_version := 0;
 
                     INSERT INTO streams
-                        (id, type, version)
+                        (id, type, subtype, name, bank, version)
                     VALUES
-                        (stream_id, stream_type, stream_version);
+                        (stream_id, stream_type, 'Default stream subtype', 'Default Stream Name', 'Default Bank', stream_version);
                 END IF;
 
                 -- increment event_version

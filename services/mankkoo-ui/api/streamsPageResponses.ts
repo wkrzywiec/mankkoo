@@ -1,6 +1,8 @@
 export interface StreamResponse {
     id: string;
     type: string;
+    subtype: string;
+    bank: string;
     name: string;
     wallet: string;
 }

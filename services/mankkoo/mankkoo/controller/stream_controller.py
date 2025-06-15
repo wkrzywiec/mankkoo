@@ -13,6 +13,9 @@ stream_endpoints = APIBlueprint("stream_endpoints", __name__, tag="Stream")
 
 class CreateStream(Schema):
     type = String(required=True)
+    subtype = String(required=True)
+    bank = String(required=False)
+    name = String(required=True)
     metadata = Mapping()
 
 
@@ -29,7 +32,13 @@ def create_stream(body: CreateStream):
 
     allowed_types = ["account", "investment", "real-estate", "retirement", "stocks"]
 
-    if body is None or "type" not in body:
+    if body is None:
+        abort(
+            400,
+            message="Failed to create a new stream. Request body was not provided.",
+        )
+
+    if "type" not in body:
         abort(
             400,
             message="Failed to create a new stream. Invalid request body was provided. The 'type' of a new stream must be provided.",
@@ -38,11 +47,15 @@ def create_stream(body: CreateStream):
     if body["type"] not in allowed_types:
         abort(
             400,
-            message="Failed to create a new stream. Invalid request body was provided. The 'type' must have one of values: {allowed_types}, but '{body['type']}' was provided.",
+            message=f"Failed to create a new stream. Invalid request body was provided. The 'type' must have one of values: {allowed_types}, but '{body['type']}' was provided.",
         )
 
-    metadata = body["metadata"] if "metadata" in body else dict()
-    stream = es.Stream(uuid.uuid4(), body["type"], 0, metadata)
+    type: str = body["type"]
+    subtype: str = body["subtype"]
+    name: str = body["name"]
+    bank: str = body["bank"] if "bank" in body else "Default Bank"
+    metadata: dict = body["metadata"] if "metadata" in body else dict()
+    stream = es.Stream(uuid.uuid4(), type, subtype, name, bank, True, 0, metadata)
     es.create([stream])
 
     result = CreateStreamResult()

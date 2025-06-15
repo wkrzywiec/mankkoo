@@ -4,10 +4,12 @@ from datetime import datetime, timedelta, timezone
 
 import mankkoo.event_store as es
 
+# todo test with bank name
 
-def test_stream_is_created__if_type_is_provided(test_client):
+
+def test_stream_is_created__if_minimal_data_is_provided(test_client):
     # GIVEN
-    data = {"type": "account"}
+    data = {"type": "account", "subtype": "checking", "name": "My Account"}
 
     # WHEN
     response = test_client.post(
@@ -21,10 +23,12 @@ def test_stream_is_created__if_type_is_provided(test_client):
     assert payload["id"] is not None
 
 
-def test_stream_is_created__if_type_and_metadata_are_provided(test_client):
+def test_stream_is_created__if_minimal_data_and_metadata_are_provided(test_client):
     # GIVEN
     data = {
         "type": "investment",
+        "subtype": "treasury_bonds",
+        "name": "Treasury Bonds",
         "metadata": {"text": "something", "number": 123, "bool": True},
     }
 
@@ -60,7 +64,7 @@ def test_stream_is_not_created__if_type_is_not_provided(test_client):
 
 def test_stream_is_not_created__if_invalid_type_is_provided(test_client):
     # GIVEN
-    data = {"type": "invalid"}
+    data = {"type": "invalid", "subtype": "checking", "name": "My Account"}
 
     # WHEN
     response = test_client.post(
@@ -79,54 +83,55 @@ def test_all_streams_are_listed__if_no_filters_are_provided__and_stream_names_ar
         es.Stream(
             uuid.uuid4(),
             "account",
+            "checking",
+            "Super Personal account",
+            "Bank A",
+            True,
             0,
             {
-                "active": True,
                 "alias": "Bank account A",
-                "bankName": "Bank A",
                 "bankUrl": "https://www.bank-a.com",
                 "accountNumber": "iban-1",
-                "accountName": "Super Personal account",
-                "accountType": "checking",
                 "importer": "MANKKOO",
             },
         ),
         es.Stream(
             uuid.uuid4(),
             "investment",
+            "treasury_bonds",
+            "2 years Treasury Bonds",
+            "Bank B",
+            True,
             0,
             {
-                "active": True,
-                "category": "treasury_bonds",
-                "bankName": "Bank B",
-                "investmentName": "2 years Treasury Bonds",
+                "details": "Investment details",
             },
         ),
         es.Stream(
             uuid.uuid4(),
             "retirement",
+            "retirement",
+            "PPK",
+            "Bank PPK",
+            True,
             0,
             {
-                "active": True,
                 "alias": "PPK",
-                "bank": "Bank PPK",
                 "bankUrl": "https://www.ppk.com",
                 "accountNumber": "ppk-bank-acc-11",
-                "accountName": "'PPK",
-                "accountType": "retirement",
                 "importer": "MANKKOO",
             },
         ),
         es.Stream(
             uuid.uuid4(),
             "stocks",
+            "ETF",
+            "ETF name",
+            "Bank A",
+            True,
             0,
             {
-                "active": True,
-                "type": "ETF",
-                "broker": "Bank A",
                 "etfUrl": "https://atlasetf.pl/etf-details/IE00B4L5Y983",
-                "etfName": "ETF name",
             },
         ),
     ]
@@ -142,23 +147,24 @@ def test_all_streams_are_listed__if_no_filters_are_provided__and_stream_names_ar
     assert len(payload) == 4
 
     account_stream = next(x for x in payload if x["id"] == str(streams[0].id))
-    assert account_stream["type"] == "checking"
-    assert (
-        account_stream["name"]
-        == streams[0].metadata["bankName"] + " - " + streams[0].metadata["alias"]
-    )
+    assert account_stream["type"] == "account"
+    assert account_stream["subtype"] == "checking"
+    assert account_stream["name"] == streams[0].name
 
     investment_stream = next(x for x in payload if x["id"] == str(streams[1].id))
-    assert investment_stream["type"] == "treasury_bonds"
-    assert investment_stream["name"] == streams[1].metadata["investmentName"]
+    assert investment_stream["type"] == "investment"
+    assert investment_stream["subtype"] == "treasury_bonds"
+    assert investment_stream["name"] == streams[1].name
 
     retirement_stream = next(x for x in payload if x["id"] == str(streams[2].id))
     assert retirement_stream["type"] == "retirement"
-    assert retirement_stream["name"] == streams[2].metadata["alias"]
+    assert retirement_stream["subtype"] == "retirement"
+    assert retirement_stream["name"] == streams[2].name
 
     etf_stream = next(x for x in payload if x["id"] == str(streams[3].id))
-    assert etf_stream["type"] == "ETF"
-    assert etf_stream["name"] == streams[3].metadata["etfName"]
+    assert etf_stream["type"] == "stocks"
+    assert etf_stream["subtype"] == "ETF"
+    assert etf_stream["name"] == streams[3].name
 
 
 def test_only_active_streams_are_listed__if_active_qparam_equals_true(test_client):
@@ -167,30 +173,30 @@ def test_only_active_streams_are_listed__if_active_qparam_equals_true(test_clien
         es.Stream(
             uuid.uuid4(),
             "account",
+            "checking",  # subtype
+            "Super Personal account",  # name
+            "Bank A",  # bank
+            True,  # active
             0,
             {
-                "active": True,
                 "alias": "Bank account A",
-                "bankName": "Bank A",
                 "bankUrl": "https://www.bank-a.com",
                 "accountNumber": "iban-1",
-                "accountName": "Super Personal account",
-                "accountType": "checking",
                 "importer": "MANKKOO",
             },
         ),
         es.Stream(
             uuid.uuid4(),
             "account",
+            "checking",
+            "Super Personal account 2",
+            "Bank A",
+            False,
             0,
             {
-                "active": False,
                 "alias": "Bank account B",
-                "bankName": "Bank A",
                 "bankUrl": "https://www.bank-a.com",
                 "accountNumber": "iban-2",
-                "accountName": "Super Personal account 2",
-                "accountType": "checking",
                 "importer": "MANKKOO",
             },
         ),
@@ -215,30 +221,30 @@ def test_only_inactive_streams_are_listed__if_active_qparam_equals_false(test_cl
         es.Stream(
             uuid.uuid4(),
             "account",
+            "checking",
+            "Super Personal account",
+            "Bank A",
+            True,
             0,
             {
-                "active": True,
                 "alias": "Bank account A",
-                "bankName": "Bank A",
                 "bankUrl": "https://www.bank-a.com",
                 "accountNumber": "iban-1",
-                "accountName": "Super Personal account",
-                "accountType": "checking",
                 "importer": "MANKKOO",
             },
         ),
         es.Stream(
             uuid.uuid4(),
             "account",
+            "checking",
+            "Super Personal account 2",
+            "Bank A",
+            False,
             0,
             {
-                "active": False,
                 "alias": "Bank account B",
-                "bankName": "Bank A",
                 "bankUrl": "https://www.bank-a.com",
                 "accountNumber": "iban-2",
-                "accountName": "Super Personal account 2",
-                "accountType": "checking",
                 "importer": "MANKKOO",
             },
         ),
@@ -263,27 +269,28 @@ def test_only_accounts_streams_are_listed__if_type_qparam_equals_account(test_cl
         es.Stream(
             uuid.uuid4(),
             "account",
+            "checking",
+            "Super Personal account",
+            "Bank A",
+            True,
             0,
             {
-                "active": True,
                 "alias": "Bank account A",
-                "bankName": "Bank A",
                 "bankUrl": "https://www.bank-a.com",
                 "accountNumber": "iban-1",
-                "accountName": "Super Personal account",
-                "accountType": "checking",
                 "importer": "MANKKOO",
             },
         ),
         es.Stream(
             uuid.uuid4(),
             "investment",
+            "treasury_bonds",
+            "2 years Treasury Bonds",
+            "Bank B",
+            True,
             0,
             {
-                "active": True,
                 "category": "treasury_bonds",
-                "bankName": "Bank B",
-                "investmentName": "2 years Treasury Bonds",
             },
         ),
     ]
@@ -309,38 +316,40 @@ def test_only_inactive_investment_streams_are_listed__if_type_qparam_equals_inve
         es.Stream(
             uuid.uuid4(),
             "account",
+            "checking",
+            "Super Personal account",
+            "Bank A",
+            True,
             0,
             {
-                "active": True,
                 "alias": "Bank account A",
-                "bankName": "Bank A",
                 "bankUrl": "https://www.bank-a.com",
                 "accountNumber": "iban-1",
-                "accountName": "Super Personal account",
-                "accountType": "checking",
                 "importer": "MANKKOO",
             },
         ),
         es.Stream(
             uuid.uuid4(),
             "investment",
+            "treasury_bonds",
+            "2 years Treasury Bonds",
+            "Bank B",
+            True,
             0,
             {
-                "active": True,
                 "category": "treasury_bonds",
-                "bankName": "Bank B",
-                "investmentName": "2 years Treasury Bonds",
             },
         ),
         es.Stream(
             uuid.uuid4(),
             "investment",
+            "treasury_bonds",
+            "1 year Treasury Bonds",
+            "Bank B",
+            False,
             0,
             {
-                "active": False,
                 "category": "treasury_bonds",
-                "bankName": "Bank B",
-                "investmentName": "1 year Treasury Bonds",
             },
         ),
     ]
@@ -363,15 +372,15 @@ def test_stream_is_loaded(test_client):
     stream = es.Stream(
         uuid.uuid4(),
         "account",
+        "checking",
+        "Super Personal account",
+        "Bank A",
+        True,
         0,
         {
-            "active": True,
             "alias": "Bank account A",
-            "bankName": "Bank A",
             "bankUrl": "https://www.bank-a.com",
             "accountNumber": "iban-1",
-            "accountName": "Super Personal account",
-            "accountType": "checking",
             "importer": "MANKKOO",
         },
         {"wallet": "Risky Investments"},
@@ -394,15 +403,15 @@ def test_stream_is_not_loaded__if_invalid_id_provided(test_client):
     stream = es.Stream(
         uuid.uuid4(),
         "account",
+        "checking",
+        "Super Personal account",
+        "Bank A",
+        True,
         0,
         {
-            "active": True,
             "alias": "Bank account A",
-            "bankName": "Bank A",
             "bankUrl": "https://www.bank-a.com",
             "accountNumber": "iban-1",
-            "accountName": "Super Personal account",
-            "accountType": "checking",
             "importer": "MANKKOO",
         },
     )
@@ -421,15 +430,15 @@ def test_events_are_added_to_stream(test_client):
     stream = es.Stream(
         uuid.uuid4(),
         "account",
+        "checking",
+        "Super Personal account",
+        "Bank A",
+        True,
         0,
         {
-            "active": True,
             "alias": "Bank account A",
-            "bankName": "Bank A",
             "bankUrl": "https://www.bank-a.com",
             "accountNumber": "iban-1",
-            "accountName": "Super Personal account",
-            "accountType": "checking",
             "importer": "MANKKOO",
         },
     )
@@ -459,15 +468,15 @@ def test_events_are_not_added_to_stream__if_invalid_stream_id_was_provided(test_
     stream = es.Stream(
         uuid.uuid4(),
         "account",
+        "checking",
+        "Super Personal account",
+        "Bank A",
+        True,
         0,
         {
-            "active": True,
             "alias": "Bank account A",
-            "bankName": "Bank A",
             "bankUrl": "https://www.bank-a.com",
             "accountNumber": "iban-1",
-            "accountName": "Super Personal account",
-            "accountType": "checking",
             "importer": "MANKKOO",
         },
     )
@@ -563,15 +572,15 @@ def test_stream_metadata_are_updated(test_client):
     stream = es.Stream(
         uuid.uuid4(),
         "account",
+        "checking",
+        "Super Personal account",
+        "Bank A",
+        True,
         0,
         {
-            "active": True,
             "alias": "Bank account A",
-            "bankName": "Bank A",
             "bankUrl": "https://www.bank-a.com",
             "accountNumber": "iban-1",
-            "accountName": "Super Personal account",
-            "accountType": "checking",
             "importer": "MANKKOO",
         },
     )

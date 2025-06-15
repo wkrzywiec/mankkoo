@@ -1,8 +1,16 @@
-export const createStreamRequiredProps: Record<string, string[]> = {
-    "account": ["alias", "active", "bankUrl", "bankName", "importer", "accountName", "accountType", "accountNumber"],
-    "investment": ["active", "bankName", "category", "investmentName"],
-    "stocks": ["type", "active", "broker", "etfUrl", "etfName"],
-    "retirement": ["alias", "active", "bankUrl", "bankName", "importer", "accountName", "accountType", "accountNumber"],
+export const createStreamPossibleSubtypes: Record<string, string[]> = {
+    "account": ["checking", "savings", "cash"],
+    "investment": ["treasury_bonds", "deposit"],
+    "stocks": ["ETF"],
+    "retirement": ["retirement"],
+    "real-estate": [ "" ]
+}
+
+export const createStreamRequiredMetadata: Record<string, string[]> = {
+    "account": ["alias", "bankUrl", "importer", "accountNumber"],
+    "investment": ["details"],
+    "stocks": ["etfUrl", "ike", "ikze"],
+    "retirement": ["alias", "bankUrl", "importer", "accountNumber"],
     "real-estate": [ "" ]
 }
 
