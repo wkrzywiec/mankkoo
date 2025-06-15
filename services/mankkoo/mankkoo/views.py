@@ -82,13 +82,13 @@ def __load_current_total_savings() -> float:
     accounts_balance AS (
         SELECT
             SUM((data->>'balance')::numeric) AS total,
-            l.type as type
+            l.subtype as type
         FROM
             events e
         JOIN
             account_latest_version l ON e.stream_id = l.id AND l.version = e.version
         GROUP BY
-            l.type
+            l.subtype
         ),
 
     retirement_latest_version AS (
@@ -131,7 +131,7 @@ def __load_current_total_savings() -> float:
     investment_balance AS (
         SELECT
             (data->>'balance')::numeric AS total,
-            l.type
+            l.subtype
         FROM events e
         JOIN investment_latest_version l ON e.stream_id = l.id AND l.version = e.version
     ),
@@ -206,16 +206,16 @@ def __load_current_total_savings_distribution() -> list[dict]:
         SELECT
             SUM((data->>'balance')::numeric) AS total,
             CASE
-                WHEN l.type = 'checking' THEN 'Checking Accounts'
-                WHEN l.type = 'savings' THEN 'Savings Accounts'
-            ELSE l.type
+                WHEN l.subtype = 'checking' THEN 'Checking Accounts'
+                WHEN l.subtype = 'savings' THEN 'Savings Accounts'
+            ELSE l.subtype
             END AS type
         FROM
             events e
         JOIN
             account_latest_version l ON e.stream_id = l.id AND l.version = e.version
         GROUP BY
-            l.type
+            l.subtype
         ),
 
     retirement_latest_version AS (
@@ -414,7 +414,7 @@ def __investment_indicators() -> None:
     investment_balance AS (
         SELECT
             (data->>'balance')::numeric AS total,
-            l.type
+            l.subtype
         FROM events e
         JOIN investment_latest_version l ON e.stream_id = l.id AND l.version = e.version
     ),
@@ -494,10 +494,10 @@ def __load_investment_types_distribution() -> list[dict]:
     investment_balance AS (
         SELECT
             SUM((e.data->>'balance')::numeric) AS total,
-            s.type
+            s.subtype
         FROM events e
         JOIN investment_streams s ON e.stream_id = s.id AND e.version = s.version
-        GROUP BY s.type
+        GROUP BY s.subtype
     ),
     stocks_streams AS (
         SELECT id, version, subtype
@@ -508,13 +508,13 @@ def __load_investment_types_distribution() -> list[dict]:
     stocks_balance AS (
         SELECT
             SUM((e.data->>'balance')::numeric) AS total,
-            s.type
+            s.subtype
         FROM events e
         JOIN stocks_streams s ON e.stream_id = s.id AND e.version = s.version
-        GROUP BY s.type
+        GROUP BY s.subtype
     ),
     savings_streams AS (
-        SELECT id, version, 'Savings Accounts' AS type
+        SELECT id, version, 'Savings Accounts' AS subtype
         FROM streams
         WHERE type = 'account'
           AND (subtype) = 'savings'
@@ -523,10 +523,10 @@ def __load_investment_types_distribution() -> list[dict]:
     savings_balance AS (
         SELECT
             SUM((e.data->>'balance')::numeric) AS total,
-            s.type
+            s.subtype
         FROM events e
         JOIN savings_streams s ON e.stream_id = s.id AND e.version = s.version
-        GROUP BY s.type
+        GROUP BY s.subtype
     ),
     all_types AS (
         SELECT * FROM investment_balance
@@ -536,7 +536,7 @@ def __load_investment_types_distribution() -> list[dict]:
         SELECT * FROM savings_balance
     )
     SELECT
-        type,
+        subtype,
         total,
         ROUND(total / NULLIF((SELECT SUM(total) FROM all_types), 0), 4) AS percentage
     FROM all_types
@@ -669,10 +669,10 @@ def __load_investment_types_distribution_per_wallet() -> list[dict]:
         SELECT
             SUM((e.data->>'balance')::numeric) AS total,
             s.wallet,
-            s.type
+            s.subtype
         FROM events e
         JOIN investment_streams s ON e.stream_id = s.id AND e.version = s.version
-        GROUP BY s.wallet, s.type
+        GROUP BY s.wallet, s.subtype
     ),
     stocks_streams AS (
         SELECT id, version, labels ->> 'wallet' AS wallet, subtype
@@ -683,13 +683,13 @@ def __load_investment_types_distribution_per_wallet() -> list[dict]:
         SELECT
             SUM((e.data->>'balance')::numeric) AS total,
             s.wallet,
-            s.type
+            s.subtype
         FROM events e
         JOIN stocks_streams s ON e.stream_id = s.id AND e.version = s.version
-        GROUP BY s.wallet, s.type
+        GROUP BY s.wallet, s.subtype
     ),
     savings_streams AS (
-        SELECT id, version, labels ->> 'wallet' AS wallet, 'Savings Accounts' AS type
+        SELECT id, version, labels ->> 'wallet' AS wallet, 'Savings Accounts' AS subtype
         FROM streams
         WHERE type = 'account' AND (subtype) = 'savings' AND active = true
     ),
@@ -697,10 +697,10 @@ def __load_investment_types_distribution_per_wallet() -> list[dict]:
         SELECT
             SUM((e.data->>'balance')::numeric) AS total,
             s.wallet,
-            s.type
+            s.subtype
         FROM events e
         JOIN savings_streams s ON e.stream_id = s.id AND e.version = s.version
-        GROUP BY s.wallet, s.type
+        GROUP BY s.wallet, s.subtype
     ),
     all_types AS (
         SELECT * FROM investment_balance
@@ -716,7 +716,7 @@ def __load_investment_types_distribution_per_wallet() -> list[dict]:
     )
     SELECT
         a.wallet,
-        a.type,
+        a.subtype,
         a.total,
         ROUND(a.total / NULLIF(w.wallet_total, 0), 4) AS percentage
     FROM all_types a
