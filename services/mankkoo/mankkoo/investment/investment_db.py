@@ -26,16 +26,11 @@ def load_investments(active: bool, wallet: str) -> list[dict]:
     conditions = []
     # Only allow investment, stocks, or account (savings)
     conditions.append(
-        "(s.type IN ('investment', 'stocks') OR (s.type = 'account' AND s.metadata->>'accountType' = 'savings'))"
+        "(s.type IN ('investment', 'stocks') OR (s.type = 'account' AND s.subtype = 'savings'))"
     )
 
     if active is not None:
-        if active:
-            conditions.append(
-                f"(active = {active})"
-            )
-        else:
-            conditions.append(f"CAST (s.metadata->>'active' AS boolean) = {active}")
+        conditions.append(f"(active = {active})")
     if wallet:
         conditions.append(f"s.labels->>'wallet' = '{wallet}'")
 
@@ -50,24 +45,9 @@ def load_investments(active: bool, wallet: str) -> list[dict]:
         ORDER BY e.stream_id, e.version DESC
     )
     SELECT s.id,
-        CASE
-            WHEN s.type = 'investment' THEN s.metadata->>'investmentName'
-            WHEN s.type = 'stocks' THEN s.metadata->>'etfName'
-            WHEN s.type = 'account' THEN s.metadata->>'accountName'
-            ELSE NULL
-        END AS name,
-        CASE
-            WHEN s.type = 'investment' THEN 'investment'
-            WHEN s.type = 'stocks' THEN 'stocks'
-            WHEN s.type = 'account' THEN 'account'
-            ELSE s.type
-        END AS investment_type,
-        CASE
-            WHEN s.type = 'investment' THEN s.metadata->>'category'
-            WHEN s.type = 'stocks' THEN s.metadata->>'type'
-            WHEN s.type = 'account' THEN s.metadata->>'accountType'
-            ELSE NULL
-        END AS subtype,
+        name,
+        type AS investment_type,
+        subtype,
         COALESCE((le.data->>'balance')::numeric, 0) AS balance
     FROM streams s
     LEFT JOIN latest_events le ON le.stream_id = s.id AND le.version = s.version

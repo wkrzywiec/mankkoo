@@ -24,7 +24,7 @@ export default function Streams() {
 
   const MySwal = withReactContent(Swal);
 
-  const streamsHeaders = [['Type', 'Name', 'Wallet']]
+  const streamsHeaders = [['Subtype', 'Bank', 'Name', 'Wallet']]
   const streamsDetailsHeaders = [['Property', 'Value']]
   const eventsHeaders = [['Event Type', 'Occured At', 'Data']]
 
@@ -73,7 +73,7 @@ export default function Streams() {
       setStreamType(undefined)
     }
 
-    const streamsData = streams?.map(stream => [stream.type, stream.name, stream.wallet])
+    const streamsData = streams?.map(stream => [stream.subtype, stream.bank, stream.name, stream.wallet])
     const streamTableData = [...streamsHeaders, ...streamsData ?? []]
     const streamRowIds = streams?.map(stream => stream.id)
 

@@ -25,13 +25,13 @@ def load_all_accounts() -> list[Account]:
     query = """
     SELECT
         id,
-        metadata->>'accountName' AS name,
+        name,
         metadata->>'accountNumber' AS number,
         metadata->>'alias' AS alias,
-        metadata->>'accountType' AS type,
+        subtype AS type,
         metadata->>'importer' AS importer,
-        metadata->>'active' AS active,
-        metadata->>'bankName' AS bankName,
+        active,
+        bank AS bankName,
         metadata->>'bankUrl' AS bankUrl,
         false as hidden,
         (SELECT DATE(e.occured_at)

@@ -8,6 +8,8 @@ from mankkoo.base_logger import log
 class Stream(Schema):
     id = String()
     type = String()
+    subtype = String()
+    bank = String()
     name = String()
     wallet = String()
 
@@ -17,12 +19,7 @@ def load_streams(active: bool, type: str) -> list[Stream]:
     conditions = []
 
     if active is not None:
-        if active:
-            conditions.append(
-                f"(CAST (metadata->>'active' AS boolean) = {active} OR NOT (metadata ? 'active'))"
-            )
-        else:
-            conditions.append(f"CAST (metadata->>'active' AS boolean) = {active}")
+        conditions.append(f"active = {active}")
 
     if type is not None:
         conditions.append(f"type = '{type}'")
@@ -36,22 +33,10 @@ def load_streams(active: bool, type: str) -> list[Stream]:
     query = f"""
     SELECT
         id,
-        CASE
-           WHEN type = 'account' THEN metadata->>'accountType'
-           WHEN type = 'investment' THEN metadata->>'category'
-           WHEN type = 'retirement' THEN metadata->>'accountType'
-           WHEN type = 'stocks' THEN metadata->>'type'
-           ELSE type
-        END AS type
-        ,
-        CASE
-           WHEN type = 'account' THEN CONCAT(metadata->>'bankName', ' - ', metadata->>'alias')
-           WHEN type = 'investment' THEN metadata->>'investmentName'
-           WHEN type = 'retirement' THEN metadata->>'alias'
-           WHEN type = 'stocks' AND metadata->>'type' = 'ETF' THEN metadata->>'etfName'
-           ELSE 'Unknown'
-        END AS name
-        ,
+        type,
+        subtype,
+        bank,
+        name,
         labels->>'wallet' AS wallet
     FROM
         streams
@@ -69,8 +54,10 @@ def load_streams(active: bool, type: str) -> list[Stream]:
                 stream = Stream()
                 stream.id = row[0]
                 stream.type = row[1]
-                stream.name = row[2]
-                stream.wallet = row[3]
+                stream.subtype = row[2]
+                stream.bank = row[3]
+                stream.name = row[4]
+                stream.wallet = row[5]
 
                 result.append(stream)
     return result
