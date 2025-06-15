@@ -4,7 +4,8 @@ from datetime import datetime, timedelta, timezone
 
 import mankkoo.event_store as es
 
-#todo test with bank name
+# todo test with bank name
+
 
 def test_stream_is_created__if_minimal_data_is_provided(test_client):
     # GIVEN

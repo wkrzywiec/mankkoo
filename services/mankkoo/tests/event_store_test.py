@@ -230,7 +230,16 @@ def test_get_stream_by_metadata_if_key_exists():
     stream = es.get_stream_by_metadata("details", "bank")
 
     # then
-    assert stream == es.Stream(stream_id, stream_type, "Default stream subtype", "Default Stream Name", "Default Bank", True, 1, metadata)
+    assert stream == es.Stream(
+        stream_id,
+        stream_type,
+        "Default stream subtype",
+        "Default Stream Name",
+        "Default Bank",
+        True,
+        1,
+        metadata,
+    )
 
 
 def test_get_none_stream_by_metadata_if_key_does_not_exist():

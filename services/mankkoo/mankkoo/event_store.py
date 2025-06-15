@@ -11,7 +11,16 @@ log.basicConfig(level=log.DEBUG)
 
 class Stream:
     def __init__(
-        self, id: UUID, type: str, subtype: str, name: str, bank: str, active: bool, version: int, metadata: dict, labels: dict = {}
+        self,
+        id: UUID,
+        type: str,
+        subtype: str,
+        name: str,
+        bank: str,
+        active: bool,
+        version: int,
+        metadata: dict,
+        labels: dict = {},
     ):
         self.id = id
         self.type = type
@@ -43,7 +52,16 @@ class Stream:
         )
 
     def __hash__(self):
-        return hash(self.id, self.type, self.subtype, self.name, self.bank, self.active, self.version, self.metadata)
+        return hash(
+            self.id,
+            self.type,
+            self.subtype,
+            self.name,
+            self.bank,
+            self.active,
+            self.version,
+            self.metadata,
+        )
 
 
 class Event:

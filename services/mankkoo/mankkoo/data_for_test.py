@@ -9,7 +9,12 @@ def any_account_stream(account_type="checking", active=True, wallet="Default"):
 
 
 def any_stream(
-    stream_type="account", stream_subtype="checking", stream_name=f"Stream Name {str(uuid.uuid4())}", bank=f"Bank {str(uuid.uuid4())}", active=True, wallet="Default"
+    stream_type="account",
+    stream_subtype="checking",
+    stream_name=f"Stream Name {str(uuid.uuid4())}",
+    bank=f"Bank {str(uuid.uuid4())}",
+    active=True,
+    wallet="Default",
 ):
     return es.Stream(
         uuid.uuid4(),
