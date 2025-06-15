@@ -153,11 +153,13 @@ def investment_events(
     inv_stream = es.Stream(
         uuid.uuid4(),
         "investment",
+        category,
+        "10-years Treasury Bonds",
+        "Bank 1",
+        active,
         0,
         {
-            "investmentName": "10-years Treasury Bonds",
-            "category": category,
-            "active": active,
+            "details": "Some details about the investment"
         },
         {"wallet": wallet},
     )
