@@ -11,8 +11,12 @@ def test_investment_wallets_endpoint__returns_wallet_list(test_client):
         stream = es.Stream(
             uuid.uuid4(),
             "investment",
+            "deposit",
+            "Super Investment",
+            "Broker A",
+            True,
             version=0,
-            metadata={"active": True},
+            metadata={"details": "Super investment details"},
             labels={"wallet": wallet_label},
         )
         streams.append(stream)
@@ -82,40 +86,60 @@ def _create_investment_test_streams():
     etf_stream = es.Stream(
         uuid.uuid4(),
         "stocks",
+        "ETF",
+        "SP500 ETF",
+        "Broker1",
+        True,
         0,
-        {"active": True, "type": "ETF", "broker": "Broker1", "etfName": "ETFSP500"},
+        {"details": "SP500 ETF details"},
         {"wallet": "Wallet A"},
     )
     # Investment (active)
     investment_stream = es.Stream(
         uuid.uuid4(),
         "investment",
+        "deposit",
+        "Bank Deposit",
+        "Broker B",
+        True,
         0,
-        {"active": True, "category": "bonds", "investmentName": "Bond2025"},
+        {"details": "Bank deposit details"},
         {"wallet": "Wallet B"},
     )
     # Investment (inactive)
     investment_stream_inactive = es.Stream(
         uuid.uuid4(),
         "investment",
+        "deposit",
+        "Old Investment",
+        "Broker B",
+        False,
         0,
-        {"active": False, "category": "bonds", "investmentName": "Bond2020"},
+        {"details": "Old investment details"},
         {"wallet": "Wallet B"},
     )
     # Savings account (active)
     savings_stream = es.Stream(
         uuid.uuid4(),
         "account",
+        "savings",
+        "My Savings Account",
+        "Bank C",
+        True,
         0,
-        {"active": True, "accountType": "savings", "accountName": "MySavings"},
+        {"accountNumber": "1234567890"},
         {"wallet": "Wallet C"},
     )
     # Savings account (inactive)
     savings_stream_inactive = es.Stream(
         uuid.uuid4(),
         "account",
+        "savings",
+        "Old Savings Account",
+        "Bank C",
+        False,
         0,
-        {"active": False, "accountType": "savings", "accountName": "OldSavings"},
+        {"details": "Old savings account details"},
         {"wallet": "Wallet C"},
     )
     es.create(

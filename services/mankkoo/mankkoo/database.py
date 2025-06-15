@@ -113,9 +113,9 @@ def init_db():
                     stream_version := 0;
 
                     INSERT INTO streams
-                        (id, type, version)
+                        (id, type, subtype, name, bank, version)
                     VALUES
-                        (stream_id, stream_type, stream_version);
+                        (stream_id, stream_type, 'Default stream subtype', 'Default Stream Name', 'Default Bank', stream_version);
                 END IF;
 
                 -- increment event_version

@@ -10,45 +10,45 @@ def test_all_accounts_are_loaded(test_client):
         es.Stream(
             uuid.uuid4(),
             "account",
+            "checking",
+            "Super Personal account",
+            "Bank A",
+            True,
             0,
             {
-                "active": True,
                 "alias": "Bank account A",
-                "bankName": "Bank A",
                 "bankUrl": "https://www.bank-a.com",
                 "accountNumber": "iban-1",
-                "accountName": "Super Personal account",
-                "accountType": "checking",
                 "importer": "MANKKOO",
             },
         ),
         es.Stream(
             uuid.uuid4(),
             "account",
+            "savings",
+            "Super Savings account",
+            "Bank A",
+            True,
             0,
             {
-                "active": True,
                 "alias": "Saving account",
-                "bankName": "Bank A",
                 "bankUrl": "https://www.bank-a.com",
                 "accountNumber": "iban-11",
-                "accountName": "'Super Savings account",
-                "accountType": "savigs",
                 "importer": "MANKKOO",
             },
         ),
         es.Stream(
             uuid.uuid4(),
             "retirement",
+            "retirement",
+            "PPK",
+            "Bank PPK",
+            True,
             0,
             {
-                "active": True,
                 "alias": "PPK",
-                "bank": "Bank PPK",
                 "bankUrl": "https://www.ppk.com",
                 "accountNumber": "ppk-bank-acc-11",
-                "accountName": "'PPK",
-                "accountType": "retirement",
                 "importer": "MANKKOO",
             },
         ),
@@ -67,11 +67,11 @@ def test_all_accounts_are_loaded(test_client):
     first_account = next(x for x in payload if x["id"] == str(streams[0].id))
     assert first_account["active"] is True
     assert first_account["alias"] == streams[0].metadata["alias"]
-    assert first_account["bankName"] == streams[0].metadata["bankName"]
+    assert first_account["bankName"] == streams[0].bank
     assert first_account["bankUrl"] == streams[0].metadata["bankUrl"]
     assert first_account["number"] == streams[0].metadata["accountNumber"]
-    assert first_account["name"] == streams[0].metadata["accountName"]
-    assert first_account["type"] == streams[0].metadata["accountType"]
+    assert first_account["name"] == streams[0].name
+    assert first_account["type"] == streams[0].subtype
     assert first_account["importer"] == streams[0].metadata["importer"]
 
 

@@ -196,7 +196,7 @@ def get_stream_by_id(stream_id: str) -> Stream | None:
     with db.get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                f"SELECT id, type, version, metadata from streams WHERE id = '{stream_id}'"
+                f"SELECT id, type, subtype, name, bank, active, version, metadata from streams WHERE id = '{stream_id}'"
             )
             result = cur.fetchone()
             if result is None:
@@ -205,10 +205,14 @@ def get_stream_by_id(stream_id: str) -> Stream | None:
                 (
                     id,
                     type,
+                    subtype,
+                    name,
+                    bank,
+                    active,
                     version,
                     metadata,
                 ) = result
-    return Stream(uuid.UUID(id), type, version, metadata)
+    return Stream(uuid.UUID(id), type, subtype, name, bank, active, version, metadata)
 
 
 def get_stream_by_metadata(key: str, value) -> Stream | None:
@@ -218,7 +222,7 @@ def get_stream_by_metadata(key: str, value) -> Stream | None:
     with db.get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                f"SELECT id, type, version, metadata FROM streams WHERE metadata ->> '{key}' = '{value}'"
+                f"SELECT id, type, subtype, name, bank, active, version, metadata FROM streams WHERE metadata ->> '{key}' = '{value}'"
             )
             result = cur.fetchone()
             if result is None:
@@ -227,10 +231,14 @@ def get_stream_by_metadata(key: str, value) -> Stream | None:
                 (
                     id,
                     type,
+                    subtype,
+                    name,
+                    bank,
+                    active,
                     version,
                     metadata,
                 ) = result
-    return Stream(uuid.UUID(id), type, version, metadata)
+    return Stream(uuid.UUID(id), type, subtype, name, bank, active, version, metadata)
 
 
 def get_stream_metadata(stream_id: UUID) -> dict:

@@ -78,14 +78,10 @@ def load_stream_by_id(stream_id: str) -> StreamsQueryResult | None:
         with conn.cursor() as cur:
             cur.execute(
                 f"""
-                SELECT id, type,
-                CASE
-                    WHEN type = 'account' THEN CONCAT(metadata->>'bankName', ' - ', metadata->>'alias')
-                    WHEN type = 'investment' THEN metadata->>'investmentName'
-                    WHEN type = 'retirement' THEN metadata->>'alias'
-                    WHEN type = 'stocks' AND metadata->>'type' = 'ETF' THEN metadata->>'etfName'
-                    ELSE 'Unknown'
-                END AS name,
+                SELECT
+                id,
+                type,
+                name,
                 version,
                 metadata,
                 labels

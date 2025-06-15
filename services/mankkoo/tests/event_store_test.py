@@ -223,14 +223,14 @@ def test_udpate_streams_filled_metadata():
 def test_get_stream_by_metadata_if_key_exists():
     # given
     es.store([initEvent])
-    metadata = {"name": "bank", "number": 1234, "isActive": True}
+    metadata = {"details": "bank", "number": 1234, "isActive": True}
     es.update_stream_metadata(stream_id, metadata)
 
     # when
-    stream = es.get_stream_by_metadata("name", "bank")
+    stream = es.get_stream_by_metadata("details", "bank")
 
     # then
-    assert stream == es.Stream(stream_id, stream_type, 1, metadata)
+    assert stream == es.Stream(stream_id, stream_type, "Default stream subtype", "Default Stream Name", "Default Bank", True, 1, metadata)
 
 
 def test_get_none_stream_by_metadata_if_key_does_not_exist():
