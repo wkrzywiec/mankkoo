@@ -11,16 +11,20 @@ log.basicConfig(level=log.DEBUG)
 
 class Stream:
     def __init__(
-        self, id: UUID, type: str, version: int, metadata: dict, labels: dict = {}
+        self, id: UUID, type: str, subtype: str, name: str, bank: str, active: bool, version: int, metadata: dict, labels: dict = {}
     ):
         self.id = id
         self.type = type
+        self.subtype = subtype
+        self.name = name
+        self.bank = bank
+        self.active = active
         self.version = version
         self.metadata = metadata
         self.labels = labels
 
     def __str__(self):
-        return f"Stream(id={self.id}, type={self.type}, version={self.version}, metadata={self.metadata})"
+        return f"Stream(id={self.id}, type={self.type}, subtype={self.subtype}, name={self.name}, bank={self.bank}, active={self.active} version={self.version}, metadata={self.metadata}, labels={self.labels})"
 
     def __eq__(self, other):
         if not isinstance(other, Stream):
@@ -29,12 +33,17 @@ class Stream:
         return (
             self.id == other.id
             and self.type == other.type
+            and self.subtype == other.subtype
+            and self.name == other.name
+            and self.bank == other.bank
+            and self.active == other.active
             and self.version == other.version
             and self.metadata == other.metadata
+            and self.labels == other.labels
         )
 
     def __hash__(self):
-        return hash(self.id, self.type, self.version, self.metadata)
+        return hash(self.id, self.type, self.subtype, self.name, self.bank, self.active, self.version, self.metadata)
 
 
 class Event:
@@ -97,10 +106,14 @@ def create(streams: list[Stream]):
             for stream in streams:
                 log.info(f"Inserting stream: {stream}...")
                 cur.execute(
-                    "INSERT INTO streams (id, type, version, metadata, labels) VALUES (%s, %s, %s, %s, %s)",
+                    "INSERT INTO streams (id, type, subtype, name, bank, active, version, metadata, labels) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
                     (
                         str(stream.id),
                         stream.type,
+                        stream.subtype,
+                        stream.name,
+                        stream.bank,
+                        stream.active,
                         stream.version,
                         json.dumps(stream.metadata),
                         json.dumps(stream.labels),
