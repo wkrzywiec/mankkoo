@@ -113,8 +113,12 @@ def stock_events(
     stock_stream = es.Stream(
         uuid.uuid4(),
         "stocks",
+        type,
+        "Stock Stream Name",
+        "Bank 1",
+        active,
         0,
-        {"type": type, "broker": "Bank 1", "active": active},
+        {"details": "Some details about the stock"},
         {"wallet": wallet},
     )
 
