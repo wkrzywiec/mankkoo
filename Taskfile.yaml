@@ -42,7 +42,7 @@ tasks:
     desc: Spin up infra
     cmds: 
       - echo "Starting docker containers..."
-      - docker compose up -d
+      - docker compose up -d postgres pgadmin
 
   infra:down:
     desc: Tear down infra
