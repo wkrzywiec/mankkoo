@@ -45,66 +45,56 @@ export default function Investments() {
   const [invTypeDistributionPie, setSavingsDistributionPie] = useState<PieChartData>({ data: [], labels: [] });
   
   useEffect(() => {
-
     function prepareDataForSavingsDistributionTable() {
-        const savingsTable: TableData = { data: [], hasHeader: false, boldLastRow: true, currencyColumnIdx: 3, colorsColumnIdx: 2};
-        
-        invTypeDistribution?.data.forEach(value => {
-          savingsTable.data.push([value.type, value.total.toString(), percentage(value.percentage)]);
-        });
-  
-        savingsTable.data.push(['Total', indicators === undefined ? '0' : indicators.totalInvestments.toString(), '']);
-        setSavingsDistributionTable(savingsTable);
+      if (!invTypeDistribution || !invTypeDistribution.data) return;
+      const savingsTable: TableData = { data: [], hasHeader: false, boldLastRow: true, currencyColumnIdx: 3, colorsColumnIdx: 2};
+      invTypeDistribution.data.forEach(value => {
+        savingsTable.data.push([value.type, value.total.toString(), percentage(value.percentage)]);
+      });
+      savingsTable.data.push(['Total', indicators === undefined ? '0' : indicators.totalInvestments.toString(), '']);
+      setSavingsDistributionTable(savingsTable);
     }
-
     function prepareDataForSavingsDistributionPieChart() {
+      if (!invTypeDistribution || !invTypeDistribution.data) return;
       const tempPieData: PieChartData = { data: [], labels: [] };
-      
-      invTypeDistribution?.data.forEach(value => {
+      invTypeDistribution.data.forEach(value => {
         tempPieData.labels.push(value.type);
         tempPieData.data.push(value.total);
       });
       setSavingsDistributionPie(tempPieData);
     }
-
-    if (invTypeDistribution !== undefined && invTypeDistribution?.data.length > 0 && !isFetchingInvTypeDistribution ) {
+    if (invTypeDistribution && invTypeDistribution.data && invTypeDistribution.data.length > 0 && !isFetchingInvTypeDistribution ) {
       prepareDataForSavingsDistributionTable();
       prepareDataForSavingsDistributionPieChart();
     }
-    
   }, [invTypeDistribution, isFetchingInvTypeDistribution, indicators])
 
   const [walletsDistributionTable, setWalletsDistributionTable] = useState<TableData>({ data: [], hasHeader: false, boldLastRow: false, currencyColumnIdx: -1, colorsColumnIdx: -1})
   const [walletsDistributionPie, setWalletsDistributionPie] = useState<PieChartData>({ data: [], labels: [] });
   
   useEffect(() => {
-
     function prepareDataForWalletsDistributionTable() {
-        const walletsTable: TableData = { data: [], hasHeader: false, boldLastRow: true, currencyColumnIdx: 3, colorsColumnIdx: 2};
-        
-        walletsDistribution?.data.forEach(value => {
-          walletsTable.data.push([value.wallet, value.total.toString(), percentage(value.percentage)]);
-        });
-  
-        walletsTable.data.push(['Total', indicators === undefined ? '0' : indicators.totalInvestments.toString(), '']);
-        setWalletsDistributionTable(walletsTable);
+      if (!walletsDistribution || !walletsDistribution.data) return;
+      const walletsTable: TableData = { data: [], hasHeader: false, boldLastRow: true, currencyColumnIdx: 3, colorsColumnIdx: 2};
+      walletsDistribution.data.forEach(value => {
+        walletsTable.data.push([value.wallet, value.total.toString(), percentage(value.percentage)]);
+      });
+      walletsTable.data.push(['Total', indicators === undefined ? '0' : indicators.totalInvestments.toString(), '']);
+      setWalletsDistributionTable(walletsTable);
     }
-
     function prepareDataForWalletsDistributionPieChart() {
+      if (!walletsDistribution || !walletsDistribution.data) return;
       const tempPieData: PieChartData = { data: [], labels: [] };
-      
-      walletsDistribution?.data.forEach(value => {
+      walletsDistribution.data.forEach(value => {
         tempPieData.labels.push(value.wallet);
         tempPieData.data.push(value.total);
       });
       setWalletsDistributionPie(tempPieData);
     }
-
-    if (walletsDistribution !== undefined && walletsDistribution?.data.length > 0 && !isFetchingWalletsDistribution ) {
+    if (walletsDistribution && walletsDistribution.data && walletsDistribution.data.length > 0 && !isFetchingWalletsDistribution ) {
       prepareDataForWalletsDistributionTable();
       prepareDataForWalletsDistributionPieChart();
     }
-    
   }, [walletsDistribution, isFetchingWalletsDistribution, indicators])
 
   const investmentsTableData = useMemo<TableData>(() => ({
@@ -121,7 +111,7 @@ export default function Investments() {
   const investmentsRowIds = useMemo(() => (investmentsInWallet ?? []).map(inv => inv.id), [investmentsInWallet]);
 
   const invTypeDistPerWalletPie = useMemo<PieChartData>(() => {
-    if (!investmentTypeDistributionPerWallet?.data?.length || !selectedWallet) return { data: [], labels: [] };
+    if (!investmentTypeDistributionPerWallet || !investmentTypeDistributionPerWallet.data || !investmentTypeDistributionPerWallet.data.length || !selectedWallet) return { data: [], labels: [] };
     const filtered = investmentTypeDistributionPerWallet.data.filter((item: InvestmentTypesDistributionPerWalletItem) => item.wallet === selectedWallet);
     return {
       labels: filtered.map((item) => item.type),
@@ -130,7 +120,7 @@ export default function Investments() {
   }, [investmentTypeDistributionPerWallet, selectedWallet]);
 
   const invTypeDistPerWalletTable = useMemo<TableData>(() => {
-    if (!investmentTypeDistributionPerWallet?.data?.length || !selectedWallet) return { data: [], hasHeader: true, boldLastRow: false, currencyColumnIdx: -1, colorsColumnIdx: -1 };
+    if (!investmentTypeDistributionPerWallet || !investmentTypeDistributionPerWallet.data || !investmentTypeDistributionPerWallet.data.length || !selectedWallet) return { data: [], hasHeader: true, boldLastRow: false, currencyColumnIdx: -1, colorsColumnIdx: -1 };
     const filtered = investmentTypeDistributionPerWallet.data.filter((item: InvestmentTypesDistributionPerWalletItem) => item.wallet === selectedWallet);
     return {
       hasHeader: true,

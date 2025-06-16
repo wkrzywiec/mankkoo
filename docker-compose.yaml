@@ -1,9 +1,10 @@
 services:
 
   ui:
-    build:
-      context: ./services/mankkoo-ui
-      dockerfile: Dockerfile
+    image: ghcr.io/wkrzywiec/mankkoo-ui:latest
+    # build:
+    #   context: ./services/mankkoo-ui
+    #   dockerfile: Dockerfile
     container_name: mankkoo-ui
     depends_on:
       - core
@@ -13,9 +14,10 @@ services:
       - NODE_ENV=production
 
   core:
-    build:
-      context: ./services/mankkoo
-      dockerfile: Dockerfile
+    image: ghcr.io/wkrzywiec/mankkoo-core:latest
+    # build:
+    #   context: ./services/mankkoo
+    #   dockerfile: Dockerfile
     container_name: mankkoo-core
     environment:
       - ENV=prod
@@ -43,7 +45,7 @@ services:
     command: [ "postgres", "-c", "log_statement=all" ]
     volumes:
       - postgres:/var/lib/postgres/data
-      - ./services/infra/postgres:/docker-entrypoint-initdb.d
+      - ./services/infra/postgres/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-postgres}"]
       interval: 5s

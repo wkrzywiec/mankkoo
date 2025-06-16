@@ -9,7 +9,7 @@ on:
 jobs:
 
   mankkoo:
-    name: mankkoo-core
+    name: build (mankkoo-core)
     runs-on: ubuntu-24.04
     defaults:
       run: 
@@ -44,7 +44,7 @@ jobs:
           flags: unittests
 
   ui:
-    name: mankkoo-ui
+    name: build (mankkoo-ui)
     runs-on: ubuntu-24.04
     defaults:
       run: 
@@ -82,7 +82,7 @@ jobs:
         run: npm run build
 
   docker-mankkoo:
-    name: Build & Push Docker Image (mankkoo-core)
+    name: docker (mankkoo-core)
     runs-on: ubuntu-24.04
     needs: mankkoo
     steps:
@@ -100,7 +100,7 @@ jobs:
           docker push ghcr.io/${{ github.repository_owner }}/mankkoo-core:latest
 
   docker-ui:
-    name: Build & Push Docker Image (mankkoo-ui)
+    name: docker (mankkoo-ui)
     runs-on: ubuntu-24.04
     needs: ui
     steps:
