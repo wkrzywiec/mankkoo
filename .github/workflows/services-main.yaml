@@ -81,12 +81,39 @@ jobs:
       - name: Create build 🏗️
         run: npm run build
 
-# TODO enable docs generation
-      # - name: Build docs 🏗️
-      #   run: pipenv run docs-build
+  docker-mankkoo:
+    name: Build & Push Docker Image (mankkoo-core)
+    runs-on: ubuntu-24.04
+    needs: mankkoo
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push Docker image
+        run: |
+          docker build -t ghcr.io/${{ github.repository_owner }}/mankkoo-core:latest ./services/mankkoo
+          docker push ghcr.io/${{ github.repository_owner }}/mankkoo-core:latest
 
-      # - name: Deploy 🚀
-      #   uses: JamesIves/github-pages-deploy-action@4.1.0
-      #   with:
-      #     branch: gh-pages
-      #     folder: ./site
+  docker-ui:
+    name: Build & Push Docker Image (mankkoo-ui)
+    runs-on: ubuntu-24.04
+    needs: ui
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push Docker image
+        run: |
+          docker build -t ghcr.io/${{ github.repository_owner }}/mankkoo-ui:latest ./services/mankkoo-ui
+          docker push ghcr.io/${{ github.repository_owner }}/mankkoo-ui:latest
+
