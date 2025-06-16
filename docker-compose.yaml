@@ -1,9 +1,22 @@
 services:
 
+  ui:
+    build:
+      context: ./services/mankkoo-ui
+      dockerfile: Dockerfile
+    container_name: mankkoo-ui
+    depends_on:
+      - core
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+
   core:
     build:
       context: ./services/mankkoo
       dockerfile: Dockerfile
+    container_name: mankkoo-core
     environment:
       - ENV=prod
       - DB_HOST=postgres
