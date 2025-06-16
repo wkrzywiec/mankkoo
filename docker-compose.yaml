@@ -1,4 +1,35 @@
 services:
+
+  ui:
+    build:
+      context: ./services/mankkoo-ui
+      dockerfile: Dockerfile
+    container_name: mankkoo-ui
+    depends_on:
+      - core
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+
+  core:
+    build:
+      context: ./services/mankkoo
+      dockerfile: Dockerfile
+    container_name: mankkoo-core
+    environment:
+      - ENV=prod
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=postgres
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+    ports:
+      - "5000:5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    entrypoint: ["flask", "run"]
   
   postgres:
     image: postgres:16
@@ -13,9 +44,14 @@ services:
     volumes:
       - postgres:/var/lib/postgres/data
       - ./services/infra/postgres:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-postgres}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   pgadmin:
-    image: dpage/pgadmin4:8.9
+    image: dpage/pgadmin4:9.4
     container_name: pgadmin
     restart: always
     environment:
