@@ -22,6 +22,7 @@ export const addEventRequiredProps: Record<string,  Record<string, string[]>> = 
     "investment": {
         "TreasuryBondsBought": ["balance", "totalValue", "currency", "units", "pricePerUnit"],
         "TreasuryBondsMatured": ["balance", "totalValue", "currency", "units", "pricePerUnit"],
+        "TreasuryBondsPriced": ["balance", "currency", "units", "pricePerUnit"],
         "TermDepositOpened": ["balance", "amount", "currency"],
         "TermDepositFinished": ["balance", "amount", "currency"],
         "InvestmentFundBought": ["balance", "totalValue", "currency"],
@@ -30,7 +31,7 @@ export const addEventRequiredProps: Record<string,  Record<string, string[]>> = 
     "stocks": {
         "ETFBought": ["averagePrice" ,"balance", "currency", "totalValue", "units"],
         "ETFSold": ["averagePrice" ,"balance", "comment", "currency", "totalValue", "units"],
-        "ETFPriced": ["averagePrice" ,"balance", "currency", "totalValue", "units"],
+        "ETFPriced": ["averagePrice" ,"balance", "currency", "units"],
     },
     "retirement": {
         "MoneyWithdrawn": ["amount", "currency", "title"],

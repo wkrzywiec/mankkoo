@@ -50,6 +50,13 @@ tasks:
       - echo "Stopping docker containers..."
       - docker compose down
 
+  run:
+    desc: Run entire project in Docker
+    dir: services/mankkoo/mankkoo
+    cmds:
+      - task: infra
+      - docker compose up -d
+
   mankkoo:dev:
     desc: Run mankkoo core backend in a dev mode
     dir: services/mankkoo/mankkoo
@@ -132,7 +139,7 @@ tasks:
   restore:
     desc: Restoring backup data for PostgreSQL
     vars:
-      file: mankkoo_20250616_1830
+      file: mankkoo_20250702_1909
       db: mankkoo
     cmds:
       - echo "Starting restoring '{{.db}}' database. Copying backup..."
