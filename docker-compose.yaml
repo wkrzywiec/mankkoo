@@ -46,6 +46,9 @@ services:
     volumes:
       - postgres:/var/lib/postgres/data
       - ./services/infra/postgres/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+      # Note: pg_hba.conf must be copied manually after first startup:
+      # docker cp services/infra/postgres/pg_hba.conf mankkoo-postgres:/var/lib/postgresql/data/pg_hba.conf
+      # docker exec mankkoo-postgres psql -U postgres -c "SELECT pg_reload_conf();"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-postgres}"]
       interval: 5s
