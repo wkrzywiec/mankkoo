@@ -189,6 +189,86 @@ def investment_events(
     return {"stream": inv_stream, "events": events}
 
 
+def gold_events(operations: list[dict], active=True, wallet="Default") -> dict:
+    events = []
+    balance = 0
+    total_weight = 0
+    version = 0
+    gold_stream = es.Stream(
+        uuid.uuid4(),
+        "investment",
+        "gold",
+        "Physical Gold",
+        "Gold Dealer",
+        active,
+        0,
+        {"details": "Gold coins"},
+        {"wallet": wallet},
+    )
+
+    for operation in operations:
+        version += 1
+        event_type = operation.get("event_type", "GoldBought")
+        weight = operation.get("weight", 0)
+        unit_price = operation.get("unitPrice", 0)
+        total_value = operation.get("totalValue", 0)
+        comment = operation.get("comment", "")
+
+        if event_type == "GoldBought":
+            balance += total_value
+            total_weight += weight
+            data = {
+                "totalValue": total_value,
+                "balance": balance,
+                "weight": weight,
+                "totalWeight": total_weight,
+                "unitPrice": unit_price,
+                "currency": "PLN",
+                "seller": operation.get("seller", ""),
+                "goldSource": operation.get("goldSource", ""),
+                "comment": comment,
+            }
+        elif event_type == "GoldSold":
+            total_weight -= weight
+            balance = total_weight * unit_price
+            data = {
+                "totalValue": total_value,
+                "balance": balance,
+                "weight": weight,
+                "totalWeight": total_weight,
+                "unitPrice": unit_price,
+                "currency": "PLN",
+                "buyer": operation.get("buyer", ""),
+                "goldSource": operation.get("goldSource", ""),
+                "comment": comment,
+            }
+        elif event_type == "GoldPriced":
+            balance = total_weight * unit_price
+            data = {
+                "totalValue": 0.0,
+                "balance": balance,
+                "weight": 0.0,
+                "totalWeight": total_weight,
+                "unitPrice": unit_price,
+                "currency": "PLN",
+                "comment": comment,
+            }
+        else:
+            raise ValueError(f"Unknown gold event type: {event_type}")
+
+        event = es.Event(
+            stream_type="investment",
+            stream_id=gold_stream.id,
+            event_type=event_type,
+            data=data,
+            occured_at=datetime.strptime(operation["date"], "%d-%m-%Y"),
+            version=version,
+        )
+        events.append(event)
+
+    return {"stream": gold_stream, "events": events}
+
+
 def retirment_events(operations: list[dict]) -> dict:
     account_stream = any_stream(stream_type="retirement")
     first_operation_date = datetime.strptime(operations[0]["date"], "%d-%m-%Y")

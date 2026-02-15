@@ -77,9 +77,9 @@ def load_investment_transactions(investment_id: str) -> list[dict]:
         SELECT
             occured_at::date AS occured_at,
             e.type AS event_type,
-            (e.data->>'units')::numeric AS units_count,
+            COALESCE((e.data->>'units')::numeric, (e.data->>'weight')::numeric) AS units_count,
             CASE
-                WHEN s.type = 'investment' THEN (e.data->>'pricePerUnit')::numeric
+                WHEN s.type = 'investment' THEN COALESCE((e.data->>'pricePerUnit')::numeric, (e.data->>'unitPrice')::numeric)
                 WHEN s.type = 'account' THEN (e.data->>'amount')::numeric
                 ELSE (e.data->>'averagePrice')::numeric
             END AS price_per_unit,

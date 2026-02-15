@@ -1,4 +1,6 @@
 import time
+import uuid
+from datetime import datetime
 
 import mankkoo.app as app
 import mankkoo.data_for_test as dt
@@ -371,6 +373,292 @@ def test_investment_types_distribution_per_wallet_view_is_updated():
     # THEN
     __wait_for_condition(
         condition_func=a_investment_types_distribution_per_wallet_view_is_updated,
+        timeout=10,
+        interval=1,
+    )
+
+
+def test_investment_indicators_include_gold():
+    # GIVEN
+    app.start_listener_thread()
+
+    # Create a gold stream with a GoldBought event
+    gold_stream = es.Stream(
+        uuid.uuid4(),
+        "investment",
+        "gold",
+        "Physical Gold",
+        "Gold Dealer",
+        True,
+        0,
+        {"details": "Gold coins"},
+        {"wallet": "Default"},
+    )
+
+    # Create a treasury bonds stream for baseline
+    bonds_stream = es.Stream(
+        uuid.uuid4(),
+        "investment",
+        "treasury_bonds",
+        "10-years Treasury Bonds",
+        "Bank 1",
+        True,
+        0,
+        {"details": "Some details"},
+        {"wallet": "Default"},
+    )
+
+    es.create([gold_stream, bonds_stream])
+
+    gold_bought = es.Event(
+        stream_type="investment",
+        stream_id=gold_stream.id,
+        event_type="GoldBought",
+        data={
+            "totalValue": 8500.0,
+            "balance": 8500.0,
+            "weight": 31.1,
+            "totalWeight": 31.1,
+            "unitPrice": 273.31,
+            "currency": "PLN",
+            "seller": "Mennica Polska",
+            "goldSource": "1oz Krugerrand",
+            "comment": "Purchase",
+        },
+        occured_at=datetime(2025, 1, 15),
+        version=1,
+    )
+    bonds_bought = es.Event(
+        stream_type="investment",
+        stream_id=bonds_stream.id,
+        event_type="TreasuryBondsBought",
+        data={
+            "totalValue": 1000.0,
+            "balance": 1000.0,
+            "units": 10,
+            "pricePerUnit": 100.0,
+            "currency": "PLN",
+        },
+        occured_at=datetime(2025, 1, 15),
+        version=1,
+    )
+    es.store([gold_bought, bonds_bought])
+
+    # WHEN
+    def investment_indicators_include_gold_balance():
+        result = views.load_view(views.investment_indicators_key)
+        if result is None:
+            return False
+        # Gold (8500) + Bonds (1000) = 9500
+        return result["totalInvestments"] == 9500.0
+
+    # THEN
+    __wait_for_condition(
+        condition_func=investment_indicators_include_gold_balance,
+        timeout=10,
+        interval=1,
+    )
+
+
+def test_investment_types_distribution_includes_gold():
+    # GIVEN
+    app.start_listener_thread()
+
+    gold_stream = es.Stream(
+        uuid.uuid4(),
+        "investment",
+        "gold",
+        "Physical Gold",
+        "Gold Dealer",
+        True,
+        0,
+        {"details": "Gold coins"},
+        {"wallet": "Default"},
+    )
+    bonds_stream = es.Stream(
+        uuid.uuid4(),
+        "investment",
+        "treasury_bonds",
+        "10-years Treasury Bonds",
+        "Bank 1",
+        True,
+        0,
+        {"details": "Some details"},
+        {"wallet": "Default"},
+    )
+
+    es.create([gold_stream, bonds_stream])
+
+    gold_bought = es.Event(
+        stream_type="investment",
+        stream_id=gold_stream.id,
+        event_type="GoldBought",
+        data={
+            "totalValue": 8500.0,
+            "balance": 8500.0,
+            "weight": 31.1,
+            "totalWeight": 31.1,
+            "unitPrice": 273.31,
+            "currency": "PLN",
+            "seller": "Mennica Polska",
+            "goldSource": "1oz Krugerrand",
+            "comment": "Purchase",
+        },
+        occured_at=datetime(2025, 1, 15),
+        version=1,
+    )
+    bonds_bought = es.Event(
+        stream_type="investment",
+        stream_id=bonds_stream.id,
+        event_type="TreasuryBondsBought",
+        data={
+            "totalValue": 1000.0,
+            "balance": 1000.0,
+            "units": 10,
+            "pricePerUnit": 100.0,
+            "currency": "PLN",
+        },
+        occured_at=datetime(2025, 1, 15),
+        version=1,
+    )
+    es.store([gold_bought, bonds_bought])
+
+    # WHEN
+    def investment_types_distribution_includes_gold():
+        result = views.load_view(views.investment_types_distribution_key)
+        if result is None:
+            return False
+        # Total = 8500 + 1000 = 9500
+        # Gold: 8500/9500 = 0.8947, Bonds: 1000/9500 = 0.1053
+        expected = [
+            {"type": "Gold", "total": 8500.0, "percentage": round(8500 / 9500, 4)},
+            {
+                "type": "Treasury Bonds",
+                "total": 1000,
+                "percentage": round(1000 / 9500, 4),
+            },
+        ]
+        return result == expected
+
+    # THEN
+    __wait_for_condition(
+        condition_func=investment_types_distribution_includes_gold,
+        timeout=10,
+        interval=1,
+    )
+
+
+def test_gold_lifecycle_updates_views():
+    # GIVEN
+    app.start_listener_thread()
+
+    gold_stream = es.Stream(
+        uuid.uuid4(),
+        "investment",
+        "gold",
+        "Physical Gold",
+        "Gold Dealer",
+        True,
+        0,
+        {"details": "Gold coins"},
+        {"wallet": "Default"},
+    )
+    es.create([gold_stream])
+
+    # Step 1: Buy gold
+    gold_bought = es.Event(
+        stream_type="investment",
+        stream_id=gold_stream.id,
+        event_type="GoldBought",
+        data={
+            "totalValue": 8500.0,
+            "balance": 8500.0,
+            "weight": 31.1,
+            "totalWeight": 31.1,
+            "unitPrice": 273.31,
+            "currency": "PLN",
+            "seller": "Mennica Polska",
+            "goldSource": "1oz Krugerrand",
+            "comment": "First purchase",
+        },
+        occured_at=datetime(2025, 1, 15),
+        version=1,
+    )
+    es.store([gold_bought])
+
+    # Wait for initial view update
+    def gold_bought_reflected_in_indicators():
+        result = views.load_view(views.investment_indicators_key)
+        if result is None:
+            return False
+        return result["totalInvestments"] == 8500.0
+
+    __wait_for_condition(
+        condition_func=gold_bought_reflected_in_indicators,
+        timeout=10,
+        interval=1,
+    )
+
+    # Step 2: Reprice gold (price went up)
+    gold_priced = es.Event(
+        stream_type="investment",
+        stream_id=gold_stream.id,
+        event_type="GoldPriced",
+        data={
+            "totalValue": 0.0,
+            "balance": 9330.0,
+            "weight": 0.0,
+            "totalWeight": 31.1,
+            "unitPrice": 300.0,
+            "currency": "PLN",
+            "comment": "Monthly revaluation",
+        },
+        occured_at=datetime(2025, 2, 15),
+        version=2,
+    )
+    es.store([gold_priced])
+
+    def gold_priced_reflected_in_indicators():
+        result = views.load_view(views.investment_indicators_key)
+        if result is None:
+            return False
+        return result["totalInvestments"] == 9330.0
+
+    __wait_for_condition(
+        condition_func=gold_priced_reflected_in_indicators,
+        timeout=10,
+        interval=1,
+    )
+
+    # Step 3: Sell all gold
+    gold_sold = es.Event(
+        stream_type="investment",
+        stream_id=gold_stream.id,
+        event_type="GoldSold",
+        data={
+            "totalValue": 9330.0,
+            "balance": 0.0,
+            "weight": 31.1,
+            "totalWeight": 0.0,
+            "unitPrice": 300.0,
+            "currency": "PLN",
+            "buyer": "Mennica Polska",
+            "goldSource": "1oz Krugerrand",
+            "comment": "Sold all",
+        },
+        occured_at=datetime(2025, 3, 15),
+        version=3,
+    )
+    es.store([gold_sold])
+
+    def gold_sold_reflected_in_indicators():
+        result = views.load_view(views.investment_indicators_key)
+        if result is None:
+            return False
+        return result["totalInvestments"] == 0
+
+    __wait_for_condition(
+        condition_func=gold_sold_reflected_in_indicators,
         timeout=10,
         interval=1,
     )
