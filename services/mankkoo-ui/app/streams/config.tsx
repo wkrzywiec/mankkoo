@@ -1,6 +1,6 @@
 export const createStreamPossibleSubtypes: Record<string, string[]> = {
     "account": ["checking", "savings", "cash"],
-    "investment": ["treasury_bonds", "deposit"],
+    "investment": ["treasury_bonds", "deposit", "gold"],
     "stocks": ["ETF"],
     "retirement": ["retirement"],
     "real-estate": [ "" ]
@@ -27,6 +27,9 @@ export const addEventRequiredProps: Record<string,  Record<string, string[]>> = 
         "TermDepositFinished": ["balance", "amount", "currency"],
         "InvestmentFundBought": ["balance", "totalValue", "currency"],
         "InvestmentFundSold": ["balance", "totalValue", "currency"],
+        "GoldBought": ["balance", "totalValue", "currency", "weight", "totalWeight", "unitPrice", "seller", "goldSource", "comment"],
+        "GoldSold": ["balance", "totalValue", "currency", "weight", "totalWeight", "unitPrice", "buyer", "goldSource", "comment"],
+        "GoldPriced": ["balance", "currency", "totalWeight", "unitPrice", "comment"],
     },
     "stocks": {
         "ETFBought": ["averagePrice" ,"balance", "currency", "totalValue", "units"],
