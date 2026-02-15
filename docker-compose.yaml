@@ -21,7 +21,7 @@ services:
     container_name: mankkoo-core
     environment:
       - ENV=prod
-      - DB_HOST=postgres
+      - DB_HOST=mankkoo-postgres
       - DB_PORT=5432
       - DB_NAME=postgres
       - DB_USERNAME=postgres
@@ -29,13 +29,13 @@ services:
     ports:
       - "5000:5000"
     depends_on:
-      postgres:
+      mankkoo-postgres:
         condition: service_healthy
     entrypoint: ["flask", "run"]
   
-  postgres:
+  mankkoo-postgres:
     image: postgres:16
-    container_name: postgres
+    container_name: mankkoo-postgres
     restart: always
     environment:
       - POSTGRES_USER=postgres
@@ -62,7 +62,7 @@ services:
     ports:
       - 5050:80
     depends_on:
-      - postgres
+      - mankkoo-postgres
     volumes:
       - ./services/infra/pgadmin/server.json:/pgadmin4/servers.json
 
