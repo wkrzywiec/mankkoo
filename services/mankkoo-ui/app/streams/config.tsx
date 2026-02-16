@@ -27,9 +27,9 @@ export const addEventRequiredProps: Record<string,  Record<string, string[]>> = 
         "TermDepositFinished": ["balance", "amount", "currency"],
         "InvestmentFundBought": ["balance", "totalValue", "currency"],
         "InvestmentFundSold": ["balance", "totalValue", "currency"],
-        "GoldBought": ["balance", "totalValue", "currency", "weight", "totalWeight", "unitPrice", "seller", "goldSource", "comment"],
+        "GoldBought": ["balance", "totalValue", "currency", "weight", "totalWeight", "unitPrice", "seller", "goldSource"],
         "GoldSold": ["balance", "totalValue", "currency", "weight", "totalWeight", "unitPrice", "buyer", "goldSource", "comment"],
-        "GoldPriced": ["balance", "currency", "totalWeight", "unitPrice", "comment"],
+        "GoldPriced": ["balance", "currency", "totalWeight", "unitPrice"],
     },
     "stocks": {
         "ETFBought": ["averagePrice" ,"balance", "currency", "totalValue", "units"],
