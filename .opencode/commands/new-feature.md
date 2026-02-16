@@ -14,18 +14,18 @@ $ARGUMENTS
 
 ## Workflow Instructions
 
-### STAGE 1 - Requirements & Design (via @requirements-architect)
+### STAGE 1 - Requirements & Design (via @designer-dooku)
 
-Invoke the `@requirements-architect` subagent with the following prompt. Pass the full user requirement as context.
+Invoke the `@designer-dooku` subagent with the following prompt. Pass the full user requirement as context.
 
-The requirements-architect must produce a **structured plan in markdown** with exactly these sections:
+The designer-dooku must produce a **structured plan in markdown** with exactly these sections:
 
 1. **Summary of Change** - concise description of what is being built
 2. **Technical Specification** - data models, API signatures, key logic flows
 3. **Testing Strategy** - specific test cases (happy paths + edge cases), integration scenarios, mocking requirements
 4. **Implementation Steps** - step-by-step coding instructions, file-by-file changes, order of operations
 
-After the requirements-architect returns the plan, **display the full plan to the user** and ask:
+After the designer-dooku returns the plan, **display the full plan to the user** and ask:
 
 > "Here is the proposed plan. Please review it. You can:
 > 1. **Approve** - type 'approve' or 'looks good' to proceed to testing
@@ -33,7 +33,7 @@ After the requirements-architect returns the plan, **display the full plan to th
 
 **Do NOT proceed to Stage 2 until the user explicitly approves the plan.**
 
-If the user requests changes, invoke `@requirements-architect` again with the original requirement + the user's feedback, and present the revised plan for approval. Repeat until approved.
+If the user requests changes, invoke `@designer-dooku` again with the original requirement + the user's feedback, and present the revised plan for approval. Repeat until approved.
 
 ---
 
@@ -50,7 +50,7 @@ The test-engineer must:
 
 After the test-engineer returns, **display all created/modified test files to the user**.
 
-**Feedback loop check**: If the test-engineer reports issues with the plan (e.g., untestable requirements, contradictions, missing information), invoke `@requirements-architect` again with:
+**Feedback loop check**: If the test-engineer reports issues with the plan (e.g., untestable requirements, contradictions, missing information), invoke `@designer-dooku` again with:
 - The original requirement
 - The current plan
 - The test-engineer's feedback
