@@ -1,10 +1,10 @@
 ---
-description: Two-stage workflow to design, then implement and test a new feature
+description: Three-stage workflow to design, implement/test, and review a new feature
 agent: build
 subtask: false
 ---
 
-You are an orchestrator for a two-stage feature development workflow. The user has requested a new feature. You must follow the stages below **strictly and in order**. Do NOT skip stages or combine them.
+You are an orchestrator for a three-stage feature development workflow. The user has requested a new feature. You must follow the stages below **strictly and in order**. Do NOT skip stages or combine them.
 
 ## Feature Requirement
 
@@ -57,9 +57,31 @@ After worker-wookie returns, **display a summary** to the user:
 
 ---
 
+### STAGE 3 - Code Review (via @rodian-reviewer)
+
+After implementation and testing are complete, invoke the `@rodian-reviewer` subagent. Pass it:
+- The **original user requirement**
+- The **full approved plan** from Stage 1
+- The **list of all files created/modified** during Stage 2 (both production code and tests)
+
+Rodian Reviewer will inspect all changes against the project's principles (`.opencode/principles/`) and conventions (`agents.md`), and produce a review report with an issues table sorted by severity (Critical > Major > Minor).
+
+After rodian-reviewer returns, **display the full review report** to the user, including the issues table and verdict.
+
+- If the verdict is **APPROVED** — inform the user that the feature is complete.
+- If the verdict is **NEEDS_FIXES** — display the issues and ask the user how to proceed:
+  > "The reviewer found issues. You can:
+  > 1. **Fix** - I'll send the issues back to worker-wookie to address
+  > 2. **Skip** - accept the current state and move on
+  > 3. **Discuss** - talk through specific issues before deciding"
+
+  If the user chooses to fix, invoke `@worker-wookie` again with the review feedback, then re-invoke `@rodian-reviewer` to verify the fixes. This loop can repeat up to **2 times**.
+
+---
+
 ## Important Rules
 
-- Always show intermediate outputs to the user (plans, implementation results)
+- Always show intermediate outputs to the user (plans, implementation results, review reports)
 - Keep the user informed at each stage transition (e.g., "Plan approved. Moving to Stage 2: Implementation & Testing...")
 - Each subagent invocation must include the full context chain (requirement + plan + previous outputs)
 - If any stage encounters a blocking issue, report it to the user and ask how to proceed
