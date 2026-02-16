@@ -300,7 +300,7 @@ def __load_current_total_savings_distribution() -> list[dict]:
         round(
             total
             /
-            (SELECT SUM(total) FROM all_buckets)
+            NULLIF((SELECT SUM(total) FROM all_buckets), 0)
             , 4) as percentage
     FROM all_buckets
     ORDER BY

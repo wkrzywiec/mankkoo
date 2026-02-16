@@ -110,6 +110,13 @@ export default function Investments() {
 
   const investmentsRowIds = useMemo(() => (investmentsInWallet ?? []).map(inv => inv.id), [investmentsInWallet]);
 
+  const selectedInvestment = useMemo(
+    () => investmentsInWallet?.find(inv => inv.id === selectedInvestmentId),
+    [investmentsInWallet, selectedInvestmentId]
+  );
+
+  const isGold = selectedInvestment?.subtype === 'gold';
+
   const invTypeDistPerWalletPie = useMemo<PieChartData>(() => {
     if (!investmentTypeDistributionPerWallet || !investmentTypeDistributionPerWallet.data || !investmentTypeDistributionPerWallet.data.length || !selectedWallet) return { data: [], labels: [] };
     const filtered = investmentTypeDistributionPerWallet.data.filter((item: InvestmentTypesDistributionPerWalletItem) => item.wallet === selectedWallet);
@@ -135,7 +142,7 @@ export default function Investments() {
   }, [investmentTypeDistributionPerWallet, selectedWallet]);
 
   const transactionsTableData = useMemo(() => ([
-    ["Date", "Event Type", "Units", "Price/Unit", "Total Value", "Balance", "Comment"],
+    ["Date", "Event Type", isGold ? "Weight (g)" : "Units", isGold ? "Price/g (PLN)" : "Price/Unit", "Total Value", "Balance", "Comment"],
     ...((investmentTransactions ?? []).map(t => [
       t.occuredAt,
       t.eventType,
@@ -145,7 +152,7 @@ export default function Investments() {
       t.balance?.toString() ?? '',
       t.comment ?? ''
     ]))
-  ]), [investmentTransactions]);
+  ]), [investmentTransactions, isGold]);
 
   function changeTab(index: number): ReactNode {
     setSelectedWalletIdx(index);
@@ -185,7 +192,7 @@ export default function Investments() {
         <div className="gridItem span4Columns">
           <TileHeader 
             headline="Transactions" 
-            subHeadline={`Log of all transactions for the selected investment${selectedInvestmentId ? `: ${investmentsInWallet?.find(inv => inv.id === selectedInvestmentId)?.name ?? ''}` : ''}.`} 
+            subHeadline={`Log of all transactions for the selected investment${selectedInvestmentId ? `: ${selectedInvestment?.name ?? ''}` : ''}.`} 
           />
           {isFetchingInvestmentTransactions ? <Loader /> :
             <Table 
@@ -200,13 +207,13 @@ export default function Investments() {
         </div>
       </div>
     );
-  }, [investmentsTableData, isFetchingInvestmentsInWallet, invTypeDistPerWalletPie, invTypeDistPerWalletTable, investmentsRowIds, selectedInvestmentId, investmentsInWallet, transactionsTableData, isFetchingInvestmentTransactions]);
+  }, [investmentsTableData, isFetchingInvestmentsInWallet, invTypeDistPerWalletPie, invTypeDistPerWalletTable, investmentsRowIds, selectedInvestmentId, selectedInvestment, transactionsTableData, isFetchingInvestmentTransactions]);
 
   return (
     <main className="mainContainer">
       <div className="gridItem span4Columns">
         <h1>Investments</h1>
-        <p>View a summary of all your investments—bonds, ETFs, stocks, savings accounts, and wallets—in one place.</p>
+        <p>View a summary of all your investments—bonds, ETFs, stocks, gold, savings accounts, and wallets—in one place.</p>
       </div>
 
       <div className="gridItem">
