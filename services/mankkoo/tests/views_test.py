@@ -1091,7 +1091,7 @@ def test_retirement_account_excluded_from_main_indicators():
     # Set exclude flag on the stream
     excluded_retirement["stream"].labels = {
         "wallet": "Default",
-        "include_in_wealth": False,
+        "include_in_wealth": "false",
     }
 
     es.create([included_retirement["stream"], excluded_retirement["stream"]])
