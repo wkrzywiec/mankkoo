@@ -4,18 +4,23 @@ from datetime import datetime, timedelta, timezone
 import mankkoo.event_store as es
 
 
-def any_account_stream(account_type="checking", active=True, wallet="Default"):
-    return any_stream(stream_subtype=account_type, active=active, wallet=wallet)
+def any_account_stream(account_type: str = "checking", active: bool = True, wallet: str = "Default", include_in_wealth: bool | None = None) -> es.Stream:
+    return any_stream(stream_subtype=account_type, active=active, wallet=wallet, include_in_wealth=include_in_wealth)
 
 
 def any_stream(
-    stream_type="account",
-    stream_subtype="checking",
-    stream_name=f"Stream Name {str(uuid.uuid4())}",
-    bank=f"Bank {str(uuid.uuid4())}",
-    active=True,
-    wallet="Default",
-):
+    stream_type: str = "account",
+    stream_subtype: str = "checking",
+    stream_name: str = f"Stream Name {str(uuid.uuid4())}",
+    bank: str = f"Bank {str(uuid.uuid4())}",
+    active: bool = True,
+    wallet: str = "Default",
+    include_in_wealth: bool | None = None,
+) -> es.Stream:
+    labels = {"wallet": wallet}
+    if include_in_wealth is not None:
+        labels["include_in_wealth"] = "true" if include_in_wealth else "false"
+    
     return es.Stream(
         uuid.uuid4(),
         stream_type,
@@ -31,14 +36,14 @@ def any_stream(
             "accountNumber": "iban-1",
             "importer": "PL_MILLENIUM",
         },
-        {"wallet": wallet},
+        labels,
     )
 
 
 def an_account_with_operations(
-    operations: list[dict], type="checking", active=True, wallet="Default"
+    operations: list[dict], type: str = "checking", active: bool = True, wallet: str = "Default", include_in_wealth: bool | None = None
 ) -> dict:
-    account_stream = any_account_stream(account_type=type, active=active, wallet=wallet)
+    account_stream = any_account_stream(account_type=type, active=active, wallet=wallet, include_in_wealth=include_in_wealth)
     first_operation_date = datetime.strptime(operations[0]["date"], "%d-%m-%Y")
     events = [
         account_opened_event(
@@ -105,11 +110,15 @@ def account_operation_event(
 
 
 def stock_events(
-    operations: list[dict], type="ETF", active=True, wallet="Default"
+    operations: list[dict], type: str = "ETF", active: bool = True, wallet: str = "Default", include_in_wealth: bool | None = None
 ) -> dict:
     events = []
     balance = 0
     version = 0
+    labels = {"wallet": wallet}
+    if include_in_wealth is not None:
+        labels["include_in_wealth"] = "true" if include_in_wealth else "false"
+    
     stock_stream = es.Stream(
         uuid.uuid4(),
         "stocks",
@@ -119,7 +128,7 @@ def stock_events(
         active,
         0,
         {"details": "Some details about the stock"},
-        {"wallet": wallet},
+        labels,
     )
 
     for operation in operations:
@@ -145,11 +154,15 @@ def stock_events(
 
 
 def investment_events(
-    operations: list[dict], category="treasury_bonds", active=True, wallet="Default"
+    operations: list[dict], category: str = "treasury_bonds", active: bool = True, wallet: str = "Default", include_in_wealth: bool | None = None
 ) -> dict:
     events = []
     balance = 0
     version = 0
+    labels = {"wallet": wallet}
+    if include_in_wealth is not None:
+        labels["include_in_wealth"] = "true" if include_in_wealth else "false"
+    
     inv_stream = es.Stream(
         uuid.uuid4(),
         "investment",
@@ -161,7 +174,7 @@ def investment_events(
         {
             "details": "Some details about the investment"
         },
-        {"wallet": wallet},
+        labels,
     )
 
     for operation in operations:
@@ -189,11 +202,15 @@ def investment_events(
     return {"stream": inv_stream, "events": events}
 
 
-def gold_events(operations: list[dict], active=True, wallet="Default") -> dict:
+def gold_events(operations: list[dict], active: bool = True, wallet: str = "Default", include_in_wealth: bool | None = None) -> dict:
     events = []
     balance = 0
     total_weight = 0
     version = 0
+    labels = {"wallet": wallet}
+    if include_in_wealth is not None:
+        labels["include_in_wealth"] = "true" if include_in_wealth else "false"
+    
     gold_stream = es.Stream(
         uuid.uuid4(),
         "investment",
@@ -203,7 +220,7 @@ def gold_events(operations: list[dict], active=True, wallet="Default") -> dict:
         active,
         0,
         {"details": "Gold coins"},
-        {"wallet": wallet},
+        labels,
     )
 
     for operation in operations:
@@ -269,8 +286,8 @@ def gold_events(operations: list[dict], active=True, wallet="Default") -> dict:
     return {"stream": gold_stream, "events": events}
 
 
-def retirment_events(operations: list[dict]) -> dict:
-    account_stream = any_stream(stream_type="retirement")
+def retirement_events(operations: list[dict], include_in_wealth: bool | None = None) -> dict:
+    account_stream = any_stream(stream_type="retirement", include_in_wealth=include_in_wealth)
     first_operation_date = datetime.strptime(operations[0]["date"], "%d-%m-%Y")
     events = [
         account_opened_event(

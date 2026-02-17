@@ -136,6 +136,77 @@ Views are denormalized, pre-computed data structures stored as JSONB for fast AP
 
 **Important**: Views are updated asynchronously after events are inserted. Tests may need to wait for view updates using polling patterns (see `tests/account/account_test.py:158-164`).
 
+#### Stream Exclusion from Wealth Calculations (`include_in_wealth` flag)
+
+Streams can be excluded from wealth calculation views while still appearing in composition views (wallets/types distributions). This is useful for tracking wallets that should not be counted toward total net worth.
+
+**Storage**: The exclusion flag is stored in `streams.labels` JSONB as:
+```json
+{
+  "wallet": "Personal",
+  "include_in_wealth": "true"  // or "false" (both are STRINGS in JSONB)
+}
+```
+
+**CRITICAL - String Value Requirement**: 
+⚠️ **ONLY the exact lowercase string `'true'` includes a stream in wealth calculations.** Any other value (including `'false'`, `'True'`, boolean `true`, `null`, missing key, etc.) will **EXCLUDE** the stream. This is essential for backward compatibility—streams without the label default to included.
+
+- `"include_in_wealth": "true"` → **INCLUDED** in wealth calculations ✓
+- `"include_in_wealth": "false"` → **EXCLUDED** from wealth calculations ✗
+- `"include_in_wealth": "True"` (capital T) → **EXCLUDED** from wealth calculations ✗
+- `"include_in_wealth": true` (boolean) → **EXCLUDED** from wealth calculations ✗
+- Missing `include_in_wealth` key → **INCLUDED** (defaults to included for backward compatibility) ✓
+
+**Warning**: Incorrectly excluding important wallets will cause them to disappear from your total wealth view. Always double-check the exact string value when setting this flag, especially when excluding accounts.
+
+**Default Behavior**: Streams without the `include_in_wealth` label default to included (backward compatible).
+
+**Affected Views** (exclude streams when `include_in_wealth ≠ 'true'`):
+1. `main-indicators` - Excludes streams from total savings calculation
+2. `current-savings-distribution` - Excludes streams from distribution breakdown
+3. `total-history-per-day` - Excludes streams from historical balance calculation
+4. `investment-indicators` - Excludes streams from investment total
+5. `investment-types-distribution` - Excludes streams from type distribution
+
+**Composition Views** (always include all streams, regardless of flag):
+1. `investment-wallets-distribution` - Shows composition across wallets (includes excluded)
+2. `investment-types-distribution-per-wallet` - Shows per-wallet breakdown (includes excluded)
+
+**SQL Filter Used**: All wealth views apply this filter to stream CTEs:
+```sql
+WHERE ... AND (labels->>'include_in_wealth' IS NULL OR labels->>'include_in_wealth' = 'true')
+```
+
+**Example**: Exclude a wallet from wealth calculations
+```python
+import mankkoo.data_for_test as dt
+
+# Create a stream that should NOT be counted in wealth totals
+excluded_stream = dt.any_account_stream(
+    account_type='savings',
+    wallet='Personal',
+    include_in_wealth=False  # This sets labels["include_in_wealth"] = "false" (string)
+)
+
+# Or manually set the flag on an existing stream (use STRING "false", not boolean)
+stream.labels = {
+    "wallet": "Personal",
+    "include_in_wealth": "false"  # Use exact string "false", NOT boolean or "False"
+}
+```
+
+**Via Database SQL**:
+```sql
+-- CORRECT: Include in wealth
+UPDATE streams SET labels = jsonb_set(labels, '{include_in_wealth}', '"true"'::jsonb) WHERE id = '...';
+
+-- CORRECT: Exclude from wealth
+UPDATE streams SET labels = jsonb_set(labels, '{include_in_wealth}', '"false"'::jsonb) WHERE id = '...';
+
+-- WRONG: Will exclude (boolean, not string)
+UPDATE streams SET labels = jsonb_set(labels, '{include_in_wealth}', 'true'::jsonb) WHERE id = '...';
+```
+
 ---
 
 ## Project Structure

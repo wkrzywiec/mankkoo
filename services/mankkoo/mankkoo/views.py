@@ -19,17 +19,17 @@ investment_types_distribution_per_wallet_key = (
 
 def load_view(view_name):
     log.info(f"Loading '{view_name}' view...")
-    query = f"""
+    query = """
     SELECT
         content
     FROM
         views
-    WHERE name = '{view_name}';
+    WHERE name = %s;
     """
 
     with db.get_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute(query)
+            cur.execute(query, (view_name,))
             result = cur.fetchone()
             if result is None:
                 return None
@@ -77,6 +77,7 @@ def __load_current_total_savings() -> float:
         FROM streams
         WHERE type = 'account'
         AND active = true
+        AND (labels->>'include_in_wealth' IS NULL OR labels->>'include_in_wealth' = 'true')
     ),
 
     accounts_balance AS (
@@ -103,6 +104,7 @@ def __load_current_total_savings() -> float:
             type = 'retirement'
         AND
             active = true
+        AND (labels->>'include_in_wealth' IS NULL OR labels->>'include_in_wealth' = 'true')
     ),
 
     retirement_balance AS (
@@ -126,6 +128,7 @@ def __load_current_total_savings() -> float:
             type = 'investment'
         AND
             active = true
+        AND (labels->>'include_in_wealth' IS NULL OR labels->>'include_in_wealth' = 'true')
     ),
 
     investment_balance AS (
@@ -141,6 +144,7 @@ def __load_current_total_savings() -> float:
         SELECT id, version
         FROM streams
         WHERE type = 'stocks'
+        AND (labels->>'include_in_wealth' IS NULL OR labels->>'include_in_wealth' = 'true')
     ),
 
     stocks_balance AS (
@@ -175,6 +179,8 @@ def __load_current_total_savings() -> float:
         with conn.cursor() as cur:
             cur.execute(query)
             (result,) = cur.fetchone()
+    if result is None:
+        log.warning("Total savings calculation returned None, defaulting to 0")
     return 0 if result is None else result
 
 
@@ -200,6 +206,7 @@ def __load_current_total_savings_distribution() -> list[dict]:
         WHERE type = 'account'
         AND subtype != 'cash'
         AND active = true
+        AND (labels->>'include_in_wealth' IS NULL OR labels->>'include_in_wealth' = 'true')
     ),
 
     accounts_balance AS (
@@ -230,6 +237,7 @@ def __load_current_total_savings_distribution() -> list[dict]:
             type = 'retirement'
         AND
             active = true
+        AND (labels->>'include_in_wealth' IS NULL OR labels->>'include_in_wealth' = 'true')
     ),
 
     retirement_balance AS (
@@ -253,6 +261,7 @@ def __load_current_total_savings_distribution() -> list[dict]:
             type = 'investment'
         AND
             active = true
+        AND (labels->>'include_in_wealth' IS NULL OR labels->>'include_in_wealth' = 'true')
     ),
 
     investment_balance AS (
@@ -268,6 +277,7 @@ def __load_current_total_savings_distribution() -> list[dict]:
         SELECT id, version
         FROM streams
         WHERE type = 'stocks'
+        AND (labels->>'include_in_wealth' IS NULL OR labels->>'include_in_wealth' = 'true')
     ),
 
     stocks_balance AS (
@@ -352,7 +362,7 @@ def __load_total_history_per_day(oldest_occured_event_date: date) -> dict[str, l
         stream_ids.id AS stream_id
     FROM
         date_series
-    CROSS JOIN (SELECT id FROM streams) stream_ids
+    CROSS JOIN (SELECT id FROM streams WHERE labels->>'include_in_wealth' IS NULL OR labels->>'include_in_wealth' = 'true') stream_ids
     ORDER BY
         stream_ids.id, date_series.occured_at
     ),
@@ -360,22 +370,21 @@ def __load_total_history_per_day(oldest_occured_event_date: date) -> dict[str, l
     all_account_balances_per_day AS (
     SELECT al.occured_at, al.stream_id,
        COALESCE((
-           SELECT events.data ->> 'balance'
-           FROM events
-           WHERE events.stream_id = al.stream_id
-             AND events.occured_at <= al.occured_at
-           ORDER BY events.version DESC
-           LIMIT 1
-       )::numeric, 0) AS balance
+            SELECT events.data ->> 'balance'
+            FROM events
+            WHERE events.stream_id = al.stream_id
+              AND events.occured_at <= al.occured_at
+            ORDER BY events.version DESC
+            LIMIT 1
+        )::numeric, 0) AS balance
     FROM all_day_and_accounts al
     )
 
-    SELECT
+     SELECT
         occured_at,
         SUM(balance) as balance
     FROM
         all_account_balances_per_day
-    LEFT JOIN streams ON all_account_balances_per_day.stream_id = streams.id
     GROUP BY
         occured_at
     ORDER BY
@@ -410,6 +419,8 @@ def __investment_indicators() -> None:
             type = 'investment'
         AND
             active = true
+        AND
+            (labels->>'include_in_wealth' IS NULL OR labels->>'include_in_wealth' = 'true')
     ),
     investment_balance AS (
         SELECT
@@ -423,6 +434,7 @@ def __investment_indicators() -> None:
         FROM streams
         WHERE type = 'stocks'
         AND active = true
+        AND (labels->>'include_in_wealth' IS NULL OR labels->>'include_in_wealth' = 'true')
     ),
     stocks_balance AS (
         SELECT
@@ -439,6 +451,7 @@ def __investment_indicators() -> None:
         WHERE type = 'account'
           AND (subtype) = 'savings'
           AND active = true
+          AND (labels->>'include_in_wealth' IS NULL OR labels->>'include_in_wealth' = 'true')
     ),
     savings_balance AS (
         SELECT
@@ -490,6 +503,7 @@ def __load_investment_types_distribution() -> list[dict]:
         FROM streams
         WHERE type = 'investment'
           AND active = true
+          AND (labels->>'include_in_wealth' IS NULL OR labels->>'include_in_wealth' = 'true')
     ),
     investment_balance AS (
         SELECT
@@ -504,6 +518,7 @@ def __load_investment_types_distribution() -> list[dict]:
         FROM streams
         WHERE type = 'stocks'
           AND active = true
+          AND (labels->>'include_in_wealth' IS NULL OR labels->>'include_in_wealth' = 'true')
     ),
     stocks_balance AS (
         SELECT
@@ -519,6 +534,7 @@ def __load_investment_types_distribution() -> list[dict]:
         WHERE type = 'account'
           AND (subtype) = 'savings'
           AND active = true
+          AND (labels->>'include_in_wealth' IS NULL OR labels->>'include_in_wealth' = 'true')
     ),
     savings_balance AS (
         SELECT
@@ -754,14 +770,14 @@ class JSONEncoder(json.JSONEncoder):
 def __store_view(view_name: str, view_content):
     json_string = json.dumps(view_content, cls=JSONEncoder)
 
-    insert_statement = f"""
+    insert_statement = """
     INSERT INTO
         views (name, content)
     VALUES
-        ('{view_name}', '{json_string}'::jsonb)
+        (%s, %s::jsonb)
     ON CONFLICT
         (name)
     DO UPDATE
-        SET content = '{json_string}'::jsonb, updated_at = now();
+        SET content = %s::jsonb, updated_at = now();
     """
-    db.execute(insert_statement)
+    db.execute(insert_statement, (view_name, json_string, json_string))
