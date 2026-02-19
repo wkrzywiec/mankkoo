@@ -80,6 +80,12 @@ export default function Streams() {
     () => [...STREAMS_DETAILS_HEADERS, ...metadataRows, ...labelsRows],
     [metadataRows, labelsRows]
   );
+  
+  // Calculate the index of the "Labels" separator row (if it exists)
+  const labelsSeparatorRowIndex = useMemo(
+    () => labelsRows.length > 0 ? STREAMS_DETAILS_HEADERS.length + metadataRows.length : -1,
+    [metadataRows.length, labelsRows.length]
+  );
 
   const eventTableData = useMemo(
     () => events ? [...EVENTS_HEADERS, ...(events.map(event => [event.type, event.occuredAt, JSON.stringify(event.data)]))] : EVENTS_HEADERS,
@@ -121,7 +127,7 @@ export default function Streams() {
       </div>
       <div className="gridItem span2Columns ">
         <TileHeader headline="Stream summary" subHeadline="Short summary about selected stream." />
-        <Table data={streamDetailsTableData} hasHeader={true} hasRowNumber={false} style={{ width: "90%" }} boldLastRow={false} currencyColumnIdx={-1} colorsColumnIdx={-1}/>
+        <Table data={streamDetailsTableData} hasHeader={true} hasRowNumber={false} boldRowIndices={labelsSeparatorRowIndex >= 0 ? [labelsSeparatorRowIndex] : []} style={{ width: "90%" }} boldLastRow={false} currencyColumnIdx={-1} colorsColumnIdx={-1}/>
       </div>
       <div className="gridItem span4Columns">
         <div>
