@@ -166,10 +166,13 @@ def init_db():
     log.info("Database initialized")
 
 
-def execute(sql: str):
+def execute(sql: str, params=None):
     with get_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute(sql)
+            if params is None:
+                cur.execute(sql)
+            else:
+                cur.execute(sql, params)
             conn.commit()
 
 

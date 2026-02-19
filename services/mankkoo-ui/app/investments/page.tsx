@@ -76,10 +76,12 @@ export default function Investments() {
     function prepareDataForWalletsDistributionTable() {
       if (!walletsDistribution || !walletsDistribution.data) return;
       const walletsTable: TableData = { data: [], hasHeader: false, boldLastRow: true, currencyColumnIdx: 3, colorsColumnIdx: 2};
+      let totalFromWallets = 0;
       walletsDistribution.data.forEach(value => {
         walletsTable.data.push([value.wallet, value.total.toString(), percentage(value.percentage)]);
+        totalFromWallets += value.total;
       });
-      walletsTable.data.push(['Total', indicators === undefined ? '0' : indicators.totalInvestments.toString(), '']);
+      walletsTable.data.push(['Total', totalFromWallets.toString(), '']);
       setWalletsDistributionTable(walletsTable);
     }
     function prepareDataForWalletsDistributionPieChart() {
@@ -95,7 +97,7 @@ export default function Investments() {
       prepareDataForWalletsDistributionTable();
       prepareDataForWalletsDistributionPieChart();
     }
-  }, [walletsDistribution, isFetchingWalletsDistribution, indicators])
+  }, [walletsDistribution, isFetchingWalletsDistribution])
 
   const investmentsTableData = useMemo<TableData>(() => ({
     hasHeader: true,
