@@ -3,7 +3,7 @@
 import styles from "./page.module.css";
 import 'react-dropdown/style.css';
 
-import { SyntheticEvent, useState } from "react";
+import { SyntheticEvent, useMemo, useState } from "react";
 import Dropdown, { Option } from 'react-dropdown';
 import Swal from 'sweetalert2';
 import withReactContent from "sweetalert2-react-content";
@@ -19,14 +19,14 @@ import { postJson, useGetHttp } from "@/hooks/useHttp";
 import Input from "@/components/elements/Input";
 import { addEventRequiredProps, createStreamPossibleSubtypes, createStreamRequiredMetadata } from "./config";
 
+// Constants moved outside component to prevent recreation on each render
+const STREAMS_HEADERS = [['Subtype', 'Bank', 'Name', 'Wallet']]
+const STREAMS_DETAILS_HEADERS = [['Property', 'Value']]
+const EVENTS_HEADERS = [['Event Type', 'Occured At', 'Data']]
 
 export default function Streams() {
 
   const MySwal = withReactContent(Swal);
-
-  const streamsHeaders = [['Subtype', 'Bank', 'Name', 'Wallet']]
-  const streamsDetailsHeaders = [['Property', 'Value']]
-  const eventsHeaders = [['Event Type', 'Occured At', 'Data']]
 
   const [streamType, setStreamType] = useState<string | undefined>('account');
   const [streamActive, setStreamActive] = useState<boolean>(true);
@@ -44,6 +44,47 @@ export default function Streams() {
   const {
     fetchedData: events
   } = useGetHttp<EventResponse[]>(`/streams/${streamId}/events`, !!streamId);
+
+  // Memoized data transformations for performance
+  const streamsData = useMemo(
+    () => streams?.map(stream => [stream.subtype, stream.bank, stream.name, stream.wallet]),
+    [streams]
+  );
+  
+  const streamTableData = useMemo(
+    () => [...STREAMS_HEADERS, ...streamsData ?? []],
+    [streamsData]
+  );
+  
+  const streamRowIds = useMemo(
+    () => streams?.map(stream => stream.id),
+    [streams]
+  );
+
+  const metadataRows = useMemo(
+    () => streamDetails ? Object.entries(streamDetails.metadata) : [],
+    [streamDetails]
+  );
+  
+  const labelsRows = useMemo(
+    () => streamDetails?.labels && Object.keys(streamDetails.labels).length > 0
+      ? [
+          ['Labels', ''],
+          ...Object.entries(streamDetails.labels)
+        ]
+      : [],
+    [streamDetails]
+  );
+  
+  const streamDetailsTableData = useMemo(
+    () => [...STREAMS_DETAILS_HEADERS, ...metadataRows, ...labelsRows],
+    [metadataRows, labelsRows]
+  );
+
+  const eventTableData = useMemo(
+    () => events ? [...EVENTS_HEADERS, ...(events.map(event => [event.type, event.occuredAt, JSON.stringify(event.data)]))] : EVENTS_HEADERS,
+    [events]
+  );
 
 
   const changeTab = (index: number) => {
@@ -72,16 +113,6 @@ export default function Streams() {
       setStreamActive(false)
       setStreamType(undefined)
     }
-
-    const streamsData = streams?.map(stream => [stream.subtype, stream.bank, stream.name, stream.wallet])
-    const streamTableData = [...streamsHeaders, ...streamsData ?? []]
-    const streamRowIds = streams?.map(stream => stream.id)
-
-    const streamDetailsTableData = streamDetails ? [...streamsDetailsHeaders, ...Object.entries(streamDetails.metadata)] : streamsDetailsHeaders
-
-    const eventsTableData = events?.map(event => [event.type, event.occuredAt, JSON.stringify(event.data)])
-    const eventTableData = events ? [...eventsHeaders, ...eventsTableData ? eventsTableData : [[]]] : eventsHeaders
-    
 
     return <div className="mainContainer">
       <div className="gridItem span2Columns">
