@@ -601,6 +601,94 @@ def test_stream_metadata_are_updated(test_client):
     assert stored_stream.metadata == metadata
 
 
+def test_stream_labels_are_updated(test_client):
+    # GIVEN
+    stream = es.Stream(
+        uuid.uuid4(),
+        "account",
+        "checking",
+        "Super Personal account",
+        "Bank A",
+        True,
+        0,
+        {"alias": "Bank account A"},
+        {"wallet": "Personal", "include_in_wealth": "true"},
+    )
+    es.create([stream])
+
+    new_labels = {"wallet": "Business", "include_in_wealth": "false"}
+
+    # WHEN
+    response = test_client.patch(
+        f"/api/streams/{stream.id}",
+        data=json.dumps({"labels": new_labels}),
+        headers=__headers(),
+    )
+
+    # THEN
+    assert response.status_code == 200
+    stored_stream = es.get_stream_by_id(stream.id)
+    assert stored_stream.labels == new_labels
+
+
+def test_stream_metadata_and_labels_are_updated_together(test_client):
+    # GIVEN
+    stream = es.Stream(
+        uuid.uuid4(),
+        "investment",
+        "treasury_bonds",
+        "10-year Bonds",
+        "PKO",
+        True,
+        0,
+        {"details": "Old details"},
+        {"wallet": "Personal"},
+    )
+    es.create([stream])
+
+    new_metadata = {"details": "New details", "rate": "6.80%"}
+    new_labels = {"wallet": "Business", "include_in_wealth": "true"}
+
+    # WHEN
+    response = test_client.patch(
+        f"/api/streams/{stream.id}",
+        data=json.dumps({"metadata": new_metadata, "labels": new_labels}),
+        headers=__headers(),
+    )
+
+    # THEN
+    assert response.status_code == 200
+    stored_stream = es.get_stream_by_id(stream.id)
+    assert stored_stream.metadata == new_metadata
+    assert stored_stream.labels == new_labels
+
+
+def test_stream_update_fails_with_empty_body(test_client):
+    # GIVEN
+    stream = es.Stream(
+        uuid.uuid4(),
+        "account",
+        "savings",
+        "Savings Account",
+        "Bank C",
+        True,
+        0,
+        {},
+        {},
+    )
+    es.create([stream])
+
+    # WHEN
+    response = test_client.patch(
+        f"/api/streams/{stream.id}",
+        data=json.dumps({}),
+        headers=__headers(),
+    )
+
+    # THEN
+    assert response.status_code == 400
+
+
 def __headers():
     mimetype = "application/json"
     return {"Content-Type": mimetype, "Accept": mimetype}

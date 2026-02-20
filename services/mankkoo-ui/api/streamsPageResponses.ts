@@ -12,7 +12,8 @@ export interface StreamDetailsResponse {
     type: string;
     name: string;
     version: number;
-    metadata: { [key: string]: string}
+    metadata: { [key: string]: string};
+    labels?: { [key: string]: string };
 }
 
 export interface EventResponse {

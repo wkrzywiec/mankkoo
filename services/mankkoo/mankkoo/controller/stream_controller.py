@@ -166,38 +166,49 @@ def events_for_stream(stream_id):
 
 class UpdateStream(Schema):
     metadata = Mapping()
+    labels = Mapping()
 
 
 class UpdateStreamResult(Schema):
-    message = Mapping()
+    message = String()
 
 
 @stream_endpoints.route("/<stream_id>", methods=["PATCH"])
 @stream_endpoints.input(UpdateStream, location="json")
 @stream_endpoints.output(UpdateStreamResult, status_code=200)
-@stream_endpoints.doc(summary="Update stream", description="Modify stream information")
+@stream_endpoints.doc(
+    summary="Update stream", description="Modify stream metadata and/or labels"
+)
 def update_stream(stream_id, body: UpdateStream):
     log.info(f"Received request to update the '{stream_id}' stream. Body: {body}...")
 
     if body is None:
         abort(400, message="Failed to modify a stream. Body was not provided")
 
-    if body["metadata"] is None:
+    # At least one field must be present
+    if "metadata" not in body and "labels" not in body:
         abort(
             400,
-            message="Failed to modify a stream. Body must contain the 'metadata' field",
+            message="Failed to modify a stream. Body must contain at least one of: 'metadata', 'labels'",
         )
 
     stream = es.get_stream_by_id(stream_id)
     if stream is None:
         abort(
             404,
-            message="Failed to modify a stream. There is no stream with the id: '{stream_id}'",
+            message=f"Failed to modify a stream. There is no stream with the id: '{stream_id}'",
         )
 
-    metadata = body["metadata"]
-    log.info(type(metadata))
-    es.update_stream_metadata(stream.id, metadata)
+    # Update metadata if provided
+    if "metadata" in body and body["metadata"] is not None:
+        metadata = body["metadata"]
+        es.update_stream_metadata(stream.id, metadata)
+
+    # Update labels if provided
+    if "labels" in body and body["labels"] is not None:
+        labels = body["labels"]
+        es.update_stream_labels(stream.id, labels)
 
     response = UpdateStreamResult()
-    response.metadata = "Metadata was updated"
+    response.message = "Stream updated successfully"
+    return response
