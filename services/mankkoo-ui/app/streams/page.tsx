@@ -126,10 +126,11 @@ export default function Streams() {
         <Table data={streamTableData} rowIds={streamRowIds} hasHeader={true} style={{ width: "90%" }} boldLastRow={false} currencyColumnIdx={-1} colorsColumnIdx={-1} onRowClick={(id) => setStreamId(id)}/>
       </div>
       <div className="gridItem span2Columns ">
-        <div className={styles.headerWithButton}>
-          <TileHeader headline="Stream summary" subHeadline="Short summary about selected stream." />
-          <Button onClick={openEditStreamModal}>Edit</Button>
-        </div>
+        <TileHeader 
+          headline="Stream summary" 
+          subHeadline="Short summary about selected stream." 
+          headlineElement={<Button onClick={openEditStreamModal}>Edit</Button>}
+        />
         <Table data={streamDetailsTableData} hasHeader={true} hasRowNumber={false} boldRowIndices={labelsSeparatorRowIndex >= 0 ? [labelsSeparatorRowIndex] : []} style={{ width: "90%" }} boldLastRow={false} currencyColumnIdx={-1} colorsColumnIdx={-1}/>
       </div>
       <div className="gridItem span4Columns">
