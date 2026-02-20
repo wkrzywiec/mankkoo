@@ -5,6 +5,13 @@
     justify-content: flex-end;
 }
 
+.headerWithButton {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 90%;
+}
+
 .tabs {
     display: flex;
     border-bottom: 2px solid #ccc;

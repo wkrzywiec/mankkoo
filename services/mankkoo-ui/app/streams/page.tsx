@@ -15,7 +15,7 @@ import Modal from "@/components/elements/Modal";
 import Table from "@/components/charts/Table";
 import TabList from "@/components/elements/TabList";
 import TileHeader from "@/components/elements/TileHeader";
-import { postJson, useGetHttp } from "@/hooks/useHttp";
+import { patchJson, postJson, useGetHttp } from "@/hooks/useHttp";
 import Input from "@/components/elements/Input";
 import { addEventRequiredProps, createStreamPossibleSubtypes, createStreamRequiredMetadata } from "./config";
 
@@ -126,7 +126,10 @@ export default function Streams() {
         <Table data={streamTableData} rowIds={streamRowIds} hasHeader={true} style={{ width: "90%" }} boldLastRow={false} currencyColumnIdx={-1} colorsColumnIdx={-1} onRowClick={(id) => setStreamId(id)}/>
       </div>
       <div className="gridItem span2Columns ">
-        <TileHeader headline="Stream summary" subHeadline="Short summary about selected stream." />
+        <div className={styles.headerWithButton}>
+          <TileHeader headline="Stream summary" subHeadline="Short summary about selected stream." />
+          <Button onClick={openEditStreamModal}>Edit</Button>
+        </div>
         <Table data={streamDetailsTableData} hasHeader={true} hasRowNumber={false} boldRowIndices={labelsSeparatorRowIndex >= 0 ? [labelsSeparatorRowIndex] : []} style={{ width: "90%" }} boldLastRow={false} currencyColumnIdx={-1} colorsColumnIdx={-1}/>
       </div>
       <div className="gridItem span4Columns">
@@ -225,6 +228,59 @@ export default function Streams() {
     postJson(`streams/${streamDetails?.id}/events`, body, 'New stream was created', 'Failed to create a new strem')
   }
 
+
+  // EDIT STREAM
+  // =======================
+  const [isEditStreamModalOpen, setEditStreamModalOpen] = useState(false)
+  const [editStreamMetadata, setEditStreamMetadata] = useState<Row[]>([])
+  const [editStreamLabels, setEditStreamLabels] = useState<Row[]>([])
+
+  const openEditStreamModal = () => {
+    if (streamDetails === undefined) {
+      MySwal.fire({
+        title: 'Stream was not selected',
+        text: 'Select a stream from the list and then click the "Edit" button.',
+        icon: 'warning',
+        confirmButtonText: 'Ok'})
+    } else {
+      // Initialize metadata rows
+      const metadataRows: Row[] = Object.entries(streamDetails.metadata).map(([key, value], index) => ({
+        id: index,
+        property: key,
+        value: value
+      }))
+      setEditStreamMetadata(metadataRows)
+
+      // Initialize labels rows
+      const labelsRows: Row[] = streamDetails.labels 
+        ? Object.entries(streamDetails.labels).map(([key, value], index) => ({
+            id: index,
+            property: key,
+            value: value
+          }))
+        : []
+      setEditStreamLabels(labelsRows)
+
+      setEditStreamModalOpen(true)
+    }
+  }
+
+  const updateStream = (e: SyntheticEvent<Element, Event>) => {
+    const body: {metadata?: {[key: string]: string}, labels?: {[key: string]: string}} = {}
+    
+    // Add metadata if there are any rows
+    if (editStreamMetadata.length > 0) {
+      body.metadata = Object.fromEntries(editStreamMetadata.map(row => [row.property, row.value]))
+    }
+    
+    // Add labels if there are any rows
+    if (editStreamLabels.length > 0) {
+      body.labels = Object.fromEntries(editStreamLabels.map(row => [row.property, row.value]))
+    }
+
+    patchJson(`streams/${streamDetails?.id}`, body, 'Stream was updated successfully', 'Failed to update stream')
+  }
+
   return (
     <main className="mainContainer">
       <div className="gridItem span3Columns">
@@ -281,6 +337,22 @@ export default function Streams() {
         <p>Occured at:</p> <Input type="date" value={eventDate} placeholder="dd-mm-yyyy" onChange={(e) => setEventDate(e.target.value)}/>
         <p>Event type:</p> <Dropdown options={streamDetails ? Object.keys(addEventRequiredProps[streamDetails.type]) : []} onChange={changeEventTypeToBeAdded} value={selectedAddEventType} placeholder="Select an option" />
         <p>Event data:</p> <EditableTable rows={addEventData} setRows={setAddEventData}/>
+      </Modal>
+
+      <Modal 
+        isOpen={isEditStreamModalOpen}
+        header="Edit Stream"
+        subHeader={`Update metadata and labels for the '${streamDetails?.name}' stream.`}
+        onSubmit={(e) => updateStream(e)} 
+        onClose={() => setEditStreamModalOpen(false)} 
+      >
+        <p>Stream id: <b>{streamDetails?.id}</b></p>
+        <p>Stream name: <b>{streamDetails?.name}</b></p>
+        <p>Stream type: <b>{streamDetails?.type}</b></p>
+        <p>Metadata:</p>
+        <EditableTable rows={editStreamMetadata} setRows={setEditStreamMetadata}/>
+        <p>Labels:</p>
+        <EditableTable rows={editStreamLabels} setRows={setEditStreamLabels}/>
       </Modal>
 
     </main>
