@@ -134,15 +134,12 @@ export default function Streams() {
         <Table data={streamDetailsTableData} hasHeader={true} hasRowNumber={false} boldRowIndices={labelsSeparatorRowIndex >= 0 ? [labelsSeparatorRowIndex] : []} style={{ width: "90%" }} boldLastRow={false} currencyColumnIdx={-1} colorsColumnIdx={-1}/>
       </div>
       <div className="gridItem span4Columns">
-        <div>
-          <TileHeader headline="Events" subHeadline="A list of all events for a given stream." />
-        </div>
-        <div className={styles.itemsBottomRight}>
-          <Button onClick={openAddEventModal}>Add event</Button>
-        </div>
-        <div>
-          <Table data={eventTableData} hasHeader={true} style={{ width: "100%" }} boldLastRow={false} currencyColumnIdx={-1} colorsColumnIdx={-1}/>
-        </div>
+        <TileHeader 
+          headline="Events" 
+          subHeadline="A list of all events for a given stream." 
+          headlineElement={<Button onClick={openAddEventModal}>Add event</Button>}
+        />
+        <Table data={eventTableData} hasHeader={true} style={{ width: "100%" }} boldLastRow={false} currencyColumnIdx={-1} colorsColumnIdx={-1}/>
       </div>
   </div>
   }
