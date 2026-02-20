@@ -214,7 +214,7 @@ def get_stream_by_id(stream_id: str) -> Stream | None:
     with db.get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                f"SELECT id, type, subtype, name, bank, active, version, metadata from streams WHERE id = '{stream_id}'"
+                f"SELECT id, type, subtype, name, bank, active, version, metadata, labels from streams WHERE id = '{stream_id}'"
             )
             result = cur.fetchone()
             if result is None:
@@ -229,8 +229,11 @@ def get_stream_by_id(stream_id: str) -> Stream | None:
                     active,
                     version,
                     metadata,
+                    labels,
                 ) = result
-    return Stream(uuid.UUID(id), type, subtype, name, bank, active, version, metadata)
+    return Stream(
+        uuid.UUID(id), type, subtype, name, bank, active, version, metadata or {}, labels or {}
+    )
 
 
 def get_stream_by_metadata(key: str, value) -> Stream | None:
@@ -240,7 +243,7 @@ def get_stream_by_metadata(key: str, value) -> Stream | None:
     with db.get_connection() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                f"SELECT id, type, subtype, name, bank, active, version, metadata FROM streams WHERE metadata ->> '{key}' = '{value}'"
+                f"SELECT id, type, subtype, name, bank, active, version, metadata, labels FROM streams WHERE metadata ->> '{key}' = '{value}'"
             )
             result = cur.fetchone()
             if result is None:
@@ -255,8 +258,11 @@ def get_stream_by_metadata(key: str, value) -> Stream | None:
                     active,
                     version,
                     metadata,
+                    labels,
                 ) = result
-    return Stream(uuid.UUID(id), type, subtype, name, bank, active, version, metadata)
+    return Stream(
+        uuid.UUID(id), type, subtype, name, bank, active, version, metadata or {}, labels or {}
+    )
 
 
 def get_stream_metadata(stream_id: UUID) -> dict:
@@ -275,6 +281,17 @@ def update_stream_metadata(stream_id: UUID, metadata: dict):
             cur.execute(
                 "UPDATE streams SET metadata = %s::jsonb WHERE id = %s::uuid;",
                 (json.dumps(metadata), str(stream_id)),
+            )
+            conn.commit()
+
+
+def update_stream_labels(stream_id: UUID, labels: dict):
+    log.info(f"Updating stream '{stream_id}' with labels '{labels}'...")
+    with db.get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "UPDATE streams SET labels = %s::jsonb WHERE id = %s::uuid;",
+                (json.dumps(labels), str(stream_id)),
             )
             conn.commit()
 

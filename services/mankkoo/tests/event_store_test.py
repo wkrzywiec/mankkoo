@@ -239,6 +239,7 @@ def test_get_stream_by_metadata_if_key_exists():
         True,
         1,
         metadata,
+        {},  # labels
     )
 
 
@@ -279,6 +280,31 @@ def test_get_stream_metadata():
 
     # then
     assert stored_metadata == metadata
+
+
+def test_update_stream_labels():
+    # GIVEN: A stream exists with initial labels
+    test_stream_id = uuid.uuid4()
+    stream = es.Stream(
+        test_stream_id,
+        "account",
+        "checking",
+        "Test Account",
+        "Test Bank",
+        True,
+        0,
+        {},
+        {"wallet": "Personal", "include_in_wealth": "true"},
+    )
+    es.create([stream])
+
+    # WHEN: Labels are updated
+    new_labels = {"wallet": "Business", "include_in_wealth": "false"}
+    es.update_stream_labels(test_stream_id, new_labels)
+
+    # THEN: Stream has new labels
+    updated_stream = es.get_stream_by_id(test_stream_id)
+    assert updated_stream.labels == new_labels
 
 
 def __load_events(stream_id: uuid.UUID) -> list[es.Event]:
