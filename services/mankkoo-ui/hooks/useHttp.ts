@@ -68,6 +68,32 @@ export function postJson(apiPath: string, body: {[key: string]: any}, successMsg
     })
 }
 
+export function patchJson(apiPath: string, body: {[key: string]: unknown}, successMsg?: string, failureMsg?: string) {
+
+    axios.patch(API_BASE + apiPath,
+        body,
+        { headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+        }} )
+    .then(_ => {
+        MySwal.fire({
+            title: 'Success!',
+            text: successMsg ? successMsg : 'Resource was updated',
+            icon: 'success',
+            confirmButtonText: 'Cool'})
+    })
+    .catch(error => {
+        console.error(error);
+        MySwal.fire({
+            title: 'Error!',
+            text: failureMsg ? failureMsg : 'There was a problem with updating a resource',
+            icon: 'error',
+            confirmButtonText: 'Ok'
+        })
+    })
+}
+
 export function uploadFile(apiPath: string, file: File) {
     const data = new FormData();
     data.set('operations', file);

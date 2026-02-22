@@ -20,6 +20,7 @@ export default function Table({
     hasHeader=false,
     hasRowNumber=true,
     boldLastRow=false,
+    boldRowIndices=[],
     currencyColumnIdx=-1,
     colorsColumnIdx=-1,
     style={}
@@ -30,6 +31,7 @@ export default function Table({
     hasHeader?: boolean;
     hasRowNumber?: boolean;
     boldLastRow?: boolean;
+    boldRowIndices?: number[];
     currencyColumnIdx?: number;
     colorsColumnIdx?: number;
     style?: React.CSSProperties;
@@ -56,7 +58,7 @@ export default function Table({
     addColorCircleColumn(preparedData, colorsColumnIdx, hasHeader, boldLastRow)
 
     const rows = preparedData.map((rowData, rowIndex) => 
-        <tr key={rowIndex} className={(defineRowClass(preparedData, rowIndex, boldLastRow, hasHeader))} onClick={() => onRowClick(rowIds[rowIndex-1])}>
+        <tr key={rowIndex} className={(defineRowClass(preparedData, rowIndex, boldLastRow, boldRowIndices, hasHeader))} onClick={() => onRowClick(rowIds[rowIndex-1])}>
             { rowData.map((cellData, cellIndex) => {
                 
                 if (shouldAddColorCircleToCell(preparedData, rowIndex, boldLastRow, cellData)) {
@@ -123,8 +125,12 @@ function rowNumberAsString(rowIndex: number): string {
 
 
 
-function defineRowClass(data: string[][], rowIndex: number, boldLastRow: boolean, hasHeader: boolean) {
+function defineRowClass(data: string[][], rowIndex: number, boldLastRow: boolean, boldRowIndices: number[], hasHeader: boolean) {
     if (shouldBoldLastRow(data, rowIndex, boldLastRow)) {
+        return styles.boldedRow;
+    }
+    
+    if (boldRowIndices.includes(rowIndex)) {
         return styles.boldedRow;
     }
     

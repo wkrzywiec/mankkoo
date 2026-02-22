@@ -3,7 +3,7 @@
 import styles from "./page.module.css";
 import 'react-dropdown/style.css';
 
-import { SyntheticEvent, useState } from "react";
+import { SyntheticEvent, useMemo, useState } from "react";
 import Dropdown, { Option } from 'react-dropdown';
 import Swal from 'sweetalert2';
 import withReactContent from "sweetalert2-react-content";
@@ -15,18 +15,18 @@ import Modal from "@/components/elements/Modal";
 import Table from "@/components/charts/Table";
 import TabList from "@/components/elements/TabList";
 import TileHeader from "@/components/elements/TileHeader";
-import { postJson, useGetHttp } from "@/hooks/useHttp";
+import { patchJson, postJson, useGetHttp } from "@/hooks/useHttp";
 import Input from "@/components/elements/Input";
 import { addEventRequiredProps, createStreamPossibleSubtypes, createStreamRequiredMetadata } from "./config";
 
+// Constants moved outside component to prevent recreation on each render
+const STREAMS_HEADERS = [['Subtype', 'Bank', 'Name', 'Wallet']]
+const STREAMS_DETAILS_HEADERS = [['Property', 'Value']]
+const EVENTS_HEADERS = [['Event Type', 'Occured At', 'Data']]
 
 export default function Streams() {
 
   const MySwal = withReactContent(Swal);
-
-  const streamsHeaders = [['Subtype', 'Bank', 'Name', 'Wallet']]
-  const streamsDetailsHeaders = [['Property', 'Value']]
-  const eventsHeaders = [['Event Type', 'Occured At', 'Data']]
 
   const [streamType, setStreamType] = useState<string | undefined>('account');
   const [streamActive, setStreamActive] = useState<boolean>(true);
@@ -44,6 +44,53 @@ export default function Streams() {
   const {
     fetchedData: events
   } = useGetHttp<EventResponse[]>(`/streams/${streamId}/events`, !!streamId);
+
+  // Memoized data transformations for performance
+  const streamsData = useMemo(
+    () => streams?.map(stream => [stream.subtype, stream.bank, stream.name, stream.wallet]),
+    [streams]
+  );
+  
+  const streamTableData = useMemo(
+    () => [...STREAMS_HEADERS, ...streamsData ?? []],
+    [streamsData]
+  );
+  
+  const streamRowIds = useMemo(
+    () => streams?.map(stream => stream.id),
+    [streams]
+  );
+
+  const metadataRows = useMemo(
+    () => streamDetails ? Object.entries(streamDetails.metadata) : [],
+    [streamDetails]
+  );
+  
+  const labelsRows = useMemo(
+    () => streamDetails?.labels && Object.keys(streamDetails.labels).length > 0
+      ? [
+          ['Labels', ''],
+          ...Object.entries(streamDetails.labels)
+        ]
+      : [],
+    [streamDetails]
+  );
+  
+  const streamDetailsTableData = useMemo(
+    () => [...STREAMS_DETAILS_HEADERS, ...metadataRows, ...labelsRows],
+    [metadataRows, labelsRows]
+  );
+  
+  // Calculate the index of the "Labels" separator row (if it exists)
+  const labelsSeparatorRowIndex = useMemo(
+    () => labelsRows.length > 0 ? STREAMS_DETAILS_HEADERS.length + metadataRows.length : -1,
+    [metadataRows.length, labelsRows.length]
+  );
+
+  const eventTableData = useMemo(
+    () => events ? [...EVENTS_HEADERS, ...(events.map(event => [event.type, event.occuredAt, JSON.stringify(event.data)]))] : EVENTS_HEADERS,
+    [events]
+  );
 
 
   const changeTab = (index: number) => {
@@ -73,35 +120,26 @@ export default function Streams() {
       setStreamType(undefined)
     }
 
-    const streamsData = streams?.map(stream => [stream.subtype, stream.bank, stream.name, stream.wallet])
-    const streamTableData = [...streamsHeaders, ...streamsData ?? []]
-    const streamRowIds = streams?.map(stream => stream.id)
-
-    const streamDetailsTableData = streamDetails ? [...streamsDetailsHeaders, ...Object.entries(streamDetails.metadata)] : streamsDetailsHeaders
-
-    const eventsTableData = events?.map(event => [event.type, event.occuredAt, JSON.stringify(event.data)])
-    const eventTableData = events ? [...eventsHeaders, ...eventsTableData ? eventsTableData : [[]]] : eventsHeaders
-    
-
     return <div className="mainContainer">
       <div className="gridItem span2Columns">
         <TileHeader headline={`List of ${streamType ? streamType : "other"} streams`} subHeadline="Select a stream get more information about it." />
         <Table data={streamTableData} rowIds={streamRowIds} hasHeader={true} style={{ width: "90%" }} boldLastRow={false} currencyColumnIdx={-1} colorsColumnIdx={-1} onRowClick={(id) => setStreamId(id)}/>
       </div>
       <div className="gridItem span2Columns ">
-        <TileHeader headline="Stream summary" subHeadline="Short summary about selected stream." />
-        <Table data={streamDetailsTableData} hasHeader={true} hasRowNumber={false} style={{ width: "90%" }} boldLastRow={false} currencyColumnIdx={-1} colorsColumnIdx={-1}/>
+        <TileHeader 
+          headline="Stream summary" 
+          subHeadline="Short summary about selected stream." 
+          headlineElement={<Button onClick={openEditStreamModal}>Edit</Button>}
+        />
+        <Table data={streamDetailsTableData} hasHeader={true} hasRowNumber={false} boldRowIndices={labelsSeparatorRowIndex >= 0 ? [labelsSeparatorRowIndex] : []} style={{ width: "90%" }} boldLastRow={false} currencyColumnIdx={-1} colorsColumnIdx={-1}/>
       </div>
       <div className="gridItem span4Columns">
-        <div>
-          <TileHeader headline="Events" subHeadline="A list of all events for a given stream." />
-        </div>
-        <div className={styles.itemsBottomRight}>
-          <Button onClick={openAddEventModal}>Add event</Button>
-        </div>
-        <div>
-          <Table data={eventTableData} hasHeader={true} style={{ width: "100%" }} boldLastRow={false} currencyColumnIdx={-1} colorsColumnIdx={-1}/>
-        </div>
+        <TileHeader 
+          headline="Events" 
+          subHeadline="A list of all events for a given stream." 
+          headlineElement={<Button onClick={openAddEventModal}>Add event</Button>}
+        />
+        <Table data={eventTableData} hasHeader={true} style={{ width: "100%" }} boldLastRow={false} currencyColumnIdx={-1} colorsColumnIdx={-1}/>
       </div>
   </div>
   }
@@ -188,6 +226,59 @@ export default function Streams() {
     postJson(`streams/${streamDetails?.id}/events`, body, 'New stream was created', 'Failed to create a new strem')
   }
 
+
+  // EDIT STREAM
+  // =======================
+  const [isEditStreamModalOpen, setEditStreamModalOpen] = useState(false)
+  const [editStreamMetadata, setEditStreamMetadata] = useState<Row[]>([])
+  const [editStreamLabels, setEditStreamLabels] = useState<Row[]>([])
+
+  const openEditStreamModal = () => {
+    if (streamDetails === undefined) {
+      MySwal.fire({
+        title: 'Stream was not selected',
+        text: 'Select a stream from the list and then click the "Edit" button.',
+        icon: 'warning',
+        confirmButtonText: 'Ok'})
+    } else {
+      // Initialize metadata rows
+      const metadataRows: Row[] = Object.entries(streamDetails.metadata).map(([key, value], index) => ({
+        id: index,
+        property: key,
+        value: value
+      }))
+      setEditStreamMetadata(metadataRows)
+
+      // Initialize labels rows
+      const labelsRows: Row[] = streamDetails.labels 
+        ? Object.entries(streamDetails.labels).map(([key, value], index) => ({
+            id: index,
+            property: key,
+            value: value
+          }))
+        : []
+      setEditStreamLabels(labelsRows)
+
+      setEditStreamModalOpen(true)
+    }
+  }
+
+  const updateStream = (e: SyntheticEvent<Element, Event>) => {
+    const body: {metadata?: {[key: string]: string}, labels?: {[key: string]: string}} = {}
+    
+    // Add metadata if there are any rows
+    if (editStreamMetadata.length > 0) {
+      body.metadata = Object.fromEntries(editStreamMetadata.map(row => [row.property, row.value]))
+    }
+    
+    // Add labels if there are any rows
+    if (editStreamLabels.length > 0) {
+      body.labels = Object.fromEntries(editStreamLabels.map(row => [row.property, row.value]))
+    }
+
+    patchJson(`streams/${streamDetails?.id}`, body, 'Stream was updated successfully', 'Failed to update stream')
+  }
+
   return (
     <main className="mainContainer">
       <div className="gridItem span3Columns">
@@ -244,6 +335,22 @@ export default function Streams() {
         <p>Occured at:</p> <Input type="date" value={eventDate} placeholder="dd-mm-yyyy" onChange={(e) => setEventDate(e.target.value)}/>
         <p>Event type:</p> <Dropdown options={streamDetails ? Object.keys(addEventRequiredProps[streamDetails.type]) : []} onChange={changeEventTypeToBeAdded} value={selectedAddEventType} placeholder="Select an option" />
         <p>Event data:</p> <EditableTable rows={addEventData} setRows={setAddEventData}/>
+      </Modal>
+
+      <Modal 
+        isOpen={isEditStreamModalOpen}
+        header="Edit Stream"
+        subHeader={`Update metadata and labels for the '${streamDetails?.name}' stream.`}
+        onSubmit={(e) => updateStream(e)} 
+        onClose={() => setEditStreamModalOpen(false)} 
+      >
+        <p>Stream id: <b>{streamDetails?.id}</b></p>
+        <p>Stream name: <b>{streamDetails?.name}</b></p>
+        <p>Stream type: <b>{streamDetails?.type}</b></p>
+        <p>Metadata:</p>
+        <EditableTable rows={editStreamMetadata} setRows={setEditStreamMetadata}/>
+        <p>Labels:</p>
+        <EditableTable rows={editStreamLabels} setRows={setEditStreamLabels}/>
       </Modal>
 
     </main>
