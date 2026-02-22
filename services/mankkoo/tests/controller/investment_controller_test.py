@@ -341,3 +341,1012 @@ def test_get_gold_transactions(test_client):
     assert bought["totalValue"] == 8500.0
     assert bought["balance"] == 8500.0
     assert bought["comment"] == "First purchase"
+
+
+# ============================================================================
+# POST /api/investments/events ENDPOINT TESTS
+# ============================================================================
+
+
+# ============================================================================
+# 1. SUCCESSFUL EVENT CREATION TESTS
+# ============================================================================
+
+
+def test_create_buy_event_returns_201_with_event_id_and_version(test_client):
+    """Test that POST buy event returns 201 with eventId and streamVersion."""
+    # GIVEN: An investment stream
+    stream = es.Stream(
+        id=uuid.uuid4(),
+        type="stocks",
+        subtype="ETF",
+        name="Test ETF",
+        bank="Broker X",
+        active=True,
+        version=0,
+        metadata={},
+        labels={"wallet": "Personal"},
+    )
+    es.create([stream])
+
+    # WHEN: POST buy event
+    response = test_client.post(
+        "/api/investments/events",
+        json={
+            "streamId": str(stream.id),
+            "eventType": "buy",
+            "occuredAt": "2026-02-15",
+            "units": 10.0,
+            "totalValue": 1000.0,
+            "comment": "Initial purchase",
+        },
+    )
+
+    # THEN: Returns 201 with eventId and streamVersion
+    assert response.status_code == 201
+    data = response.get_json()
+    assert data["result"] == "Success"
+    assert "eventId" in data
+    assert uuid.UUID(data["eventId"])  # Valid UUID
+    assert data["streamVersion"] == 1
+
+
+def test_create_sell_event_returns_201(test_client):
+    """Test that POST sell event returns 201."""
+    # GIVEN: Investment stream with existing buy event
+    stream = es.Stream(
+        id=uuid.uuid4(),
+        type="investments",
+        subtype="ETF",
+        name="Test ETF",
+        bank="Broker X",
+        active=True,
+        version=0,
+        metadata={},
+        labels={"wallet": "Personal"},
+    )
+    es.create([stream])
+
+    # Create initial buy event
+    buy_event = es.Event(
+        stream_type="investments",
+        stream_id=stream.id,
+        event_type="ETFBought",
+        data={
+            "totalValue": 1000.0,
+            "balance": 1000.0,
+            "units": 10.0,
+            "averagePrice": 100.0,
+            "currency": "PLN",
+            "comment": "Initial",
+        },
+        occured_at=datetime(2026, 2, 1),
+        version=1,
+    )
+    es.store([buy_event])
+
+    # WHEN: POST sell event
+    response = test_client.post(
+        "/api/investments/events",
+        json={
+            "streamId": str(stream.id),
+            "eventType": "sell",
+            "occuredAt": "2026-02-20",
+            "units": 5.0,
+            "totalValue": 550.0,
+            "comment": "Partial sale",
+        },
+    )
+
+    # THEN: Returns 201
+    assert response.status_code == 201
+    data = response.get_json()
+    assert data["result"] == "Success"
+    assert data["streamVersion"] == 2
+
+
+def test_create_price_update_event_returns_201_and_stores_etfpriced_name(test_client):
+    """Test that price_update event type stores as ETFPriced event name."""
+    # GIVEN: Investment stream with units
+    stream = es.Stream(
+        id=uuid.uuid4(),
+        type="stocks",
+        subtype="ETF",
+        name="Test ETF",
+        bank="Broker X",
+        active=True,
+        version=0,
+        metadata={},
+        labels={"wallet": "IKE"},
+    )
+    es.create([stream])
+
+    # Add buy event to have units
+    buy_event = es.Event(
+        stream_type="stocks",
+        stream_id=stream.id,
+        event_type="ETFBought",
+        data={
+            "totalValue": 1000.0,
+            "balance": 1000.0,
+            "units": 10.0,
+            "averagePrice": 100.0,
+            "currency": "PLN",
+            "comment": "",
+        },
+        occured_at=datetime(2026, 2, 1),
+        version=1,
+    )
+    es.store([buy_event])
+
+    # WHEN: POST price_update event
+    response = test_client.post(
+        "/api/investments/events",
+        json={
+            "streamId": str(stream.id),
+            "eventType": "price_update",
+            "occuredAt": "2026-02-22",
+            "pricePerUnit": 110.0,
+            "comment": "Market price update",
+        },
+    )
+
+    # THEN: Returns 201 and event stored as ETFPriced
+    assert response.status_code == 201
+    data = response.get_json()
+    assert data["result"] == "Success"
+
+    # Verify event name in database
+    events = es.load(stream.id)
+    assert len(events) == 2
+    assert events[1].event_type == "ETFPriced"
+
+
+def test_buy_event_stored_in_database_with_correct_structure(test_client):
+    """Verify buy event is stored with correct JSONB structure."""
+    # GIVEN: Investment stream
+    stream = es.Stream(
+        id=uuid.uuid4(),
+        type="stocks",
+        subtype="ETF",
+        name="Test ETF",
+        bank="Broker X",
+        active=True,
+        version=0,
+        metadata={},
+        labels={"wallet": "Personal"},
+    )
+    es.create([stream])
+
+    # WHEN: POST buy event
+    response = test_client.post(
+        "/api/investments/events",
+        json={
+            "streamId": str(stream.id),
+            "eventType": "buy",
+            "occuredAt": "2026-02-15",
+            "units": 10.5,
+            "totalValue": 1050.0,
+            "comment": "Test purchase",
+        },
+    )
+
+    # THEN: Event stored with correct structure
+    assert response.status_code == 201
+
+    events = es.load(stream.id)
+    assert len(events) == 1
+
+    event_data = events[0].data
+    assert event_data["totalValue"] == 1050.0
+    assert event_data["balance"] == 1050.0
+    assert event_data["units"] == 10.5
+    assert event_data["averagePrice"] == 100.0
+    assert event_data["currency"] == "PLN"
+    assert event_data["comment"] == "Test purchase"
+
+
+def test_stream_version_increments_after_event(test_client):
+    """Verify stream version increments after each event."""
+    # GIVEN: Investment stream
+    stream = es.Stream(
+        id=uuid.uuid4(),
+        type="investments",
+        subtype="treasury_bonds",
+        name="Test Bonds",
+        bank="PKO",
+        active=True,
+        version=0,
+        metadata={},
+        labels={"wallet": "Personal"},
+    )
+    es.create([stream])
+
+    # WHEN: POST first event
+    response1 = test_client.post(
+        "/api/investments/events",
+        json={
+            "streamId": str(stream.id),
+            "eventType": "buy",
+            "occuredAt": "2026-02-15",
+            "units": 10.0,
+            "totalValue": 1000.0,
+        },
+    )
+
+    # THEN: Version is 1
+    assert response1.status_code == 201
+    assert response1.get_json()["streamVersion"] == 1
+
+    # WHEN: POST second event
+    response2 = test_client.post(
+        "/api/investments/events",
+        json={
+            "streamId": str(stream.id),
+            "eventType": "buy",
+            "occuredAt": "2026-02-20",
+            "units": 5.0,
+            "totalValue": 500.0,
+        },
+    )
+
+    # THEN: Version is 2
+    assert response2.status_code == 201
+    assert response2.get_json()["streamVersion"] == 2
+
+    # Verify in database
+    updated_stream = es.get_stream_by_id(str(stream.id))
+    assert updated_stream is not None
+    assert updated_stream.version == 2
+
+
+# ============================================================================
+# 2. VALIDATION ERROR TESTS
+# ============================================================================
+
+
+def test_missing_units_for_buy_returns_400(test_client):
+    """Test that missing units for buy event returns 400."""
+    # GIVEN: Investment stream
+    stream = es.Stream(
+        id=uuid.uuid4(),
+        type="stocks",
+        subtype="ETF",
+        name="Test ETF",
+        bank="Broker X",
+        active=True,
+        version=0,
+        metadata={},
+        labels={"wallet": "Personal"},
+    )
+    es.create([stream])
+
+    # WHEN: POST buy without units
+    response = test_client.post(
+        "/api/investments/events",
+        json={
+            "streamId": str(stream.id),
+            "eventType": "buy",
+            "occuredAt": "2026-02-15",
+            "totalValue": 1000.0,
+        },
+    )
+
+    # THEN: Returns 400
+    assert response.status_code == 400
+
+
+def test_missing_total_value_for_buy_returns_400(test_client):
+    """Test that missing totalValue for buy event returns 400."""
+    # GIVEN: Investment stream
+    stream = es.Stream(
+        id=uuid.uuid4(),
+        type="stocks",
+        subtype="ETF",
+        name="Test ETF",
+        bank="Broker X",
+        active=True,
+        version=0,
+        metadata={},
+        labels={"wallet": "Personal"},
+    )
+    es.create([stream])
+
+    # WHEN: POST buy without totalValue
+    response = test_client.post(
+        "/api/investments/events",
+        json={
+            "streamId": str(stream.id),
+            "eventType": "buy",
+            "occuredAt": "2026-02-15",
+            "units": 10.0,
+        },
+    )
+
+    # THEN: Returns 400
+    assert response.status_code == 400
+
+
+def test_negative_units_returns_400(test_client):
+    """Test that negative units returns 400."""
+    # GIVEN: Investment stream
+    stream = es.Stream(
+        id=uuid.uuid4(),
+        type="stocks",
+        subtype="ETF",
+        name="Test ETF",
+        bank="Broker X",
+        active=True,
+        version=0,
+        metadata={},
+        labels={"wallet": "Personal"},
+    )
+    es.create([stream])
+
+    # WHEN: POST buy with negative units
+    response = test_client.post(
+        "/api/investments/events",
+        json={
+            "streamId": str(stream.id),
+            "eventType": "buy",
+            "occuredAt": "2026-02-15",
+            "units": -10.0,
+            "totalValue": 1000.0,
+        },
+    )
+
+    # THEN: Returns 400
+    assert response.status_code == 400
+
+
+def test_zero_units_returns_400(test_client):
+    """Test that zero units returns 400."""
+    # GIVEN: Investment stream
+    stream = es.Stream(
+        id=uuid.uuid4(),
+        type="stocks",
+        subtype="ETF",
+        name="Test ETF",
+        bank="Broker X",
+        active=True,
+        version=0,
+        metadata={},
+        labels={"wallet": "Personal"},
+    )
+    es.create([stream])
+
+    # WHEN: POST buy with zero units
+    response = test_client.post(
+        "/api/investments/events",
+        json={
+            "streamId": str(stream.id),
+            "eventType": "buy",
+            "occuredAt": "2026-02-15",
+            "units": 0.0,
+            "totalValue": 1000.0,
+        },
+    )
+
+    # THEN: Returns 400
+    assert response.status_code == 400
+
+
+def test_negative_total_value_returns_400(test_client):
+    """Test that negative totalValue returns 400."""
+    # GIVEN: Investment stream
+    stream = es.Stream(
+        id=uuid.uuid4(),
+        type="stocks",
+        subtype="ETF",
+        name="Test ETF",
+        bank="Broker X",
+        active=True,
+        version=0,
+        metadata={},
+        labels={"wallet": "Personal"},
+    )
+    es.create([stream])
+
+    # WHEN: POST buy with negative totalValue
+    response = test_client.post(
+        "/api/investments/events",
+        json={
+            "streamId": str(stream.id),
+            "eventType": "buy",
+            "occuredAt": "2026-02-15",
+            "units": 10.0,
+            "totalValue": -1000.0,
+        },
+    )
+
+    # THEN: Returns 400
+    assert response.status_code == 400
+
+
+def test_zero_total_value_returns_400(test_client):
+    """Test that zero totalValue returns 400."""
+    # GIVEN: Investment stream
+    stream = es.Stream(
+        id=uuid.uuid4(),
+        type="stocks",
+        subtype="ETF",
+        name="Test ETF",
+        bank="Broker X",
+        active=True,
+        version=0,
+        metadata={},
+        labels={"wallet": "Personal"},
+    )
+    es.create([stream])
+
+    # WHEN: POST buy with zero totalValue
+    response = test_client.post(
+        "/api/investments/events",
+        json={
+            "streamId": str(stream.id),
+            "eventType": "buy",
+            "occuredAt": "2026-02-15",
+            "units": 10.0,
+            "totalValue": 0.0,
+        },
+    )
+
+    # THEN: Returns 400
+    assert response.status_code == 400
+
+
+def test_negative_price_per_unit_returns_400(test_client):
+    """Test that negative pricePerUnit returns 400."""
+    # GIVEN: Investment stream with units
+    stream = es.Stream(
+        id=uuid.uuid4(),
+        type="stocks",
+        subtype="ETF",
+        name="Test ETF",
+        bank="Broker X",
+        active=True,
+        version=0,
+        metadata={},
+        labels={"wallet": "Personal"},
+    )
+    es.create([stream])
+
+    # Add buy event
+    buy_event = es.Event(
+        stream_type="stocks",
+        stream_id=stream.id,
+        event_type="ETFBought",
+        data={
+            "totalValue": 1000.0,
+            "balance": 1000.0,
+            "units": 10.0,
+            "averagePrice": 100.0,
+            "currency": "PLN",
+            "comment": "",
+        },
+        occured_at=datetime(2026, 2, 1),
+        version=1,
+    )
+    es.store([buy_event])
+
+    # WHEN: POST price_update with negative pricePerUnit
+    response = test_client.post(
+        "/api/investments/events",
+        json={
+            "streamId": str(stream.id),
+            "eventType": "price_update",
+            "occuredAt": "2026-02-15",
+            "pricePerUnit": -100.0,
+        },
+    )
+
+    # THEN: Returns 400
+    assert response.status_code == 400
+
+
+def test_zero_price_per_unit_returns_400(test_client):
+    """Test that zero pricePerUnit returns 400."""
+    # GIVEN: Investment stream with units
+    stream = es.Stream(
+        id=uuid.uuid4(),
+        type="stocks",
+        subtype="ETF",
+        name="Test ETF",
+        bank="Broker X",
+        active=True,
+        version=0,
+        metadata={},
+        labels={"wallet": "Personal"},
+    )
+    es.create([stream])
+
+    # Add buy event
+    buy_event = es.Event(
+        stream_type="stocks",
+        stream_id=stream.id,
+        event_type="ETFBought",
+        data={
+            "totalValue": 1000.0,
+            "balance": 1000.0,
+            "units": 10.0,
+            "averagePrice": 100.0,
+            "currency": "PLN",
+            "comment": "",
+        },
+        occured_at=datetime(2026, 2, 1),
+        version=1,
+    )
+    es.store([buy_event])
+
+    # WHEN: POST price_update with zero pricePerUnit
+    response = test_client.post(
+        "/api/investments/events",
+        json={
+            "streamId": str(stream.id),
+            "eventType": "price_update",
+            "occuredAt": "2026-02-15",
+            "pricePerUnit": 0.0,
+        },
+    )
+
+    # THEN: Returns 400
+    assert response.status_code == 400
+
+
+def test_invalid_event_type_returns_400(test_client):
+    """Test that invalid eventType returns 400."""
+    # GIVEN: Investment stream
+    stream = es.Stream(
+        id=uuid.uuid4(),
+        type="stocks",
+        subtype="ETF",
+        name="Test ETF",
+        bank="Broker X",
+        active=True,
+        version=0,
+        metadata={},
+        labels={"wallet": "Personal"},
+    )
+    es.create([stream])
+
+    # WHEN: POST with invalid eventType
+    response = test_client.post(
+        "/api/investments/events",
+        json={
+            "streamId": str(stream.id),
+            "eventType": "invalid_type",
+            "occuredAt": "2026-02-15",
+            "units": 10.0,
+            "totalValue": 1000.0,
+        },
+    )
+
+    # THEN: Returns 400
+    assert response.status_code == 400
+
+
+def test_missing_price_per_unit_for_price_update_returns_400(test_client):
+    """Test that missing pricePerUnit for price_update returns 400."""
+    # GIVEN: Investment stream with units
+    stream = es.Stream(
+        id=uuid.uuid4(),
+        type="stocks",
+        subtype="ETF",
+        name="Test ETF",
+        bank="Broker X",
+        active=True,
+        version=0,
+        metadata={},
+        labels={"wallet": "Personal"},
+    )
+    es.create([stream])
+
+    # Add buy event
+    buy_event = es.Event(
+        stream_type="stocks",
+        stream_id=stream.id,
+        event_type="ETFBought",
+        data={
+            "totalValue": 1000.0,
+            "balance": 1000.0,
+            "units": 10.0,
+            "averagePrice": 100.0,
+            "currency": "PLN",
+            "comment": "",
+        },
+        occured_at=datetime(2026, 2, 1),
+        version=1,
+    )
+    es.store([buy_event])
+
+    # WHEN: POST price_update without pricePerUnit
+    response = test_client.post(
+        "/api/investments/events",
+        json={
+            "streamId": str(stream.id),
+            "eventType": "price_update",
+            "occuredAt": "2026-02-15",
+        },
+    )
+
+    # THEN: Returns 400
+    assert response.status_code == 400
+
+
+# ============================================================================
+# 3. STREAM ERROR TESTS
+# ============================================================================
+
+
+def test_non_existent_stream_id_returns_404(test_client):
+    """Test that non-existent streamId returns 404."""
+    # GIVEN: Random UUID that doesn't exist
+    non_existent_id = str(uuid.uuid4())
+
+    # WHEN: POST event to non-existent stream
+    response = test_client.post(
+        "/api/investments/events",
+        json={
+            "streamId": non_existent_id,
+            "eventType": "buy",
+            "occuredAt": "2026-02-15",
+            "units": 10.0,
+            "totalValue": 1000.0,
+        },
+    )
+
+    # THEN: Returns 404
+    assert response.status_code == 404
+
+
+def test_wrong_stream_type_returns_400(test_client):
+    """Test that wrong stream type (e.g., account) returns 400."""
+    # GIVEN: Account stream (not investment or stocks)
+    stream = es.Stream(
+        id=uuid.uuid4(),
+        type="account",
+        subtype="checking",
+        name="Test Account",
+        bank="Bank A",
+        active=True,
+        version=0,
+        metadata={},
+        labels={"wallet": "Personal"},
+    )
+    es.create([stream])
+
+    # WHEN: POST investment event to account stream
+    response = test_client.post(
+        "/api/investments/events",
+        json={
+            "streamId": str(stream.id),
+            "eventType": "buy",
+            "occuredAt": "2026-02-15",
+            "units": 10.0,
+            "totalValue": 1000.0,
+        },
+    )
+
+    # THEN: Returns 400
+    assert response.status_code == 400
+
+
+def test_missing_stream_id_returns_400(test_client):
+    """Test that missing streamId returns 422 (schema validation)."""
+    # WHEN: POST event without streamId
+    response = test_client.post(
+        "/api/investments/events",
+        json={
+            "eventType": "buy",
+            "occuredAt": "2026-02-15",
+            "units": 10.0,
+            "totalValue": 1000.0,
+        },
+    )
+
+    # THEN: Returns 422 (APIFlask schema validation error)
+    assert response.status_code == 422
+
+
+# ============================================================================
+# 4. EDGE CASE TESTS
+# ============================================================================
+
+
+def test_empty_comment_field_works(test_client):
+    """Test that empty comment field works correctly."""
+    # GIVEN: Investment stream
+    stream = es.Stream(
+        id=uuid.uuid4(),
+        type="stocks",
+        subtype="ETF",
+        name="Test ETF",
+        bank="Broker X",
+        active=True,
+        version=0,
+        metadata={},
+        labels={"wallet": "Personal"},
+    )
+    es.create([stream])
+
+    # WHEN: POST buy with empty comment
+    response = test_client.post(
+        "/api/investments/events",
+        json={
+            "streamId": str(stream.id),
+            "eventType": "buy",
+            "occuredAt": "2026-02-15",
+            "units": 10.0,
+            "totalValue": 1000.0,
+            "comment": "",
+        },
+    )
+
+    # THEN: Returns 201
+    assert response.status_code == 201
+
+    # Verify comment is stored as empty string
+    events = es.load(stream.id)
+    assert events[0].data["comment"] == ""
+
+
+def test_decimal_precision_in_calculations(test_client):
+    """Test decimal precision in unit price calculations."""
+    # GIVEN: Investment stream
+    stream = es.Stream(
+        id=uuid.uuid4(),
+        type="stocks",
+        subtype="ETF",
+        name="Test ETF",
+        bank="Broker X",
+        active=True,
+        version=0,
+        metadata={},
+        labels={"wallet": "Personal"},
+    )
+    es.create([stream])
+
+    # WHEN: POST buy with values that create decimal precision
+    response = test_client.post(
+        "/api/investments/events",
+        json={
+            "streamId": str(stream.id),
+            "eventType": "buy",
+            "occuredAt": "2026-02-15",
+            "units": 3.0,
+            "totalValue": 100.0,
+        },
+    )
+
+    # THEN: Returns 201
+    assert response.status_code == 201
+
+    # Verify average price calculation (100/3 = 33.333...)
+    events = es.load(stream.id)
+    average_price = events[0].data["averagePrice"]
+    assert abs(average_price - 33.333333333333336) < 0.0001
+
+
+def test_future_occured_at_date_works(test_client):
+    """Test that future occuredAt date works."""
+    from datetime import timedelta
+
+    # GIVEN: Investment stream
+    stream = es.Stream(
+        id=uuid.uuid4(),
+        type="stocks",
+        subtype="ETF",
+        name="Test ETF",
+        bank="Broker X",
+        active=True,
+        version=0,
+        metadata={},
+        labels={"wallet": "Personal"},
+    )
+    es.create([stream])
+
+    # WHEN: POST buy with future date
+    future_date = (datetime.now() + timedelta(days=30)).strftime("%Y-%m-%d")
+    response = test_client.post(
+        "/api/investments/events",
+        json={
+            "streamId": str(stream.id),
+            "eventType": "buy",
+            "occuredAt": future_date,
+            "units": 10.0,
+            "totalValue": 1000.0,
+        },
+    )
+
+    # THEN: Returns 201 (future dates allowed)
+    assert response.status_code == 201
+
+
+def test_multiple_events_increment_version_correctly(test_client):
+    """Test that multiple events increment version sequentially."""
+    # GIVEN: Investment stream
+    stream = es.Stream(
+        id=uuid.uuid4(),
+        type="stocks",
+        subtype="ETF",
+        name="Test ETF",
+        bank="Broker X",
+        active=True,
+        version=0,
+        metadata={},
+        labels={"wallet": "Personal"},
+    )
+    es.create([stream])
+
+    # WHEN: POST three events
+    response1 = test_client.post(
+        "/api/investments/events",
+        json={
+            "streamId": str(stream.id),
+            "eventType": "buy",
+            "occuredAt": "2026-02-10",
+            "units": 10.0,
+            "totalValue": 1000.0,
+        },
+    )
+
+    response2 = test_client.post(
+        "/api/investments/events",
+        json={
+            "streamId": str(stream.id),
+            "eventType": "buy",
+            "occuredAt": "2026-02-15",
+            "units": 5.0,
+            "totalValue": 500.0,
+        },
+    )
+
+    response3 = test_client.post(
+        "/api/investments/events",
+        json={
+            "streamId": str(stream.id),
+            "eventType": "price_update",
+            "occuredAt": "2026-02-20",
+            "pricePerUnit": 110.0,
+        },
+    )
+
+    # THEN: Versions increment correctly
+    assert response1.get_json()["streamVersion"] == 1
+    assert response2.get_json()["streamVersion"] == 2
+    assert response3.get_json()["streamVersion"] == 3
+
+    # Verify in database
+    events = es.load(stream.id)
+    assert len(events) == 3
+    assert events[0].version == 1
+    assert events[1].version == 2
+    assert events[2].version == 3
+
+
+def test_missing_occured_at_returns_400(test_client):
+    """Test that missing occuredAt returns 422 (schema validation)."""
+    # GIVEN: Investment stream
+    stream = es.Stream(
+        id=uuid.uuid4(),
+        type="stocks",
+        subtype="ETF",
+        name="Test ETF",
+        bank="Broker X",
+        active=True,
+        version=0,
+        metadata={},
+        labels={"wallet": "Personal"},
+    )
+    es.create([stream])
+
+    # WHEN: POST buy without occuredAt
+    response = test_client.post(
+        "/api/investments/events",
+        json={
+            "streamId": str(stream.id),
+            "eventType": "buy",
+            "units": 10.0,
+            "totalValue": 1000.0,
+        },
+    )
+
+    # THEN: Returns 422 (APIFlask schema validation error)
+    assert response.status_code == 422
+
+
+# ============================================================================
+# 5. INTEGRATION TEST
+# ============================================================================
+
+
+def test_complete_investment_flow_buy_price_sell(test_client):
+    """Integration test: buy → price_update → sell flow."""
+    # GIVEN: Investment stream
+    stream = es.Stream(
+        id=uuid.uuid4(),
+        type="stocks",
+        subtype="ETF",
+        name="Test ETF",
+        bank="Broker X",
+        active=True,
+        version=0,
+        metadata={},
+        labels={"wallet": "IKE"},
+    )
+    es.create([stream])
+
+    # WHEN: Step 1 - Buy 10 units @ 1000 PLN total
+    buy_response = test_client.post(
+        "/api/investments/events",
+        json={
+            "streamId": str(stream.id),
+            "eventType": "buy",
+            "occuredAt": "2026-02-10",
+            "units": 10.0,
+            "totalValue": 1000.0,
+            "comment": "Initial purchase",
+        },
+    )
+
+    # THEN: Buy succeeds
+    assert buy_response.status_code == 201
+    assert buy_response.get_json()["streamVersion"] == 1
+
+    # Verify buy event
+    events = es.load(stream.id)
+    assert len(events) == 1
+    assert events[0].event_type == "ETFBought"
+    assert events[0].data["balance"] == 1000.0
+    assert events[0].data["units"] == 10.0
+
+    # WHEN: Step 2 - Price update to 110 PLN per unit
+    price_response = test_client.post(
+        "/api/investments/events",
+        json={
+            "streamId": str(stream.id),
+            "eventType": "price_update",
+            "occuredAt": "2026-02-15",
+            "pricePerUnit": 110.0,
+            "comment": "Market update",
+        },
+    )
+
+    # THEN: Price update succeeds and stores as ETFPriced
+    assert price_response.status_code == 201
+    assert price_response.get_json()["streamVersion"] == 2
+
+    events = es.load(stream.id)
+    assert len(events) == 2
+    assert events[1].event_type == "ETFPriced"
+    assert events[1].data["pricePerUnit"] == 110.0
+    assert events[1].data["balance"] == 1100.0  # 10 units * 110 PLN
+
+    # WHEN: Step 3 - Sell 5 units @ 550 PLN total
+    sell_response = test_client.post(
+        "/api/investments/events",
+        json={
+            "streamId": str(stream.id),
+            "eventType": "sell",
+            "occuredAt": "2026-02-20",
+            "units": 5.0,
+            "totalValue": 550.0,
+            "comment": "Partial sale",
+        },
+    )
+
+    # THEN: Sell succeeds
+    assert sell_response.status_code == 201
+    assert sell_response.get_json()["streamVersion"] == 3
+
+    # Verify final state
+    events = es.load(stream.id)
+    assert len(events) == 3
+    assert events[2].event_type == "ETFSold"
+    assert events[2].data["units"] == -5.0  # Negative for sell
+    assert events[2].data["balance"] == 550.0  # 1100 - 550
+
+    # Verify stream version
+    updated_stream = es.get_stream_by_id(str(stream.id))
+    assert updated_stream is not None
+    assert updated_stream.version == 3

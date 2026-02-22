@@ -60,3 +60,20 @@ export interface InvestmentTransaction {
     balance: number | null;
     comment?: string | null;
 }
+
+export interface CreateInvestmentEventRequest {
+    streamId: string;
+    eventType: "buy" | "sell" | "price_update";
+    occuredAt: string;        // ISO 8601 date string (YYYY-MM-DD)
+    units?: number;           // Required for buy/sell
+    totalValue?: number;      // Required for buy/sell
+    pricePerUnit?: number;    // Required for price_update
+    comment?: string;
+}
+
+export interface CreateInvestmentEventResponse {
+    result: "Success" | "Failure";
+    eventId?: string;
+    streamVersion?: number;
+    details?: string;         // Error message if result === "Failure"
+}

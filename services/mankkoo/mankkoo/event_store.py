@@ -232,7 +232,15 @@ def get_stream_by_id(stream_id: str) -> Stream | None:
                     labels,
                 ) = result
     return Stream(
-        uuid.UUID(id), type, subtype, name, bank, active, version, metadata or {}, labels or {}
+        uuid.UUID(id),
+        type,
+        subtype,
+        name,
+        bank,
+        active,
+        version,
+        metadata or {},
+        labels or {},
     )
 
 
@@ -261,7 +269,15 @@ def get_stream_by_metadata(key: str, value) -> Stream | None:
                     labels,
                 ) = result
     return Stream(
-        uuid.UUID(id), type, subtype, name, bank, active, version, metadata or {}, labels or {}
+        uuid.UUID(id),
+        type,
+        subtype,
+        name,
+        bank,
+        active,
+        version,
+        metadata or {},
+        labels or {},
     )
 
 

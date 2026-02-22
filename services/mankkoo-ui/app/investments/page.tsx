@@ -14,6 +14,8 @@ import Loader from "@/components/elements/Loader";
 import { useWallets } from "./useWallets";
 import DiversificationSection from "./DiversificationSection";
 import { InvestmentTypesDistributionPerWalletItem } from "@/api/InvestmentsPageResponses";
+import InvestmentEventModal from "@/components/elements/InvestmentEventModal";
+import Button from "@/components/elements/Button";
 
 const LineChart = dynamic(() => import("@/components/charts/Line"), { ssr: false });
 const Table = dynamic(() => import("@/components/charts/Table"), { ssr: false });
@@ -21,6 +23,7 @@ const Table = dynamic(() => import("@/components/charts/Table"), { ssr: false })
 export default function Investments() {
   const [selectedWalletIdx, setSelectedWalletIdx] = useState(0);
   const [selectedInvestmentId, setSelectedInvestmentId] = useState<string | undefined>(undefined);
+  const [isEventModalOpen, setIsEventModalOpen] = useState(false);
 
   const { wallets } = useWallets();
   const selectedWallet = wallets?.wallets[selectedWalletIdx] ?? "";
@@ -156,6 +159,13 @@ export default function Investments() {
     ]))
   ]), [investmentTransactions, isGold]);
 
+  const investmentAndStockStreams = useMemo(
+    () => (investmentsInWallet ?? []).filter(
+      inv => inv.subtype === 'etf' || inv.subtype === 'stock'
+    ),
+    [investmentsInWallet]
+  );
+
   function changeTab(index: number): ReactNode {
     setSelectedWalletIdx(index);
     const walletName = wallets?.wallets[index] ?? "Unknown Wallet";
@@ -192,10 +202,15 @@ export default function Investments() {
           <LineChart />
         </div>
         <div className="gridItem span4Columns">
-          <TileHeader 
-            headline="Transactions" 
-            subHeadline={`Log of all transactions for the selected investment${selectedInvestmentId ? `: ${selectedInvestment?.name ?? ''}` : ''}.`} 
-          />
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <TileHeader 
+              headline="Transactions" 
+              subHeadline={`Log of all transactions for the selected investment${selectedInvestmentId ? `: ${selectedInvestment?.name ?? ''}` : ''}.`} 
+            />
+            {selectedInvestmentId && (
+              <Button onClick={() => setIsEventModalOpen(true)}>Add Transaction</Button>
+            )}
+          </div>
           {isFetchingInvestmentTransactions ? <Loader /> :
             <Table 
               hasHeader 
@@ -275,6 +290,15 @@ export default function Investments() {
           tabContent={(_idx) => changeTab(_idx)}
         />
       </div>
+
+      <InvestmentEventModal
+        isOpen={isEventModalOpen}
+        onClose={() => setIsEventModalOpen(false)}
+        streams={investmentAndStockStreams}
+        onEventCreated={() => {
+          window.location.reload();
+        }}
+      />
     </main>
   );
 }

@@ -5,7 +5,9 @@ import mankkoo.event_store as es
 from mankkoo.investment import investment_db
 
 
-def _create_gold_stream(active=True, wallet="Default", name="Physical Gold", bank="Gold Dealer"):
+def _create_gold_stream(
+    active=True, wallet="Default", name="Physical Gold", bank="Gold Dealer"
+):
     return es.Stream(
         uuid.uuid4(),
         "investment",
@@ -19,7 +21,16 @@ def _create_gold_stream(active=True, wallet="Default", name="Physical Gold", ban
     )
 
 
-def _gold_bought_event(stream_id, total_value, balance, weight, total_weight, unit_price, version, date="2025-01-15"):
+def _gold_bought_event(
+    stream_id,
+    total_value,
+    balance,
+    weight,
+    total_weight,
+    unit_price,
+    version,
+    date="2025-01-15",
+):
     return es.Event(
         stream_type="investment",
         stream_id=stream_id,
@@ -40,7 +51,9 @@ def _gold_bought_event(stream_id, total_value, balance, weight, total_weight, un
     )
 
 
-def _gold_priced_event(stream_id, balance, total_weight, unit_price, version, date="2025-02-15"):
+def _gold_priced_event(
+    stream_id, balance, total_weight, unit_price, version, date="2025-02-15"
+):
     return es.Event(
         stream_type="investment",
         stream_id=stream_id,
@@ -59,7 +72,16 @@ def _gold_priced_event(stream_id, balance, total_weight, unit_price, version, da
     )
 
 
-def _gold_sold_event(stream_id, total_value, balance, weight, total_weight, unit_price, version, date="2025-03-15"):
+def _gold_sold_event(
+    stream_id,
+    total_value,
+    balance,
+    weight,
+    total_weight,
+    unit_price,
+    version,
+    date="2025-03-15",
+):
     return es.Event(
         stream_type="investment",
         stream_id=stream_id,
