@@ -102,7 +102,7 @@ export default function InvestmentEventModal({
       units: eventType !== "price_update" ? parseFloat(units) : undefined,
       totalValue: eventType !== "price_update" ? parseFloat(totalValue) : undefined,
       pricePerUnit: eventType === "price_update" ? parseFloat(pricePerUnit) : undefined,
-      comment: comment.trim() || undefined
+      comment: comment.trim()
     };
 
     try {

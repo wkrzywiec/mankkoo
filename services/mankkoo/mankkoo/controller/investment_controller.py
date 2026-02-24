@@ -119,6 +119,7 @@ class InvestmentEventResponse(Schema):
     result = String()
     eventId = String()
     streamVersion = Integer()
+    details = String(required=False)
 
 
 @investment_endpoints.route("/events", methods=["POST"])
@@ -188,8 +189,8 @@ def create_investment_event(data):
         if stream is None:
             return {"result": "Failure", "details": "Stream not found"}, 404
 
-        # 4. Verify stream type is investments or stocks
-        if stream.type not in ["investments", "stocks"]:
+        # 4. Verify stream type is investment or stocks
+        if stream.type not in ["investment", "stocks"]:
             return {
                 "result": "Failure",
                 "details": f"Invalid stream type: {stream.type}. Must be investments or stocks",
@@ -200,12 +201,23 @@ def create_investment_event(data):
         current_units = 0.0
         events = es.load(stream_id)
 
+        # Sort events by version to ensure correct balance calculation
+        # Events must be processed in order to get accurate current state
+        events.sort(key=lambda e: e.version)
+
         for event in events:
             event_data = event.data
             if "balance" in event_data:
                 current_balance = event_data["balance"]
             if "units" in event_data:
                 current_units += event_data["units"]
+
+        # For sell events, validate user has enough units
+        if event_type == "sell" and units > current_units:
+            return {
+                "result": "Failure",
+                "details": "Cannot sell more units than currently owned",
+            }, 400
 
         # 6. Map event type to event name
         event_name = map_event_type(event_type)

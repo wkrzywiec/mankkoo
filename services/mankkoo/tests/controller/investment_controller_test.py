@@ -396,7 +396,7 @@ def test_create_sell_event_returns_201(test_client):
     # GIVEN: Investment stream with existing buy event
     stream = es.Stream(
         id=uuid.uuid4(),
-        type="investments",
+        type="investment",
         subtype="ETF",
         name="Test ETF",
         bank="Broker X",
@@ -409,7 +409,7 @@ def test_create_sell_event_returns_201(test_client):
 
     # Create initial buy event
     buy_event = es.Event(
-        stream_type="investments",
+        stream_type="investment",
         stream_id=stream.id,
         event_type="ETFBought",
         data={
@@ -551,7 +551,7 @@ def test_stream_version_increments_after_event(test_client):
     # GIVEN: Investment stream
     stream = es.Stream(
         id=uuid.uuid4(),
-        type="investments",
+        type="investment",
         subtype="treasury_bonds",
         name="Test Bonds",
         bank="PKO",
@@ -1350,3 +1350,90 @@ def test_complete_investment_flow_buy_price_sell(test_client):
     updated_stream = es.get_stream_by_id(str(stream.id))
     assert updated_stream is not None
     assert updated_stream.version == 3
+
+
+# ============================================================================
+# 6. CONCURRENT WRITE TEST (OPTIMISTIC LOCKING)
+# ============================================================================
+
+
+def test_concurrent_event_writes_optimistic_locking(test_client):
+    """Test that sequential writes to the same stream maintain correct versions.
+
+    This test verifies that multiple sequential writes to the same stream
+    correctly increment versions and maintain data integrity.
+    """
+    # GIVEN: Investment stream with initial buy event (version 1)
+    stream = es.Stream(
+        id=uuid.uuid4(),
+        type="stocks",
+        subtype="ETF",
+        name="Test ETF",
+        bank="Broker X",
+        active=True,
+        version=0,
+        metadata={},
+        labels={"wallet": "Personal"},
+    )
+    es.create([stream])
+
+    # Add initial buy event (version 1)
+    buy_event = es.Event(
+        stream_type="stocks",
+        stream_id=stream.id,
+        event_type="ETFBought",
+        data={
+            "totalValue": 1000.0,
+            "balance": 1000.0,
+            "units": 10.0,
+            "averagePrice": 100.0,
+            "currency": "PLN",
+            "comment": "Initial purchase",
+        },
+        occured_at=datetime(2026, 2, 1),
+        version=1,
+    )
+    es.store([buy_event])
+
+    # Verify stream is at version 1
+    stream_after_buy = es.get_stream_by_id(str(stream.id))
+    assert stream_after_buy is not None
+    assert stream_after_buy.version == 1
+
+    # WHEN: Two sequential sell requests are made
+    sell_request_1 = {
+        "streamId": str(stream.id),
+        "eventType": "sell",
+        "occuredAt": "2026-02-15",
+        "units": 3.0,
+        "totalValue": 330.0,
+        "comment": "First sell",
+    }
+
+    sell_request_2 = {
+        "streamId": str(stream.id),
+        "eventType": "sell",
+        "occuredAt": "2026-02-16",
+        "units": 2.0,
+        "totalValue": 220.0,
+        "comment": "Second sell",
+    }
+
+    response1 = test_client.post("/api/investments/events", json=sell_request_1)
+    response2 = test_client.post("/api/investments/events", json=sell_request_2)
+
+    # THEN: Both requests succeed
+    assert response1.status_code == 201, "First request should succeed"
+    assert response2.status_code == 201, "Second request should succeed"
+
+    # Verify final stream has exactly 3 events (1 buy + 2 sells)
+    final_events = es.load(stream.id)
+    assert len(final_events) == 3, "Should have 3 events total"
+    assert final_events[0].event_type == "ETFBought"
+    assert final_events[1].event_type == "ETFSold"
+    assert final_events[2].event_type == "ETFSold"
+
+    # Verify stream version is 3
+    final_stream = es.get_stream_by_id(str(stream.id))
+    assert final_stream is not None
+    assert final_stream.version == 3, "Stream version should be 3 (one buy, two sells)"
