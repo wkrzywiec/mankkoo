@@ -159,12 +159,16 @@ export default function Investments() {
     ]))
   ]), [investmentTransactions, isGold]);
 
-  const investmentAndStockStreams = useMemo(
-    () => (investmentsInWallet ?? []).filter(
-      inv => inv.subtype === 'etf' || inv.subtype === 'stock'
-    ),
-    [investmentsInWallet]
-  );
+  const canSelectedInvestmentAcceptEvents = useMemo(() => {
+    if (!selectedInvestment) return false;
+    return selectedInvestment.subtype === "ETF";
+  }, [selectedInvestment]);
+
+  useEffect(() => {
+    if (!canSelectedInvestmentAcceptEvents && isEventModalOpen) {
+      setIsEventModalOpen(false);
+    }
+  }, [canSelectedInvestmentAcceptEvents, isEventModalOpen]);
 
   function changeTab(index: number): ReactNode {
     setSelectedWalletIdx(index);
@@ -205,7 +209,7 @@ export default function Investments() {
           <TileHeader
             headline="Transactions"
             subHeadline={`Log of all transactions for the selected investment${selectedInvestmentId ? `: ${selectedInvestment?.name ?? ''}` : ''}.`}
-            headlineElement={selectedInvestmentId ? (
+            headlineElement={canSelectedInvestmentAcceptEvents ? (
               <Button onClick={() => setIsEventModalOpen(true)}>Add Transaction</Button>
             ) : undefined}
           />
@@ -292,7 +296,7 @@ export default function Investments() {
       <InvestmentEventModal
         isOpen={isEventModalOpen}
         onClose={() => setIsEventModalOpen(false)}
-        streams={investmentAndStockStreams}
+        selectedStream={canSelectedInvestmentAcceptEvents ? selectedInvestment : undefined}
         onEventCreated={() => {
           window.location.reload();
         }}

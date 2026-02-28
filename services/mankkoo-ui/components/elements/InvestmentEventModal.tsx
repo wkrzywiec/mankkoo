@@ -8,10 +8,10 @@ import Swal from "sweetalert2";
 import Modal from "./Modal";
 import classes from "./InvestmentEventModal.module.css";
 import { API_BASE } from "@/api/ApiUrl";
-import { 
-  InvestmentStreamResponse, 
-  CreateInvestmentEventRequest, 
-  CreateInvestmentEventResponse 
+import {
+  InvestmentStreamResponse,
+  CreateInvestmentEventRequest,
+  CreateInvestmentEventResponse
 } from "@/api/InvestmentsPageResponses";
 
 const MySwal = withReactContent(Swal);
@@ -19,18 +19,17 @@ const MySwal = withReactContent(Swal);
 interface InvestmentEventModalProps {
   isOpen: boolean;
   onClose: () => void;
-  streams: InvestmentStreamResponse[];
+  selectedStream?: InvestmentStreamResponse;
   onEventCreated: () => void;
 }
 
 export default function InvestmentEventModal({
   isOpen,
   onClose,
-  streams,
+  selectedStream,
   onEventCreated
 }: InvestmentEventModalProps) {
   // State management
-  const [selectedStreamId, setSelectedStreamId] = useState("");
   const [eventType, setEventType] = useState<"buy" | "sell" | "price_update">("buy");
   const [occuredAt, setOccuredAt] = useState(new Date().toISOString().split('T')[0]);
   const [units, setUnits] = useState("");
@@ -42,8 +41,8 @@ export default function InvestmentEventModal({
 
   // Validation function
   const validateForm = (): boolean => {
-    if (!selectedStreamId) {
-      setErrorMessage("Please select an investment stream");
+    if (!selectedStream?.id) {
+      setErrorMessage("Select an investment from the list before adding a transaction");
       return false;
     }
     if (!occuredAt) {
@@ -73,7 +72,6 @@ export default function InvestmentEventModal({
 
   // Reset form
   const resetForm = () => {
-    setSelectedStreamId("");
     setEventType("buy");
     setOccuredAt(new Date().toISOString().split('T')[0]);
     setUnits("");
@@ -95,8 +93,14 @@ export default function InvestmentEventModal({
 
     setIsSubmitting(true);
 
+    if (!selectedStream?.id) {
+      setErrorMessage("Select an investment from the list before adding a transaction");
+      setIsSubmitting(false);
+      return;
+    }
+
     const requestBody: CreateInvestmentEventRequest = {
-      streamId: selectedStreamId,
+      streamId: selectedStream.id,
       eventType: eventType,
       occuredAt: occuredAt,
       units: eventType !== "price_update" ? parseFloat(units) : undefined,
@@ -145,7 +149,9 @@ export default function InvestmentEventModal({
     <Modal
       isOpen={isOpen}
       header="Add Investment Transaction"
-      subHeader="Create a new buy, sell, or price update event"
+      subHeader={selectedStream
+        ? `Add a new buy, sell, or price update event for '${selectedStream.name}' investment.`
+        : "Select an investment to add a new event."}
       onSubmit={handleSubmit}
       onClose={handleClose}
     >
@@ -154,23 +160,19 @@ export default function InvestmentEventModal({
           <div className={classes.errorMessage}>❌ {errorMessage}</div>
         )}
 
-        <div className={classes.formGroup}>
-          <label htmlFor="stream">Investment Stream</label>
-          <select
-            id="stream"
-            value={selectedStreamId}
-            onChange={(e) => setSelectedStreamId(e.target.value)}
-            disabled={isSubmitting}
-            className={classes.select}
-          >
-            <option value="">-- Select Investment --</option>
-            {streams.map((stream) => (
-              <option key={stream.id} value={stream.id}>
-                {stream.name} ({stream.subtype})
-              </option>
-            ))}
-          </select>
-        </div>
+        {selectedStream && (
+          <div>
+            <p>
+              ID: <b>{selectedStream.id}</b>
+            </p>
+            <p>
+              Name: <b>{selectedStream.name}</b>
+            </p>
+            <p>
+              Type: <b>{selectedStream.subtype}</b>
+            </p>
+          </div>
+        )}
 
         <div className={classes.formGroup}>
           <label htmlFor="eventType">Event Type</label>
