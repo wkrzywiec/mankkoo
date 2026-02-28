@@ -202,15 +202,13 @@ export default function Investments() {
           <LineChart />
         </div>
         <div className="gridItem span4Columns">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <TileHeader 
-              headline="Transactions" 
-              subHeadline={`Log of all transactions for the selected investment${selectedInvestmentId ? `: ${selectedInvestment?.name ?? ''}` : ''}.`} 
-            />
-            {selectedInvestmentId && (
+          <TileHeader
+            headline="Transactions"
+            subHeadline={`Log of all transactions for the selected investment${selectedInvestmentId ? `: ${selectedInvestment?.name ?? ''}` : ''}.`}
+            headlineElement={selectedInvestmentId ? (
               <Button onClick={() => setIsEventModalOpen(true)}>Add Transaction</Button>
-            )}
-          </div>
+            ) : undefined}
+          />
           {isFetchingInvestmentTransactions ? <Loader /> :
             <Table 
               hasHeader 
