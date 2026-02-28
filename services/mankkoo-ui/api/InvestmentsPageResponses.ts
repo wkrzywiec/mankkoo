@@ -66,8 +66,7 @@ export interface CreateInvestmentEventRequest {
     eventType: "buy" | "sell" | "price_update";
     occuredAt: string;        // ISO 8601 date string (YYYY-MM-DD)
     units?: number;           // Required for buy/sell
-    totalValue?: number;      // Required for buy/sell
-    pricePerUnit?: number;    // Required for price_update
+    totalValue: number;       // Required for all events (price_update uses it to derive unit price)
     comment?: string;
 }
 

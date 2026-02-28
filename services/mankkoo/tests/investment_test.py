@@ -117,21 +117,28 @@ class TestValidatePriceUpdateData:
 
     def test_validate_price_update_data_with_valid_input(self):
         # WHEN / THEN (should not raise)
-        investment.validate_price_update_data(price_per_unit=125.50)
+        investment.validate_price_update_data(total_value=1250.0, current_units=10.0)
 
-    def test_validate_price_update_data_with_zero_price_raises_error(self):
+    def test_validate_price_update_data_with_zero_total_value_raises_error(self):
         # WHEN / THEN
         with pytest.raises(
-            ValueError, match="Price per unit must be greater than zero"
+            ValueError, match="Total value must be greater than zero"
         ):
-            investment.validate_price_update_data(price_per_unit=0.0)
+            investment.validate_price_update_data(total_value=0.0, current_units=10.0)
 
-    def test_validate_price_update_data_with_negative_price_raises_error(self):
+    def test_validate_price_update_data_with_negative_total_value_raises_error(self):
         # WHEN / THEN
         with pytest.raises(
-            ValueError, match="Price per unit must be greater than zero"
+            ValueError, match="Total value must be greater than zero"
         ):
-            investment.validate_price_update_data(price_per_unit=-50.0)
+            investment.validate_price_update_data(total_value=-50.0, current_units=10.0)
+
+    def test_validate_price_update_data_with_no_units_raises_error(self):
+        # WHEN / THEN
+        with pytest.raises(
+            ValueError, match="Cannot update price without owned units"
+        ):
+            investment.validate_price_update_data(total_value=100.0, current_units=0.0)
 
 
 class TestCreateETFBoughtEventData:
@@ -230,7 +237,7 @@ class TestCreateETFPricedEventData:
     def test_create_etf_priced_event_data_with_basic_inputs(self):
         # WHEN
         result = investment.create_etf_priced_event_data(
-            price_per_unit=125.0, current_units=10.0
+            total_value=1250.0, current_units=10.0
         )
 
         # THEN
@@ -242,7 +249,7 @@ class TestCreateETFPricedEventData:
     def test_create_etf_priced_event_data_with_comment(self):
         # WHEN
         result = investment.create_etf_priced_event_data(
-            price_per_unit=99.50, current_units=5.5, comment="Monthly revaluation"
+            total_value=547.25, current_units=5.5, comment="Monthly revaluation"
         )
 
         # THEN
@@ -251,19 +258,22 @@ class TestCreateETFPricedEventData:
         assert result["currency"] == "PLN"
         assert result["comment"] == "Monthly revaluation"
 
-    def test_create_etf_priced_event_data_with_zero_units(self):
-        # WHEN
-        result = investment.create_etf_priced_event_data(
-            price_per_unit=100.0, current_units=0.0
-        )
+    def test_create_etf_priced_event_data_with_zero_total_value_raises_error(self):
+        # WHEN / THEN
+        with pytest.raises(ValueError, match="Total value must be greater than zero"):
+            investment.create_etf_priced_event_data(total_value=0.0, current_units=1.0)
 
-        # THEN
-        assert result["balance"] == 0.0  # 100.0 * 0.0
+    def test_create_etf_priced_event_data_with_zero_units_raises_error(self):
+        # WHEN / THEN
+        with pytest.raises(
+            ValueError, match="Current units must be greater than zero"
+        ):
+            investment.create_etf_priced_event_data(total_value=100.0, current_units=0.0)
 
     def test_create_etf_priced_event_data_with_fractional_price_and_units(self):
         # WHEN
         result = investment.create_etf_priced_event_data(
-            price_per_unit=123.456, current_units=7.89
+            total_value=974.06784, current_units=7.89
         )
 
         # THEN

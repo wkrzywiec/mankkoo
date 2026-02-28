@@ -486,7 +486,7 @@ def test_create_price_update_event_returns_201_and_stores_etfpriced_name(test_cl
             "streamId": str(stream.id),
             "eventType": "price_update",
             "occuredAt": "2026-02-22",
-            "pricePerUnit": 110.0,
+            "totalValue": 1100.0,
             "comment": "Market price update",
         },
     )
@@ -829,14 +829,14 @@ def test_negative_price_per_unit_returns_400(test_client):
     )
     es.store([buy_event])
 
-    # WHEN: POST price_update with negative pricePerUnit
+    # WHEN: POST price_update with negative total value
     response = test_client.post(
         "/api/investments/events",
         json={
             "streamId": str(stream.id),
             "eventType": "price_update",
             "occuredAt": "2026-02-15",
-            "pricePerUnit": -100.0,
+            "totalValue": -100.0,
         },
     )
 
@@ -878,14 +878,14 @@ def test_zero_price_per_unit_returns_400(test_client):
     )
     es.store([buy_event])
 
-    # WHEN: POST price_update with zero pricePerUnit
+    # WHEN: POST price_update with zero total value
     response = test_client.post(
         "/api/investments/events",
         json={
             "streamId": str(stream.id),
             "eventType": "price_update",
             "occuredAt": "2026-02-15",
-            "pricePerUnit": 0.0,
+            "totalValue": 0.0,
         },
     )
 
@@ -959,7 +959,7 @@ def test_missing_price_per_unit_for_price_update_returns_400(test_client):
     )
     es.store([buy_event])
 
-    # WHEN: POST price_update without pricePerUnit
+    # WHEN: POST price_update without totalValue
     response = test_client.post(
         "/api/investments/events",
         json={
@@ -1207,7 +1207,7 @@ def test_multiple_events_increment_version_correctly(test_client):
             "streamId": str(stream.id),
             "eventType": "price_update",
             "occuredAt": "2026-02-20",
-            "pricePerUnit": 110.0,
+            "totalValue": 1650.0,
         },
     )
 
@@ -1307,7 +1307,7 @@ def test_complete_investment_flow_buy_price_sell(test_client):
             "streamId": str(stream.id),
             "eventType": "price_update",
             "occuredAt": "2026-02-15",
-            "pricePerUnit": 110.0,
+            "totalValue": 1100.0,
             "comment": "Market update",
         },
     )

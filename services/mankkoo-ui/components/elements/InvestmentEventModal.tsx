@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, SyntheticEvent } from "react";
+import { useMemo, useState, SyntheticEvent } from "react";
 import axios from "axios";
 import withReactContent from "sweetalert2-react-content";
 import Swal from "sweetalert2";
@@ -29,15 +29,21 @@ export default function InvestmentEventModal({
   selectedStream,
   onEventCreated
 }: InvestmentEventModalProps) {
-  // State management
   const [eventType, setEventType] = useState<"buy" | "sell" | "price_update">("buy");
-  const [occuredAt, setOccuredAt] = useState(new Date().toISOString().split('T')[0]);
+  const defaultDate = new Date().toISOString().split('T')[0];
+  const [occuredAt, setOccuredAt] = useState(defaultDate);
   const [units, setUnits] = useState("");
   const [totalValue, setTotalValue] = useState("");
-  const [pricePerUnit, setPricePerUnit] = useState("");
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+
+  const sanitizedUnits = useMemo(() => units.replace(/,/g, "."), [units]);
+  const sanitizedTotalValue = useMemo(() => totalValue.replace(/,/g, "."), [totalValue]);
+
+  const parseNumber = (value: string): number => {
+    return parseFloat(value.replace(/,/g, "."));
+  };
 
   // Validation function
   const validateForm = (): boolean => {
@@ -50,14 +56,14 @@ export default function InvestmentEventModal({
       return false;
     }
     if (eventType === "price_update") {
-      const price = parseFloat(pricePerUnit);
-      if (!pricePerUnit || isNaN(price) || price <= 0) {
-        setErrorMessage("Price per unit must be greater than 0");
+      const totalNum = parseFloat(sanitizedTotalValue);
+      if (!totalValue || isNaN(totalNum) || totalNum <= 0) {
+        setErrorMessage("Total value must be greater than 0");
         return false;
       }
     } else {
-      const unitsNum = parseFloat(units);
-      const totalNum = parseFloat(totalValue);
+      const unitsNum = parseFloat(sanitizedUnits);
+      const totalNum = parseFloat(sanitizedTotalValue);
       if (!units || isNaN(unitsNum) || unitsNum <= 0) {
         setErrorMessage("Units must be greater than 0");
         return false;
@@ -73,10 +79,9 @@ export default function InvestmentEventModal({
   // Reset form
   const resetForm = () => {
     setEventType("buy");
-    setOccuredAt(new Date().toISOString().split('T')[0]);
+    setOccuredAt(defaultDate);
     setUnits("");
     setTotalValue("");
-    setPricePerUnit("");
     setComment("");
     setErrorMessage("");
     setIsSubmitting(false);
@@ -103,9 +108,8 @@ export default function InvestmentEventModal({
       streamId: selectedStream.id,
       eventType: eventType,
       occuredAt: occuredAt,
-      units: eventType !== "price_update" ? parseFloat(units) : undefined,
-      totalValue: eventType !== "price_update" ? parseFloat(totalValue) : undefined,
-      pricePerUnit: eventType === "price_update" ? parseFloat(pricePerUnit) : undefined,
+      units: eventType !== "price_update" ? parseNumber(units) : undefined,
+      totalValue: parseNumber(totalValue),
       comment: comment.trim()
     };
 
@@ -163,13 +167,13 @@ export default function InvestmentEventModal({
         {selectedStream && (
           <div>
             <p>
-              ID: <b>{selectedStream.id}</b>
+              Investment ID: <b>{selectedStream.id}</b>
             </p>
             <p>
-              Name: <b>{selectedStream.name}</b>
+              Investment Name: <b>{selectedStream.name}</b>
             </p>
             <p>
-              Type: <b>{selectedStream.subtype}</b>
+              Investment Type: <b>{selectedStream.subtype}</b>
             </p>
           </div>
         )}
@@ -209,6 +213,7 @@ export default function InvestmentEventModal({
                 type="number"
                 id="units"
                 value={units}
+                inputMode="decimal"
                 onChange={(e) => setUnits(e.target.value)}
                 disabled={isSubmitting}
                 placeholder="0"
@@ -219,11 +224,12 @@ export default function InvestmentEventModal({
             </div>
 
             <div className={classes.formGroup}>
-              <label htmlFor="totalValue">Total Price (PLN)</label>
+              <label htmlFor="totalValue">Total Value (PLN)</label>
               <input
                 type="number"
                 id="totalValue"
                 value={totalValue}
+                inputMode="decimal"
                 onChange={(e) => setTotalValue(e.target.value)}
                 disabled={isSubmitting}
                 placeholder="0.00"
@@ -237,12 +243,13 @@ export default function InvestmentEventModal({
 
         {eventType === "price_update" && (
           <div className={classes.formGroup}>
-            <label htmlFor="pricePerUnit">Price Per Unit (PLN)</label>
+            <label htmlFor="totalValuePriceUpdate">Total Value (PLN)</label>
             <input
               type="number"
-              id="pricePerUnit"
-              value={pricePerUnit}
-              onChange={(e) => setPricePerUnit(e.target.value)}
+              id="totalValuePriceUpdate"
+              value={totalValue}
+              inputMode="decimal"
+              onChange={(e) => setTotalValue(e.target.value)}
               disabled={isSubmitting}
               placeholder="0.00"
               step="0.01"

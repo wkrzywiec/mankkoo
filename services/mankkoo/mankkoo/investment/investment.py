@@ -83,17 +83,21 @@ def validate_sell_event_data(units: float, total_value: float) -> None:
         raise ValueError("Total value must be greater than zero")
 
 
-def validate_price_update_data(price_per_unit: float) -> None:
+def validate_price_update_data(total_value: float, current_units: float) -> None:
     """Validate price update event data.
 
     Args:
-        price_per_unit: Current market price per unit
+        total_value: Current total value of the position
+        current_units: Current number of units held in the stream
 
     Raises:
-        ValueError: If price_per_unit is not greater than zero
+        ValueError: If total_value is not greater than zero or there are no units
     """
-    if price_per_unit <= 0.0:
-        raise ValueError("Price per unit must be greater than zero")
+    if total_value <= 0.0:
+        raise ValueError("Total value must be greater than zero")
+
+    if current_units <= 0.0:
+        raise ValueError("Cannot update price without owned units")
 
 
 def create_etf_bought_event_data(
@@ -167,12 +171,12 @@ def create_etf_sold_event_data(
 
 
 def create_etf_priced_event_data(
-    price_per_unit: float, current_units: float, comment: str = ""
+    total_value: float, current_units: float, comment: str = ""
 ) -> dict:
     """Create ETFPriced event data.
 
     Args:
-        price_per_unit: Current market price per unit
+        total_value: Current total value of the position
         current_units: Current number of units in portfolio
         comment: Optional user comment
 
@@ -185,7 +189,14 @@ def create_etf_priced_event_data(
             "comment": str
         }
     """
-    balance = price_per_unit * current_units
+    if total_value <= 0.0:
+        raise ValueError("Total value must be greater than zero")
+
+    if current_units <= 0.0:
+        raise ValueError("Current units must be greater than zero")
+
+    price_per_unit = total_value / current_units
+    balance = total_value
 
     return {
         "pricePerUnit": price_per_unit,

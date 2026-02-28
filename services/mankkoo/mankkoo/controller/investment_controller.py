@@ -107,10 +107,8 @@ class InvestmentEventRequest(Schema):
     )
     units = Float(required=False, description="Number of units (required for buy/sell)")
     totalValue = Float(
-        required=False, description="Total value in PLN (required for buy/sell)"
-    )
-    pricePerUnit = Float(
-        required=False, description="Price per unit (required for price_update)"
+        required=True,
+        description="Total value in PLN (required for buy/sell and price_update)",
     )
     comment = String(required=False, load_default="", description="Optional comment")
 
@@ -153,7 +151,6 @@ def create_investment_event(data):
         occured_at_str = data.get("occuredAt")
         units = data.get("units")
         total_value = data.get("totalValue")
-        price_per_unit = data.get("pricePerUnit")
         comment = data.get("comment", "")
 
         # 2. Validate required fields based on event type
@@ -171,14 +168,7 @@ def create_investment_event(data):
                     "details": "Missing required fields for sell event",
                 }, 400
             validate_sell_event_data(units, total_value)
-        elif event_type == "price_update":
-            if price_per_unit is None:
-                return {
-                    "result": "Failure",
-                    "details": "Missing pricePerUnit for price_update event",
-                }, 400
-            validate_price_update_data(price_per_unit)
-        else:
+        elif event_type != "price_update":
             return {
                 "result": "Failure",
                 "details": f"Invalid event type: {event_type}",
@@ -219,6 +209,9 @@ def create_investment_event(data):
                 "details": "Cannot sell more units than currently owned",
             }, 400
 
+        if event_type == "price_update":
+            validate_price_update_data(total_value, current_units)
+
         # 6. Map event type to event name
         event_name = map_event_type(event_type)
 
@@ -234,7 +227,7 @@ def create_investment_event(data):
             )
         elif event_type == "price_update":
             event_data = create_etf_priced_event_data(
-                price_per_unit, current_units, comment
+                total_value, current_units, comment
             )
 
         # 8. Parse occuredAt date
