@@ -7,6 +7,17 @@ from mankkoo.investment import investment_db
 investment_endpoints = APIBlueprint("investment_endpoints", __name__, tag="Investments")
 
 
+def _as_float(value: float | int | str) -> float:
+    if isinstance(value, (int, float)):
+        return float(value)
+    if isinstance(value, str):
+        cleaned = value.strip().replace(" ", "").replace(",", ".")
+        if not cleaned:
+            raise ValueError("Numeric value cannot be empty")
+        return float(cleaned)
+    raise TypeError(f"Unsupported numeric value type: {type(value)}")
+
+
 class InvestmentIndicators(Schema):
     totalInvestments = Float()
     lastYearTotalResultsValue = Float()
@@ -198,9 +209,9 @@ def create_investment_event(data):
         for event in events:
             event_data = event.data
             if "balance" in event_data:
-                current_balance = event_data["balance"]
+                current_balance = _as_float(event_data["balance"])
             if "units" in event_data:
-                current_units += event_data["units"]
+                current_units += _as_float(event_data["units"])
 
         # For sell events, validate user has enough units
         if event_type == "sell" and units > current_units:

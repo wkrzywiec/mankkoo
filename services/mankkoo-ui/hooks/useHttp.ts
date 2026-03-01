@@ -17,7 +17,7 @@ export function useGetHttp<Type>(apiPath: string, enabled: boolean=true): {isFet
         async function fetchData() {
             setIsFetching(true);
             try {
-                const response = await axios.get<Type>(API_BASE + apiPath);
+                const response = await axios.get<Type>(`${API_BASE}${apiPath}`);
                 setFetchedData(response.data);
             } catch (error) {
                 let errorMessage = 'Failed to fetch data from ';
@@ -44,7 +44,7 @@ export function useGetHttp<Type>(apiPath: string, enabled: boolean=true): {isFet
 
 export function postJson(apiPath: string, body: {[key: string]: any}, successMsg?: string, failureMsg?: string) {
 
-    axios.post(API_BASE + apiPath,
+    axios.post(`${API_BASE}${apiPath}`,
         body,
         { headers: {
             'Content-Type': 'application/json',
@@ -70,7 +70,7 @@ export function postJson(apiPath: string, body: {[key: string]: any}, successMsg
 
 export function patchJson(apiPath: string, body: {[key: string]: unknown}, successMsg?: string, failureMsg?: string) {
 
-    axios.patch(API_BASE + apiPath,
+    axios.patch(`${API_BASE}${apiPath}`,
         body,
         { headers: {
             'Content-Type': 'application/json',
@@ -98,7 +98,7 @@ export function uploadFile(apiPath: string, file: File) {
     const data = new FormData();
     data.set('operations', file);
 
-    axios.post(API_BASE + apiPath,
+    axios.post(`${API_BASE}${apiPath}`,
         data,
         { headers: {
             'Content-Type': 'multipart/form-data',
@@ -121,4 +121,3 @@ export function uploadFile(apiPath: string, file: File) {
         })
     });
 }
-
