@@ -146,18 +146,32 @@ export default function Investments() {
     };
   }, [investmentTypeDistributionPerWallet, selectedWallet]);
 
+  const formatPrice = useCallback((value?: number | null) => {
+    if (value === null || value === undefined) return '';
+    return value.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+  }, []);
+
+  const formatUnits = useCallback((value?: number | null) => {
+    if (value === null || value === undefined) return '';
+    const formatted = value.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+    if (value >= 1000 && value < 10000) {
+      return formatted.replace(/\u00A0/g, ' ');
+    }
+    return formatted;
+  }, []);
+
   const transactionsTableData = useMemo(() => ([
     ["Date", "Event Type", isGold ? "Weight (g)" : "Units", isGold ? "Price/g (PLN)" : "Price/Unit", "Total Value", "Balance", "Comment"],
     ...((investmentTransactions ?? []).map(t => [
       t.occuredAt,
       t.eventType,
-      t.unitsCount?.toString() ?? '',
-      t.pricePerUnit?.toString() ?? '',
-      t.totalValue?.toString() ?? '',
-      t.balance?.toString() ?? '',
+      formatUnits(t.unitsCount),
+      formatPrice(t.pricePerUnit),
+      formatPrice(t.totalValue),
+      formatPrice(t.balance),
       t.comment ?? ''
     ]))
-  ]), [investmentTransactions, isGold]);
+  ]), [investmentTransactions, isGold, formatPrice, formatUnits]);
 
   const canSelectedInvestmentAcceptEvents = useMemo(() => {
     if (!selectedInvestment) return false;
