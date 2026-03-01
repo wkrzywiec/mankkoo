@@ -23,6 +23,31 @@ import { addEventRequiredProps, createStreamPossibleSubtypes, createStreamRequir
 const STREAMS_HEADERS = [['Subtype', 'Bank', 'Name', 'Wallet']]
 const STREAMS_DETAILS_HEADERS = [['Property', 'Value']]
 const EVENTS_HEADERS = [['Event Type', 'Occured At', 'Data']]
+const NUMERIC_EVENT_FIELDS = new Set([
+  'amount',
+  'averagePrice',
+  'balance',
+  'pricePerUnit',
+  'totalValue',
+  'totalWeight',
+  'unitPrice',
+  'units',
+  'weight'
+])
+
+const sanitizeNumericValue = (field: string, value: string) => {
+  if (!value || !NUMERIC_EVENT_FIELDS.has(field)) {
+    return value
+  }
+  return value.replace(/,/g, '.').trim()
+}
+
+const buildEventPayload = (rows: Row[]): Record<string, string> => {
+  const entries = rows
+    .filter(row => row.property.trim().length > 0)
+    .map<[string, string]>(row => [row.property, sanitizeNumericValue(row.property, row.value)])
+  return Object.fromEntries(entries)
+}
 
 export default function Streams() {
 
@@ -221,7 +246,7 @@ export default function Streams() {
       type: selectedAddEventType,
       occuredAt: eventDate,
       version: (streamDetails ? streamDetails.version : 0) + 1,
-      data: Object.fromEntries(addEventData.map(row => [row.property, row.value]))
+      data: buildEventPayload(addEventData)
     }
     postJson(`streams/${streamDetails?.id}/events`, body, 'New stream was created', 'Failed to create a new strem')
   }

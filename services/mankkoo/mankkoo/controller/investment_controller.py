@@ -1,8 +1,9 @@
 from apiflask import APIBlueprint, Schema
-from apiflask.fields import Boolean, Float, List, String
+from apiflask.fields import Boolean, Float, Integer, List, String
 
 import mankkoo.views as views
 from mankkoo.investment import investment_db
+from mankkoo.investment.investment import create_investment_event_entry
 
 investment_endpoints = APIBlueprint("investment_endpoints", __name__, tag="Investments")
 
@@ -21,7 +22,10 @@ class InvestmentIndicators(Schema):
     description="Key investment performance metrics including total investments, yearly results, and inflation comparison",
 )
 def investment_indicators():
-    return views.load_view(views.investment_indicators_key)
+    indicators = views.load_view(views.investment_indicators_key)
+    if indicators is None:
+        return {"result": "Failure", "details": "Indicators not available"}, 404
+    return indicators
 
 
 class WalletsResponse(Schema):
@@ -90,3 +94,42 @@ class InvestmentTransaction(Schema):
 def get_investment_transactions(investment_id):
     transactions = investment_db.load_investment_transactions(investment_id)
     return transactions
+
+
+# ============================================================================
+# POST /api/investments/events - Create Investment Event
+# ============================================================================
+
+
+class InvestmentEventRequest(Schema):
+    streamId = String(required=True, description="UUID of the investment stream")
+    eventType = String(
+        required=True, description="Event type: 'buy', 'sell', or 'price_update'"
+    )
+    occuredAt = String(
+        required=True, description="Date when event occurred (ISO format)"
+    )
+    units = Float(required=False, description="Number of units (required for buy/sell)")
+    totalValue = Float(
+        required=True,
+        description="Total value in PLN (required for buy/sell and price_update)",
+    )
+    comment = String(required=False, load_default="", description="Optional comment")
+
+
+class InvestmentEventResponse(Schema):
+    result = String()
+    eventId = String()
+    streamVersion = Integer()
+    details = String(required=False)
+
+
+@investment_endpoints.route("/events", methods=["POST"])
+@investment_endpoints.input(InvestmentEventRequest)
+@investment_endpoints.output(InvestmentEventResponse, status_code=201)
+@investment_endpoints.doc(
+    summary="Create Investment Event",
+    description="Create a new investment event (buy, sell, or price update) for a stream",
+)
+def create_investment_event(data):
+    return create_investment_event_entry(data)

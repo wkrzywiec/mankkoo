@@ -706,11 +706,14 @@ def test_excluded_streams_not_in_main_indicators():
         result = views.load_view(views.main_indicators_key)
         if result is None:
             return False
-        # Should only include the 1000 from included account, not the 500 from excluded
+        # Should only include the 1000 from included account, not the 500 from
+        # excluded
         return result["savings"] == 1000.0
 
     # THEN: Verify excluded stream is not included
-    __wait_for_condition(condition_func=excluded_account_not_in_total, timeout=10, interval=1)
+    __wait_for_condition(
+        condition_func=excluded_account_not_in_total, timeout=10, interval=1
+    )
 
 
 def test_excluded_streams_not_in_savings_distribution():
@@ -740,7 +743,9 @@ def test_excluded_streams_not_in_savings_distribution():
         ]
     )
     es.store(
-        included_checking["events"] + excluded_savings["events"] + included_savings["events"]
+        included_checking["events"]
+        + excluded_savings["events"]
+        + included_savings["events"]
     )
 
     # WHEN: Load the current savings distribution view
@@ -800,7 +805,8 @@ def test_excluded_investment_streams_not_in_investment_indicators():
         result = views.load_view(views.investment_indicators_key)
         if result is None:
             return False
-        # Should only sum: 500 (bonds) + 200 (stock) = 700, excluding 300 (crypto)
+        # Should only sum: 500 (bonds) + 200 (stock) = 700, excluding 300
+        # (crypto)
         return result["totalInvestments"] == 700.0
 
     # THEN: Verify excluded investments are not included
@@ -852,7 +858,8 @@ def test_excluded_streams_not_in_investment_types_distribution():
         # Total: 400 (bonds) + 300 (ETF) = 700, excluding 100 (crypto) and 50 (stock)
         # Bonds: 400/700 = 0.5714, ETF: 300/700 = 0.4286
         types = [r["type"] for r in result]
-        # Should not include "Crypto" or "Stock", only "Treasury Bonds" and "Etf"
+        # Should not include "Crypto" or "Stock", only "Treasury Bonds" and
+        # "Etf"
         has_crypto = any(t == "Crypto" for t in types)
         has_stock = any(t == "Stock" for t in types)
         has_bonds = any(t == "Treasury Bonds" for t in types)
@@ -908,7 +915,8 @@ def test_composition_views_include_excluded_streams():
         + excluded_wallet2["events"]
     )
 
-    # WHEN: Load investment wallets distribution (composition view - should include excluded)
+    # WHEN: Load investment wallets distribution (composition view - should
+    # include excluded)
     def composition_view_includes_all_streams():
         result = views.load_view(views.investment_wallets_distribution_key)
         if result is None:
@@ -932,7 +940,8 @@ def test_composition_views_include_excluded_streams():
 
 
 def test_total_history_excludes_streams_at_each_date():
-    # GIVEN: Create accounts with mixed inclusion that operate on different dates
+    # GIVEN: Create accounts with mixed inclusion that operate on different
+    # dates
     app.start_listener_thread()
     included_account = dt.an_account_with_operations(
         [
@@ -1016,7 +1025,9 @@ def test_backward_compatibility_streams_without_flag_default_to_included():
 
     # THEN: Verify streams without flag default to included
     __wait_for_condition(
-        condition_func=backward_compatible_no_flag_defaults_to_true, timeout=10, interval=1
+        condition_func=backward_compatible_no_flag_defaults_to_true,
+        timeout=10,
+        interval=1,
     )
 
 
@@ -1075,7 +1086,9 @@ def test_composition_view_per_wallet_includes_excluded_streams():
         return abs(wallet1_total - 300.0) < 0.01 and abs(wallet2_total - 200.0) < 0.01
 
     # THEN: Verify per-wallet composition includes excluded streams
-    __wait_for_condition(condition_func=per_wallet_includes_excluded, timeout=10, interval=1)
+    __wait_for_condition(
+        condition_func=per_wallet_includes_excluded, timeout=10, interval=1
+    )
 
 
 def test_retirement_account_excluded_from_main_indicators():
@@ -1102,7 +1115,8 @@ def test_retirement_account_excluded_from_main_indicators():
         result = views.load_view(views.main_indicators_key)
         if result is None:
             return False
-        # Should only include 1000 from included retirement, not 500 from excluded
+        # Should only include 1000 from included retirement, not 500 from
+        # excluded
         return result["savings"] == 1000.0
 
     # THEN: Verify excluded retirement not included

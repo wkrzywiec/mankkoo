@@ -1,0 +1,278 @@
+"use client";
+
+import { useMemo, useState, SyntheticEvent } from "react";
+import axios from "axios";
+import withReactContent from "sweetalert2-react-content";
+import Swal from "sweetalert2";
+
+import Modal from "./Modal";
+import classes from "./InvestmentEventModal.module.css";
+import { API_BASE } from "@/api/ApiUrl";
+import {
+  InvestmentStreamResponse,
+  CreateInvestmentEventRequest,
+  CreateInvestmentEventResponse
+} from "@/api/InvestmentsPageResponses";
+
+const MySwal = withReactContent(Swal);
+
+interface InvestmentEventModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  selectedStream?: InvestmentStreamResponse;
+  onEventCreated: () => void;
+}
+
+export default function InvestmentEventModal({
+  isOpen,
+  onClose,
+  selectedStream,
+  onEventCreated
+}: InvestmentEventModalProps) {
+  const [eventType, setEventType] = useState<"buy" | "sell" | "price_update">("buy");
+  const defaultDate = new Date().toISOString().split('T')[0];
+  const [occuredAt, setOccuredAt] = useState(defaultDate);
+  const [units, setUnits] = useState("");
+  const [totalValue, setTotalValue] = useState("");
+  const [comment, setComment] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const sanitizedUnits = useMemo(() => units.replace(/,/g, "."), [units]);
+  const sanitizedTotalValue = useMemo(() => totalValue.replace(/,/g, "."), [totalValue]);
+
+  const parseNumber = (value: string): number => {
+    return parseFloat(value.replace(/,/g, "."));
+  };
+
+  // Validation function
+  const validateForm = (): boolean => {
+    if (!selectedStream?.id) {
+      setErrorMessage("Select an investment from the list before adding a transaction");
+      return false;
+    }
+    if (!occuredAt) {
+      setErrorMessage("Please select a date");
+      return false;
+    }
+    if (eventType === "price_update") {
+      const totalNum = parseFloat(sanitizedTotalValue);
+      if (!totalValue || isNaN(totalNum) || totalNum <= 0) {
+        setErrorMessage("Total value must be greater than 0");
+        return false;
+      }
+    } else {
+      const unitsNum = parseFloat(sanitizedUnits);
+      const totalNum = parseFloat(sanitizedTotalValue);
+      if (!units || isNaN(unitsNum) || unitsNum <= 0) {
+        setErrorMessage("Units must be greater than 0");
+        return false;
+      }
+      if (!totalValue || isNaN(totalNum) || totalNum <= 0) {
+        setErrorMessage("Total value must be greater than 0");
+        return false;
+      }
+    }
+    return true;
+  };
+
+  // Reset form
+  const resetForm = () => {
+    setEventType("buy");
+    setOccuredAt(defaultDate);
+    setUnits("");
+    setTotalValue("");
+    setComment("");
+    setErrorMessage("");
+    setIsSubmitting(false);
+  };
+
+  // Submit handler
+  const handleSubmit = async (event: SyntheticEvent) => {
+    event.preventDefault();
+    setErrorMessage("");
+
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    if (!selectedStream?.id) {
+      setErrorMessage("Select an investment from the list before adding a transaction");
+      setIsSubmitting(false);
+      return;
+    }
+
+    const requestBody: CreateInvestmentEventRequest = {
+      streamId: selectedStream.id,
+      eventType: eventType,
+      occuredAt: occuredAt,
+      units: eventType !== "price_update" ? parseNumber(units) : undefined,
+      totalValue: parseNumber(totalValue),
+      comment: comment.trim()
+    };
+
+    try {
+      const response = await axios.post<CreateInvestmentEventResponse>(
+        `${API_BASE}/investments/events`,
+        requestBody,
+        { headers: { "Content-Type": "application/json" } }
+      );
+
+      if (response.data.result === "Success") {
+        MySwal.fire({
+          title: "Success!",
+          text: "Investment event created successfully",
+          icon: "success",
+          confirmButtonText: "Cool"
+        });
+        resetForm();
+        onEventCreated();
+        onClose();
+      } else {
+        setErrorMessage(response.data.details || "Failed to create event");
+        setIsSubmitting(false);
+      }
+    } catch (error) {
+      let errorMsg = "Failed to create investment event";
+      if (axios.isAxiosError(error) && error.response?.data?.details) {
+        errorMsg = error.response.data.details;
+      }
+      setErrorMessage(errorMsg);
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleClose = () => {
+    resetForm();
+    onClose();
+  };
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      header="Add Investment Transaction"
+      subHeader={selectedStream
+        ? `Add a new buy, sell, or price update event for '${selectedStream.name}' investment.`
+        : "Select an investment to add a new event."}
+      onSubmit={handleSubmit}
+      onClose={handleClose}
+    >
+      <form className={classes.form}>
+        {errorMessage && (
+          <div className={classes.errorMessage}>❌ {errorMessage}</div>
+        )}
+
+        {selectedStream && (
+          <div>
+            <p>
+              Investment ID: <b>{selectedStream.id}</b>
+            </p>
+            <p>
+              Investment Name: <b>{selectedStream.name}</b>
+            </p>
+            <p>
+              Investment Type: <b>{selectedStream.subtype}</b>
+            </p>
+          </div>
+        )}
+
+        <div className={classes.formGroup}>
+          <label htmlFor="eventType">Event Type</label>
+          <select
+            id="eventType"
+            value={eventType}
+            onChange={(e) => setEventType(e.target.value as "buy" | "sell" | "price_update")}
+            disabled={isSubmitting}
+            className={classes.select}
+          >
+            <option value="buy">Buy</option>
+            <option value="sell">Sell</option>
+            <option value="price_update">Price Update</option>
+          </select>
+        </div>
+
+        <div className={classes.formGroup}>
+          <label htmlFor="occuredAt">Date of Occurrence</label>
+          <input
+            type="date"
+            id="occuredAt"
+            value={occuredAt}
+            onChange={(e) => setOccuredAt(e.target.value)}
+            disabled={isSubmitting}
+            className={classes.input}
+          />
+        </div>
+
+        {eventType !== "price_update" && (
+          <>
+            <div className={classes.formGroup}>
+              <label htmlFor="units">Units</label>
+              <input
+                type="number"
+                id="units"
+                value={units}
+                inputMode="decimal"
+                onChange={(e) => setUnits(e.target.value)}
+                disabled={isSubmitting}
+                placeholder="0"
+                step="0.01"
+                min="0"
+                className={classes.input}
+              />
+            </div>
+
+            <div className={classes.formGroup}>
+              <label htmlFor="totalValue">Total Value (PLN)</label>
+              <input
+                type="number"
+                id="totalValue"
+                value={totalValue}
+                inputMode="decimal"
+                onChange={(e) => setTotalValue(e.target.value)}
+                disabled={isSubmitting}
+                placeholder="0.00"
+                step="0.01"
+                min="0"
+                className={classes.input}
+              />
+            </div>
+          </>
+        )}
+
+        {eventType === "price_update" && (
+          <div className={classes.formGroup}>
+            <label htmlFor="totalValuePriceUpdate">Total Value (PLN)</label>
+            <input
+              type="number"
+              id="totalValuePriceUpdate"
+              value={totalValue}
+              inputMode="decimal"
+              onChange={(e) => setTotalValue(e.target.value)}
+              disabled={isSubmitting}
+              placeholder="0.00"
+              step="0.01"
+              min="0"
+              className={classes.input}
+            />
+          </div>
+        )}
+
+        <div className={classes.formGroup}>
+          <label htmlFor="comment">Comment (optional)</label>
+          <textarea
+            id="comment"
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            disabled={isSubmitting}
+            maxLength={500}
+            rows={3}
+            className={classes.textarea}
+            placeholder="Add any notes..."
+          />
+        </div>
+      </form>
+    </Modal>
+  );
+}

@@ -14,6 +14,8 @@ import Loader from "@/components/elements/Loader";
 import { useWallets } from "./useWallets";
 import DiversificationSection from "./DiversificationSection";
 import { InvestmentTypesDistributionPerWalletItem } from "@/api/InvestmentsPageResponses";
+import InvestmentEventModal from "@/components/elements/InvestmentEventModal";
+import Button from "@/components/elements/Button";
 
 const LineChart = dynamic(() => import("@/components/charts/Line"), { ssr: false });
 const Table = dynamic(() => import("@/components/charts/Table"), { ssr: false });
@@ -21,6 +23,7 @@ const Table = dynamic(() => import("@/components/charts/Table"), { ssr: false })
 export default function Investments() {
   const [selectedWalletIdx, setSelectedWalletIdx] = useState(0);
   const [selectedInvestmentId, setSelectedInvestmentId] = useState<string | undefined>(undefined);
+  const [isEventModalOpen, setIsEventModalOpen] = useState(false);
 
   const { wallets } = useWallets();
   const selectedWallet = wallets?.wallets[selectedWalletIdx] ?? "";
@@ -143,18 +146,43 @@ export default function Investments() {
     };
   }, [investmentTypeDistributionPerWallet, selectedWallet]);
 
+  const formatPrice = useCallback((value?: number | null) => {
+    if (value === null || value === undefined) return '';
+    return value.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+  }, []);
+
+  const formatUnits = useCallback((value?: number | null) => {
+    if (value === null || value === undefined) return '';
+    const formatted = value.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+    if (value >= 1000 && value < 10000) {
+      return formatted.replace(/\u00A0/g, ' ');
+    }
+    return formatted;
+  }, []);
+
   const transactionsTableData = useMemo(() => ([
     ["Date", "Event Type", isGold ? "Weight (g)" : "Units", isGold ? "Price/g (PLN)" : "Price/Unit", "Total Value", "Balance", "Comment"],
     ...((investmentTransactions ?? []).map(t => [
       t.occuredAt,
       t.eventType,
-      t.unitsCount?.toString() ?? '',
-      t.pricePerUnit?.toString() ?? '',
-      t.totalValue?.toString() ?? '',
-      t.balance?.toString() ?? '',
+      formatUnits(t.unitsCount),
+      formatPrice(t.pricePerUnit),
+      formatPrice(t.totalValue),
+      formatPrice(t.balance),
       t.comment ?? ''
     ]))
-  ]), [investmentTransactions, isGold]);
+  ]), [investmentTransactions, isGold, formatPrice, formatUnits]);
+
+  const canSelectedInvestmentAcceptEvents = useMemo(() => {
+    if (!selectedInvestment) return false;
+    return ["ETF", "treasury_bonds"].includes(selectedInvestment.subtype);
+  }, [selectedInvestment]);
+
+  useEffect(() => {
+    if (!canSelectedInvestmentAcceptEvents && isEventModalOpen) {
+      setIsEventModalOpen(false);
+    }
+  }, [canSelectedInvestmentAcceptEvents, isEventModalOpen]);
 
   function changeTab(index: number): ReactNode {
     setSelectedWalletIdx(index);
@@ -192,9 +220,12 @@ export default function Investments() {
           <LineChart />
         </div>
         <div className="gridItem span4Columns">
-          <TileHeader 
-            headline="Transactions" 
-            subHeadline={`Log of all transactions for the selected investment${selectedInvestmentId ? `: ${selectedInvestment?.name ?? ''}` : ''}.`} 
+          <TileHeader
+            headline="Transactions"
+            subHeadline={`Log of all transactions for the selected investment${selectedInvestmentId ? `: ${selectedInvestment?.name ?? ''}` : ''}.`}
+            headlineElement={canSelectedInvestmentAcceptEvents ? (
+              <Button onClick={() => setIsEventModalOpen(true)}>Add Transaction</Button>
+            ) : undefined}
           />
           {isFetchingInvestmentTransactions ? <Loader /> :
             <Table 
@@ -275,6 +306,15 @@ export default function Investments() {
           tabContent={(_idx) => changeTab(_idx)}
         />
       </div>
+
+      <InvestmentEventModal
+        isOpen={isEventModalOpen}
+        onClose={() => setIsEventModalOpen(false)}
+        selectedStream={canSelectedInvestmentAcceptEvents ? selectedInvestment : undefined}
+        onEventCreated={() => {
+          window.location.reload();
+        }}
+      />
     </main>
   );
 }
