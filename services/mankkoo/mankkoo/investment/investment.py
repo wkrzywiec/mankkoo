@@ -2,7 +2,8 @@
 
 This module contains business logic functions for investment event processing,
 validation, and derived value calculation. It handles ETF operations (buy, sell, price
-update) and constructs proper event data structures.
+update) along with treasury bonds operations (buy, sell, matured) and constructs proper
+event data structures.
 """
 
 from datetime import datetime
@@ -24,15 +25,28 @@ def _as_float(value: float | int | str) -> float:
     raise TypeError(f"Unsupported numeric value type: {type(value)}")
 
 
-def __map_event_type(event_type: str) -> str:
-    mapping = {
-        "buy": "ETFBought",
-        "sell": "ETFSold",
-        "price_update": "ETFPriced",
+def __map_event_type(stream_subtype: str, event_type: str) -> str:
+    mapping_by_subtype = {
+        "ETF": {
+            "buy": "ETFBought",
+            "sell": "ETFSold",
+            "price_update": "ETFPriced",
+        },
+        "treasury_bonds": {
+            "buy": "TreasuryBondsBought",
+            "sell": "TreasuryBondsMatured",
+            "price_update": "TreasuryBondsPriced",
+        },
     }
 
+    if stream_subtype not in mapping_by_subtype:
+        raise ValueError(f"Unsupported investment subtype: {stream_subtype}")
+
+    mapping = mapping_by_subtype[stream_subtype]
     if event_type not in mapping:
-        raise ValueError(f"Unknown event type: {event_type}")
+        raise ValueError(
+            f"Unsupported event type: {event_type} for subtype: {stream_subtype}"
+        )
 
     return mapping[event_type]
 
@@ -120,6 +134,57 @@ def __create_etf_priced_event_data(
     }
 
 
+def __create_treasury_bonds_bought_event_data(
+    units: float, total_value: float, current_balance: float, comment: str = ""
+) -> dict:
+    price_per_unit = __calculate_unit_price(total_value, units)
+    new_balance = current_balance + total_value
+
+    return {
+        "totalValue": total_value,
+        "balance": new_balance,
+        "units": units,
+        "pricePerUnit": price_per_unit,
+        "currency": "PLN",
+        "comment": comment,
+    }
+
+
+def __create_treasury_bonds_sold_event_data(
+    units: float, total_value: float, current_balance: float, comment: str = ""
+) -> dict:
+    price_per_unit = __calculate_unit_price(total_value, units)
+    new_balance = current_balance - total_value
+
+    return {
+        "totalValue": total_value,
+        "balance": new_balance,
+        "units": -units,
+        "pricePerUnit": price_per_unit,
+        "currency": "PLN",
+        "comment": comment,
+    }
+
+
+def __create_treasury_bonds_priced_event_data(
+    total_value: float, current_units: float, comment: str = ""
+) -> dict:
+    if total_value <= 0.0:
+        raise ValueError("Total value must be greater than zero")
+
+    if current_units <= 0.0:
+        raise ValueError("Current units must be greater than zero")
+
+    price_per_unit = total_value / current_units
+
+    return {
+        "balance": total_value,
+        "units": current_units,
+        "pricePerUnit": price_per_unit,
+        "currency": "PLN",
+        "comment": comment,
+    }
+
 def create_investment_event_entry(data: Dict[str, Any]) -> Tuple[Dict[str, Any], int]:
     try:
         stream_id = data.get("streamId")
@@ -129,27 +194,20 @@ def create_investment_event_entry(data: Dict[str, Any]) -> Tuple[Dict[str, Any],
         total_value = data.get("totalValue")
         comment = data.get("comment", "")
 
-        if event_type == "buy":
-            if units is None or total_value is None:
-                return {
-                    "result": "Failure",
-                    "details": "Missing required fields for buy event",
-                }, 400
-            __validate_buy_event_data(units, total_value)
-        elif event_type == "sell":
-            if units is None or total_value is None:
-                return {
-                    "result": "Failure",
-                    "details": "Missing required fields for sell event",
-                }, 400
-            __validate_sell_event_data(units, total_value)
-        elif event_type != "price_update":
-            return {
-                "result": "Failure",
-                "details": f"Invalid event type: {event_type}",
-            }, 400
+        if not stream_id:
+            return {"result": "Failure", "details": "Stream id is required"}, 400
 
-        stream = es.get_stream_by_id(stream_id)
+        if not event_type:
+            return {"result": "Failure", "details": "Event type is required"}, 400
+
+        if not occured_at_str:
+            return {"result": "Failure", "details": "Occured date is required"}, 400
+
+        stream_id_str = str(stream_id)
+        event_type_str = str(event_type)
+        occured_at_value = str(occured_at_str)
+
+        stream = es.get_stream_by_id(stream_id_str)
         if stream is None:
             return {"result": "Failure", "details": "Stream not found"}, 404
 
@@ -159,9 +217,20 @@ def create_investment_event_entry(data: Dict[str, Any]) -> Tuple[Dict[str, Any],
                 "details": f"Invalid stream type: {stream.type}. Must be investments or stocks",
             }, 400
 
+        if stream.subtype not in {"ETF", "treasury_bonds"}:
+            return {
+                "result": "Failure",
+                "details": f"Unsupported investment subtype: {stream.subtype}",
+            }, 400
+
+        units_value = float(units) if units is not None else None
+        total_value_value = float(total_value) if total_value is not None else None
+        units_value_float: float | None = None
+        total_value_float: float | None = None
+
         current_balance = 0.0
         current_units = 0.0
-        events = es.load(stream_id)
+        events = es.load(UUID(stream_id_str))
         events.sort(key=lambda e: e.version)
 
         for event in events:
@@ -171,31 +240,111 @@ def create_investment_event_entry(data: Dict[str, Any]) -> Tuple[Dict[str, Any],
             if "units" in event_data:
                 current_units += _as_float(event_data["units"])
 
-        if event_type == "sell" and units > current_units:
+        if event_type_str in {"buy", "sell"}:
+            if units is None or total_value is None:
+                return {
+                    "result": "Failure",
+                    "details": "Missing required fields for buy/sell event",
+                }, 400
+            if units_value is None or total_value_value is None:
+                return {
+                    "result": "Failure",
+                    "details": "Missing required fields for buy/sell event",
+                }, 400
+            units_value_float = float(units_value)
+            total_value_float = float(total_value_value)
+            if event_type_str == "buy":
+                __validate_buy_event_data(units_value_float, total_value_float)
+            else:
+                __validate_sell_event_data(units_value_float, total_value_float)
+        elif event_type_str == "price_update":
+            if total_value is None:
+                return {
+                    "result": "Failure",
+                    "details": "Missing required fields for price update event",
+                }, 400
+            if total_value_value is None:
+                return {
+                    "result": "Failure",
+                    "details": "Missing required fields for price update event",
+                }, 400
+            total_value_float = float(total_value_value)
+            __validate_price_update_data(total_value_float, current_units)
+        else:
+            return {
+                "result": "Failure",
+                "details": f"Invalid event type: {event_type_str}",
+            }, 400
+
+        if (
+            event_type_str == "sell"
+            and units_value_float is not None
+            and units_value_float > current_units
+        ):
             return {
                 "result": "Failure",
                 "details": "Cannot sell more units than currently owned",
             }, 400
 
-        if event_type == "price_update":
-            __validate_price_update_data(total_value, current_units)
+        try:
+            event_name = __map_event_type(stream.subtype, event_type_str)
+        except ValueError as ex:
+            return {"result": "Failure", "details": str(ex)}, 400
 
-        event_name = __map_event_type(event_type)
-
-        if event_type == "buy":
-            event_data = __create_etf_bought_event_data(
-                units, total_value, current_balance, comment
-            )
-        elif event_type == "sell":
-            event_data = __create_etf_sold_event_data(
-                units, total_value, current_balance, comment
-            )
+        if stream.subtype == "treasury_bonds":
+            if event_type_str == "price_update":
+                if total_value_float is None:
+                    return {
+                        "result": "Failure",
+                        "details": "Missing required fields for price update event",
+                    }, 400
+                event_data = __create_treasury_bonds_priced_event_data(
+                    total_value_float, current_units, comment
+                )
+            else:
+                if units_value_float is None or total_value_float is None:
+                    return {
+                        "result": "Failure",
+                        "details": "Missing required fields for buy/sell event",
+                    }, 400
+                if event_type_str == "buy":
+                    event_data = __create_treasury_bonds_bought_event_data(
+                        units_value_float, total_value_float, current_balance, comment
+                    )
+                else:
+                    event_data = __create_treasury_bonds_sold_event_data(
+                        units_value_float, total_value_float, current_balance, comment
+                    )
         else:
-            event_data = __create_etf_priced_event_data(
-                total_value, current_units, comment
-            )
+            if event_type_str == "buy":
+                if units_value_float is None or total_value_float is None:
+                    return {
+                        "result": "Failure",
+                        "details": "Missing required fields for buy event",
+                    }, 400
+                event_data = __create_etf_bought_event_data(
+                    units_value_float, total_value_float, current_balance, comment
+                )
+            elif event_type_str == "sell":
+                if units_value_float is None or total_value_float is None:
+                    return {
+                        "result": "Failure",
+                        "details": "Missing required fields for sell event",
+                    }, 400
+                event_data = __create_etf_sold_event_data(
+                    units_value_float, total_value_float, current_balance, comment
+                )
+            else:
+                if total_value_float is None:
+                    return {
+                        "result": "Failure",
+                        "details": "Missing required fields for price update event",
+                    }, 400
+                event_data = __create_etf_priced_event_data(
+                    total_value_float, current_units, comment
+                )
 
-        occured_at = datetime.fromisoformat(occured_at_str)
+        occured_at = datetime.fromisoformat(occured_at_value)
         next_version = stream.version + 1
         event = es.Event(
             stream_type=stream.type,

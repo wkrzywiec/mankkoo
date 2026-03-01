@@ -4,12 +4,16 @@ from mankkoo.investment import investment
 
 
 def test_map_event_type_happy_path():
-    assert investment.map_event_type("buy") == "ETFBought"
+    assert investment.map_event_type("ETF", "buy") == "ETFBought"
+    assert (
+        investment.map_event_type("treasury_bonds", "price_update")
+        == "TreasuryBondsPriced"
+    )
 
 
 def test_map_event_type_invalid_raises_value_error():
     with pytest.raises(ValueError):
-        investment.map_event_type("bonus")
+        investment.map_event_type("ETF", "bonus")
 
 
 def test_calculate_unit_price_returns_ratio():

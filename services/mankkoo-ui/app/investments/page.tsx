@@ -175,7 +175,7 @@ export default function Investments() {
 
   const canSelectedInvestmentAcceptEvents = useMemo(() => {
     if (!selectedInvestment) return false;
-    return selectedInvestment.subtype === "ETF";
+    return ["ETF", "treasury_bonds"].includes(selectedInvestment.subtype);
   }, [selectedInvestment]);
 
   useEffect(() => {
