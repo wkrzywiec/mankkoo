@@ -1,23 +1,30 @@
 """Investment business logic module.
 
-This module contains pure business logic functions for investment event processing,
-validation, and derived value calculation. It handles ETF operations (buy, sell, price update)
-and constructs proper event data structures.
+This module contains business logic functions for investment event processing,
+validation, and derived value calculation. It handles ETF operations (buy, sell, price
+update) and constructs proper event data structures.
 """
 
+from datetime import datetime
+from typing import Any, Dict, Tuple
+from uuid import UUID
 
-def map_event_type(event_type: str) -> str:
-    """Map API event type to event name.
+import mankkoo.event_store as es
+from mankkoo.base_logger import log
 
-    Args:
-        event_type: The event type from API ("buy", "sell", "price_update")
 
-    Returns:
-        The corresponding event name ("ETFBought", "ETFSold", "ETFPriced")
+def _as_float(value: float | int | str) -> float:
+    if isinstance(value, (int, float)):
+        return float(value)
+    if isinstance(value, str):
+        cleaned = value.strip().replace(" ", "").replace(",", ".")
+        if not cleaned:
+            raise ValueError("Numeric value cannot be empty")
+        return float(cleaned)
+    raise TypeError(f"Unsupported numeric value type: {type(value)}")
 
-    Raises:
-        ValueError: If event_type is not recognized
-    """
+
+def __map_event_type(event_type: str) -> str:
     mapping = {
         "buy": "ETFBought",
         "sell": "ETFSold",
@@ -30,35 +37,14 @@ def map_event_type(event_type: str) -> str:
     return mapping[event_type]
 
 
-def calculate_unit_price(total_value: float, units: float) -> float:
-    """Calculate price per unit.
-
-    Args:
-        total_value: Total value of the transaction
-        units: Number of units
-
-    Returns:
-        Price per unit (total_value / units)
-
-    Raises:
-        ValueError: If units is zero
-    """
+def __calculate_unit_price(total_value: float, units: float) -> float:
     if units == 0.0:
         raise ValueError("Units cannot be zero")
 
     return total_value / units
 
 
-def validate_buy_event_data(units: float, total_value: float) -> None:
-    """Validate buy event data.
-
-    Args:
-        units: Number of units to buy
-        total_value: Total purchase price
-
-    Raises:
-        ValueError: If units or total_value is not greater than zero
-    """
+def __validate_buy_event_data(units: float, total_value: float) -> None:
     if units <= 0.0:
         raise ValueError("Units must be greater than zero")
 
@@ -66,16 +52,7 @@ def validate_buy_event_data(units: float, total_value: float) -> None:
         raise ValueError("Total value must be greater than zero")
 
 
-def validate_sell_event_data(units: float, total_value: float) -> None:
-    """Validate sell event data.
-
-    Args:
-        units: Number of units to sell
-        total_value: Total sale price
-
-    Raises:
-        ValueError: If units or total_value is not greater than zero
-    """
+def __validate_sell_event_data(units: float, total_value: float) -> None:
     if units <= 0.0:
         raise ValueError("Units must be greater than zero")
 
@@ -83,16 +60,7 @@ def validate_sell_event_data(units: float, total_value: float) -> None:
         raise ValueError("Total value must be greater than zero")
 
 
-def validate_price_update_data(total_value: float, current_units: float) -> None:
-    """Validate price update event data.
-
-    Args:
-        total_value: Current total value of the position
-        current_units: Current number of units held in the stream
-
-    Raises:
-        ValueError: If total_value is not greater than zero or there are no units
-    """
+def __validate_price_update_data(total_value: float, current_units: float) -> None:
     if total_value <= 0.0:
         raise ValueError("Total value must be greater than zero")
 
@@ -100,29 +68,10 @@ def validate_price_update_data(total_value: float, current_units: float) -> None
         raise ValueError("Cannot update price without owned units")
 
 
-def create_etf_bought_event_data(
+def __create_etf_bought_event_data(
     units: float, total_value: float, current_balance: float, comment: str = ""
 ) -> dict:
-    """Create ETFBought event data.
-
-    Args:
-        units: Number of units purchased
-        total_value: Total purchase price
-        current_balance: Current portfolio balance before this purchase
-        comment: Optional user comment
-
-    Returns:
-        Dictionary with event data structure:
-        {
-            "totalValue": float,
-            "balance": float,
-            "units": float,
-            "averagePrice": float,
-            "currency": str,
-            "comment": str
-        }
-    """
-    average_price = calculate_unit_price(total_value, units)
+    average_price = __calculate_unit_price(total_value, units)
     new_balance = current_balance + total_value
 
     return {
@@ -135,29 +84,10 @@ def create_etf_bought_event_data(
     }
 
 
-def create_etf_sold_event_data(
+def __create_etf_sold_event_data(
     units: float, total_value: float, current_balance: float, comment: str = ""
 ) -> dict:
-    """Create ETFSold event data.
-
-    Args:
-        units: Number of units sold (positive value)
-        total_value: Total sale price
-        current_balance: Current portfolio balance before this sale
-        comment: Optional user comment
-
-    Returns:
-        Dictionary with event data structure:
-        {
-            "totalValue": float,
-            "balance": float,
-            "units": float,  # Negative value
-            "averagePrice": float,
-            "currency": str,
-            "comment": str
-        }
-    """
-    average_price = calculate_unit_price(total_value, units)
+    average_price = __calculate_unit_price(total_value, units)
     new_balance = current_balance - total_value
 
     return {
@@ -170,25 +100,9 @@ def create_etf_sold_event_data(
     }
 
 
-def create_etf_priced_event_data(
+def __create_etf_priced_event_data(
     total_value: float, current_units: float, comment: str = ""
 ) -> dict:
-    """Create ETFPriced event data.
-
-    Args:
-        total_value: Current total value of the position
-        current_units: Current number of units in portfolio
-        comment: Optional user comment
-
-    Returns:
-        Dictionary with event data structure:
-        {
-            "pricePerUnit": float,
-            "balance": float,
-            "currency": str,
-            "comment": str
-        }
-    """
     if total_value <= 0.0:
         raise ValueError("Total value must be greater than zero")
 
@@ -204,3 +118,113 @@ def create_etf_priced_event_data(
         "currency": "PLN",
         "comment": comment,
     }
+
+
+def create_investment_event_entry(data: Dict[str, Any]) -> Tuple[Dict[str, Any], int]:
+    try:
+        stream_id = data.get("streamId")
+        event_type = data.get("eventType")
+        occured_at_str = data.get("occuredAt")
+        units = data.get("units")
+        total_value = data.get("totalValue")
+        comment = data.get("comment", "")
+
+        if event_type == "buy":
+            if units is None or total_value is None:
+                return {
+                    "result": "Failure",
+                    "details": "Missing required fields for buy event",
+                }, 400
+            __validate_buy_event_data(units, total_value)
+        elif event_type == "sell":
+            if units is None or total_value is None:
+                return {
+                    "result": "Failure",
+                    "details": "Missing required fields for sell event",
+                }, 400
+            __validate_sell_event_data(units, total_value)
+        elif event_type != "price_update":
+            return {
+                "result": "Failure",
+                "details": f"Invalid event type: {event_type}",
+            }, 400
+
+        stream = es.get_stream_by_id(stream_id)
+        if stream is None:
+            return {"result": "Failure", "details": "Stream not found"}, 404
+
+        if stream.type not in ["investment", "stocks"]:
+            return {
+                "result": "Failure",
+                "details": f"Invalid stream type: {stream.type}. Must be investments or stocks",
+            }, 400
+
+        current_balance = 0.0
+        current_units = 0.0
+        events = es.load(stream_id)
+        events.sort(key=lambda e: e.version)
+
+        for event in events:
+            event_data = event.data
+            if "balance" in event_data:
+                current_balance = _as_float(event_data["balance"])
+            if "units" in event_data:
+                current_units += _as_float(event_data["units"])
+
+        if event_type == "sell" and units > current_units:
+            return {
+                "result": "Failure",
+                "details": "Cannot sell more units than currently owned",
+            }, 400
+
+        if event_type == "price_update":
+            __validate_price_update_data(total_value, current_units)
+
+        event_name = __map_event_type(event_type)
+
+        if event_type == "buy":
+            event_data = __create_etf_bought_event_data(
+                units, total_value, current_balance, comment
+            )
+        elif event_type == "sell":
+            event_data = __create_etf_sold_event_data(
+                units, total_value, current_balance, comment
+            )
+        else:
+            event_data = __create_etf_priced_event_data(
+                total_value, current_units, comment
+            )
+
+        occured_at = datetime.fromisoformat(occured_at_str)
+        next_version = stream.version + 1
+        event = es.Event(
+            stream_type=stream.type,
+            stream_id=UUID(stream_id),
+            event_type=event_name,
+            data=event_data,
+            occured_at=occured_at,
+            version=next_version,
+        )
+
+        es.store([event])
+
+        log.info(
+            f"Created {event_name} event for stream {stream_id} with version {next_version}"
+        )
+
+        return {
+            "result": "Success",
+            "eventId": str(event.id),
+            "streamVersion": next_version,
+        }, 201
+
+    except ValueError as ex:
+        log.error(f"Validation error: {ex}", exc_info=True)
+        return {"result": "Failure", "details": str(ex)}, 400
+    except Exception as ex:
+        import traceback
+
+        log.error(
+            f"Failed to create investment event: {ex}, traceback: {traceback.format_exc()}"
+        )
+        return {"result": "Failure", "details": str(ex)}, 500

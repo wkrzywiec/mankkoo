@@ -1,6 +1,8 @@
 import uuid
 from datetime import datetime
 
+import pytest
+
 import mankkoo.event_store as es
 
 
@@ -445,6 +447,66 @@ def test_create_sell_event_returns_201(test_client):
     assert data["streamVersion"] == 2
 
 
+def test_create_sell_event_handles_legacy_string_units_and_balance(test_client):
+    """Ensure legacy stringified numbers do not break sell event calculations."""
+    # GIVEN: Investment stream with existing buy event that stores strings
+    stream = es.Stream(
+        id=uuid.uuid4(),
+        type="investment",
+        subtype="ETF",
+        name="Legacy ETF",
+        bank="Broker X",
+        active=True,
+        version=0,
+        metadata={},
+        labels={"wallet": "Personal"},
+    )
+    es.create([stream])
+
+    legacy_buy_event = es.Event(
+        stream_type="investment",
+        stream_id=stream.id,
+        event_type="ETFBought",
+        data={
+            "totalValue": "1 234,56",
+            "balance": "1 234,56",
+            "units": "12,3456",
+            "averagePrice": "100,00",
+            "currency": "PLN",
+            "comment": "legacy import",
+        },
+        occured_at=datetime(2024, 12, 1),
+        version=1,
+    )
+    es.store([legacy_buy_event])
+
+    # WHEN: POST sell event with normal floats
+    response = test_client.post(
+        "/api/investments/events",
+        json={
+            "streamId": str(stream.id),
+            "eventType": "sell",
+            "occuredAt": "2024-12-15",
+            "units": 2.3456,
+            "totalValue": 234.56,
+        },
+    )
+
+    # THEN: Request succeeds and stream version increments
+    assert response.status_code == 201
+    data = response.get_json()
+    assert data["result"] == "Success"
+    assert data["streamVersion"] == 2
+
+    # Verify sell event stored with numeric values
+    events = es.load(stream.id)
+    assert len(events) == 2
+    sell_event = events[1]
+    assert sell_event.event_type == "ETFSold"
+    assert sell_event.data["units"] == -2.3456
+    assert sell_event.data["balance"] == pytest.approx(1000.0)
+
+
 def test_create_price_update_event_returns_201_and_stores_etfpriced_name(test_client):
     """Test that price_update event type stores as ETFPriced event name."""
     # GIVEN: Investment stream with units
@@ -663,8 +725,8 @@ def test_missing_total_value_for_buy_returns_400(test_client):
         },
     )
 
-    # THEN: Returns 400
-    assert response.status_code == 400
+    # THEN: Schema validation triggered (422)
+    assert response.status_code == 422
 
 
 def test_negative_units_returns_400(test_client):
@@ -969,8 +1031,8 @@ def test_missing_price_per_unit_for_price_update_returns_400(test_client):
         },
     )
 
-    # THEN: Returns 400
-    assert response.status_code == 400
+    # THEN: Schema validation triggered (422)
+    assert response.status_code == 422
 
 
 # ============================================================================

@@ -8,21 +8,21 @@ class TestEventTypeMapping:
 
     def test_map_buy_event_type(self):
         # WHEN
-        result = investment.map_event_type("buy")
+        result = investment.__map_event_type("buy")
 
         # THEN
         assert result == "ETFBought"
 
     def test_map_sell_event_type(self):
         # WHEN
-        result = investment.map_event_type("sell")
+        result = investment.__map_event_type("sell")
 
         # THEN
         assert result == "ETFSold"
 
     def test_map_price_update_event_type(self):
         # WHEN
-        result = investment.map_event_type("price_update")
+        result = investment.__map_event_type("price_update")
 
         # THEN
         assert result == "ETFPriced"
@@ -30,22 +30,64 @@ class TestEventTypeMapping:
     def test_map_invalid_event_type_raises_error(self):
         # WHEN / THEN
         with pytest.raises(ValueError, match="Unknown event type"):
-            investment.map_event_type("unknown_type")
+            investment.__map_event_type("unknown_type")
 
 
 class TestCalculateUnitPrice:
     """Test unit price calculation"""
 
+
+class TestAsFloat:
+    """Test numeric normalization helper"""
+
+    def test_as_float_accepts_float(self):
+        # WHEN
+        result = investment._as_float(123.45)
+
+        # THEN
+        assert result == 123.45
+
+    def test_as_float_accepts_int(self):
+        # WHEN
+        result = investment._as_float(42)
+
+        # THEN
+        assert result == 42.0
+
+    def test_as_float_cleans_spaces_and_commas(self):
+        # WHEN
+        result = investment._as_float("  1 234,56 ")
+
+        # THEN
+        assert result == pytest.approx(1234.56)
+
+    def test_as_float_handles_comma_decimal_without_spaces(self):
+        # WHEN
+        result = investment._as_float("45,78")
+
+        # THEN
+        assert result == pytest.approx(45.78)
+
+    def test_as_float_empty_string_raises(self):
+        # WHEN / THEN
+        with pytest.raises(ValueError, match="Numeric value cannot be empty"):
+            investment._as_float("   ")
+
+    def test_as_float_invalid_type_raises(self):
+        # WHEN / THEN
+        with pytest.raises(TypeError, match="Unsupported numeric value type"):
+            investment._as_float(["1,23"])  # type: ignore[arg-type]
+
     def test_calculate_unit_price_with_valid_inputs(self):
         # WHEN
-        result = investment.calculate_unit_price(total_value=1000.0, units=10.0)
+        result = investment.__calculate_unit_price(total_value=1000.0, units=10.0)
 
         # THEN
         assert result == 100.0
 
     def test_calculate_unit_price_with_fractional_units(self):
         # WHEN
-        result = investment.calculate_unit_price(total_value=1234.56, units=5.5)
+        result = investment.__calculate_unit_price(total_value=1234.56, units=5.5)
 
         # THEN
         assert result == pytest.approx(224.465454, rel=1e-5)
@@ -53,7 +95,7 @@ class TestCalculateUnitPrice:
     def test_calculate_unit_price_with_zero_units_raises_error(self):
         # WHEN / THEN
         with pytest.raises(ValueError, match="Units cannot be zero"):
-            investment.calculate_unit_price(total_value=1000.0, units=0.0)
+            investment.__calculate_unit_price(total_value=1000.0, units=0.0)
 
 
 class TestValidateBuyEventData:
@@ -61,27 +103,27 @@ class TestValidateBuyEventData:
 
     def test_validate_buy_event_data_with_valid_inputs(self):
         # WHEN / THEN (should not raise)
-        investment.validate_buy_event_data(units=10.0, total_value=1000.0)
+        investment.__validate_buy_event_data(units=10.0, total_value=1000.0)
 
     def test_validate_buy_event_data_with_zero_units_raises_error(self):
         # WHEN / THEN
         with pytest.raises(ValueError, match="Units must be greater than zero"):
-            investment.validate_buy_event_data(units=0.0, total_value=1000.0)
+            investment.__validate_buy_event_data(units=0.0, total_value=1000.0)
 
     def test_validate_buy_event_data_with_negative_units_raises_error(self):
         # WHEN / THEN
         with pytest.raises(ValueError, match="Units must be greater than zero"):
-            investment.validate_buy_event_data(units=-5.0, total_value=1000.0)
+            investment.__validate_buy_event_data(units=-5.0, total_value=1000.0)
 
     def test_validate_buy_event_data_with_zero_total_value_raises_error(self):
         # WHEN / THEN
         with pytest.raises(ValueError, match="Total value must be greater than zero"):
-            investment.validate_buy_event_data(units=10.0, total_value=0.0)
+            investment.__validate_buy_event_data(units=10.0, total_value=0.0)
 
     def test_validate_buy_event_data_with_negative_total_value_raises_error(self):
         # WHEN / THEN
         with pytest.raises(ValueError, match="Total value must be greater than zero"):
-            investment.validate_buy_event_data(units=10.0, total_value=-100.0)
+            investment.__validate_buy_event_data(units=10.0, total_value=-100.0)
 
 
 class TestValidateSellEventData:
@@ -89,27 +131,27 @@ class TestValidateSellEventData:
 
     def test_validate_sell_event_data_with_valid_inputs(self):
         # WHEN / THEN (should not raise)
-        investment.validate_sell_event_data(units=5.0, total_value=500.0)
+        investment.__validate_sell_event_data(units=5.0, total_value=500.0)
 
     def test_validate_sell_event_data_with_zero_units_raises_error(self):
         # WHEN / THEN
         with pytest.raises(ValueError, match="Units must be greater than zero"):
-            investment.validate_sell_event_data(units=0.0, total_value=500.0)
+            investment.__validate_sell_event_data(units=0.0, total_value=500.0)
 
     def test_validate_sell_event_data_with_negative_units_raises_error(self):
         # WHEN / THEN
         with pytest.raises(ValueError, match="Units must be greater than zero"):
-            investment.validate_sell_event_data(units=-3.0, total_value=500.0)
+            investment.__validate_sell_event_data(units=-3.0, total_value=500.0)
 
     def test_validate_sell_event_data_with_zero_total_value_raises_error(self):
         # WHEN / THEN
         with pytest.raises(ValueError, match="Total value must be greater than zero"):
-            investment.validate_sell_event_data(units=5.0, total_value=0.0)
+            investment.__validate_sell_event_data(units=5.0, total_value=0.0)
 
     def test_validate_sell_event_data_with_negative_total_value_raises_error(self):
         # WHEN / THEN
         with pytest.raises(ValueError, match="Total value must be greater than zero"):
-            investment.validate_sell_event_data(units=5.0, total_value=-100.0)
+            investment.__validate_sell_event_data(units=5.0, total_value=-100.0)
 
 
 class TestValidatePriceUpdateData:
@@ -117,28 +159,28 @@ class TestValidatePriceUpdateData:
 
     def test_validate_price_update_data_with_valid_input(self):
         # WHEN / THEN (should not raise)
-        investment.validate_price_update_data(total_value=1250.0, current_units=10.0)
+        investment.__validate_price_update_data(total_value=1250.0, current_units=10.0)
 
     def test_validate_price_update_data_with_zero_total_value_raises_error(self):
         # WHEN / THEN
         with pytest.raises(
             ValueError, match="Total value must be greater than zero"
         ):
-            investment.validate_price_update_data(total_value=0.0, current_units=10.0)
+            investment.__validate_price_update_data(total_value=0.0, current_units=10.0)
 
     def test_validate_price_update_data_with_negative_total_value_raises_error(self):
         # WHEN / THEN
         with pytest.raises(
             ValueError, match="Total value must be greater than zero"
         ):
-            investment.validate_price_update_data(total_value=-50.0, current_units=10.0)
+            investment.__validate_price_update_data(total_value=-50.0, current_units=10.0)
 
     def test_validate_price_update_data_with_no_units_raises_error(self):
         # WHEN / THEN
         with pytest.raises(
             ValueError, match="Cannot update price without owned units"
         ):
-            investment.validate_price_update_data(total_value=100.0, current_units=0.0)
+            investment.__validate_price_update_data(total_value=100.0, current_units=0.0)
 
 
 class TestCreateETFBoughtEventData:
@@ -146,7 +188,7 @@ class TestCreateETFBoughtEventData:
 
     def test_create_etf_bought_event_data_with_basic_inputs(self):
         # WHEN
-        result = investment.create_etf_bought_event_data(
+        result = investment.__create_etf_bought_event_data(
             units=10.0, total_value=1000.0, current_balance=2000.0
         )
 
@@ -160,7 +202,7 @@ class TestCreateETFBoughtEventData:
 
     def test_create_etf_bought_event_data_with_comment(self):
         # WHEN
-        result = investment.create_etf_bought_event_data(
+        result = investment.__create_etf_bought_event_data(
             units=5.5,
             total_value=550.0,
             current_balance=1000.0,
@@ -177,7 +219,7 @@ class TestCreateETFBoughtEventData:
 
     def test_create_etf_bought_event_data_with_zero_current_balance(self):
         # WHEN
-        result = investment.create_etf_bought_event_data(
+        result = investment.__create_etf_bought_event_data(
             units=8.0, total_value=800.0, current_balance=0.0
         )
 
@@ -191,7 +233,7 @@ class TestCreateETFSoldEventData:
 
     def test_create_etf_sold_event_data_with_basic_inputs(self):
         # WHEN
-        result = investment.create_etf_sold_event_data(
+        result = investment.__create_etf_sold_event_data(
             units=5.0, total_value=500.0, current_balance=2000.0
         )
 
@@ -205,7 +247,7 @@ class TestCreateETFSoldEventData:
 
     def test_create_etf_sold_event_data_with_comment(self):
         # WHEN
-        result = investment.create_etf_sold_event_data(
+        result = investment.__create_etf_sold_event_data(
             units=3.25,
             total_value=325.0,
             current_balance=1000.0,
@@ -222,7 +264,7 @@ class TestCreateETFSoldEventData:
 
     def test_create_etf_sold_event_data_selling_all(self):
         # WHEN
-        result = investment.create_etf_sold_event_data(
+        result = investment.__create_etf_sold_event_data(
             units=10.0, total_value=1200.0, current_balance=1200.0
         )
 
@@ -236,7 +278,7 @@ class TestCreateETFPricedEventData:
 
     def test_create_etf_priced_event_data_with_basic_inputs(self):
         # WHEN
-        result = investment.create_etf_priced_event_data(
+        result = investment.__create_etf_priced_event_data(
             total_value=1250.0, current_units=10.0
         )
 
@@ -248,7 +290,7 @@ class TestCreateETFPricedEventData:
 
     def test_create_etf_priced_event_data_with_comment(self):
         # WHEN
-        result = investment.create_etf_priced_event_data(
+        result = investment.__create_etf_priced_event_data(
             total_value=547.25, current_units=5.5, comment="Monthly revaluation"
         )
 
@@ -261,21 +303,21 @@ class TestCreateETFPricedEventData:
     def test_create_etf_priced_event_data_with_zero_total_value_raises_error(self):
         # WHEN / THEN
         with pytest.raises(ValueError, match="Total value must be greater than zero"):
-            investment.create_etf_priced_event_data(total_value=0.0, current_units=1.0)
+            investment.__create_etf_priced_event_data(total_value=0.0, current_units=1.0)
 
     def test_create_etf_priced_event_data_with_zero_units_raises_error(self):
         # WHEN / THEN
         with pytest.raises(
             ValueError, match="Current units must be greater than zero"
         ):
-            investment.create_etf_priced_event_data(total_value=100.0, current_units=0.0)
+            investment.__create_etf_priced_event_data(total_value=100.0, current_units=0.0)
 
     def test_create_etf_priced_event_data_with_fractional_price_and_units(self):
         # WHEN
-        result = investment.create_etf_priced_event_data(
+        result = investment.__create_etf_priced_event_data(
             total_value=974.06784, current_units=7.89
         )
 
         # THEN
-        assert result["pricePerUnit"] == 123.456
+        assert result["pricePerUnit"] == pytest.approx(123.456)
         assert result["balance"] == pytest.approx(974.06784, rel=1e-5)  # 123.456 * 7.89
