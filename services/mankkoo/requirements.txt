@@ -7,8 +7,6 @@ apiflask==3.1.0
     # via mankkoo
 apispec==6.10.0
     # via apiflask
-backports-datetime-fromisoformat==2.0.3 ; python_full_version < '3.11'
-    # via marshmallow
 blinker==1.9.0
     # via flask
 certifi==2026.6.17
@@ -36,7 +34,7 @@ flask-cors==6.0.5
     # via mankkoo
 flask-httpauth==4.8.1
     # via apiflask
-flask-marshmallow==1.5.0
+flask-marshmallow==1.4.0
     # via apiflask
 greenlet==3.5.2 ; platform_machine == 'AMD64' or platform_machine == 'WIN32' or platform_machine == 'aarch64' or platform_machine == 'amd64' or platform_machine == 'ppc64le' or platform_machine == 'win32' or platform_machine == 'x86_64'
     # via sqlalchemy
@@ -53,10 +51,11 @@ markupsafe==3.0.3
     #   flask
     #   jinja2
     #   werkzeug
-marshmallow==4.3.0
+marshmallow==3.26.2
     # via
     #   apiflask
     #   flask-marshmallow
+    #   mankkoo
     #   webargs
 numpy==1.26.4
     # via
@@ -65,6 +64,7 @@ numpy==1.26.4
 packaging==26.2
     # via
     #   apispec
+    #   marshmallow
     #   webargs
 pandas==1.5.3
     # via mankkoo
@@ -107,7 +107,6 @@ testcontainers==4.14.2
 typing-extensions==4.15.0
     # via
     #   flask-cors
-    #   marshmallow
     #   pydantic
     #   pydantic-core
     #   sqlalchemy

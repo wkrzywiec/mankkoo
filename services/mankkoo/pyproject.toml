@@ -18,6 +18,7 @@ dependencies = [
     "flask>=2.2.2",
     "apiflask[yaml]>=1.2.3",
     "flask-cors>=3.0.10",
+    "marshmallow>=3.20,<4",
     "sqlalchemy>=2.0.31",
     "psycopg2-binary>=2.9.9",
     "testcontainers[postgres]>=4.7.2",
