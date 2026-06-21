@@ -17,6 +17,7 @@ This document provides comprehensive guidance for AI coding agents working on th
 
 ---
 
+
 ## Core Architecture Principles
 
 ### 1. Event Sourcing Architecture
