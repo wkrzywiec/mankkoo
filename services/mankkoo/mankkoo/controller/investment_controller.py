@@ -46,9 +46,9 @@ def get_wallets():
 class InvestmentsQuery(Schema):
     active = Boolean(
         required=False,
-        description="Filter by active/inactive investments. 'true' or 'false'.",
+        metadata={"description": "Filter by active/inactive investments. 'true' or 'false'."},
     )
-    wallet = String(required=False, description="Filter by wallet label.")
+    wallet = String(required=False, metadata={"description": "Filter by wallet label."})
 
 
 class InvestmentStreamResponse(Schema):
@@ -102,19 +102,19 @@ def get_investment_transactions(investment_id):
 
 
 class InvestmentEventRequest(Schema):
-    streamId = String(required=True, description="UUID of the investment stream")
+    streamId = String(required=True, metadata={"description": "UUID of the investment stream"})
     eventType = String(
-        required=True, description="Event type: 'buy', 'sell', or 'price_update'"
+        required=True, metadata={"description": "Event type: 'buy', 'sell', or 'price_update'"}
     )
     occuredAt = String(
-        required=True, description="Date when event occurred (ISO format)"
+        required=True, metadata={"description": "Date when event occurred (ISO format)"}
     )
-    units = Float(required=False, description="Number of units (required for buy/sell)")
+    units = Float(required=False, metadata={"description": "Number of units (required for buy/sell)"})
     totalValue = Float(
         required=True,
-        description="Total value in PLN (required for buy/sell and price_update)",
+        metadata={"description": "Total value in PLN (required for buy/sell and price_update)"},
     )
-    comment = String(required=False, load_default="", description="Optional comment")
+    comment = String(required=False, load_default="", metadata={"description": "Optional comment"})
 
 
 class InvestmentEventResponse(Schema):
@@ -131,5 +131,5 @@ class InvestmentEventResponse(Schema):
     summary="Create Investment Event",
     description="Create a new investment event (buy, sell, or price update) for a stream",
 )
-def create_investment_event(data):
-    return create_investment_event_entry(data)
+def create_investment_event(json_data):
+    return create_investment_event_entry(json_data)

@@ -48,11 +48,11 @@ class OperationsImport(Schema):
     summary="Import account operations",
     description="Import new operations from a file to an account",
 )
-def import_operations(account_id, data):
+def import_operations(account_id, files_data):
     log.info(f'Adding new operations to account with id {account_id}"...')
 
     try:
-        account.add_new_operations(account_id, None, data["operations"].read())
+        account.add_new_operations(account_id, None, files_data["operations"].read())
         log.info(
             f'New account operations have been added to account with id "{account_id}".'
         )
