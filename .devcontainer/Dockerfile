@@ -1,14 +1,9 @@
 FROM mcr.microsoft.com/vscode/devcontainers/base:ubuntu-22.04
 
 ENV PYTHON_VERSION=3.10
-ENV POETRY_VERSION=1.3.2
-ENV POETRY_HOME=/opt/poetry
-ENV POETRY_CACHE_DIR=/opt/.cache
-ENV POETRY_VIRTUALENVS_CREATE=false
-ENV POETRY_NO_INTERACTION=1
+ENV UV_VERSION=0.11.21
 
 ENV NVM_DIR=/usr/local/nvm
-# ENV NVM_DIR=~/.nvm
 ENV NODE_VERSION=20.18.0
 # replace shell with bash so we can source files
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
@@ -22,15 +17,9 @@ RUN apt-get update \
     && ln -s /usr/bin/python3 /usr/bin/python \
     && apt-get install -y python3-pip
 
-# Poetry
-RUN pip install -U pip setuptools \
-	&& pip install poetry==${POETRY_VERSION}
-
-# Add `poetry` to PATH
-# ENV PATH="${PATH}:${POETRY_VENV}/bin"
-
-RUN python --version
-RUN poetry --version
+# uv
+RUN curl -LsSf https://astral.sh/uv/install.sh | UV_INSTALL_DIR=/usr/local/bin sh \
+    && uv --version
 
 # nvm
 RUN apt-get update \

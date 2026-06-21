@@ -79,7 +79,7 @@ erDiagram
 ### Technologies
 
 * **Frontend**: React 18, NextJS, TypeScript, ChartJS
-* **Backend**: Python 3.10, Flask, Pandas, Pytest, Poetry
+* **Backend**: Python 3.10, Flask, Pandas, Pytest, uv
 * **Database**: PostgreSQL 16
 
 ## Roadmap
@@ -102,8 +102,8 @@ The best way to get started with this project is by using the defined DevContain
 
 If you prefer not to use the DevContainer configuration, make sure you have the following dependencies installed:
 
-* Pip
 * Python
+* uv
 * Node.js
 * npm
 * Taskfile
@@ -117,7 +117,7 @@ The DevContainer automatically installs all the necessary libraries for both the
 1. Navigate to the `services/mankkoo` directory and run:
 
 ```bash
-pip install -r requirements.txt --ignore-installed
+uv sync
 ```
 
 2. Then, go to the `services/mankkoo-ui` directory and run:

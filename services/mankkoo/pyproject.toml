@@ -1,41 +1,46 @@
-[tool.poetry]
+[project]
 name = "mankkoo"
 version = "0.1.0"
 description = ""
-authors = ["Wojtek Krzywiec <wojciechkrzywiec@gmail.com>"]
+authors = [
+    {name = "Wojtek Krzywiec", email = "wojciechkrzywiec@gmail.com"}
+]
 readme = "README.md"
+requires-python = ">=3.10"
 
-[tool.poetry.dependencies]
-python = "^3.10"
-pandas = "~=1.2"
-plotly = "~=4.14"
-numpy = "~=1.20"
-pyyaml = "*"
-python-dateutil = "*"
-pycountry = "^22.3.5"
-flask = "^2.2.2"
-apiflask = {extras = ["yaml"], version = "^1.2.3"}
-flask-cors = "^3.0.10"
-sqlalchemy = "^2.0.31"
-psycopg2-binary = "^2.9.9"
-testcontainers = {extras = ["postgres"], version = "^4.7.2"}
-asyncio = "^3.4.3"
+dependencies = [
+    "pandas~=1.2",
+    "plotly~=4.14",
+    "numpy~=1.20",
+    "pyyaml",
+    "python-dateutil",
+    "pycountry>=22.3.5",
+    "flask>=2.2.2",
+    "apiflask[yaml]>=1.2.3",
+    "flask-cors>=3.0.10",
+    "sqlalchemy>=2.0.31",
+    "psycopg2-binary>=2.9.9",
+    "testcontainers[postgres]>=4.7.2",
+    "asyncio>=3.4.3",
+]
 
-[tool.poetry.group.dev.dependencies]
-pytest = "~=6.2"
-pytest-cov = "~=2.11"
-pytest-sugar = "~=0.9.4"
-pytest-mock = "~=3.5.1"
-flake8 = "*"
-mypy = "^1.8.0"
-autoflake = "^2.3.1"
-isort = "^6.0.1"
-autopep8 = "^2.3.2"
-black = "^25.1.0"
+[dependency-groups]
+dev = [
+    "pytest~=6.2",
+    "pytest-cov~=2.11",
+    "pytest-sugar~=0.9.4",
+    "pytest-mock~=3.5.1",
+    "flake8",
+    "mypy>=1.8.0",
+    "autoflake>=2.3.1",
+    "isort>=6.0.1",
+    "autopep8>=2.3.2",
+    "black>=25.1.0",
+]
 
 [tool.flake8]
-max-line-length=160
+max-line-length = 160
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
