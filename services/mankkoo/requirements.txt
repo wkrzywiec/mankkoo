@@ -7,8 +7,6 @@ apiflask==3.1.0
     # via mankkoo
 apispec==6.10.0
     # via apiflask
-asyncio==4.0.0
-    # via mankkoo
 backports-datetime-fromisoformat==2.0.3 ; python_full_version < '3.11'
     # via marshmallow
 blinker==1.9.0

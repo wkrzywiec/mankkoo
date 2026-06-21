@@ -21,7 +21,6 @@ dependencies = [
     "sqlalchemy>=2.0.31",
     "psycopg2-binary>=2.9.9",
     "testcontainers[postgres]>=4.7.2",
-    "asyncio>=3.4.3",
 ]
 
 [dependency-groups]
