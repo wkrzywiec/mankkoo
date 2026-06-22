@@ -46,7 +46,9 @@ def get_wallets():
 class InvestmentsQuery(Schema):
     active = Boolean(
         required=False,
-        metadata={"description": "Filter by active/inactive investments. 'true' or 'false'."},
+        metadata={
+            "description": "Filter by active/inactive investments. 'true' or 'false'."
+        },
     )
     wallet = String(required=False, metadata={"description": "Filter by wallet label."})
 
@@ -102,19 +104,29 @@ def get_investment_transactions(investment_id):
 
 
 class InvestmentEventRequest(Schema):
-    streamId = String(required=True, metadata={"description": "UUID of the investment stream"})
+    streamId = String(
+        required=True, metadata={"description": "UUID of the investment stream"}
+    )
     eventType = String(
-        required=True, metadata={"description": "Event type: 'buy', 'sell', or 'price_update'"}
+        required=True,
+        metadata={"description": "Event type: 'buy', 'sell', or 'price_update'"},
     )
     occuredAt = String(
         required=True, metadata={"description": "Date when event occurred (ISO format)"}
     )
-    units = Float(required=False, metadata={"description": "Number of units (required for buy/sell)"})
+    units = Float(
+        required=False,
+        metadata={"description": "Number of units (required for buy/sell)"},
+    )
     totalValue = Float(
         required=True,
-        metadata={"description": "Total value in PLN (required for buy/sell and price_update)"},
+        metadata={
+            "description": "Total value in PLN (required for buy/sell and price_update)"
+        },
     )
-    comment = String(required=False, load_default="", metadata={"description": "Optional comment"})
+    comment = String(
+        required=False, load_default="", metadata={"description": "Optional comment"}
+    )
 
 
 class InvestmentEventResponse(Schema):

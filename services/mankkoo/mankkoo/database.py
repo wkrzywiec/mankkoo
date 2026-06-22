@@ -48,8 +48,7 @@ total_monthly_columns = ["Date", "Income", "Spending", "Profit"]
 
 def init_db():
     log.info("Initializing database with tables and functions...")
-    execute(
-        """
+    execute("""
         CREATE TABLE IF NOT EXISTS streams
         (
             id              UUID                      NOT NULL    PRIMARY KEY,
@@ -160,8 +159,7 @@ def init_db():
 
         CREATE OR REPLACE TRIGGER capture_event_added_trigger AFTER INSERT ON events
         FOR EACH STATEMENT EXECUTE FUNCTION notification_trigger();
-        """
-    )
+        """)
 
     log.info("Database initialized")
 
