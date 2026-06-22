@@ -38,9 +38,6 @@ dev = [
     "black>=25.1.0",
 ]
 
-[tool.flake8]
-max-line-length = 160
-
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
