@@ -76,8 +76,7 @@ def load_stream_by_id(stream_id: str) -> StreamsQueryResult | None:
     log.info(f"Loading stream by id '{stream_id}'...")
     with db.get_connection() as conn:
         with conn.cursor() as cur:
-            cur.execute(
-                f"""
+            cur.execute(f"""
                 SELECT
                 id,
                 type,
@@ -86,13 +85,12 @@ def load_stream_by_id(stream_id: str) -> StreamsQueryResult | None:
                 metadata,
                 labels
                 FROM streams WHERE id = '{stream_id}';
-                        """
-            )
+                        """)
             result = cur.fetchone()
             if result is None:
                 return None
             else:
-                (id, type, name, version, metadata, labels) = result
+                id, type, name, version, metadata, labels = result
                 stream = StreamsQueryResult()
                 stream.id = id
                 stream.type = type

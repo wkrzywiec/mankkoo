@@ -11,7 +11,7 @@ tasks:
     desc: Install all dependencies
     cmds: 
       - task: install:python
-      - task: install:poetry
+      - task: install:uv
       - task: install:npm
 
   install:python:
@@ -21,11 +21,11 @@ tasks:
       - pyenv install -v {{.PYTHON_VERSION}}
       - python3 --version
 
-  install:poetry:
-    desc: Install poetry
+  install:uv:
+    desc: Install uv
     cmds:
-      - curl -sSL https://install.python-poetry.org | python3 -
-      - poetry --version
+      - curl -LsSf https://astral.sh/uv/install.sh | sh
+      - uv --version
 
   install:npm:
     desc: Install npm, NodeJS, npx
@@ -59,20 +59,20 @@ tasks:
 
   mankkoo:dev:
     desc: Run mankkoo core backend in a dev mode
-    dir: services/mankkoo/mankkoo
+    dir: services/mankkoo
     cmds:
       - task: infra
       - echo "Starting mankkoo core..."
-      - flask run --reload
+      - uv run flask run --reload
 
   mankkoo:test:
     desc: Run tests for mankkoo core
     dir: services/mankkoo
     cmds:
       - echo "Running tests for mankkoo core..."
-      - pytest -s -vv --cov=./mankkoo
+      - uv run pytest -s -vv --cov=./mankkoo
       # uncomment below step to run a single test file
-      # - pytest -s -vv --cov=./mankkoo tests/controller/stream_controller_test.py
+      # - uv run pytest -s -vv --cov=./mankkoo tests/controller/stream_controller_test.py
 
   update:
     desc: Update dependencies for all services
@@ -84,24 +84,24 @@ tasks:
     dir: services/mankkoo
     cmds:
       - echo "Updating dependencies for mankkoo core..."
-      - poetry update
+      - uv lock --upgrade
 
   mankkoo:req:
-    desc: Generate requirements.txt file from Poetry
+    desc: Generate requirements.txt file from uv
     dir: services/mankkoo
     cmds:
       - echo "Generate requirements.txt file..."
-      - poetry export --without-hashes --format=requirements.txt > requirements.txt
+      - uv export --no-hashes --no-dev -o requirements.txt
 
   mankkoo:lint:
     desc: Run linter
     dir: services/mankkoo
     cmds:
       - echo "Linting mankkoo core..."
-      - autoflake --in-place --remove-all-unused-imports --remove-unused-variables --ignore-init-module-imports -r .
-      - isort .
-      - autopep8 --in-place --aggressive --recursive .
-      - black .
+      - uv run autoflake --in-place --remove-all-unused-imports --remove-unused-variables --ignore-init-module-imports -r .
+      - uv run isort .
+      - uv run autopep8 --in-place --aggressive --recursive .
+      - uv run black .
 
   ui:dev:
     desc: Run mankkoo UI in a dev mode
@@ -116,6 +116,32 @@ tasks:
     cmds:
       - echo "Starting building UI..."
       - npm run build
+
+  docker:build:
+    desc: Build Docker images for both services (tagged :latest and :YYYYMMDD_HHmm)
+    cmds:
+      - task: docker:build:mankkoo
+      - task: docker:build:ui
+
+  docker:build:mankkoo:
+    desc: Build Docker image for mankkoo core backend (tagged :latest and :YYYYMMDD_HHmm)
+    vars:
+      TIMESTAMP:
+        sh: date +%Y%m%d_%H%M
+    cmds:
+      - echo "Building mankkoo core image..."
+      - docker build -t mankkoo-core:latest -t mankkoo-core:{{.TIMESTAMP}} ./services/mankkoo
+      - echo "Built mankkoo-core:latest and mankkoo-core:{{.TIMESTAMP}}"
+
+  docker:build:ui:
+    desc: Build Docker image for mankkoo UI (tagged :latest and :YYYYMMDD_HHmm)
+    vars:
+      TIMESTAMP:
+        sh: date +%Y%m%d_%H%M
+    cmds:
+      - echo "Building mankkoo UI image..."
+      - docker build -t mankkoo-ui:latest -t mankkoo-ui:{{.TIMESTAMP}} ./services/mankkoo-ui
+      - echo "Built mankkoo-ui:latest and mankkoo-ui:{{.TIMESTAMP}}"
 
   test:
     desc: Run all tests

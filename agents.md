@@ -36,7 +36,7 @@ Three services, all orchestrated via `docker-compose.yaml`:
 | Layer | Technologies |
 |---|---|
 | **Frontend** | Next.js 14 (App Router), React 18, TypeScript 5 (strict), Chart.js 4, Axios, CSS Modules |
-| **Backend** | Python 3.10+, Flask / APIFlask, pandas, psycopg2, Poetry (dev) / pip (prod) |
+| **Backend** | Python 3.10+, Flask / APIFlask, pandas, psycopg2, uv |
 | **Database** | PostgreSQL 16 with JSONB, NOTIFY/LISTEN triggers, event sourcing schema |
 | **CI/CD** | GitHub Actions — test on branch push, build + publish Docker images on `main` |
 | **Dev Env** | VS Code DevContainers, Taskfile (task runner) |
@@ -91,7 +91,7 @@ Always read the relevant service-level `agents.md` before making changes in that
 ### Prerequisites
 
 - Docker (for PostgreSQL, pgAdmin, and full-stack runs)
-- Python 3.10+ with Poetry (backend development)
+- Python 3.10+ with uv (backend development)
 - Node.js 20+ with npm (frontend development)
 - [Taskfile](https://taskfile.dev) CLI (optional but recommended)
 
@@ -114,8 +114,8 @@ task restore             # Restore PostgreSQL from dump
 ```bash
 # Backend
 cd services/mankkoo
-poetry install
-poetry run flask run --reload      # Dev server on port 5000
+uv sync
+uv run flask run --reload      # Dev server on port 5000
 
 # Frontend
 cd services/mankkoo-ui

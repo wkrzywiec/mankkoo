@@ -13,10 +13,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Upgrade pip and install dependencies
-RUN pip install --upgrade --no-cache-dir pip
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+# Install uv
+COPY --from=ghcr.io/astral-sh/uv:0.11.23 /uv /uvx /usr/local/bin/
+
+# Copy dependency files
+COPY pyproject.toml uv.lock ./
+
+# Install dependencies (no dev deps, no editable install)
+RUN uv sync --frozen --no-dev --no-install-project
 
 # Copy application code
 COPY mankkoo/ ./mankkoo/
@@ -28,5 +32,5 @@ EXPOSE 5000
 ENV FLASK_APP=mankkoo/app.py
 ENV FLASK_RUN_HOST=0.0.0.0
 
-# Run the application
-CMD ["flask", "run"]
+# Run the application via uv
+CMD ["uv", "run", "flask", "run"]

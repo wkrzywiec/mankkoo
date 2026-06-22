@@ -185,6 +185,7 @@ def __create_treasury_bonds_priced_event_data(
         "comment": comment,
     }
 
+
 def create_investment_event_entry(data: Dict[str, Any]) -> Tuple[Dict[str, Any], int]:
     try:
         stream_id = data.get("streamId")

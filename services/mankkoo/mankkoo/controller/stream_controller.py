@@ -27,7 +27,8 @@ class CreateStreamResult(Schema):
 @stream_endpoints.input(CreateStream, location="json")
 @stream_endpoints.output(CreateStreamResult, status_code=201)
 @stream_endpoints.doc(summary="Create a new stream", description="Create a new stream")
-def create_stream(body: CreateStream):
+def create_stream(json_data):
+    body = json_data
     log.info(f"Received request to create a new stream. Body: {body}...")
 
     allowed_types = ["account", "investment", "real-estate", "retirement", "stocks"]
@@ -72,16 +73,16 @@ class StreamsQuery(Schema):
 @stream_endpoints.input(StreamsQuery, location="query")
 @stream_endpoints.output(Stream(many=True), status_code=200)
 @stream_endpoints.doc(summary="List of streams", description="Get list of streams")
-def streams(query_params):
-    log.info(f"Fetching all streams. Query: {str(query_params)}...")
+def streams(query_data):
+    log.info(f"Fetching all streams. Query: {str(query_data)}...")
 
     active: bool = None
     type_param: str = None
-    if "active" in query_params:
-        active = query_params["active"]
+    if "active" in query_data:
+        active = query_data["active"]
 
-    if "type" in query_params:
-        type_param = query_params["type"]
+    if "type" in query_data:
+        type_param = query_data["type"]
 
     streams = database.load_streams(active, type=type_param)
     return streams
@@ -122,7 +123,8 @@ class AddEventResult(Schema):
 @stream_endpoints.input(AddEvent, location="json")
 @stream_endpoints.output(AddEventResult, status_code=201)
 @stream_endpoints.doc(summary="Add event", description="Add event to the stream")
-def add_event(stream_id, body: AddEvent):
+def add_event(stream_id, json_data):
+    body = json_data
     log.info(
         f"Received request to add an event to the '{stream_id}' stream. Body: {body}..."
     )
@@ -179,7 +181,8 @@ class UpdateStreamResult(Schema):
 @stream_endpoints.doc(
     summary="Update stream", description="Modify stream metadata and/or labels"
 )
-def update_stream(stream_id, body: UpdateStream):
+def update_stream(stream_id, json_data):
+    body = json_data
     log.info(f"Received request to update the '{stream_id}' stream. Body: {body}...")
 
     if body is None:

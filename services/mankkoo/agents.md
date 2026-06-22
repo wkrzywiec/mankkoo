@@ -10,14 +10,13 @@ This document provides comprehensive guidance for AI coding agents working on th
 - **Language**: Python 3.10+
 - **Web Framework**: Flask (APIFlask for OpenAPI/Swagger)
 - **Database**: PostgreSQL with event sourcing
-- **Package Manager**: 
-  - **Development**: Poetry (pyproject.toml)
-  - **Production/Docker**: pip (requirements.txt)
+- **Package Manager**: uv (pyproject.toml + uv.lock)
 - **Testing**: pytest with testcontainers (PostgreSQL)
 - **Data Processing**: pandas, numpy
 - **API Documentation**: OpenAPI 3.0 (auto-generated via APIFlask)
 
 ---
+
 
 ## Core Architecture Principles
 
@@ -395,16 +394,16 @@ investment_data = td.investment_events(operations=[...], category='treasury_bond
 
 ```bash
 # Install dependencies
-poetry install
+uv sync
 
 # Run all tests with coverage
-poetry run pytest -s -vv --cov=./mankkoo
+uv run pytest -s -vv --cov=./mankkoo
 
 # Run specific test file
-poetry run pytest -s -vv tests/account/account_test.py
+uv run pytest -s -vv tests/account/account_test.py
 
 # Run specific test
-poetry run pytest -s -vv tests/account/account_test.py::test_new_operations_are_added_to_event_store
+uv run pytest -s -vv tests/account/account_test.py::test_new_operations_are_added_to_event_store
 ```
 
 ### Test Patterns
@@ -649,20 +648,23 @@ Environment variables:
 ### Key Points
 
 1. **Base Image**: `python:3.11-slim`
-2. **Dependencies**: Uses `requirements.txt` (NOT poetry) for production
+2. **Dependencies**: Uses `uv` with `uv.lock` for reproducible installs
 3. **Working Directory**: `/app`
-4. **Entry Point**: `flask run`
+4. **Entry Point**: `uv run flask run`
 
-### Building Requirements.txt
+### Updating Dependencies
 
-Poetry is used for development, but Docker uses pip:
+uv manages both development and production dependencies via `pyproject.toml` and `uv.lock`:
 
 ```bash
-# Export dependencies from poetry to requirements.txt
-poetry export -f requirements.txt --output requirements.txt --without-hashes
+# Update all dependencies and regenerate lock file
+uv lock --upgrade
+
+# Export requirements.txt for reference (optional)
+uv export --no-hashes --no-dev -o requirements.txt
 ```
 
-**Important**: Whenever you update `pyproject.toml`, regenerate `requirements.txt`
+**Important**: Whenever you update `pyproject.toml`, run `uv lock` to regenerate `uv.lock`
 
 ---
 
@@ -769,14 +771,14 @@ meta = es.get_stream_metadata(stream_id)
 
 ### Local Development Setup
 
-1. **Install Poetry** (if not installed):
+1. **Install uv** (if not installed):
    ```bash
-   curl -sSL https://install.python-poetry.org | python3 -
+   curl -LsSf https://astral.sh/uv/install.sh | sh
    ```
 
 2. **Install Dependencies**:
    ```bash
-   poetry install
+   uv sync
    ```
 
 3. **Start PostgreSQL** (via Docker):
@@ -786,13 +788,7 @@ meta = es.get_stream_metadata(stream_id)
 
 4. **Run Application**:
    ```bash
-   poetry run flask run --reload
-   ```
-   
-   Or from within poetry shell:
-   ```bash
-   poetry shell
-   flask run --reload
+   uv run flask run --reload
    ```
 
 5. **Access API**:
@@ -803,32 +799,32 @@ meta = es.get_stream_metadata(stream_id)
 
 ```bash
 # All tests
-poetry run pytest -s -vv --cov=./mankkoo
+uv run pytest -s -vv --cov=./mankkoo
 
 # Specific module
-poetry run pytest -s -vv tests/account/
+uv run pytest -s -vv tests/account/
 
 # With coverage report
-poetry run pytest --cov=./mankkoo --cov-report=html
+uv run pytest --cov=./mankkoo --cov-report=html
 ```
 
 ### Code Quality Tools
 
 ```bash
 # Format code
-poetry run black mankkoo/ tests/
+uv run black mankkoo/ tests/
 
 # Sort imports
-poetry run isort mankkoo/ tests/
+uv run isort mankkoo/ tests/
 
 # Remove unused imports
-poetry run autoflake --remove-all-unused-imports --in-place mankkoo/**/*.py
+uv run autoflake --remove-all-unused-imports --in-place mankkoo/**/*.py
 
 # Type checking
-poetry run mypy mankkoo/
+uv run mypy mankkoo/
 
 # Linting
-poetry run flake8 mankkoo/
+uv run flake8 mankkoo/
 ```
 
 ---
@@ -1076,20 +1072,19 @@ df = df.sort_values(by="Date").reset_index(drop=True)
 
 ```bash
 # Development
-poetry install                          # Install dependencies
-poetry run flask run --reload           # Run dev server
-poetry shell                            # Enter poetry virtualenv
+uv sync                                 # Install dependencies
+uv run flask run --reload               # Run dev server
 
 # Testing
-poetry run pytest -s -vv                # Run all tests
-poetry run pytest --cov=./mankkoo      # With coverage
-poetry run pytest tests/account/        # Specific module
+uv run pytest -s -vv                    # Run all tests
+uv run pytest --cov=./mankkoo           # With coverage
+uv run pytest tests/account/            # Specific module
 
 # Code Quality
-poetry run black mankkoo/ tests/        # Format code
-poetry run isort mankkoo/ tests/        # Sort imports
-poetry run mypy mankkoo/                # Type checking
-poetry run flake8 mankkoo/              # Linting
+uv run black mankkoo/ tests/            # Format code
+uv run isort mankkoo/ tests/            # Sort imports
+uv run mypy mankkoo/                    # Type checking
+uv run flake8 mankkoo/                  # Linting
 
 # Database (manual operations)
 psql -U postgres -d mankkoo             # Connect to DB
@@ -1100,7 +1095,7 @@ SELECT * FROM views;                    # View materialized views
 # Docker
 docker build -t mankkoo-backend .       # Build image
 docker run -p 5000:5000 mankkoo-backend # Run container
-poetry export -f requirements.txt --output requirements.txt  # Update deps
+uv export --no-hashes --no-dev -o requirements.txt  # Export deps
 ```
 
 ---

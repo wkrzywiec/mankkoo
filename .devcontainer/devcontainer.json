@@ -28,7 +28,7 @@
     ],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "cd services/mankkoo && pip install -r requirements.txt --ignore-installed && cd ../mankkoo-ui && npm install",
+	"postCreateCommand": "cd services/mankkoo && uv sync --frozen && cd ../mankkoo-ui && npm install",
 
 	// Configure tool-specific properties.
 	"customizations": {
@@ -71,7 +71,7 @@
 	"mounts": [
 		"source=${localEnv:HOME}${localEnv:USERPROFILE}/.mankkoo,target=/root/.mankkoo,type=bind,consistency=cached", // Establishing a persistent volume for maven local repository downloads
 		"source=${localEnv:HOME}${localEnv:USERPROFILE}/.gitconfig,target=/root/.gitconfig,type=bind,consistency=cached",
-		"source=${localEnv:HOME}${localEnv:USERPROFILE}/.cache/pypoetry,target=/opt/.cache,type=bind,consistency=cached"
+		"source=${localEnv:HOME}${localEnv:USERPROFILE}/.cache/uv,target=/root/.cache/uv,type=bind,consistency=cached"
 		// "source=/var/run/docker.sock,target=/var/run/docker-host.sock,type=bind" //dont work?
 	],
 
