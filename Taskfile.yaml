@@ -117,6 +117,32 @@ tasks:
       - echo "Starting building UI..."
       - npm run build
 
+  docker:build:
+    desc: Build Docker images for both services (tagged :latest and :YYYYMMDD_HHmm)
+    cmds:
+      - task: docker:build:mankkoo
+      - task: docker:build:ui
+
+  docker:build:mankkoo:
+    desc: Build Docker image for mankkoo core backend (tagged :latest and :YYYYMMDD_HHmm)
+    vars:
+      TIMESTAMP:
+        sh: date +%Y%m%d_%H%M
+    cmds:
+      - echo "Building mankkoo core image..."
+      - docker build -t mankkoo-core:latest -t mankkoo-core:{{.TIMESTAMP}} ./services/mankkoo
+      - echo "Built mankkoo-core:latest and mankkoo-core:{{.TIMESTAMP}}"
+
+  docker:build:ui:
+    desc: Build Docker image for mankkoo UI (tagged :latest and :YYYYMMDD_HHmm)
+    vars:
+      TIMESTAMP:
+        sh: date +%Y%m%d_%H%M
+    cmds:
+      - echo "Building mankkoo UI image..."
+      - docker build -t mankkoo-ui:latest -t mankkoo-ui:{{.TIMESTAMP}} ./services/mankkoo-ui
+      - echo "Built mankkoo-ui:latest and mankkoo-ui:{{.TIMESTAMP}}"
+
   test:
     desc: Run all tests
     cmds:
