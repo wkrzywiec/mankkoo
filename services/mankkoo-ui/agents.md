@@ -2,13 +2,22 @@
 
 Personal finance management dashboard built with Next.js 14 (App Router), React 18, and TypeScript 5 (strict mode). Polish localization (PLN currency).
 
+## Commands
+
+```bash
+npm install          # install dependencies (use npm — not pnpm, despite pnpm-lock.yaml existing)
+npm run dev          # dev server on port 3000
+npm run build        # production build (CI verification)
+npm run lint         # ESLint (next lint)
+```
+
 ## Tech Stack
 
 - **Framework:** Next.js 14 App Router, React 18
 - **Language:** TypeScript 5 — strict mode enabled, no `any` types
 - **HTTP:** Axios (`hooks/useHttp.ts`)
 - **Charts:** Chart.js 4 + react-chartjs-2 5
-- **Styling:** CSS Modules (co-located `.module.css` files), CSS custom properties in `globals.css`
+- **Styling:** CSS Modules (co-located `.module.css` files), CSS custom properties in `app/globals.css`
 - **Layout:** Custom 4-column CSS Grid system
 - **Icons:** FontAwesome
 - **Notifications:** SweetAlert2
@@ -19,6 +28,8 @@ Personal finance management dashboard built with Next.js 14 (App Router), React 
 ```
 api/              # API response type interfaces & base URL
 app/              # Next.js App Router pages (file-system routing)
+  globals.css     # CSS custom properties and global grid utility classes
+  colors.tsx      # mankkooColors array and getColor(index) helper
 components/
   charts/         # Reusable chart components (Bar, Line, Piechart, Table)
   elements/       # Reusable UI components (Button, Modal, Input, etc.)
@@ -53,15 +64,20 @@ import { useGetHttp } from '@/hooks/useHttp';
 
 ## HTTP & Data Fetching
 
-- **GET requests:** Use the `useGetHttp<Type>(apiPath, enabled?)` hook from `hooks/useHttp.ts`. It returns `{ isFetching, fetchedData, setFetchedData, error }`.
-- **POST requests:** Use `postJson(apiPath, body, successMsg?, failureMsg?)` from the same file.
-- **File uploads:** Use `uploadFile(apiPath, file)`.
-- API base URL is defined in `api/ApiUrl.ts`.
-- Create domain-specific custom hooks (like `useInvestmentsData`, `useWallets`) to aggregate related API calls into a single hook.
+All HTTP helpers live in `hooks/useHttp.ts`:
+
+- **GET:** `useGetHttp<Type>(apiPath, enabled?)` — returns `{ isFetching, fetchedData, setFetchedData, error }`
+- **POST:** `postJson(apiPath, body, successMsg?, failureMsg?)`
+- **PATCH:** `patchJson(apiPath, body, successMsg?, failureMsg?)`
+- **File upload:** `uploadFile(apiPath, file)`
+
+API base URL is hardcoded in `api/ApiUrl.ts` as `http://localhost:5000/api`. Change this file if the backend URL changes.
+
+Create domain-specific custom hooks (like `useInvestmentsData`, `useWallets`) to aggregate related API calls into a single hook.
 
 ## Layout & Grid System
 
-The app uses a **4-column CSS Grid** defined in `globals.css`. Available utility classes:
+The app uses a **4-column CSS Grid** defined in `app/globals.css`. Available utility classes:
 
 | Class | Effect |
 |---|---|
@@ -78,7 +94,7 @@ Use these classes for page layout. Combine with page-scoped CSS Module classes (
 
 - Use **CSS Modules** only. No CSS-in-JS, no Tailwind, no inline styles (except for dynamic sizing).
 - Co-locate `.module.css` files next to their component.
-- Use CSS custom properties from `globals.css` for colors (e.g., `var(--main-bg-color)`, `var(--accent-red)`).
+- Use CSS custom properties from `app/globals.css` for colors (e.g., `var(--main-bg-color)`, `var(--accent-red)`).
 - Import the module as `classes` or `styles`:
   ```ts
   import classes from './Component.module.css';
@@ -88,7 +104,6 @@ Use these classes for page layout. Combine with page-scoped CSS Module classes (
 
 - Use React built-in state only: `useState`, `useEffect`, `useMemo`, `useCallback`.
 - No external state management libraries.
-- Derive state with `useMemo`/`useCallback` where appropriate to avoid unnecessary re-renders.
 - Encapsulate page-level data fetching logic in custom hooks when a page needs multiple API calls.
 
 ## Formatting Utilities
