@@ -5,16 +5,20 @@
     ".memory/project.md",
     ".memory/context.md",
     ".memory/architecture.md",
-    ".memory/techContext.md",
-    "services/mankkoo/agents.md",
-    "services/mankkoo/.memory/project.md",
-    "services/mankkoo/.memory/context.md",
-    "services/mankkoo/.memory/architecture.md",
-    "services/mankkoo/.memory/techContext.md",
-    "services/mankkoo-ui/agents.md",
-    "services/mankkoo-ui/.memory/project.md",
-    "services/mankkoo-ui/.memory/context.md",
-    "services/mankkoo-ui/.memory/architecture.md",
-    "services/mankkoo-ui/.memory/techContext.md"
-  ]
+    ".memory/techContext.md"
+  ],
+  "references": {
+    "backend": {
+      "path": "services/mankkoo/.memory",
+      "description": "Backend service memory bank. Use for event sourcing patterns, DB schema, API endpoints, bank importers, testing conventions, and Python coding style."
+    },
+    "frontend": {
+      "path": "services/mankkoo-ui/.memory",
+      "description": "Frontend service memory bank. Use for component patterns, TypeScript rules, CSS Modules, Chart.js, HTTP hooks, and grid layout system."
+    },
+    "specs": {
+      "path": "openspec/specs",
+      "description": "Main capability specs. Use to understand existing requirements, find what capabilities exist, or check what a feature is supposed to do."
+    }
+  }
 }

@@ -1,20 +1,49 @@
 schema: spec-driven
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+context: |
+  Mankkoo is a self-hosted personal finance app for tracking bank accounts, investments, and net worth.
+  Single-user, Polish market (PLN currency). No authentication layer.
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+  Architecture: Next.js 14 frontend (port 3000) -> Flask/Python REST API (port 5000) -> PostgreSQL 16.
+  All services run in Docker containers (docker-compose.yaml). Dev tasks via Taskfile.
+
+  Core concept - EVENT SOURCING:
+  - Financial state lives in immutable events, never mutable rows.
+  - Three tables: streams (entities), events (append-only log), views (pre-computed JSONB blobs).
+  - Never INSERT into events directly. Always use es.store([event]) via append_event() PostgreSQL function.
+  - Never UPDATE an event. Append a correcting event instead.
+  - Views update asynchronously via NOTIFY/LISTEN. They are eventually consistent.
+  - Stream types: account (checking/savings/cash), investment (treasury_bonds/corporate_bonds/real_estate), stocks (ETF/stock), retirement.
+
+  Backend (services/mankkoo): Python 3.10+, Flask/APIFlask, pandas, psycopg2, uv package manager.
+  - Max line length 160. Test files end with _test.py. Tests use real PostgreSQL testcontainer.
+  - API blueprints: /api/admin, /api/main, /api/accounts, /api/investments, /api/streams.
+
+  Frontend (services/mankkoo-ui): Next.js 14 App Router, React 18, TypeScript 5 strict mode.
+  - Use npm (not pnpm). CSS Modules only. Never use TypeScript any type.
+  - Chart components must use next/dynamic with ssr:false.
+  - API base URL hardcoded in api/ApiUrl.ts as http://localhost:5000/api.
+
+  For full conventions read the memory bank (.memory/, services/mankkoo/.memory/, services/mankkoo-ui/.memory/).
+  Existing specs live in openspec/specs/. Check there before naming new capabilities.
+
+rules:
+  proposal:
+    - Keep proposals concise (1-2 pages max)
+    - Always identify which specs/<capability>/spec.md files are affected under the Capabilities section
+    - Check openspec/specs/ for existing capabilities before naming new ones
+    - For backend changes, note if event schema or view logic is affected
+  specs:
+    - Use WHEN/THEN scenario format for all behavioral requirements
+    - Each spec file covers one capability (kebab-case directory name)
+    - Include edge cases specific to financial data (PLN amounts, zero balances, negative operations)
+  design:
+    - If the change touches event sourcing, document the event types and their data schema
+    - If the change adds a new API endpoint, include the request/response shape
+    - If the change adds a new bank importer, document the CSV column mapping
+    - Always note if views need to be updated and which ones
+  tasks:
+    - Break into atomic tasks (30-90 min each)
+    - Separate backend and frontend tasks clearly
+    - Always include a task for running tests (pytest for backend, npm run build for frontend)
+    - Always include a task for running the linter if backend code changes
