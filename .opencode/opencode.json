@@ -1,0 +1,24 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": [
+    "AGENTS.md",
+    ".memory/project.md",
+    ".memory/context.md",
+    ".memory/architecture.md",
+    ".memory/techContext.md"
+  ],
+  "references": {
+    "backend": {
+      "path": "services/mankkoo/.memory",
+      "description": "Backend service memory bank. Use for event sourcing patterns, DB schema, API endpoints, bank importers, testing conventions, and Python coding style."
+    },
+    "frontend": {
+      "path": "services/mankkoo-ui/.memory",
+      "description": "Frontend service memory bank. Use for component patterns, TypeScript rules, CSS Modules, Chart.js, HTTP hooks, and grid layout system."
+    },
+    "specs": {
+      "path": "openspec/specs",
+      "description": "Main capability specs. Use to understand existing requirements, find what capabilities exist, or check what a feature is supposed to do."
+    }
+  }
+}
