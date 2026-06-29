@@ -11,7 +11,7 @@ import PieChart from "@/components/charts/Piechart";
 import TileHeader from "@/components/elements/TileHeader";
 import SubHeadline from "@/components/elements/SubHeadline";
 
-import { MainIndicatorsResponse, SavingsDistribution, TotalHistory } from "@/api/MainPageResponses";
+import { MainIndicatorsResponse, SavingsDistribution, TotalHistory, MonthlyIncome } from "@/api/MainPageResponses";
 
 import { currencyFormat, percentage } from "@/utils/Formatter";
 
@@ -47,6 +47,11 @@ export default function Home() {
     isFetching: isFetchingTotalHistory,
     fetchedData: totalHistory,
   } = useGetHttp<TotalHistory>('/main/total-history');
+
+  const {
+    isFetching: isFetchingMonthlyIncome,
+    fetchedData: monthlyIncome,
+  } = useGetHttp<MonthlyIncome>('/main/monthly-profits');
   
 
   
@@ -104,7 +109,7 @@ export default function Home() {
         <Indicator headline="Savings" text={formattedSavings} isFetching={isFetchingMainIndicators}/>
       </div>
       <div className="gridItem">
-        <Indicator headline="Last Month Income" text="no data" textColor="#659B5E" />
+        <Indicator headline="Last Month Income" text={currencyFormat(indicators?.lastMonthIncome)} textColor="#659B5E" isFetching={isFetchingMainIndicators}/>
       </div>
       <div className="gridItem">
         <Indicator headline="Last Month Spendings" text="no data" textColor="#ED6B53" />
@@ -161,7 +166,9 @@ export default function Home() {
       <div className="gridItem span2Columns">
         <div className={styles.verticalAlignment}>
           <SubHeadline text="Income per each month by comparing value from the previous year for the same month" />
-          <LineChart />
+          {isFetchingMonthlyIncome ?
+            <Loader /> :
+            <BarChart x={monthlyIncome?.date} y={monthlyIncome?.total} seriesName="Monthly Income" />}
         </div>
       </div>
 

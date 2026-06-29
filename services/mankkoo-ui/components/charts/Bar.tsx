@@ -1,41 +1,46 @@
 "use client";
 
-import { Chart as ChartJS, BarElement, Legend, CategoryScale, LinearScale} from 'chart.js'
+import { Chart as ChartJS, BarElement, Tooltip, Legend, CategoryScale, LinearScale } from 'chart.js'
 import { Bar } from "react-chartjs-2";
 
+import { Colors } from "@/app/colors";
 
-import { mankkooColors } from "@/app/colors";
+ChartJS.register(BarElement, Tooltip, Legend, CategoryScale, LinearScale);
 
-ChartJS.register(BarElement, Legend, CategoryScale, LinearScale);
+interface BarChartProps {
+    x?: string[];
+    y?: number[];
+    seriesName?: string;
+}
 
-export default function BarChart() {
-    
-    const data = {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+export default function BarChart({ x, y, seriesName }: BarChartProps) {
+
+    const labels = x ?? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
+    const data = y ?? [65, 59, 80, 81, 56, 55, 40];
+    const label = seriesName ?? 'Income';
+
+    const barColors = data.map(v => (v >= 0 ? Colors.Green : Colors.Red));
+
+    const barChartData = {
+        labels,
         datasets: [{
-          label: 'My First Dataset',
-          data: [65, 59, 80, 81, 56, 55, 40],
-          borderColor: mankkooColors[0],
-          backgroundColor: mankkooColors[0],
-        },
-        {
-          label: 'My Second Dataset',
-          data: [65, 23, 20, 7, 12, 67, 100],
-          borderColor: mankkooColors[1],
-          backgroundColor: mankkooColors[1],
+            label,
+            data,
+            backgroundColor: barColors,
+            borderColor: barColors,
         }]
-      };
+    };
 
     return (
-        <div style={{height: "600px", width: "100%"}}>
+        <div style={{ height: "600px", width: "100%" }}>
             <Bar
-                data={data}
+                data={barChartData}
                 options={{
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
                         datalabels: {
-                          display: false
+                            display: false
                         },
                         legend: {
                             display: true,
@@ -45,5 +50,5 @@ export default function BarChart() {
                 }}
             />
         </div>
-    )
+    );
 }

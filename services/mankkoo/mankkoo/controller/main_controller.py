@@ -64,9 +64,4 @@ class TotalMonthlyProfits(Schema):
     description="A history of a monthly profit and loss statements",
 )
 def monthly_profits():
-    # data = db.load_all()
-    # result = data['total_monthly']
-    # result['total'] = result.pop('Profit')
-    # result['date'] = result.pop('Date')
-    # return result.to_dict('list')
-    pass
+    return views.load_view(views.monthly_income_key)

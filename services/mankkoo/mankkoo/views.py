@@ -16,6 +16,8 @@ investment_types_distribution_per_wallet_key = (
     "investment-types-distribution-per-wallet"
 )
 
+monthly_income_key = "monthly-income"
+
 
 def load_view(view_name):
     log.info(f"Loading '{view_name}' view...")
@@ -48,16 +50,21 @@ def update_views(oldest_occured_event_date: date):
     __investment_types_distribution()
     __investment_wallets_distribution()
     __investment_types_distribution_per_wallet()
+    __monthly_income()
 
 
 def __main_indicators() -> None:
     log.info(f"Updating '{main_indicators_key}' view...")
     current_total_savings = __load_current_total_savings()
+    monthly_income_data = __load_monthly_income()
+    last_month_income = (
+        monthly_income_data["total"][-1] if monthly_income_data["total"] else None
+    )
 
     view_content = {
         "savings": current_total_savings,
         "netWorth": None,
-        "lastMonthIncome": None,
+        "lastMonthIncome": last_month_income,
         "lastMonthSpending": None,
     }
     __store_view(main_indicators_key, view_content)
@@ -401,6 +408,83 @@ def __load_total_history_per_day(oldest_occured_event_date: date) -> dict[str, l
                 result["date"].append(row[0].strftime("%Y-%m-%d"))
                 result["total"].append(row[1])
     return result
+
+
+def __load_monthly_income() -> dict[str, list]:
+    log.info("Loading monthly income (last-day minus first-day balance per month)...")
+    query = """
+    WITH
+    wealth_streams AS (
+        SELECT id FROM streams
+        WHERE labels->>'include_in_wealth' IS NULL OR labels->>'include_in_wealth' = 'true'
+    ),
+
+    month_series AS (
+        SELECT generate_series(
+            date_trunc('month', (SELECT MIN(occured_at) FROM events)),
+            date_trunc('month', now()) - interval '1 month',
+            '1 month'::interval
+        )::date AS month_start
+    ),
+
+    first_day_balance AS (
+        SELECT
+            ms.month_start,
+            ws.id AS stream_id,
+            COALESCE((
+                SELECT (e.data->>'balance')::numeric
+                FROM events e
+                WHERE e.stream_id = ws.id
+                  AND e.occured_at <= ms.month_start
+                ORDER BY e.version DESC
+                LIMIT 1
+            ), 0) AS balance
+        FROM month_series ms
+        CROSS JOIN wealth_streams ws
+    ),
+
+    last_day_balance AS (
+        SELECT
+            ms.month_start,
+            ws.id AS stream_id,
+            COALESCE((
+                SELECT (e.data->>'balance')::numeric
+                FROM events e
+                WHERE e.stream_id = ws.id
+                  AND e.occured_at <= (ms.month_start + interval '1 month - 1 day')::date
+                ORDER BY e.version DESC
+                LIMIT 1
+            ), 0) AS balance
+        FROM month_series ms
+        CROSS JOIN wealth_streams ws
+    )
+
+    SELECT
+        f.month_start,
+        SUM(l.balance - f.balance) AS income
+    FROM first_day_balance f
+    JOIN last_day_balance l ON f.stream_id = l.stream_id AND f.month_start = l.month_start
+    GROUP BY f.month_start
+    ORDER BY f.month_start ASC;
+    """
+
+    result: dict[str, list] = {"date": [], "total": []}
+    with db.get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(query)
+            rows = cur.fetchall()
+
+            for row in rows:
+                result["date"].append(row[0].strftime("%Y-%m"))
+                result["total"].append(row[1])
+    return result
+
+
+def __monthly_income() -> None:
+    log.info(f"Updating '{monthly_income_key}' view...")
+    view_content = __load_monthly_income()
+    __store_view(monthly_income_key, view_content)
+    log.info(f"The '{monthly_income_key}' view was updated")
 
 
 def __investment_indicators() -> None:
