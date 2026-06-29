@@ -66,12 +66,16 @@ def test_main_indicators_view_is_updated():
     # WHEN
     def a_main_indicators_view_is_updated():
         result = views.load_view(views.main_indicators_key)
-        return result == {
-            "lastMonthIncome": None,
-            "lastMonthSpending": None,
-            "netWorth": None,
-            "savings": 1004.78,
-        }
+        if result is None:
+            return False
+        return (
+            result["savings"] == 1004.78
+            and result["netWorth"] is None
+            and result["lastMonthSpending"] is None
+            # lastMonthIncome is computed: most recent complete month has no activity
+            # so income = 0.0 (balance carries forward unchanged)
+            and result["lastMonthIncome"] == 0.0
+        )
 
     # THEN
     __wait_for_condition(
@@ -659,6 +663,166 @@ def test_gold_lifecycle_updates_views():
 
     __wait_for_condition(
         condition_func=gold_sold_reflected_in_indicators,
+        timeout=10,
+        interval=1,
+    )
+
+
+def test_monthly_income_view_two_months():
+    # GIVEN: events across two complete calendar months
+    app.start_listener_thread()
+
+    # Account starts at 0, gets 1000 on Jan 2, then 500 more on Feb 3
+    account_jan = dt.an_account_with_operations(
+        [
+            {"date": "02-01-2021", "operation": 1000},  # Jan 2: balance 1000
+            {"date": "03-02-2021", "operation": 500},  # Feb 3: balance 1500
+        ],
+        type="checking",
+    )
+
+    es.create([account_jan["stream"]])
+    es.store(account_jan["events"])
+
+    # WHEN
+    def monthly_income_view_has_two_months():
+        result = views.load_view(views.monthly_income_key)
+        if result is None or not result["date"]:
+            return False
+        # Jan 2021: first_day(Jan 1)=0, last_day(Jan 31)=1000 → income=1000
+        # Feb 2021: first_day(Feb 1)=1000, last_day(Feb 28)=1500 → income=500
+        # Subsequent months: income=0 (balance stays at 1500)
+        try:
+            idx_jan = result["date"].index("2021-01")
+            idx_feb = result["date"].index("2021-02")
+        except ValueError:
+            return False
+        return (
+            abs(float(result["total"][idx_jan]) - 1000.0) < 0.01
+            and abs(float(result["total"][idx_feb]) - 500.0) < 0.01
+        )
+
+    # THEN
+    __wait_for_condition(
+        condition_func=monthly_income_view_has_two_months, timeout=10, interval=1
+    )
+
+
+def test_monthly_income_zero_for_inactive_month():
+    # GIVEN: one event in Jan 2021, nothing in Feb 2021
+    app.start_listener_thread()
+
+    account = dt.an_account_with_operations(
+        [{"date": "15-01-2021", "operation": 800}],
+        type="checking",
+    )
+
+    es.create([account["stream"]])
+    es.store(account["events"])
+
+    # WHEN
+    def feb_income_is_zero():
+        result = views.load_view(views.monthly_income_key)
+        if result is None or "2021-02" not in result["date"]:
+            return False
+        idx_feb = result["date"].index("2021-02")
+        # Feb: first_day(Feb 1)=800, last_day(Feb 28)=800 → income=0
+        return abs(float(result["total"][idx_feb])) < 0.01
+
+    # THEN
+    __wait_for_condition(condition_func=feb_income_is_zero, timeout=10, interval=1)
+
+
+def test_monthly_income_negative_when_wealth_decreases():
+    # GIVEN: balance drops during Feb 2021
+    app.start_listener_thread()
+
+    account = dt.an_account_with_operations(
+        [
+            {"date": "31-01-2021", "operation": 1000},  # Jan 31: balance 1000
+            {"date": "15-02-2021", "operation": -300},  # Feb 15: balance 700
+        ],
+        type="checking",
+    )
+
+    es.create([account["stream"]])
+    es.store(account["events"])
+
+    # WHEN
+    def feb_income_is_negative():
+        result = views.load_view(views.monthly_income_key)
+        if result is None or "2021-02" not in result["date"]:
+            return False
+        idx_feb = result["date"].index("2021-02")
+        # Feb: first_day(Feb 1)=1000, last_day(Feb 28)=700 → income=-300
+        return abs(float(result["total"][idx_feb]) - (-300.0)) < 0.01
+
+    # THEN
+    __wait_for_condition(condition_func=feb_income_is_negative, timeout=10, interval=1)
+
+
+def test_last_month_income_in_main_indicators():
+    # GIVEN: events in Jan and Feb 2021 (two distinct income values)
+    app.start_listener_thread()
+
+    account = dt.an_account_with_operations(
+        [
+            {"date": "02-01-2021", "operation": 1000},
+            {"date": "03-02-2021", "operation": 400},
+        ],
+        type="checking",
+    )
+
+    es.create([account["stream"]])
+    es.store(account["events"])
+
+    # WHEN
+    def last_month_income_is_current_recent_complete_month():
+        result = views.load_view(views.main_indicators_key)
+        if result is None or result["lastMonthIncome"] is None:
+            return False
+        # The most recent complete month (last month relative to today)
+        # has no activity, so its income = 0.0 (balance carries forward as 1400)
+        return result["lastMonthIncome"] == 0.0
+
+    # THEN
+    __wait_for_condition(
+        condition_func=last_month_income_is_current_recent_complete_month,
+        timeout=10,
+        interval=1,
+    )
+
+
+def test_monthly_income_excludes_non_wealth_streams():
+    # GIVEN: one included stream gaining 1000, one excluded stream gaining 500
+    app.start_listener_thread()
+
+    included = dt.an_account_with_operations(
+        [{"date": "02-01-2021", "operation": 1000}],
+        type="checking",
+        include_in_wealth=True,
+    )
+    excluded = dt.an_account_with_operations(
+        [{"date": "02-01-2021", "operation": 500}],
+        type="checking",
+        include_in_wealth=False,
+    )
+
+    es.create([included["stream"], excluded["stream"]])
+    es.store(included["events"] + excluded["events"])
+
+    # WHEN
+    def monthly_income_only_includes_wealth_streams():
+        result = views.load_view(views.monthly_income_key)
+        if result is None or "2021-01" not in result["date"]:
+            return False
+        idx_jan = result["date"].index("2021-01")
+        # Jan: only included stream contributes → income = 1000 (not 1500)
+        return abs(float(result["total"][idx_jan]) - 1000.0) < 0.01
+
+    # THEN
+    __wait_for_condition(
+        condition_func=monthly_income_only_includes_wealth_streams,
         timeout=10,
         interval=1,
     )

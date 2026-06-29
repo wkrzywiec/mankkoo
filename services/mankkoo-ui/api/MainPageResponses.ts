@@ -1,7 +1,7 @@
 export interface MainIndicatorsResponse {
     savings: number;
     netWorth: number;
-    lastMonthProfit: number;
+    lastMonthIncome: number;
     lastMonthSpending: number;
 }
 
@@ -12,6 +12,11 @@ export interface SavingsDistribution {
 }
 
 export interface TotalHistory {
+    date: string[];
+    total: number[];
+}
+
+export interface MonthlyIncome {
     date: string[];
     total: number[];
 }
