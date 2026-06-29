@@ -138,8 +138,6 @@ def test_new_operations_are_added_and_views_are_updated(mocker):
         "mankkoo.account.account_db.get_bank_type", side_effect=[Bank.PL_MILLENIUM]
     )
 
-    app.start_listener_thread()
-
     # WHEN
     account.add_new_operations(account_id, contents=account_operations_raw_data)
 
@@ -150,7 +148,7 @@ def test_new_operations_are_added_and_views_are_updated(mocker):
                 cur.execute("SELECT count(*) FROM views")
                 (views_count,) = cur.fetchone()
         print(f"Found {views_count} views")
-        return views_count == 7
+        return views_count == 8
 
     __wait_for_condition(condition_func=all_views_are_created, timeout=10, interval=1)
 
