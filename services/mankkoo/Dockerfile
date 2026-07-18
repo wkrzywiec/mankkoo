@@ -23,7 +23,11 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev --no-install-project
 
 # Copy application code
+COPY README.md ./
 COPY mankkoo/ ./mankkoo/
+
+# Install the project itself
+RUN uv sync --frozen --no-dev
 
 # Expose port (default Flask port)
 EXPOSE 5000

@@ -14,10 +14,10 @@ services:
       - NODE_ENV=production
 
   core:
-    image: ghcr.io/wkrzywiec/mankkoo-core:latest
     # build:
     #   context: ./services/mankkoo
     #   dockerfile: Dockerfile
+    image: ghcr.io/wkrzywiec/mankkoo-core:latest
     container_name: mankkoo-core
     environment:
       - ENV=prod
@@ -31,7 +31,7 @@ services:
     depends_on:
       mankkoo-postgres:
         condition: service_healthy
-    entrypoint: ["flask", "run"]
+    entrypoint: ["uv", "run", "flask", "run"]
   
   mankkoo-postgres:
     image: postgres:16
