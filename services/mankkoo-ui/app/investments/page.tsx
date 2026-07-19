@@ -196,16 +196,40 @@ export default function Investments() {
     return depositedVsValueHistory.types;
   }, [depositedVsValueHistory]);
 
-  // Derived: deposited vs value bar items by type
-  const depositedVsValueBarItems = useMemo(() => {
-    if (!depositedVsValue) return [];
-    return depositedVsValue.map(item => ({ label: item.type, deposited: item.deposited, value: item.value }));
+  // Derived: deposited vs value table by type
+  const depositedVsValueTableData = useMemo<TableData>(() => {
+    if (!depositedVsValue || depositedVsValue.length === 0) return { data: [], hasHeader: true, boldLastRow: true, currencyColumnIdx: -1, colorsColumnIdx: -1 };
+    const rows: string[][] = [
+      ["Type", "Deposited", "Current Value", "Gain"],
+      ...depositedVsValue.map(item => [
+        item.type,
+        currencyFormat(item.deposited),
+        currencyFormat(item.value),
+        currencyFormat(item.value - item.deposited),
+      ]),
+    ];
+    const totalDeposited = depositedVsValue.reduce((s, i) => s + i.deposited, 0);
+    const totalValue = depositedVsValue.reduce((s, i) => s + i.value, 0);
+    rows.push(["Total", currencyFormat(totalDeposited), currencyFormat(totalValue), currencyFormat(totalValue - totalDeposited)]);
+    return { data: rows, hasHeader: true, boldLastRow: true, currencyColumnIdx: -1, colorsColumnIdx: -1 };
   }, [depositedVsValue]);
 
-  // Derived: deposited vs value bar items by wallet
-  const depositedVsValuePerWalletBarItems = useMemo(() => {
-    if (!depositedVsValuePerWallet) return [];
-    return depositedVsValuePerWallet.map(item => ({ label: item.wallet, deposited: item.deposited, value: item.value }));
+  // Derived: deposited vs value table by wallet
+  const depositedVsValuePerWalletTableData = useMemo<TableData>(() => {
+    if (!depositedVsValuePerWallet || depositedVsValuePerWallet.length === 0) return { data: [], hasHeader: true, boldLastRow: true, currencyColumnIdx: -1, colorsColumnIdx: -1 };
+    const rows: string[][] = [
+      ["Wallet", "Deposited", "Current Value", "Gain"],
+      ...depositedVsValuePerWallet.map(item => [
+        item.wallet,
+        currencyFormat(item.deposited),
+        currencyFormat(item.value),
+        currencyFormat(item.value - item.deposited),
+      ]),
+    ];
+    const totalDeposited = depositedVsValuePerWallet.reduce((s, i) => s + i.deposited, 0);
+    const totalValue = depositedVsValuePerWallet.reduce((s, i) => s + i.value, 0);
+    rows.push(["Total", currencyFormat(totalDeposited), currencyFormat(totalValue), currencyFormat(totalValue - totalDeposited)]);
+    return { data: rows, hasHeader: true, boldLastRow: true, currencyColumnIdx: -1, colorsColumnIdx: -1 };
   }, [depositedVsValuePerWallet]);
 
   function changeTab(index: number): ReactNode {
@@ -223,10 +247,17 @@ export default function Investments() {
       : {};
     const walletHistoryDates = depositedVsValueHistoryPerWallet?.dates ?? [];
 
-    // Per-wallet bar items filtered to selected wallet
-    const walletBarItems = depositedVsValuePerWallet
-      ?.filter(item => item.wallet === walletName)
-      .map(item => ({ label: item.wallet, deposited: item.deposited, value: item.value })) ?? [];
+    // Per-wallet table data filtered to selected wallet
+    const walletItem = depositedVsValuePerWallet?.find(item => item.wallet === walletName);
+    const walletTableData: TableData = walletItem
+      ? {
+          data: [
+            ["Wallet", "Deposited", "Current Value", "Gain"],
+            [walletItem.wallet, currencyFormat(walletItem.deposited), currencyFormat(walletItem.value), currencyFormat(walletItem.value - walletItem.deposited)],
+          ],
+          hasHeader: true, boldLastRow: false, currencyColumnIdx: -1, colorsColumnIdx: -1,
+        }
+      : { data: [], hasHeader: true, boldLastRow: false, currencyColumnIdx: -1, colorsColumnIdx: -1 };
 
     return (
       <div className="mainContainer">
@@ -260,7 +291,9 @@ export default function Investments() {
         </div>
         <div className="gridItem span2Columns">
           <TileHeader headline="Results" subHeadline="Deposited vs current value for this wallet." />
-          {walletBarItems.length > 0 ? <DepositedVsValueBarChart items={walletBarItems} /> : null}
+          {walletTableData.data.length > 0
+            ? <Table data={walletTableData.data} hasHeader boldLastRow={false} currencyColumnIdx={-1} colorsColumnIdx={-1} />
+            : null}
         </div>
         <div className="gridItem span4Columns">
           <TileHeader
@@ -347,12 +380,16 @@ export default function Investments() {
 
       <div className="gridItem span4Columns">
         <TileHeader headline="Results by Type" subHeadline="Deposited vs current market value for each investment type." />
-        {depositedVsValueBarItems.length > 0 ? <DepositedVsValueBarChart items={depositedVsValueBarItems} /> : null}
+        {depositedVsValueTableData.data.length > 0
+          ? <Table data={depositedVsValueTableData.data} hasHeader boldLastRow currencyColumnIdx={-1} colorsColumnIdx={-1} />
+          : null}
       </div>
 
       <div className="gridItem span4Columns">
         <TileHeader headline="Results by Wallet" subHeadline="Deposited vs current market value across all wallets." />
-        {depositedVsValuePerWalletBarItems.length > 0 ? <DepositedVsValueBarChart items={depositedVsValuePerWalletBarItems} /> : null}
+        {depositedVsValuePerWalletTableData.data.length > 0
+          ? <Table data={depositedVsValuePerWalletTableData.data} hasHeader boldLastRow currencyColumnIdx={-1} colorsColumnIdx={-1} />
+          : null}
       </div>
 
       <div className="gridItem span4Columns">
