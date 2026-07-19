@@ -76,3 +76,30 @@ export interface CreateInvestmentEventResponse {
     streamVersion?: number;
     details?: string;         // Error message if result === "Failure"
 }
+
+export interface DepositedVsValueItem {
+    type: string;
+    deposited: number;
+    value: number;
+}
+
+export interface DepositedVsValuePerWalletItem {
+    wallet: string;
+    deposited: number;
+    value: number;
+}
+
+export interface DepositedVsValueSeries {
+    deposited: number[];
+    value: number[];
+}
+
+export interface DepositedVsValueHistory {
+    dates: string[];
+    types: Record<string, DepositedVsValueSeries>;
+}
+
+export interface DepositedVsValueHistoryPerWallet {
+    dates: string[];
+    wallets: Record<string, DepositedVsValueSeries>;
+}

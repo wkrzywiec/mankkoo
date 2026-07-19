@@ -1,5 +1,5 @@
 from apiflask import APIBlueprint, Schema
-from apiflask.fields import Boolean, Float, Integer, List, String
+from apiflask.fields import Boolean, Dict, Float, Integer, List, Nested, String
 
 import mankkoo.views as views
 from mankkoo.investment import investment_db
@@ -145,3 +145,81 @@ class InvestmentEventResponse(Schema):
 )
 def create_investment_event(json_data):
     return create_investment_event_entry(json_data)
+
+
+# ============================================================================
+# GET /api/investments/deposited-vs-value - Deposited vs Value views
+# ============================================================================
+
+
+class DepositedVsValueItemSchema(Schema):
+    type = String()
+    deposited = Float()
+    value = Float()
+
+
+class DepositedVsValuePerWalletItemSchema(Schema):
+    wallet = String()
+    deposited = Float()
+    value = Float()
+
+
+class DepositedVsValueSeriesSchema(Schema):
+    deposited = List(Float())
+    value = List(Float())
+
+
+class DepositedVsValueHistorySchema(Schema):
+    dates = List(String())
+    types = Dict(keys=String(), values=Nested(DepositedVsValueSeriesSchema()))
+
+
+class DepositedVsValueHistoryPerWalletSchema(Schema):
+    dates = List(String())
+    wallets = Dict(keys=String(), values=Nested(DepositedVsValueSeriesSchema()))
+
+
+@investment_endpoints.get("/deposited-vs-value")
+@investment_endpoints.output(DepositedVsValueItemSchema(many=True), status_code=200)
+@investment_endpoints.doc(
+    summary="Deposited vs Value by Type",
+    description="Current deposited amount vs market value for each investment subtype",
+)
+def get_deposited_vs_value():
+    result = views.load_view(views.investment_deposited_vs_value_key)
+    return result if result is not None else []
+
+
+@investment_endpoints.get("/deposited-vs-value/per-wallet")
+@investment_endpoints.output(
+    DepositedVsValuePerWalletItemSchema(many=True), status_code=200
+)
+@investment_endpoints.doc(
+    summary="Deposited vs Value by Wallet",
+    description="Current deposited amount vs market value grouped by wallet label",
+)
+def get_deposited_vs_value_per_wallet():
+    result = views.load_view(views.investment_deposited_vs_value_per_wallet_key)
+    return result if result is not None else []
+
+
+@investment_endpoints.get("/deposited-vs-value/history")
+@investment_endpoints.output(DepositedVsValueHistorySchema(), status_code=200)
+@investment_endpoints.doc(
+    summary="Deposited vs Value History by Type",
+    description="Monthly time-series of deposited amount vs market value per investment subtype",
+)
+def get_deposited_vs_value_history():
+    result = views.load_view(views.investment_deposited_vs_value_history_key)
+    return result if result is not None else {"dates": [], "types": {}}
+
+
+@investment_endpoints.get("/deposited-vs-value/history/per-wallet")
+@investment_endpoints.output(DepositedVsValueHistoryPerWalletSchema(), status_code=200)
+@investment_endpoints.doc(
+    summary="Deposited vs Value History by Wallet",
+    description="Monthly time-series of deposited amount vs market value per wallet",
+)
+def get_deposited_vs_value_history_per_wallet():
+    result = views.load_view(views.investment_deposited_vs_value_history_per_wallet_key)
+    return result if result is not None else {"dates": [], "wallets": {}}

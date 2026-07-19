@@ -19,6 +19,8 @@ import Button from "@/components/elements/Button";
 
 const LineChart = dynamic(() => import("@/components/charts/Line"), { ssr: false });
 const Table = dynamic(() => import("@/components/charts/Table"), { ssr: false });
+const DepositedVsValueLineChart = dynamic(() => import("@/components/charts/DepositedVsValueLineChart"), { ssr: false });
+const DepositedVsValueBarChart = dynamic(() => import("@/components/charts/DepositedVsValueBarChart"), { ssr: false });
 
 export default function Investments() {
   const [selectedWalletIdx, setSelectedWalletIdx] = useState(0);
@@ -39,7 +41,11 @@ export default function Investments() {
     isFetchingInvestmentsInWallet,
     investmentTypeDistributionPerWallet,
     investmentTransactions,
-    isFetchingInvestmentTransactions
+    isFetchingInvestmentTransactions,
+    depositedVsValue,
+    depositedVsValuePerWallet,
+    depositedVsValueHistory,
+    depositedVsValueHistoryPerWallet,
   } = useInvestmentsData(selectedWallet, selectedInvestmentId);
 
   const formattedTotalInvestments = currencyFormat(indicators?.totalInvestments);
@@ -184,6 +190,24 @@ export default function Investments() {
     }
   }, [canSelectedInvestmentAcceptEvents, isEventModalOpen]);
 
+  // Derived: deposited vs value history series keyed by type (for line chart)
+  const depositedVsValueHistorySeries = useMemo(() => {
+    if (!depositedVsValueHistory || !depositedVsValueHistory.types) return {};
+    return depositedVsValueHistory.types;
+  }, [depositedVsValueHistory]);
+
+  // Derived: deposited vs value bar items by type
+  const depositedVsValueBarItems = useMemo(() => {
+    if (!depositedVsValue) return [];
+    return depositedVsValue.map(item => ({ label: item.type, deposited: item.deposited, value: item.value }));
+  }, [depositedVsValue]);
+
+  // Derived: deposited vs value bar items by wallet
+  const depositedVsValuePerWalletBarItems = useMemo(() => {
+    if (!depositedVsValuePerWallet) return [];
+    return depositedVsValuePerWallet.map(item => ({ label: item.wallet, deposited: item.deposited, value: item.value }));
+  }, [depositedVsValuePerWallet]);
+
   function changeTab(index: number): ReactNode {
     setSelectedWalletIdx(index);
     const walletName = wallets?.wallets[index] ?? "Unknown Wallet";
@@ -191,6 +215,19 @@ export default function Investments() {
   }
 
   const renderTabContent = useCallback((walletName: string) => {
+    // Per-wallet history series filtered to the selected wallet
+    const walletHistorySeries = depositedVsValueHistoryPerWallet?.wallets
+      ? Object.fromEntries(
+          Object.entries(depositedVsValueHistoryPerWallet.wallets).filter(([key]) => key === walletName || key === "total")
+        )
+      : {};
+    const walletHistoryDates = depositedVsValueHistoryPerWallet?.dates ?? [];
+
+    // Per-wallet bar items filtered to selected wallet
+    const walletBarItems = depositedVsValuePerWallet
+      ?.filter(item => item.wallet === walletName)
+      .map(item => ({ label: item.wallet, deposited: item.deposited, value: item.value })) ?? [];
+
     return (
       <div className="mainContainer">
         <div className="gridItem span2Columns span2Rows">
@@ -216,8 +253,14 @@ export default function Investments() {
           />
         </div>
         <div className="gridItem span2Columns">
-          <TileHeader headline="History" subHeadline="History of wallet's results." />
-          <LineChart />
+          <TileHeader headline="History" subHeadline="Deposited vs market value over time for this wallet." />
+          {walletHistoryDates.length > 0
+            ? <DepositedVsValueLineChart dates={walletHistoryDates} series={walletHistorySeries} />
+            : <LineChart />}
+        </div>
+        <div className="gridItem span2Columns">
+          <TileHeader headline="Results" subHeadline="Deposited vs current value for this wallet." />
+          {walletBarItems.length > 0 ? <DepositedVsValueBarChart items={walletBarItems} /> : null}
         </div>
         <div className="gridItem span4Columns">
           <TileHeader
@@ -240,7 +283,11 @@ export default function Investments() {
         </div>
       </div>
     );
-  }, [investmentsTableData, isFetchingInvestmentsInWallet, invTypeDistPerWalletPie, invTypeDistPerWalletTable, investmentsRowIds, selectedInvestmentId, selectedInvestment, transactionsTableData, isFetchingInvestmentTransactions]);
+  }, [
+    investmentsTableData, isFetchingInvestmentsInWallet, invTypeDistPerWalletPie, invTypeDistPerWalletTable,
+    investmentsRowIds, selectedInvestmentId, selectedInvestment, transactionsTableData, isFetchingInvestmentTransactions,
+    depositedVsValueHistoryPerWallet, depositedVsValuePerWallet,
+  ]);
 
   return (
     <main className="mainContainer">
@@ -292,8 +339,20 @@ export default function Investments() {
       </div>
 
       <div className="gridItem span4Columns">
-        <TileHeader headline="Investments History" subHeadline="📈 Illustrates the historical growth of total invested funds over time." />
-        <LineChart />
+        <TileHeader headline="Investments History" subHeadline="Deposited vs market value over time, by investment type." />
+        {depositedVsValueHistory && depositedVsValueHistory.dates.length > 0
+          ? <DepositedVsValueLineChart dates={depositedVsValueHistory.dates} series={depositedVsValueHistorySeries} />
+          : <LineChart />}
+      </div>
+
+      <div className="gridItem span4Columns">
+        <TileHeader headline="Results by Type" subHeadline="Deposited vs current market value for each investment type." />
+        {depositedVsValueBarItems.length > 0 ? <DepositedVsValueBarChart items={depositedVsValueBarItems} /> : null}
+      </div>
+
+      <div className="gridItem span4Columns">
+        <TileHeader headline="Results by Wallet" subHeadline="Deposited vs current market value across all wallets." />
+        {depositedVsValuePerWalletBarItems.length > 0 ? <DepositedVsValueBarChart items={depositedVsValuePerWalletBarItems} /> : null}
       </div>
 
       <div className="gridItem span4Columns">
