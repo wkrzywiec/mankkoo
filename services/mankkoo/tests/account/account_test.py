@@ -7,7 +7,6 @@ import pytest
 
 import mankkoo.account.account as account
 import mankkoo.account.account_db as account_db
-import mankkoo.app as app
 import mankkoo.data_for_test as td
 import mankkoo.database as db
 import mankkoo.event_store as es
@@ -148,7 +147,7 @@ def test_new_operations_are_added_and_views_are_updated(mocker):
                 cur.execute("SELECT count(*) FROM views")
                 (views_count,) = cur.fetchone()
         print(f"Found {views_count} views")
-        return views_count == 8
+        return views_count == 13
 
     __wait_for_condition(condition_func=all_views_are_created, timeout=10, interval=1)
 

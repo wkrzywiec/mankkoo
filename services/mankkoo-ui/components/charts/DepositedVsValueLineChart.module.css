@@ -1,0 +1,21 @@
+.toggleContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.toggleBtn {
+  padding: 4px 14px;
+  border-radius: 16px;
+  border: 1.5px solid;
+  background: transparent;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s;
+}
+
+.toggleBtn.active {
+  color: #fff;
+}

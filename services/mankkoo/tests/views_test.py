@@ -1296,3 +1296,329 @@ def __wait_for_condition(condition_func, timeout=10, interval=1):
             return True
         time.sleep(interval)
     raise TimeoutError(f"Condition was not met within {timeout} seconds.")
+
+
+# ── investment-deposited-vs-value (snapshot by type) ─────────────────────────
+
+
+def test_deposited_vs_value_etf_buy_and_price_update():
+    # GIVEN: ETF buy then price update — deposited = buy totalValue, value = priced balance
+    app.start_listener_thread()
+    etf = dt.stock_events(
+        [{"date": "01-01-2023", "operation": 10000}], type="ETF", wallet="IKE"
+    )
+    es.create([etf["stream"]])
+    es.store(etf["events"])
+
+    # Add a price update event manually (not covered by stock_events helper)
+    priced = es.Event(
+        stream_type="stocks",
+        stream_id=etf["stream"].id,
+        event_type="ETFPriced",
+        data={
+            "pricePerUnit": 120.0,
+            "balance": 12000.0,
+            "currency": "PLN",
+            "comment": "",
+        },
+        occured_at=datetime(2023, 3, 1),
+        version=2,
+    )
+    es.store([priced])
+
+    def view_has_etf():
+        result = views.load_view(views.investment_deposited_vs_value_key)
+        if not result:
+            return False
+        etf_entry = next((r for r in result if r["type"] == "Etf"), None)
+        if etf_entry is None:
+            return False
+        return etf_entry["deposited"] == 10000.0 and etf_entry["value"] == 12000.0
+
+    __wait_for_condition(view_has_etf, timeout=10, interval=1)
+
+
+def test_deposited_vs_value_etf_buy_and_sell():
+    # GIVEN: ETF buy 10000 then sell 3000 — deposited = 7000, value = balance after sell
+    app.start_listener_thread()
+    etf = dt.stock_events(
+        [
+            {"date": "01-01-2023", "operation": 10000},
+            {"date": "01-03-2023", "operation": -3000},
+        ],
+        type="ETF",
+        wallet="IKE",
+    )
+    es.create([etf["stream"]])
+    es.store(etf["events"])
+
+    def view_has_correct_deposited():
+        result = views.load_view(views.investment_deposited_vs_value_key)
+        if not result:
+            return False
+        etf_entry = next((r for r in result if r["type"] == "Etf"), None)
+        if etf_entry is None:
+            return False
+        # deposited = 10000 - 3000 = 7000 (totalValue signs in data_for_test: sell uses negative op)
+        return etf_entry["deposited"] == 7000.0
+
+    __wait_for_condition(view_has_correct_deposited, timeout=10, interval=1)
+
+
+def test_deposited_vs_value_no_price_update_value_equals_deposited():
+    # GIVEN: Gold buy only, no price update — value should equal deposited
+    app.start_listener_thread()
+    gold = dt.gold_events(
+        [
+            {
+                "event_type": "GoldBought",
+                "totalValue": 5000,
+                "weight": 10,
+                "unitPrice": 500,
+                "date": "01-02-2023",
+            }
+        ],
+        wallet="Personal",
+    )
+    es.create([gold["stream"]])
+    es.store(gold["events"])
+
+    def gold_value_equals_deposited():
+        result = views.load_view(views.investment_deposited_vs_value_key)
+        if not result:
+            return False
+        gold_entry = next((r for r in result if r["type"] == "Gold"), None)
+        if gold_entry is None:
+            return False
+        return gold_entry["deposited"] == gold_entry["value"] == 5000.0
+
+    __wait_for_condition(gold_value_equals_deposited, timeout=10, interval=1)
+
+
+def test_deposited_vs_value_excludes_stream_not_in_wealth():
+    # GIVEN: One ETF included, one excluded
+    app.start_listener_thread()
+    included = dt.stock_events(
+        [{"date": "01-01-2023", "operation": 10000}],
+        type="ETF",
+        wallet="IKE",
+        include_in_wealth=True,
+    )
+    excluded = dt.stock_events(
+        [{"date": "01-01-2023", "operation": 5000}],
+        type="ETF",
+        wallet="IKE",
+        include_in_wealth=False,
+    )
+    es.create([included["stream"], excluded["stream"]])
+    es.store(included["events"] + excluded["events"])
+
+    def only_included_in_view():
+        result = views.load_view(views.investment_deposited_vs_value_key)
+        if not result:
+            return False
+        etf_entry = next((r for r in result if r["type"] == "Etf"), None)
+        if etf_entry is None:
+            return False
+        # Only the included stream's 10000 should be counted, not the excluded 5000
+        return etf_entry["deposited"] == 10000.0
+
+    __wait_for_condition(only_included_in_view, timeout=10, interval=1)
+
+
+def test_deposited_vs_value_multiple_types():
+    # GIVEN: ETF and treasury bonds — two separate entries
+    app.start_listener_thread()
+    etf = dt.stock_events(
+        [{"date": "01-01-2023", "operation": 10000}], type="ETF", wallet="IKE"
+    )
+    bonds = dt.investment_events(
+        [{"date": "01-01-2023", "operation": 20000}],
+        category="treasury_bonds",
+        wallet="IKE",
+    )
+    es.create([etf["stream"], bonds["stream"]])
+    es.store(etf["events"] + bonds["events"])
+
+    def two_types_in_view():
+        result = views.load_view(views.investment_deposited_vs_value_key)
+        if not result or len(result) < 2:
+            return False
+        types = [r["type"] for r in result]
+        return "Etf" in types and "Treasury Bonds" in types
+
+    __wait_for_condition(two_types_in_view, timeout=10, interval=1)
+
+
+# ── investment-deposited-vs-value-per-wallet ──────────────────────────────────
+
+
+def test_deposited_vs_value_per_wallet_two_wallets():
+    # GIVEN: ETF in IKE, gold in Personal — two separate wallet entries
+    app.start_listener_thread()
+    etf = dt.stock_events(
+        [{"date": "01-01-2023", "operation": 10000}], type="ETF", wallet="IKE"
+    )
+    gold = dt.gold_events(
+        [
+            {
+                "event_type": "GoldBought",
+                "totalValue": 5000,
+                "weight": 10,
+                "unitPrice": 500,
+                "date": "01-01-2023",
+            }
+        ],
+        wallet="Personal",
+    )
+    es.create([etf["stream"], gold["stream"]])
+    es.store(etf["events"] + gold["events"])
+
+    def two_wallets_in_view():
+        result = views.load_view(views.investment_deposited_vs_value_per_wallet_key)
+        if not result or len(result) < 2:
+            return False
+        wallets = [r["wallet"] for r in result]
+        return "IKE" in wallets and "Personal" in wallets
+
+    __wait_for_condition(two_wallets_in_view, timeout=10, interval=1)
+
+
+def test_deposited_vs_value_per_wallet_aggregates_same_wallet():
+    # GIVEN: ETF and gold both in IKE — single wallet entry with combined totals
+    app.start_listener_thread()
+    etf = dt.stock_events(
+        [{"date": "01-01-2023", "operation": 10000}], type="ETF", wallet="IKE"
+    )
+    gold = dt.gold_events(
+        [
+            {
+                "event_type": "GoldBought",
+                "totalValue": 5000,
+                "weight": 10,
+                "unitPrice": 500,
+                "date": "01-01-2023",
+            }
+        ],
+        wallet="IKE",
+    )
+    es.create([etf["stream"], gold["stream"]])
+    es.store(etf["events"] + gold["events"])
+
+    def single_wallet_aggregated():
+        result = views.load_view(views.investment_deposited_vs_value_per_wallet_key)
+        if not result:
+            return False
+        ike_entries = [r for r in result if r["wallet"] == "IKE"]
+        if len(ike_entries) != 1:
+            return False
+        return ike_entries[0]["deposited"] == 15000.0
+
+    __wait_for_condition(single_wallet_aggregated, timeout=10, interval=1)
+
+
+# ── investment-deposited-vs-value-history ────────────────────────────────────
+
+
+def test_deposited_vs_value_history_single_stream_two_months():
+    # GIVEN: ETF buy in Jan 2023, price update in Mar 2023
+    app.start_listener_thread()
+    etf = dt.stock_events(
+        [{"date": "15-01-2023", "operation": 10000}], type="ETF", wallet="IKE"
+    )
+    es.create([etf["stream"]])
+    es.store(etf["events"])
+
+    priced = es.Event(
+        stream_type="stocks",
+        stream_id=etf["stream"].id,
+        event_type="ETFPriced",
+        data={
+            "pricePerUnit": 120.0,
+            "balance": 12000.0,
+            "currency": "PLN",
+            "comment": "",
+        },
+        occured_at=datetime(2023, 3, 15),
+        version=2,
+    )
+    es.store([priced])
+
+    def history_has_two_months():
+        result = views.load_view(views.investment_deposited_vs_value_history_key)
+        if not result or not result.get("dates"):
+            return False
+        return "2023-01" in result["dates"] and "2023-03" in result["dates"]
+
+    __wait_for_condition(history_has_two_months, timeout=10, interval=1)
+
+    result = views.load_view(views.investment_deposited_vs_value_history_key)
+    assert result is not None
+    idx_jan = result["dates"].index("2023-01")
+    idx_mar = result["dates"].index("2023-03")
+
+    etf_key = "Etf"
+    assert etf_key in result["types"]
+    # Jan: deposited = 10000, value = 10000 (no price update yet)
+    assert result["types"][etf_key]["deposited"][idx_jan] == 10000.0
+    assert result["types"][etf_key]["value"][idx_jan] == 10000.0
+    # Mar: deposited still 10000 (step function, carry-forward), value = 12000
+    assert result["types"][etf_key]["deposited"][idx_mar] == 10000.0
+    assert result["types"][etf_key]["value"][idx_mar] == 12000.0
+
+
+def test_deposited_vs_value_history_total_key_present():
+    # GIVEN: Any investment stream exists
+    app.start_listener_thread()
+    etf = dt.stock_events(
+        [{"date": "01-01-2023", "operation": 10000}], type="ETF", wallet="IKE"
+    )
+    es.create([etf["stream"]])
+    es.store(etf["events"])
+
+    def history_has_total():
+        result = views.load_view(views.investment_deposited_vs_value_history_key)
+        if not result or not result.get("types"):
+            return False
+        return "total" in result["types"]
+
+    __wait_for_condition(history_has_total, timeout=10, interval=1)
+
+
+# ── investment-deposited-vs-value-history-per-wallet ─────────────────────────
+
+
+def test_deposited_vs_value_history_per_wallet_two_wallets():
+    # GIVEN: IKE (ETF) and Personal (gold) across multiple months
+    app.start_listener_thread()
+    etf = dt.stock_events(
+        [{"date": "15-01-2023", "operation": 10000}], type="ETF", wallet="IKE"
+    )
+    gold = dt.gold_events(
+        [
+            {
+                "event_type": "GoldBought",
+                "totalValue": 5000,
+                "weight": 10,
+                "unitPrice": 500,
+                "date": "15-02-2023",
+            }
+        ],
+        wallet="Personal",
+    )
+    es.create([etf["stream"], gold["stream"]])
+    es.store(etf["events"] + gold["events"])
+
+    def history_per_wallet_has_both_wallets():
+        result = views.load_view(
+            views.investment_deposited_vs_value_history_per_wallet_key
+        )
+        if not result or not result.get("wallets"):
+            return False
+        return (
+            "IKE" in result["wallets"]
+            and "Personal" in result["wallets"]
+            and "total" in result["wallets"]
+        )
+
+    __wait_for_condition(history_per_wallet_has_both_wallets, timeout=10, interval=1)

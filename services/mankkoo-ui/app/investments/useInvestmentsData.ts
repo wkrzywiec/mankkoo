@@ -1,5 +1,5 @@
 import { useGetHttp } from "@/hooks/useHttp";
-import { InvetsmentsIndicatorsResponse, InvestmentTypesDistributionResponse, WalletsDistributionResponse, WalletsResponse, InvestmentStreamResponse, InvestmentTypesDistributionPerWalletsResponse, InvestmentTransaction } from "@/api/InvestmentsPageResponses";
+import { InvetsmentsIndicatorsResponse, InvestmentTypesDistributionResponse, WalletsDistributionResponse, WalletsResponse, InvestmentStreamResponse, InvestmentTypesDistributionPerWalletsResponse, InvestmentTransaction, DepositedVsValueHistory, DepositedVsValueHistoryPerWallet, DepositedVsValueHistoryByTypePerWallet, DepositedVsValueItem, DepositedVsValuePerWalletItem } from "@/api/InvestmentsPageResponses";
 
 export function useInvestmentsData(selectedWallet: string, selectedInvestmentId: string | undefined) {
   const {
@@ -38,6 +38,30 @@ export function useInvestmentsData(selectedWallet: string, selectedInvestmentId:
     !!selectedInvestmentId
   );
 
+  const {
+    isFetching: isFetchingDepositedVsValue,
+    fetchedData: depositedVsValue,
+  } = useGetHttp<DepositedVsValueItem[]>('/investments/deposited-vs-value');
+
+  const {
+    isFetching: isFetchingDepositedVsValuePerWallet,
+    fetchedData: depositedVsValuePerWallet,
+  } = useGetHttp<DepositedVsValuePerWalletItem[]>('/investments/deposited-vs-value/per-wallet');
+
+  const {
+    isFetching: isFetchingDepositedVsValueHistory,
+    fetchedData: depositedVsValueHistory,
+  } = useGetHttp<DepositedVsValueHistory>('/investments/deposited-vs-value/history');
+
+  const {
+    isFetching: isFetchingDepositedVsValueHistoryPerWallet,
+    fetchedData: depositedVsValueHistoryPerWallet,
+  } = useGetHttp<DepositedVsValueHistoryPerWallet>('/investments/deposited-vs-value/history/per-wallet');
+
+  const {
+    fetchedData: depositedVsValueHistoryByTypePerWallet,
+  } = useGetHttp<DepositedVsValueHistoryByTypePerWallet>('/investments/deposited-vs-value/history/by-type-per-wallet');
+
   return {
     isFetchingInvIndicators,
     indicators,
@@ -50,6 +74,15 @@ export function useInvestmentsData(selectedWallet: string, selectedInvestmentId:
     isFetchingInvestmentsInWallet,
     investmentTypeDistributionPerWallet,
     investmentTransactions,
-    isFetchingInvestmentTransactions
+    isFetchingInvestmentTransactions,
+    isFetchingDepositedVsValue,
+    depositedVsValue,
+    isFetchingDepositedVsValuePerWallet,
+    depositedVsValuePerWallet,
+    isFetchingDepositedVsValueHistory,
+    depositedVsValueHistory,
+    isFetchingDepositedVsValueHistoryPerWallet,
+    depositedVsValueHistoryPerWallet,
+    depositedVsValueHistoryByTypePerWallet,
   };
 }

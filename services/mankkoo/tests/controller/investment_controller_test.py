@@ -1499,3 +1499,223 @@ def test_concurrent_event_writes_optimistic_locking(test_client):
     final_stream = es.get_stream_by_id(str(stream.id))
     assert final_stream is not None
     assert final_stream.version == 3, "Stream version should be 3 (one buy, two sells)"
+
+
+# ── deposited-vs-value endpoints ─────────────────────────────────────────────
+
+
+def test_get_deposited_vs_value_returns_200(test_client):
+    # GIVEN: An ETF stream with a buy event
+    import time
+
+    import mankkoo.app as app
+    import mankkoo.event_store as es
+    import mankkoo.views as views
+
+    app.start_listener_thread()
+    stream = es.Stream(
+        __import__("uuid").uuid4(),
+        "stocks",
+        "ETF",
+        "Test ETF",
+        "Broker",
+        True,
+        0,
+        {},
+        {"wallet": "IKE"},
+    )
+    es.create([stream])
+    event = es.Event(
+        stream_type="stocks",
+        stream_id=stream.id,
+        event_type="ETFBought",
+        data={
+            "totalValue": 10000.0,
+            "balance": 10000.0,
+            "units": 100.0,
+            "averagePrice": 100.0,
+            "currency": "PLN",
+            "comment": "",
+        },
+        occured_at=__import__("datetime").datetime(2023, 1, 15),
+        version=1,
+    )
+    es.store([event])
+
+    def view_ready():
+        v = views.load_view(views.investment_deposited_vs_value_key)
+        return v is not None and len(v) > 0
+
+    start = time.time()
+    while time.time() - start < 10:
+        if view_ready():
+            break
+        time.sleep(0.5)
+
+    # WHEN
+    response = test_client.get("/api/investments/deposited-vs-value")
+
+    # THEN
+    assert response.status_code == 200
+    data = response.get_json()
+    assert isinstance(data, list)
+    assert any(item.get("type") == "Etf" for item in data)
+
+
+def test_get_deposited_vs_value_per_wallet_returns_200(test_client):
+    import time
+
+    import mankkoo.app as app
+    import mankkoo.views as views
+
+    app.start_listener_thread()
+    stream = es.Stream(
+        __import__("uuid").uuid4(),
+        "stocks",
+        "ETF",
+        "Test ETF",
+        "Broker",
+        True,
+        0,
+        {},
+        {"wallet": "MyWallet"},
+    )
+    es.create([stream])
+    event = es.Event(
+        stream_type="stocks",
+        stream_id=stream.id,
+        event_type="ETFBought",
+        data={
+            "totalValue": 5000.0,
+            "balance": 5000.0,
+            "units": 50.0,
+            "averagePrice": 100.0,
+            "currency": "PLN",
+            "comment": "",
+        },
+        occured_at=__import__("datetime").datetime(2023, 1, 15),
+        version=1,
+    )
+    es.store([event])
+
+    def view_ready():
+        v = views.load_view(views.investment_deposited_vs_value_per_wallet_key)
+        return v is not None and len(v) > 0
+
+    start = time.time()
+    while time.time() - start < 10:
+        if view_ready():
+            break
+        time.sleep(0.5)
+
+    response = test_client.get("/api/investments/deposited-vs-value/per-wallet")
+    assert response.status_code == 200
+    data = response.get_json()
+    assert isinstance(data, list)
+    assert any(item.get("wallet") == "MyWallet" for item in data)
+
+
+def test_get_deposited_vs_value_history_returns_200_with_correct_shape(test_client):
+    import time
+
+    import mankkoo.app as app
+    import mankkoo.views as views
+
+    app.start_listener_thread()
+    stream = es.Stream(
+        __import__("uuid").uuid4(),
+        "stocks",
+        "ETF",
+        "Test ETF",
+        "Broker",
+        True,
+        0,
+        {},
+        {"wallet": "IKE"},
+    )
+    es.create([stream])
+    event = es.Event(
+        stream_type="stocks",
+        stream_id=stream.id,
+        event_type="ETFBought",
+        data={
+            "totalValue": 10000.0,
+            "balance": 10000.0,
+            "units": 100.0,
+            "averagePrice": 100.0,
+            "currency": "PLN",
+            "comment": "",
+        },
+        occured_at=__import__("datetime").datetime(2023, 1, 15),
+        version=1,
+    )
+    es.store([event])
+
+    def view_ready():
+        v = views.load_view(views.investment_deposited_vs_value_history_key)
+        return v is not None and v.get("dates")
+
+    start = time.time()
+    while time.time() - start < 10:
+        if view_ready():
+            break
+        time.sleep(0.5)
+
+    response = test_client.get("/api/investments/deposited-vs-value/history")
+    assert response.status_code == 200
+    data = response.get_json()
+    assert "dates" in data
+    assert "types" in data
+
+
+def test_get_deposited_vs_value_history_per_wallet_returns_200(test_client):
+    import time
+
+    import mankkoo.app as app
+    import mankkoo.views as views
+
+    app.start_listener_thread()
+    stream = es.Stream(
+        __import__("uuid").uuid4(),
+        "stocks",
+        "ETF",
+        "Test ETF",
+        "Broker",
+        True,
+        0,
+        {},
+        {"wallet": "IKE"},
+    )
+    es.create([stream])
+    event = es.Event(
+        stream_type="stocks",
+        stream_id=stream.id,
+        event_type="ETFBought",
+        data={
+            "totalValue": 10000.0,
+            "balance": 10000.0,
+            "units": 100.0,
+            "averagePrice": 100.0,
+            "currency": "PLN",
+            "comment": "",
+        },
+        occured_at=__import__("datetime").datetime(2023, 1, 15),
+        version=1,
+    )
+    es.store([event])
+
+    def view_ready():
+        v = views.load_view(views.investment_deposited_vs_value_history_per_wallet_key)
+        return v is not None and v.get("dates")
+
+    start = time.time()
+    while time.time() - start < 10:
+        if view_ready():
+            break
+        time.sleep(0.5)
+
+    response = test_client.get("/api/investments/deposited-vs-value/history/per-wallet")
+    assert response.status_code == 200
+    data = response.get_json()
+    assert "dates" in data
+    assert "wallets" in data

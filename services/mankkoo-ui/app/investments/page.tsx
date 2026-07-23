@@ -19,6 +19,8 @@ import Button from "@/components/elements/Button";
 
 const LineChart = dynamic(() => import("@/components/charts/Line"), { ssr: false });
 const Table = dynamic(() => import("@/components/charts/Table"), { ssr: false });
+const DepositedVsValueLineChart = dynamic(() => import("@/components/charts/DepositedVsValueLineChart"), { ssr: false });
+const DepositedVsValueBarChart = dynamic(() => import("@/components/charts/DepositedVsValueBarChart"), { ssr: false });
 
 export default function Investments() {
   const [selectedWalletIdx, setSelectedWalletIdx] = useState(0);
@@ -39,7 +41,12 @@ export default function Investments() {
     isFetchingInvestmentsInWallet,
     investmentTypeDistributionPerWallet,
     investmentTransactions,
-    isFetchingInvestmentTransactions
+    isFetchingInvestmentTransactions,
+    depositedVsValue,
+    depositedVsValuePerWallet,
+    depositedVsValueHistory,
+    depositedVsValueHistoryPerWallet,
+    depositedVsValueHistoryByTypePerWallet,
   } = useInvestmentsData(selectedWallet, selectedInvestmentId);
 
   const formattedTotalInvestments = currencyFormat(indicators?.totalInvestments);
@@ -184,6 +191,88 @@ export default function Investments() {
     }
   }, [canSelectedInvestmentAcceptEvents, isEventModalOpen]);
 
+  // Derived: deposited vs value history series keyed by type (for line chart)
+  const depositedVsValueHistorySeries = useMemo(() => {
+    if (!depositedVsValueHistory || !depositedVsValueHistory.types) return {};
+    return depositedVsValueHistory.types;
+  }, [depositedVsValueHistory]);
+
+  // Derived: overall gain indicator (total value - total deposited, all time)
+  const overallGain = useMemo(() => {
+    const total = depositedVsValueHistory?.types?.["total"];
+    if (!total || total.deposited.length === 0) return null;
+    const lastDeposited = total.deposited[total.deposited.length - 1];
+    const lastValue = total.value[total.value.length - 1];
+    if (lastDeposited === 0) return null;
+    const gainAmt = lastValue - lastDeposited;
+    const gainPct = (gainAmt / lastDeposited) * 100;
+    return { amount: gainAmt, pct: gainPct };
+  }, [depositedVsValueHistory]);
+
+  // Derived: year-to-year gain indicator (market gain only, excluding new deposits in the period)
+  const yearToYearGain = useMemo(() => {
+    const total = depositedVsValueHistory?.types?.["total"];
+    const dates = depositedVsValueHistory?.dates;
+    if (!total || !dates || dates.length < 2) return null;
+    const lastDate = dates[dates.length - 1];
+    const [lastYear, lastMonth] = lastDate.split("-").map(Number);
+    const targetYear = lastYear - 1;
+    const targetMonth = lastMonth;
+    const targetLabel = `${targetYear}-${String(targetMonth).padStart(2, "0")}`;
+    const targetIdx = dates.indexOf(targetLabel);
+    if (targetIdx === -1) return null;
+    const valueNow = total.value[total.value.length - 1];
+    const valueThen = total.value[targetIdx];
+    const depositedNow = total.deposited[total.deposited.length - 1];
+    const depositedThen = total.deposited[targetIdx];
+    if (valueThen === 0) return null;
+    // Subtract new deposits made in the period so only market gain is shown
+    const newDeposits = depositedNow - depositedThen;
+    const gainAmt = (valueNow - valueThen) - newDeposits;
+    const gainPct = (gainAmt / valueThen) * 100;
+    return { amount: gainAmt, pct: gainPct };
+  }, [depositedVsValueHistory]);
+
+  // Derived: deposited vs value table by type
+  const depositedVsValueTableData = useMemo<TableData>(() => {
+    if (!depositedVsValue || depositedVsValue.length === 0) return { data: [], hasHeader: true, boldLastRow: true, currencyColumnIdx: -1, colorsColumnIdx: -1 };
+    const gainPct = (dep: number, val: number) => dep === 0 ? "—" : percentage((val - dep) / dep);
+    const rows: string[][] = [
+      ["Type", "Deposited", "Current Value", "Gain", "Gain %"],
+      ...depositedVsValue.map(item => [
+        item.type,
+        currencyFormat(item.deposited),
+        currencyFormat(item.value),
+        currencyFormat(item.value - item.deposited),
+        gainPct(item.deposited, item.value),
+      ]),
+    ];
+    const totalDeposited = depositedVsValue.reduce((s, i) => s + i.deposited, 0);
+    const totalValue = depositedVsValue.reduce((s, i) => s + i.value, 0);
+    rows.push(["Total", currencyFormat(totalDeposited), currencyFormat(totalValue), currencyFormat(totalValue - totalDeposited), gainPct(totalDeposited, totalValue)]);
+    return { data: rows, hasHeader: true, boldLastRow: true, currencyColumnIdx: -1, colorsColumnIdx: -1 };
+  }, [depositedVsValue]);
+
+  // Derived: deposited vs value table by wallet
+  const depositedVsValuePerWalletTableData = useMemo<TableData>(() => {
+    if (!depositedVsValuePerWallet || depositedVsValuePerWallet.length === 0) return { data: [], hasHeader: true, boldLastRow: true, currencyColumnIdx: -1, colorsColumnIdx: -1 };
+    const gainPct = (dep: number, val: number) => dep === 0 ? "—" : percentage((val - dep) / dep);
+    const rows: string[][] = [
+      ["Wallet", "Deposited", "Current Value", "Gain", "Gain %"],
+      ...depositedVsValuePerWallet.map(item => [
+        item.wallet,
+        currencyFormat(item.deposited),
+        currencyFormat(item.value),
+        currencyFormat(item.value - item.deposited),
+        gainPct(item.deposited, item.value),
+      ]),
+    ];
+    const totalDeposited = depositedVsValuePerWallet.reduce((s, i) => s + i.deposited, 0);
+    const totalValue = depositedVsValuePerWallet.reduce((s, i) => s + i.value, 0);
+    rows.push(["Total", currencyFormat(totalDeposited), currencyFormat(totalValue), currencyFormat(totalValue - totalDeposited), gainPct(totalDeposited, totalValue)]);
+    return { data: rows, hasHeader: true, boldLastRow: true, currencyColumnIdx: -1, colorsColumnIdx: -1 };
+  }, [depositedVsValuePerWallet]);
+
   function changeTab(index: number): ReactNode {
     setSelectedWalletIdx(index);
     const walletName = wallets?.wallets[index] ?? "Unknown Wallet";
@@ -191,6 +280,10 @@ export default function Investments() {
   }
 
   const renderTabContent = useCallback((walletName: string) => {
+    // Per-wallet history series: each investment type + total for the selected wallet
+    const walletTypeSeries = depositedVsValueHistoryByTypePerWallet?.wallets?.[walletName] ?? {};
+    const walletHistoryDates = depositedVsValueHistoryByTypePerWallet?.dates ?? [];
+
     return (
       <div className="mainContainer">
         <div className="gridItem span2Columns span2Rows">
@@ -216,8 +309,10 @@ export default function Investments() {
           />
         </div>
         <div className="gridItem span2Columns">
-          <TileHeader headline="History" subHeadline="History of wallet's results." />
-          <LineChart />
+          <TileHeader headline="History" subHeadline="Deposited vs market value over time for this wallet." />
+          {walletHistoryDates.length > 0
+            ? <DepositedVsValueLineChart dates={walletHistoryDates} series={walletTypeSeries} />
+            : <LineChart />}
         </div>
         <div className="gridItem span4Columns">
           <TileHeader
@@ -240,7 +335,11 @@ export default function Investments() {
         </div>
       </div>
     );
-  }, [investmentsTableData, isFetchingInvestmentsInWallet, invTypeDistPerWalletPie, invTypeDistPerWalletTable, investmentsRowIds, selectedInvestmentId, selectedInvestment, transactionsTableData, isFetchingInvestmentTransactions]);
+  }, [
+    investmentsTableData, isFetchingInvestmentsInWallet, invTypeDistPerWalletPie, invTypeDistPerWalletTable,
+    investmentsRowIds, selectedInvestmentId, selectedInvestment, transactionsTableData, isFetchingInvestmentTransactions,
+    depositedVsValueHistoryByTypePerWallet,
+  ]);
 
   return (
     <main className="mainContainer">
@@ -257,10 +356,18 @@ export default function Investments() {
         />
       </div>
       <div className="gridItem">
-        <Indicator headline="Total Results (last year)" text="no data" />
+        <Indicator
+          headline="Total Results (all time)"
+          text={overallGain ? `${currencyFormat(overallGain.amount)} (${overallGain.pct.toFixed(1)}%)` : "no data"}
+          textColor={overallGain ? (overallGain.amount >= 0 ? "#659B5E" : "#ED6B53") : undefined}
+        />
       </div>
       <div className="gridItem">
-        <Indicator headline="Total Results (last year)" text="no data" textColor="#659B5E" />
+        <Indicator
+          headline="Total Results (year-to-year)"
+          text={yearToYearGain ? `${currencyFormat(yearToYearGain.amount)} (${yearToYearGain.pct.toFixed(1)}%)` : "no data"}
+          textColor={yearToYearGain ? (yearToYearGain.amount >= 0 ? "#659B5E" : "#ED6B53") : undefined}
+        />
       </div>
       <div className="gridItem">
         <Indicator headline="Investments vs inflation" text="no data" textColor="#ED6B53" />
@@ -292,8 +399,24 @@ export default function Investments() {
       </div>
 
       <div className="gridItem span4Columns">
-        <TileHeader headline="Investments History" subHeadline="📈 Illustrates the historical growth of total invested funds over time." />
-        <LineChart />
+        <TileHeader headline="Investments History" subHeadline="Deposited vs market value over time, by investment type." />
+        {depositedVsValueHistory && depositedVsValueHistory.dates.length > 0
+          ? <DepositedVsValueLineChart dates={depositedVsValueHistory.dates} series={depositedVsValueHistorySeries} />
+          : <LineChart />}
+      </div>
+
+      <div className="gridItem span2Columns">
+        <TileHeader headline="Results by Type" subHeadline="Deposited vs current market value for each investment type." />
+        {depositedVsValueTableData.data.length > 0
+          ? <Table data={depositedVsValueTableData.data} hasHeader boldLastRow currencyColumnIdx={-1} colorsColumnIdx={-1} />
+          : null}
+      </div>
+
+      <div className="gridItem span2Columns">
+        <TileHeader headline="Results by Wallet" subHeadline="Deposited vs current market value across all wallets." />
+        {depositedVsValuePerWalletTableData.data.length > 0
+          ? <Table data={depositedVsValuePerWalletTableData.data} hasHeader boldLastRow currencyColumnIdx={-1} colorsColumnIdx={-1} />
+          : null}
       </div>
 
       <div className="gridItem span4Columns">
