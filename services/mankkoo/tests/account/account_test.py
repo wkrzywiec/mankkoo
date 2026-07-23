@@ -147,7 +147,7 @@ def test_new_operations_are_added_and_views_are_updated(mocker):
                 cur.execute("SELECT count(*) FROM views")
                 (views_count,) = cur.fetchone()
         print(f"Found {views_count} views")
-        return views_count == 12
+        return views_count == 13
 
     __wait_for_condition(condition_func=all_views_are_created, timeout=10, interval=1)
 
