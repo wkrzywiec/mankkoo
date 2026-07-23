@@ -12,10 +12,13 @@ import {
   Legend,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
+import ChartDataLabels from "chartjs-plugin-datalabels";
+import zoomPlugin from "chartjs-plugin-zoom";
+import "chartjs-adapter-moment";
 import { getColor } from "@/app/colors";
 import styles from "./DepositedVsValueLineChart.module.css";
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ChartDataLabels, zoomPlugin);
 
 interface DepositedVsValueSeries {
   deposited: number[];
@@ -25,9 +28,12 @@ interface DepositedVsValueSeries {
 interface DepositedVsValueLineChartProps {
   dates: string[];
   series: Record<string, DepositedVsValueSeries>;
+  hideYAxis?: boolean;
+  hideToggle?: boolean;
+  height?: string;
 }
 
-export default function DepositedVsValueLineChart({ dates, series }: DepositedVsValueLineChartProps) {
+export default function DepositedVsValueLineChart({ dates, series, hideYAxis = false, hideToggle = false, height = "320px" }: DepositedVsValueLineChartProps) {
   const seriesKeys = Object.keys(series);
   const initialVisibility = seriesKeys.reduce<Record<string, boolean>>((acc, key) => {
     acc[key] = true;
@@ -81,7 +87,7 @@ export default function DepositedVsValueLineChart({ dates, series }: DepositedVs
 
   return (
     <div>
-      <div className={styles.toggleContainer}>
+      {!hideToggle && <div className={styles.toggleContainer}>
         <button
           className={`${styles.toggleBtn} ${seriesKeys.some((k) => visible[k]) ? styles.active : ""}`}
           style={{ borderColor: "#463F3A", backgroundColor: seriesKeys.some((k) => visible[k]) ? "#463F3A" : "transparent", color: seriesKeys.some((k) => visible[k]) ? "#fff" : "#463F3A" }}
@@ -107,8 +113,8 @@ export default function DepositedVsValueLineChart({ dates, series }: DepositedVs
             </button>
           );
         })}
-      </div>
-      <div style={{ height: "320px" }}>
+      </div>}
+      <div style={{ height }}>
         <Line
           ref={chartRef}
           data={{ labels: dates, datasets }}
@@ -118,10 +124,18 @@ export default function DepositedVsValueLineChart({ dates, series }: DepositedVs
             plugins: {
               legend: { display: false },
               tooltip: { mode: "index", intersect: false },
+              datalabels: { display: false },
+              zoom: {
+                zoom: {
+                  wheel: { enabled: true, modifierKey: "ctrl" },
+                  pinch: { enabled: true },
+                  mode: "x",
+                },
+              },
             },
             scales: {
               x: { ticks: { maxTicksLimit: 12 } },
-              y: { beginAtZero: false },
+              y: { beginAtZero: false, ticks: { display: !hideYAxis }, grid: { display: true } },
             },
           }}
         />

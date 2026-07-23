@@ -12,6 +12,7 @@ import TileHeader from "@/components/elements/TileHeader";
 import SubHeadline from "@/components/elements/SubHeadline";
 
 import { MainIndicatorsResponse, SavingsDistribution, TotalHistory, MonthlyIncome } from "@/api/MainPageResponses";
+import { DepositedVsValueHistory } from "@/api/InvestmentsPageResponses";
 
 import { currencyFormat, percentage } from "@/utils/Formatter";
 
@@ -25,6 +26,8 @@ import Loader from "@/components/elements/Loader";
 const LineChart = dynamic(() => import('@/components/charts/Line'), {
   ssr: false, // Disable server-side rendering, more info: https://nextjs.org/docs/messages/react-hydration-error
 });
+
+const DepositedVsValueLineChart = dynamic(() => import('@/components/charts/DepositedVsValueLineChart'), { ssr: false });
 
 const Table = dynamic(() => import('@/components/charts/Table'), {
   ssr: false, // Disable server-side rendering, more info: https://nextjs.org/docs/messages/react-hydration-error
@@ -52,6 +55,10 @@ export default function Home() {
     isFetching: isFetchingMonthlyIncome,
     fetchedData: monthlyIncome,
   } = useGetHttp<MonthlyIncome>('/main/monthly-profits');
+
+  const {
+    fetchedData: depositedVsValueHistory,
+  } = useGetHttp<DepositedVsValueHistory>('/investments/deposited-vs-value/history');
   
 
   
@@ -185,8 +192,15 @@ export default function Home() {
       </div>
 
       <div className="gridItem span2Columns">
-        <TileHeader headline="Investments" subHeadline="💸 Historical value of all investments divided by the asset type excluding real-estate."/>
-        <LineChart />
+        <TileHeader headline="Investments" subHeadline="💸 Total invested vs current market value of all investments."/>
+        {depositedVsValueHistory && depositedVsValueHistory.dates.length > 0 && depositedVsValueHistory.types["total"]
+          ? <DepositedVsValueLineChart
+              dates={depositedVsValueHistory.dates}
+              series={{ total: depositedVsValueHistory.types["total"] }}
+              hideToggle
+              height="600px"
+            />
+          : <LineChart />}
       </div>
       <div className="gridItem span2Columns">
         <TileHeader headline="Retirement" subHeadline="👴Cumultive resources collected for a retirement."/>

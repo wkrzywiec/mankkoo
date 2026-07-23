@@ -196,6 +196,38 @@ export default function Investments() {
     return depositedVsValueHistory.types;
   }, [depositedVsValueHistory]);
 
+  // Derived: overall gain indicator (total value - total deposited, all time)
+  const overallGain = useMemo(() => {
+    const total = depositedVsValueHistory?.types?.["total"];
+    if (!total || total.deposited.length === 0) return null;
+    const lastDeposited = total.deposited[total.deposited.length - 1];
+    const lastValue = total.value[total.value.length - 1];
+    if (lastDeposited === 0) return null;
+    const gainAmt = lastValue - lastDeposited;
+    const gainPct = (gainAmt / lastDeposited) * 100;
+    return { amount: gainAmt, pct: gainPct };
+  }, [depositedVsValueHistory]);
+
+  // Derived: year-to-year gain indicator (current value vs value 12 months ago)
+  const yearToYearGain = useMemo(() => {
+    const total = depositedVsValueHistory?.types?.["total"];
+    const dates = depositedVsValueHistory?.dates;
+    if (!total || !dates || dates.length < 2) return null;
+    const lastDate = dates[dates.length - 1];
+    const [lastYear, lastMonth] = lastDate.split("-").map(Number);
+    const targetYear = lastMonth === 1 ? lastYear - 1 : lastYear - 1;
+    const targetMonth = lastMonth === 1 ? 12 : lastMonth - 1;
+    const targetLabel = `${targetYear}-${String(targetMonth).padStart(2, "0")}`;
+    const targetIdx = dates.indexOf(targetLabel);
+    if (targetIdx === -1) return null;
+    const valueNow = total.value[total.value.length - 1];
+    const valueThen = total.value[targetIdx];
+    if (valueThen === 0) return null;
+    const gainAmt = valueNow - valueThen;
+    const gainPct = (gainAmt / valueThen) * 100;
+    return { amount: gainAmt, pct: gainPct };
+  }, [depositedVsValueHistory]);
+
   // Derived: deposited vs value table by type
   const depositedVsValueTableData = useMemo<TableData>(() => {
     if (!depositedVsValue || depositedVsValue.length === 0) return { data: [], hasHeader: true, boldLastRow: true, currencyColumnIdx: -1, colorsColumnIdx: -1 };
@@ -323,10 +355,18 @@ export default function Investments() {
         />
       </div>
       <div className="gridItem">
-        <Indicator headline="Total Results (last year)" text="no data" />
+        <Indicator
+          headline="Total Results (all time)"
+          text={overallGain ? `${currencyFormat(overallGain.amount)} (${overallGain.pct.toFixed(1)}%)` : "no data"}
+          textColor={overallGain ? (overallGain.amount >= 0 ? "#659B5E" : "#ED6B53") : undefined}
+        />
       </div>
       <div className="gridItem">
-        <Indicator headline="Total Results (last year)" text="no data" textColor="#659B5E" />
+        <Indicator
+          headline="Total Results (year-to-year)"
+          text={yearToYearGain ? `${currencyFormat(yearToYearGain.amount)} (${yearToYearGain.pct.toFixed(1)}%)` : "no data"}
+          textColor={yearToYearGain ? (yearToYearGain.amount >= 0 ? "#659B5E" : "#ED6B53") : undefined}
+        />
       </div>
       <div className="gridItem">
         <Indicator headline="Investments vs inflation" text="no data" textColor="#ED6B53" />
