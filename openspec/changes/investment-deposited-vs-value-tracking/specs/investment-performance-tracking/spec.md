@@ -82,9 +82,25 @@ Same computation rules as the by-type history view, but grouped by wallet instea
 
 ---
 
+### Requirement: Deposited vs Value Time-Series History by Type Within Wallet
+
+The system SHALL maintain a pre-computed time-series view showing deposited amount and market value at monthly intervals, broken down by investment subtype within each wallet, for streams included in wealth.
+
+For each wallet the result contains one series per subtype present in that wallet, plus a synthetic `total` series aggregating all subtypes within the wallet.
+
+#### Scenario: History by type within wallet contains per-subtype series per wallet
+- **WHEN** the `investment-deposited-vs-value-history-by-type-per-wallet` view is requested
+- **THEN** the response contains `dates` and `wallets`, where each wallet key maps to a record of subtype keys (e.g. `ETF`, `Gold`) each with `deposited` and `value` arrays, plus a `total` key
+
+#### Scenario: Each wallet total aggregates its subtypes only
+- **WHEN** a wallet contains ETF and Gold streams
+- **THEN** the `total` series within that wallet sums only ETF and Gold — not streams from other wallets
+
+---
+
 ### Requirement: API Endpoints for Performance Views
 
-The system SHALL expose four GET endpoints returning the above views.
+The system SHALL expose five GET endpoints returning the above views.
 
 #### Scenario: Get snapshot by type
 - **WHEN** `GET /api/investments/deposited-vs-value` is called
@@ -102,6 +118,10 @@ The system SHALL expose four GET endpoints returning the above views.
 - **WHEN** `GET /api/investments/deposited-vs-value/history/per-wallet` is called
 - **THEN** the system returns HTTP 200 with `{ dates: [...], wallets: { <wallet>: { deposited: [...], value: [...] }, total: { ... } } }`
 
+#### Scenario: Get time-series history by type within wallet
+- **WHEN** `GET /api/investments/deposited-vs-value/history/by-type-per-wallet` is called
+- **THEN** the system returns HTTP 200 with `{ dates: [...], wallets: { <wallet>: { <subtype>: { deposited: [...], value: [...] }, total: { ... } } } }`
+
 #### Scenario: Views update after new investment event
 - **WHEN** a new investment or stocks event is appended
-- **THEN** all four performance views are updated asynchronously via the NOTIFY/LISTEN mechanism
+- **THEN** all five performance views are updated asynchronously via the NOTIFY/LISTEN mechanism

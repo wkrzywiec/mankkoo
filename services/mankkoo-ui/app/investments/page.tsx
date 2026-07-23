@@ -209,22 +209,26 @@ export default function Investments() {
     return { amount: gainAmt, pct: gainPct };
   }, [depositedVsValueHistory]);
 
-  // Derived: year-to-year gain indicator (current value vs value 12 months ago)
+  // Derived: year-to-year gain indicator (market gain only, excluding new deposits in the period)
   const yearToYearGain = useMemo(() => {
     const total = depositedVsValueHistory?.types?.["total"];
     const dates = depositedVsValueHistory?.dates;
     if (!total || !dates || dates.length < 2) return null;
     const lastDate = dates[dates.length - 1];
     const [lastYear, lastMonth] = lastDate.split("-").map(Number);
-    const targetYear = lastMonth === 1 ? lastYear - 1 : lastYear - 1;
-    const targetMonth = lastMonth === 1 ? 12 : lastMonth - 1;
+    const targetYear = lastYear - 1;
+    const targetMonth = lastMonth;
     const targetLabel = `${targetYear}-${String(targetMonth).padStart(2, "0")}`;
     const targetIdx = dates.indexOf(targetLabel);
     if (targetIdx === -1) return null;
     const valueNow = total.value[total.value.length - 1];
     const valueThen = total.value[targetIdx];
+    const depositedNow = total.deposited[total.deposited.length - 1];
+    const depositedThen = total.deposited[targetIdx];
     if (valueThen === 0) return null;
-    const gainAmt = valueNow - valueThen;
+    // Subtract new deposits made in the period so only market gain is shown
+    const newDeposits = depositedNow - depositedThen;
+    const gainAmt = (valueNow - valueThen) - newDeposits;
     const gainPct = (gainAmt / valueThen) * 100;
     return { amount: gainAmt, pct: gainPct };
   }, [depositedVsValueHistory]);
