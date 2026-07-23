@@ -46,6 +46,7 @@ export default function Investments() {
     depositedVsValuePerWallet,
     depositedVsValueHistory,
     depositedVsValueHistoryPerWallet,
+    depositedVsValueHistoryByTypePerWallet,
   } = useInvestmentsData(selectedWallet, selectedInvestmentId);
 
   const formattedTotalInvestments = currencyFormat(indicators?.totalInvestments);
@@ -275,13 +276,9 @@ export default function Investments() {
   }
 
   const renderTabContent = useCallback((walletName: string) => {
-    // Per-wallet history series filtered to the selected wallet
-    const walletHistorySeries = depositedVsValueHistoryPerWallet?.wallets
-      ? Object.fromEntries(
-          Object.entries(depositedVsValueHistoryPerWallet.wallets).filter(([key]) => key === walletName || key === "total")
-        )
-      : {};
-    const walletHistoryDates = depositedVsValueHistoryPerWallet?.dates ?? [];
+    // Per-wallet history series: each investment type + total for the selected wallet
+    const walletTypeSeries = depositedVsValueHistoryByTypePerWallet?.wallets?.[walletName] ?? {};
+    const walletHistoryDates = depositedVsValueHistoryByTypePerWallet?.dates ?? [];
 
     return (
       <div className="mainContainer">
@@ -310,7 +307,7 @@ export default function Investments() {
         <div className="gridItem span2Columns">
           <TileHeader headline="History" subHeadline="Deposited vs market value over time for this wallet." />
           {walletHistoryDates.length > 0
-            ? <DepositedVsValueLineChart dates={walletHistoryDates} series={walletHistorySeries} />
+            ? <DepositedVsValueLineChart dates={walletHistoryDates} series={walletTypeSeries} />
             : <LineChart />}
         </div>
         <div className="gridItem span4Columns">
@@ -337,7 +334,7 @@ export default function Investments() {
   }, [
     investmentsTableData, isFetchingInvestmentsInWallet, invTypeDistPerWalletPie, invTypeDistPerWalletTable,
     investmentsRowIds, selectedInvestmentId, selectedInvestment, transactionsTableData, isFetchingInvestmentTransactions,
-    depositedVsValueHistoryPerWallet,
+    depositedVsValueHistoryByTypePerWallet,
   ]);
 
   return (

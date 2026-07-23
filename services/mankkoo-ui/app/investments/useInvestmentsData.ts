@@ -1,5 +1,5 @@
 import { useGetHttp } from "@/hooks/useHttp";
-import { InvetsmentsIndicatorsResponse, InvestmentTypesDistributionResponse, WalletsDistributionResponse, WalletsResponse, InvestmentStreamResponse, InvestmentTypesDistributionPerWalletsResponse, InvestmentTransaction, DepositedVsValueHistory, DepositedVsValueHistoryPerWallet, DepositedVsValueItem, DepositedVsValuePerWalletItem } from "@/api/InvestmentsPageResponses";
+import { InvetsmentsIndicatorsResponse, InvestmentTypesDistributionResponse, WalletsDistributionResponse, WalletsResponse, InvestmentStreamResponse, InvestmentTypesDistributionPerWalletsResponse, InvestmentTransaction, DepositedVsValueHistory, DepositedVsValueHistoryPerWallet, DepositedVsValueHistoryByTypePerWallet, DepositedVsValueItem, DepositedVsValuePerWalletItem } from "@/api/InvestmentsPageResponses";
 
 export function useInvestmentsData(selectedWallet: string, selectedInvestmentId: string | undefined) {
   const {
@@ -58,6 +58,10 @@ export function useInvestmentsData(selectedWallet: string, selectedInvestmentId:
     fetchedData: depositedVsValueHistoryPerWallet,
   } = useGetHttp<DepositedVsValueHistoryPerWallet>('/investments/deposited-vs-value/history/per-wallet');
 
+  const {
+    fetchedData: depositedVsValueHistoryByTypePerWallet,
+  } = useGetHttp<DepositedVsValueHistoryByTypePerWallet>('/investments/deposited-vs-value/history/by-type-per-wallet');
+
   return {
     isFetchingInvIndicators,
     indicators,
@@ -79,5 +83,6 @@ export function useInvestmentsData(selectedWallet: string, selectedInvestmentId:
     depositedVsValueHistory,
     isFetchingDepositedVsValueHistoryPerWallet,
     depositedVsValueHistoryPerWallet,
+    depositedVsValueHistoryByTypePerWallet,
   };
 }

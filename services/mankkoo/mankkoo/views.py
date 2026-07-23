@@ -26,6 +26,9 @@ investment_deposited_vs_value_history_key = "investment-deposited-vs-value-histo
 investment_deposited_vs_value_history_per_wallet_key = (
     "investment-deposited-vs-value-history-per-wallet"
 )
+investment_deposited_vs_value_history_by_type_per_wallet_key = (
+    "investment-deposited-vs-value-history-by-type-per-wallet"
+)
 
 
 def load_view(view_name):
@@ -64,6 +67,7 @@ def update_views(oldest_occured_event_date: date):
     __investment_deposited_vs_value_per_wallet()
     __investment_deposited_vs_value_history()
     __investment_deposited_vs_value_history_per_wallet()
+    __investment_deposited_vs_value_history_by_type_per_wallet()
 
 
 def __main_indicators() -> None:
@@ -1181,6 +1185,109 @@ def __investment_deposited_vs_value_history_per_wallet() -> None:
     log.info(
         f"The '{investment_deposited_vs_value_history_per_wallet_key}' view was updated"
     )
+
+
+def __load_investment_deposited_vs_value_history_by_type_per_wallet() -> dict:
+    log.info("Loading investment deposited vs value history by type per wallet...")
+    query = """
+    WITH wealth_streams AS (
+        SELECT id, subtype, labels->>'wallet' AS wallet
+        FROM streams
+        WHERE type IN ('investment', 'stocks')
+          AND active = true
+          AND (labels->>'include_in_wealth' IS NULL OR labels->>'include_in_wealth' = 'true')
+    ),
+    event_months AS (
+        SELECT DISTINCT date_trunc('month', e.occured_at)::date AS month_start
+        FROM events e
+        JOIN wealth_streams s ON s.id = e.stream_id
+    ),
+    month_stream_deposited AS (
+        SELECT
+            em.month_start,
+            s.id AS stream_id,
+            s.subtype,
+            s.wallet,
+            COALESCE(SUM(CASE WHEN e.type LIKE '%%Bought' OR e.type LIKE '%%Sold' OR e.type LIKE '%%Matured' THEN (e.data->>'totalValue')::numeric ELSE 0 END), 0) AS deposited
+        FROM event_months em
+        CROSS JOIN wealth_streams s
+        LEFT JOIN events e ON e.stream_id = s.id
+            AND e.occured_at <= (em.month_start + interval '1 month - 1 day')
+        GROUP BY em.month_start, s.id, s.subtype, s.wallet
+    ),
+    month_stream_value AS (
+        SELECT
+            em.month_start,
+            s.id AS stream_id,
+            COALESCE((
+                SELECT (ev.data->>'balance')::numeric
+                FROM events ev
+                WHERE ev.stream_id = s.id
+                  AND ev.occured_at <= (em.month_start + interval '1 month - 1 day')
+                ORDER BY ev.version DESC
+                LIMIT 1
+            ), 0) AS value
+        FROM event_months em
+        CROSS JOIN wealth_streams s
+    )
+    SELECT
+        d.month_start,
+        d.wallet,
+        d.subtype,
+        ROUND(SUM(d.deposited), 2) AS deposited,
+        ROUND(SUM(v.value), 2) AS value
+    FROM month_stream_deposited d
+    JOIN month_stream_value v ON v.stream_id = d.stream_id AND v.month_start = d.month_start
+    GROUP BY d.month_start, d.wallet, d.subtype
+    ORDER BY d.month_start, d.wallet, d.subtype;
+    """
+    with db.get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(query)
+            rows = cur.fetchall()
+
+    # rows: (month_start, wallet, subtype, deposited, value)
+    all_months = sorted(set(r[0] for r in rows))
+    all_wallets = sorted(set(r[1] for r in rows if r[1] is not None))
+    dates = [m.strftime("%Y-%m") for m in all_months]
+
+    result: dict = {}
+    for wallet in all_wallets:
+        wallet_rows = [(r[0], r[2], r[3], r[4]) for r in rows if r[1] == wallet]
+        subtypes = sorted(set(r[1] for r in wallet_rows))
+        sparse = {(r[0], r[1]): (float(r[2] or 0), float(r[3] or 0)) for r in wallet_rows}
+
+        types: dict = {}
+        for subtype in subtypes:
+            dep_list: list = []
+            val_list: list = []
+            prev_dep = 0.0
+            prev_val = 0.0
+            for m in all_months:
+                dep, val = sparse.get((m, subtype), (prev_dep, prev_val))
+                dep_list.append(dep)
+                val_list.append(val)
+                prev_dep = dep
+                prev_val = val
+            key = subtype.replace("_", " ").title()
+            types[key] = {"deposited": dep_list, "value": val_list}
+
+        if types:
+            type_keys = list(types.keys())
+            total_dep = [sum(types[k]["deposited"][i] for k in type_keys) for i in range(len(dates))]
+            total_val = [sum(types[k]["value"][i] for k in type_keys) for i in range(len(dates))]
+            types["total"] = {"deposited": total_dep, "value": total_val}
+
+        result[wallet] = types
+
+    return {"dates": dates, "wallets": result}
+
+
+def __investment_deposited_vs_value_history_by_type_per_wallet() -> None:
+    log.info(f"Updating '{investment_deposited_vs_value_history_by_type_per_wallet_key}' view...")
+    view_content = __load_investment_deposited_vs_value_history_by_type_per_wallet()
+    __store_view(investment_deposited_vs_value_history_by_type_per_wallet_key, view_content)
+    log.info(f"The '{investment_deposited_vs_value_history_by_type_per_wallet_key}' view was updated")
 
 
 class JSONEncoder(json.JSONEncoder):

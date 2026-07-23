@@ -103,3 +103,8 @@ export interface DepositedVsValueHistoryPerWallet {
     dates: string[];
     wallets: Record<string, DepositedVsValueSeries>;
 }
+
+export interface DepositedVsValueHistoryByTypePerWallet {
+    dates: string[];
+    wallets: Record<string, Record<string, DepositedVsValueSeries>>;
+}

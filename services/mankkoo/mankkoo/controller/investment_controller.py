@@ -223,3 +223,13 @@ def get_deposited_vs_value_history():
 def get_deposited_vs_value_history_per_wallet():
     result = views.load_view(views.investment_deposited_vs_value_history_per_wallet_key)
     return result if result is not None else {"dates": [], "wallets": {}}
+
+
+@investment_endpoints.get("/deposited-vs-value/history/by-type-per-wallet")
+@investment_endpoints.doc(
+    summary="Deposited vs Value History by Type per Wallet",
+    description="Monthly time-series broken down by investment type within each wallet",
+)
+def get_deposited_vs_value_history_by_type_per_wallet():
+    result = views.load_view(views.investment_deposited_vs_value_history_by_type_per_wallet_key)
+    return result if result is not None else {"dates": [], "wallets": {}}
