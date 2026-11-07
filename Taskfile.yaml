@@ -54,8 +54,8 @@ tasks:
     desc: Run entire project in Docker
     dir: services/mankkoo/mankkoo
     cmds:
-      - task: infra
-      - docker compose up -d
+      # - task: infra
+      - docker compose up -d ui core
 
   mankkoo:dev:
     desc: Run mankkoo core backend in a dev mode
@@ -167,7 +167,7 @@ tasks:
   restore:
     desc: Restoring backup data for PostgreSQL
     vars:
-      file: mankkoo_20260321_1504
+      file: mankkoo_20260802_1357
       db: dev
     cmds:
       - echo "Starting restoring '{{.db}}' database. Copying backup..."
